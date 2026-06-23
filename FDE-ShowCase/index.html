@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FDE Showcase · Demo 中心</title>
+<link rel="stylesheet" href="./css/style.css">
+</head>
+<body>
+  <div id="progress"></div>
+  <div class="bg-layer">
+    <div class="aurora a"></div><div class="aurora b"></div><div class="aurora c"></div>
+  </div>
+  <div class="bg-grid"></div>
+  <div id="spotlight"></div>
+
+  <nav>
+    <div class="nav-inner">
+      <div class="brand">
+        <div class="logo">F</div>
+        <div>FDE Studio<small>FORWARD DEPLOYED ENGINEERING</small></div>
+      </div>
+      <div class="nav-links">
+        <a href="#work">作品 Work</a>
+      </div>
+      <a href="#work" class="nav-cta">浏览作品 →</a>
+    </div>
+  </nav>
+
+  <div class="wrap">
+    <header class="hero">
+      <div class="eyebrow"><span class="dot"></span>Forward Deployed Engineering · Internal Demo Hub</div>
+      <h1>FDE 团队<br><span class="accent">Demo 中心</span></h1>
+      <p class="sub">团队为各业务线搭建的 Agent Demo 集中收录于此 —— 覆盖多个行业场景，点击即可直达最新线上版本。</p>
+      <div class="hero-actions">
+        <a href="#work" class="btn btn-primary">浏览全部作品 <span>→</span></a>
+      </div>
+      <div class="stats" id="stats"></div>
+    </header>
+
+    <section id="work">
+      <div class="sec-head reveal">
+        <div><span class="tag">Selected Work</span><h2>精选作品集</h2></div>
+        <p>缩略图为各 Agent 的实时预览，点击任意卡片即可在新标签打开线上版本。</p>
+      </div>
+
+      <div class="filters reveal" id="filters"></div>
+
+      <div class="grid" id="grid"></div>
+    </section>
+  </div>
+
+  <footer>
+    <div class="wrap foot-inner">
+      <div class="muted">© 2026 FDE Studio · Forward Deployed Engineering · 内部使用 Internal Use Only</div>
+      <div class="foot-links">
+        <a href="#work">Work</a>
+      </div>
+    </div>
+  </footer>
+
+  <!-- 数据与逻辑分离：编辑 js/data.js 即可增删 Demo -->
+  <script src="./js/data.js"></script>
+  <script src="./js/main.js"></script>
+</body>
+</html>
