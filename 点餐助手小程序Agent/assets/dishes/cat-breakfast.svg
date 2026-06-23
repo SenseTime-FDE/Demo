@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 220" preserveAspectRatio="xMidYMid slice">
+  <rect width="400" height="220" fill="#f6edda"/>
+  <ellipse cx="200" cy="166" rx="150" ry="30" fill="#000" opacity="0.05"/>
+  <!-- yogurt cup -->
+  <g transform="translate(150 110)">
+    <path d="M-46 -30 L46 -30 L40 66 Q0 80 -40 66 Z" fill="#ffffff"/>
+    <path d="M-42 -22 L42 -22 L40 8 Q0 18 -40 8 Z" fill="#f1e7d2"/>
+    <ellipse cx="0" cy="-30" rx="46" ry="12" fill="#fbf4e6"/>
+    <circle cx="-16" cy="-32" r="8" fill="#7b3b7a"/><circle cx="6" cy="-34" r="7" fill="#9c2f44"/><circle cx="22" cy="-30" r="6" fill="#7b3b7a"/>
+    <g fill="#e7cf9b"><ellipse cx="-4" cy="-26" rx="6" ry="3"/></g>
+  </g>
+  <!-- toast -->
+  <g transform="translate(268 130) rotate(-6)">
+    <rect x="-54" y="-34" width="108" height="66" rx="16" fill="#e3b272"/>
+    <rect x="-44" y="-24" width="88" height="46" rx="10" fill="#f4d29a"/>
+    <g transform="translate(0 -2) rotate(-16)"><ellipse rx="30" ry="11" fill="#8cbf5e"/><ellipse rx="24" ry="7" fill="#bfe08a"/></g>
+    <ellipse cx="16" cy="-8" rx="16" ry="13" fill="#fffdf7"/><circle cx="16" cy="-8" r="6" fill="#f4b836"/>
+  </g>
+</svg>

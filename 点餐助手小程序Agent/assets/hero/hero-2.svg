@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid slice">
+  <defs>
+    <linearGradient id="bg2" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#9cb46a"/><stop offset="1" stop-color="#6f9047"/>
+    </linearGradient>
+    <radialGradient id="spot2" cx="0.55" cy="0.4" r="0.6">
+      <stop offset="0" stop-color="#ffffff" stop-opacity="0.25"/><stop offset="1" stop-color="#ffffff" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect width="1600" height="900" fill="url(#bg2)"/>
+  <rect width="1600" height="900" fill="url(#spot2)"/>
+  <!-- plate disc -->
+  <circle cx="1080" cy="470" r="330" fill="#000" opacity="0.05"/>
+  <circle cx="1075" cy="460" r="300" fill="#eef3e3"/>
+  <!-- tall glass -->
+  <g>
+    <path d="M1000 250 L1150 250 L1132 690 Q1075 715 1018 690 Z" fill="#ffffff" opacity="0.5"/>
+    <path d="M1006 300 L1144 300 L1129 680 Q1075 702 1021 680 Z" fill="#88b94e"/>
+    <path d="M1006 300 L1144 300 L1140 360 L1010 360 Z" fill="#a7cf6c"/>
+    <ellipse cx="1075" cy="300" rx="69" ry="16" fill="#bcdc86"/>
+    <!-- straw -->
+    <rect x="1095" y="190" width="16" height="150" rx="8" fill="#e8714b" transform="rotate(12 1103 265)"/>
+  </g>
+  <!-- lemon slice -->
+  <g transform="translate(1210 360)">
+    <circle r="52" fill="#f4cf52"/><circle r="40" fill="#fbe89a"/>
+    <g stroke="#f4cf52" stroke-width="5"><line x1="0" y1="-38" x2="0" y2="38"/><line x1="-38" y1="0" x2="38" y2="0"/><line x1="-27" y1="-27" x2="27" y2="27"/><line x1="-27" y1="27" x2="27" y2="-27"/></g>
+  </g>
+  <!-- mint leaves -->
+  <path d="M1060 215 q35 -45 80 -30 q-25 55 -80 30 Z" fill="#4e8a3a"/>
+  <path d="M1035 230 q-40 -40 -82 -18 q30 50 82 18 Z" fill="#5e9d46"/>
+  <!-- apple -->
+  <circle cx="930" cy="560" r="60" fill="#cf4d3a"/>
+  <path d="M930 505 q10 -22 26 -20" stroke="#6b4a2a" stroke-width="7" fill="none" stroke-linecap="round"/>
+  <ellipse cx="912" cy="540" rx="14" ry="22" fill="#f0a08f" opacity="0.6"/>
+</svg>

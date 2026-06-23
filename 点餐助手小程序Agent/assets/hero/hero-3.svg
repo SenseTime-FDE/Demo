@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid slice">
+  <defs>
+    <linearGradient id="bg3" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#e0b552"/><stop offset="1" stop-color="#c8932f"/>
+    </linearGradient>
+    <radialGradient id="spot3" cx="0.55" cy="0.42" r="0.6">
+      <stop offset="0" stop-color="#ffffff" stop-opacity="0.24"/><stop offset="1" stop-color="#ffffff" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect width="1600" height="900" fill="url(#bg3)"/>
+  <rect width="1600" height="900" fill="url(#spot3)"/>
+  <circle cx="1075" cy="465" r="330" fill="#000" opacity="0.05"/>
+  <!-- wooden bowl -->
+  <ellipse cx="1070" cy="475" rx="300" ry="278" fill="#f7f1e6"/>
+  <ellipse cx="1070" cy="490" rx="282" ry="252" fill="#eadfc8"/>
+  <!-- salad greens -->
+  <g>
+    <path d="M850 470 q60 -120 175 -95 q-45 95 -175 95 Z" fill="#5f9a45"/>
+    <path d="M900 540 q70 -110 190 -80 q-55 90 -190 80 Z" fill="#74b252"/>
+    <path d="M1010 420 q90 -70 195 -10 q-70 75 -195 10 Z" fill="#6aa84b"/>
+    <path d="M1060 560 q90 -80 200 -30 q-70 80 -200 30 Z" fill="#80bd5d"/>
+  </g>
+  <!-- tomatoes -->
+  <circle cx="945" cy="585" r="34" fill="#e0533d"/><circle cx="934" cy="574" r="9" fill="#f3a08f" opacity="0.8"/>
+  <circle cx="1185" cy="520" r="30" fill="#e0533d"/>
+  <!-- cucumber -->
+  <g transform="translate(1130 600)"><circle r="32" fill="#86b94e"/><circle r="22" fill="#cfe6a6"/></g>
+  <g transform="translate(1000 470)"><circle r="28" fill="#86b94e"/><circle r="19" fill="#cfe6a6"/></g>
+  <!-- corn / cheese cubes -->
+  <g fill="#f4d35e"><rect x="1080" y="430" width="26" height="26" rx="5" transform="rotate(15 1093 443)"/><rect x="1150" y="470" width="24" height="24" rx="5" transform="rotate(-10 1162 482)"/></g>
+  <!-- feta -->
+  <g fill="#fdfaf2"><rect x="1020" y="540" width="30" height="28" rx="5" transform="rotate(8 1035 554)"/><rect x="960" y="500" width="26" height="26" rx="5" transform="rotate(-12 973 513)"/></g>
+</svg>

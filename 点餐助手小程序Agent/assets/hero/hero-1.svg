@@ -1,0 +1,43 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid slice">
+  <defs>
+    <linearGradient id="bg1" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#cf7b3c"/><stop offset="1" stop-color="#a85423"/>
+    </linearGradient>
+    <radialGradient id="spot1" cx="0.5" cy="0.45" r="0.6">
+      <stop offset="0" stop-color="#ffffff" stop-opacity="0.22"/><stop offset="1" stop-color="#ffffff" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect width="1600" height="900" fill="url(#bg1)"/>
+  <rect width="1600" height="900" fill="url(#spot1)"/>
+  <circle cx="1080" cy="470" r="330" fill="#000" opacity="0.06"/>
+  <circle cx="1070" cy="455" r="320" fill="#f6efe2"/>
+  <circle cx="1070" cy="455" r="320" fill="none" stroke="#e6d9c2" stroke-width="4"/>
+  <!-- bowl -->
+  <ellipse cx="1070" cy="470" rx="250" ry="232" fill="#fbf7ee"/>
+  <ellipse cx="1070" cy="470" rx="250" ry="232" fill="none" stroke="#ece0cb" stroke-width="3"/>
+  <!-- grain base -->
+  <ellipse cx="1070" cy="500" rx="225" ry="195" fill="#f0e2c0"/>
+  <!-- greens -->
+  <path d="M880 470 q40 -90 130 -70 q-30 70 -130 70 Z" fill="#5f9a45"/>
+  <path d="M905 520 q50 -70 140 -45 q-40 60 -140 45 Z" fill="#6fae50"/>
+  <!-- avocado slices -->
+  <g transform="translate(1150 400) rotate(20)">
+    <ellipse cx="0" cy="0" rx="70" ry="34" fill="#9cc46a"/>
+    <ellipse cx="0" cy="0" rx="58" ry="24" fill="#c9e09a"/>
+  </g>
+  <g transform="translate(1190 470) rotate(35)">
+    <ellipse cx="0" cy="0" rx="64" ry="30" fill="#9cc46a"/>
+    <ellipse cx="0" cy="0" rx="52" ry="21" fill="#c9e09a"/>
+  </g>
+  <!-- cherry tomatoes -->
+  <circle cx="960" cy="560" r="34" fill="#e0533d"/><circle cx="949" cy="549" r="9" fill="#f3a08f" opacity="0.8"/>
+  <circle cx="1035" cy="600" r="30" fill="#e0533d"/><circle cx="1025" cy="591" r="8" fill="#f3a08f" opacity="0.8"/>
+  <!-- egg -->
+  <ellipse cx="1110" cy="560" rx="62" ry="50" fill="#fffdf7"/>
+  <circle cx="1110" cy="560" r="24" fill="#f4b836"/>
+  <!-- chickpeas -->
+  <circle cx="980" cy="420" r="15" fill="#e7c986"/><circle cx="1010" cy="400" r="13" fill="#e7c986"/>
+  <circle cx="1240" cy="540" r="14" fill="#e7c986"/><circle cx="1215" cy="585" r="12" fill="#e7c986"/>
+  <!-- seeds -->
+  <g fill="#7a5a2c" opacity="0.7"><circle cx="1080" cy="470" r="4"/><circle cx="1100" cy="500" r="4"/><circle cx="1050" cy="510" r="4"/><circle cx="1130" cy="490" r="4"/></g>
+</svg>
