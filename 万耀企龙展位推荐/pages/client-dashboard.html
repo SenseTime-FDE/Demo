@@ -1,0 +1,800 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>我的仪表盘 · 万耀企龙展位智能推荐系统</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Noto+Sans+SC:wght@300;400;500;600;700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<style>
+*, *::before, *::after {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+:root {
+    --navy: #0B2A4A;
+    --navy-dark: #071D35;
+    --navy-deep: #041221;
+    --gold: #C9A84C;
+    --gold-light: #E0C36A;
+    --gold-dark: #A88B3A;
+    --cyan: #00A3E0;
+    --cyan-light: #33B8E8;
+    --cyan-dark: #0089BF;
+    --white: #FFFFFF;
+    --gray-50: #F8F9FA;
+    --gray-100: #F0F2F5;
+    --gray-200: #E4E7EB;
+    --gray-300: #D1D5DB;
+    --gray-400: #9CA3AF;
+    --gray-500: #6B7280;
+    --gray-600: #4B5563;
+    --gray-700: #374151;
+    --gray-800: #1F2937;
+    --green: #10B981;
+    --green-light: #D1FAE5;
+    --red: #EF4444;
+    --orange: #F59E0B;
+    --sidebar-width: 220px;
+    --navbar-height: 64px;
+}
+
+html { scroll-behavior: smooth; }
+
+body {
+    font-family: 'Noto Sans SC', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    color: var(--gray-800);
+    background: var(--gray-50);
+    line-height: 1.6;
+    min-height: 100vh;
+}
+
+/* ============ NAVBAR ============ */
+.navbar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 32px;
+    height: var(--navbar-height);
+    background: var(--white);
+    border-bottom: 1px solid var(--gray-200);
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+}
+
+.nav-left {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.hamburger {
+    display: none;
+    width: 36px;
+    height: 36px;
+    border: none;
+    background: none;
+    cursor: pointer;
+    border-radius: 8px;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    color: var(--gray-600);
+    transition: all 0.2s;
+}
+.hamburger:hover { background: var(--gray-100); }
+
+.nav-brand {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    text-decoration: none;
+}
+
+.nav-logo {
+    width: 40px;
+    height: 40px;
+    background: linear-gradient(135deg, var(--navy), var(--cyan));
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 800;
+    font-size: 18px;
+    color: var(--white);
+    letter-spacing: -1px;
+    flex-shrink: 0;
+}
+
+.nav-title-text {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--gray-800);
+    letter-spacing: 0.5px;
+    white-space: nowrap;
+}
+
+.nav-right {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.nav-company {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--gray-600);
+}
+
+.nav-avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--gold), var(--gold-dark));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--white);
+    flex-shrink: 0;
+}
+
+/* ============ SIDEBAR ============ */
+.sidebar {
+    position: fixed;
+    top: var(--navbar-height);
+    left: 0;
+    bottom: 0;
+    width: var(--sidebar-width);
+    background: var(--white);
+    border-right: 1px solid var(--gray-200);
+    z-index: 900;
+    overflow-y: auto;
+    padding: 16px 0;
+    transition: transform 0.3s ease;
+}
+
+.sidebar-nav {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.sidebar-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 20px;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--gray-600);
+    text-decoration: none;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border-left: 3px solid transparent;
+    position: relative;
+}
+
+.sidebar-item:hover {
+    background: var(--gray-50);
+    color: var(--gray-800);
+}
+
+.sidebar-item.active {
+    background: rgba(0, 163, 224, 0.06);
+    color: var(--cyan);
+    border-left-color: var(--cyan);
+    font-weight: 600;
+}
+
+.sidebar-item .icon {
+    width: 20px;
+    text-align: center;
+    font-size: 16px;
+    flex-shrink: 0;
+}
+
+.sidebar-divider {
+    height: 1px;
+    background: var(--gray-200);
+    margin: 8px 16px;
+}
+
+/* ============ MAIN CONTENT ============ */
+.main-content {
+    margin-left: var(--sidebar-width);
+    margin-top: var(--navbar-height);
+    padding: 32px 40px;
+    min-height: calc(100vh - var(--navbar-height));
+}
+
+.page-header {
+    margin-bottom: 32px;
+}
+
+.page-title {
+    font-size: 26px;
+    font-weight: 700;
+    color: var(--gray-800);
+    margin-bottom: 6px;
+}
+
+.page-subtitle {
+    font-size: 14px;
+    color: var(--gray-500);
+}
+
+/* ============ STAT CARDS ============ */
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
+    margin-bottom: 32px;
+}
+
+.stat-card {
+    background: var(--white);
+    border-radius: 16px;
+    padding: 24px 28px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+    border-top: 3px solid transparent;
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.stat-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 32px rgba(0,0,0,0.08);
+}
+
+.stat-card.cyan-border { border-top-color: var(--cyan); }
+.stat-card.gold-border { border-top-color: var(--gold); }
+.stat-card.green-border { border-top-color: var(--green); }
+
+.stat-info {}
+
+.stat-label {
+    font-size: 14px;
+    color: var(--gray-500);
+    font-weight: 500;
+    margin-bottom: 4px;
+}
+
+.stat-number {
+    font-size: 36px;
+    font-weight: 800;
+    color: var(--gray-800);
+    line-height: 1.1;
+}
+
+.stat-icon-wrap {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+    flex-shrink: 0;
+}
+
+.stat-icon-wrap.cyan-bg { background: rgba(0, 163, 224, 0.1); }
+.stat-icon-wrap.gold-bg { background: rgba(201, 168, 76, 0.1); }
+.stat-icon-wrap.green-bg { background: rgba(16, 185, 129, 0.1); }
+
+/* ============ TWO COLUMN LAYOUT ============ */
+.two-col {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+    margin-bottom: 32px;
+}
+
+.card {
+    background: var(--white);
+    border-radius: 16px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+    overflow: hidden;
+}
+
+.card-header {
+    padding: 20px 24px;
+    border-bottom: 1px solid var(--gray-100);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.card-title {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--gray-800);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.card-more {
+    font-size: 13px;
+    color: var(--cyan);
+    text-decoration: none;
+    font-weight: 500;
+    transition: color 0.2s;
+}
+.card-more:hover { color: var(--cyan-dark); }
+
+.card-body {
+    padding: 16px 24px;
+}
+
+/* ============ NOTIFICATION LIST ============ */
+.notification-list {
+    list-style: none;
+}
+
+.notification-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    padding: 14px 0;
+    border-bottom: 1px solid var(--gray-100);
+}
+
+.notification-item:last-child { border-bottom: none; }
+
+.notification-tag {
+    flex-shrink: 0;
+    padding: 3px 10px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    margin-top: 2px;
+}
+
+.tag-cyan {
+    background: rgba(0, 163, 224, 0.1);
+    color: var(--cyan);
+}
+
+.tag-gold {
+    background: rgba(201, 168, 76, 0.12);
+    color: var(--gold-dark);
+}
+
+.tag-green {
+    background: rgba(16, 185, 129, 0.1);
+    color: var(--green);
+}
+
+.tag-orange {
+    background: rgba(245, 158, 11, 0.1);
+    color: var(--orange);
+}
+
+.notification-content {
+    flex: 1;
+    min-width: 0;
+}
+
+.notification-text {
+    font-size: 14px;
+    color: var(--gray-700);
+    line-height: 1.5;
+    margin-bottom: 4px;
+}
+
+.notification-time {
+    font-size: 12px;
+    color: var(--gray-400);
+}
+
+/* ============ QUICK ACTIONS ============ */
+.quick-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.quick-action-btn {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 16px 20px;
+    border-radius: 12px;
+    border: 1px solid var(--gray-200);
+    background: var(--white);
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    text-align: left;
+    width: 100%;
+    font-family: inherit;
+}
+
+.quick-action-btn:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+    border-color: transparent;
+}
+
+.quick-action-btn:hover .qa-btn-icon {
+    transform: scale(1.05);
+}
+
+.qa-btn-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    flex-shrink: 0;
+    transition: transform 0.3s ease;
+}
+
+.qa-btn-icon.cyan-bg { background: rgba(0, 163, 224, 0.1); }
+.qa-btn-icon.gold-bg { background: rgba(201, 168, 76, 0.1); }
+.qa-btn-icon.green-bg { background: rgba(16, 185, 129, 0.1); }
+
+.qa-btn-text {
+    flex: 1;
+}
+
+.qa-btn-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--gray-800);
+    margin-bottom: 2px;
+}
+
+.qa-btn-desc {
+    font-size: 12px;
+    color: var(--gray-500);
+}
+
+.qa-btn-arrow {
+    color: var(--gray-400);
+    font-size: 14px;
+    transition: transform 0.3s ease;
+}
+
+.quick-action-btn:hover .qa-btn-arrow {
+    transform: translateX(4px);
+    color: var(--cyan);
+}
+
+/* ============ FOOTER ============ */
+.page-footer {
+    text-align: center;
+    padding: 24px 0 8px;
+    border-top: 1px solid var(--gray-200);
+    font-size: 12px;
+    color: var(--gray-400);
+}
+
+/* ============ SIDEBAR OVERLAY (mobile) ============ */
+.sidebar-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.3);
+    z-index: 899;
+}
+
+/* ============ RESPONSIVE ============ */
+@media (max-width: 1024px) {
+    .main-content { padding: 24px 24px; }
+    .stats-grid { gap: 16px; }
+    .two-col { gap: 16px; }
+}
+
+@media (max-width: 768px) {
+    .hamburger { display: flex; }
+
+    .sidebar {
+        transform: translateX(-100%);
+    }
+
+    .sidebar.open {
+        transform: translateX(0);
+    }
+
+    .sidebar-overlay.open {
+        display: block;
+    }
+
+    .main-content {
+        margin-left: 0;
+        padding: 20px 16px;
+    }
+
+    .navbar { padding: 0 16px; }
+    .nav-title-text { font-size: 13px; }
+    .nav-company { display: none; }
+
+    .stats-grid {
+        grid-template-columns: 1fr;
+        gap: 12px;
+    }
+
+    .two-col {
+        grid-template-columns: 1fr;
+        gap: 16px;
+    }
+
+    .stat-number { font-size: 30px; }
+    .page-title { font-size: 22px; }
+}
+
+@media (max-width: 480px) {
+    .main-content { padding: 16px 12px; }
+    .card-header { padding: 16px 16px; }
+    .card-body { padding: 12px 16px; }
+    .stat-card { padding: 18px 20px; }
+}
+</style>
+</head>
+<body>
+
+<!-- ============ NAVBAR ============ -->
+<nav class="navbar">
+    <div class="nav-left">
+        <button class="hamburger" id="hamburgerBtn" aria-label="菜单">
+            <i class="fas fa-bars"></i>
+        </button>
+        <a class="nav-brand" href="#">
+            <div class="nav-logo">GE</div>
+            <span class="nav-title-text">GLOBUS EVENTS · 万耀企龙</span>
+        </a>
+    </div>
+    <div class="nav-right">
+        <span class="nav-company"><i class="fas fa-building" style="margin-right:6px;color:var(--gray-400);"></i>上海数码科技有限公司</span>
+        <div class="nav-avatar">企</div>
+    </div>
+</nav>
+
+<!-- ============ SIDEBAR OVERLAY ============ -->
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+<!-- ============ SIDEBAR ============ -->
+<aside class="sidebar" id="sidebar">
+    <ul class="sidebar-nav">
+        <li>
+            <a class="sidebar-item active" href="#">
+                <span class="icon"><i class="fas fa-chart-pie"></i></span>
+                我的仪表盘
+            </a>
+        </li>
+        <li>
+            <a class="sidebar-item" href="#">
+                <span class="icon"><i class="fas fa-pen-to-square"></i></span>
+                需求录入
+            </a>
+        </li>
+        <li>
+            <a class="sidebar-item" href="#">
+                <span class="icon"><i class="fas fa-robot"></i></span>
+                AI推荐方案
+            </a>
+        </li>
+        <li>
+            <a class="sidebar-item" href="#">
+                <span class="icon"><i class="fas fa-map"></i></span>
+                场馆平面图
+            </a>
+        </li>
+        <li>
+            <a class="sidebar-item" href="#">
+                <span class="icon"><i class="fas fa-tags"></i></span>
+                动态价格
+            </a>
+        </li>
+        <li>
+            <a class="sidebar-item" href="#">
+                <span class="icon"><i class="fas fa-file-invoice"></i></span>
+                我的报价/预约
+            </a>
+        </li>
+    </ul>
+    <div class="sidebar-divider"></div>
+    <ul class="sidebar-nav">
+        <li>
+            <a class="sidebar-item" href="#" style="font-size:13px;color:var(--gray-400);">
+                <span class="icon"><i class="fas fa-sign-out-alt"></i></span>
+                退出登录
+            </a>
+        </li>
+    </ul>
+</aside>
+
+<!-- ============ MAIN CONTENT ============ -->
+<main class="main-content">
+
+    <!-- Page Header -->
+    <div class="page-header">
+        <h1 class="page-title"><i class="fas fa-chart-pie" style="margin-right:8px;color:var(--cyan);"></i>我的仪表盘</h1>
+        <p class="page-subtitle">欢迎回来，这里是您的参展数据总览与快捷操作中心</p>
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="stats-grid">
+        <div class="stat-card cyan-border">
+            <div class="stat-info">
+                <div class="stat-label"><i class="fas fa-file-invoice" style="margin-right:4px;color:var(--cyan);"></i>我的报价单</div>
+                <div class="stat-number">3</div>
+            </div>
+            <div class="stat-icon-wrap cyan-bg">
+                <i class="fas fa-file-invoice" style="color:var(--cyan);"></i>
+            </div>
+        </div>
+        <div class="stat-card gold-border">
+            <div class="stat-info">
+                <div class="stat-label"><i class="fas fa-hourglass-half" style="margin-right:4px;color:var(--gold);"></i>待处理报价</div>
+                <div class="stat-number">1</div>
+            </div>
+            <div class="stat-icon-wrap gold-bg">
+                <i class="fas fa-hourglass-half" style="color:var(--gold);"></i>
+            </div>
+        </div>
+        <div class="stat-card green-border">
+            <div class="stat-info">
+                <div class="stat-label"><i class="fas fa-check-circle" style="margin-right:4px;color:var(--green);"></i>已确认展位</div>
+                <div class="stat-number">1</div>
+            </div>
+            <div class="stat-icon-wrap green-bg">
+                <i class="fas fa-check-circle" style="color:var(--green);"></i>
+            </div>
+        </div>
+    </div>
+
+    <!-- Two Column Layout -->
+    <div class="two-col">
+
+        <!-- System Announcements -->
+        <div class="card">
+            <div class="card-header">
+                <div class="card-title">
+                    <i class="fas fa-bullhorn" style="color:var(--cyan);"></i>
+                    系统公告
+                </div>
+                <a href="#" class="card-more">查看全部 <i class="fas fa-chevron-right" style="font-size:10px;"></i></a>
+            </div>
+            <div class="card-body">
+                <ul class="notification-list">
+                    <li class="notification-item">
+                        <span class="notification-tag tag-cyan">通知</span>
+                        <div class="notification-content">
+                            <div class="notification-text">2026年秋季展会报名通道已开启，请及时提交参展需求。</div>
+                            <div class="notification-time">2026-06-20 10:30</div>
+                        </div>
+                    </li>
+                    <li class="notification-item">
+                        <span class="notification-tag tag-gold">优惠</span>
+                        <div class="notification-content">
+                            <div class="notification-text">早鸟优惠倒计时！7月15日前确认展位可享8折优惠。</div>
+                            <div class="notification-time">2026-06-19 14:00</div>
+                        </div>
+                    </li>
+                    <li class="notification-item">
+                        <span class="notification-tag tag-green">更新</span>
+                        <div class="notification-content">
+                            <div class="notification-text">AI推荐算法升级 V2.1，新增行业热度因子，推荐更精准。</div>
+                            <div class="notification-time">2026-06-18 09:15</div>
+                        </div>
+                    </li>
+                    <li class="notification-item">
+                        <span class="notification-tag tag-orange">提醒</span>
+                        <div class="notification-content">
+                            <div class="notification-text">您有一份报价单（#Q20260601）待确认，请在3个工作日内处理。</div>
+                            <div class="notification-time">2026-06-17 16:45</div>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="card">
+            <div class="card-header">
+                <div class="card-title">
+                    <i class="fas fa-bolt" style="color:var(--gold);"></i>
+                    快捷操作
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="quick-actions">
+                    <button class="quick-action-btn" onclick="alert('跳转至需求录入页面')">
+                        <div class="qa-btn-icon cyan-bg">
+                            <i class="fas fa-pen-to-square" style="color:var(--cyan);"></i>
+                        </div>
+                        <div class="qa-btn-text">
+                            <div class="qa-btn-title">录入参展需求</div>
+                            <div class="qa-btn-desc">填写企业信息、预算与面积偏好</div>
+                        </div>
+                        <i class="fas fa-chevron-right qa-btn-arrow"></i>
+                    </button>
+                    <button class="quick-action-btn" onclick="alert('跳转至AI推荐方案页面')">
+                        <div class="qa-btn-icon gold-bg">
+                            <i class="fas fa-robot" style="color:var(--gold-dark);"></i>
+                        </div>
+                        <div class="qa-btn-text">
+                            <div class="qa-btn-title">查看AI推荐方案</div>
+                            <div class="qa-btn-desc">基于您的需求生成智能推荐</div>
+                        </div>
+                        <i class="fas fa-chevron-right qa-btn-arrow"></i>
+                    </button>
+                    <button class="quick-action-btn" onclick="alert('跳转至场馆平面图页面')">
+                        <div class="qa-btn-icon green-bg">
+                            <i class="fas fa-map" style="color:var(--green);"></i>
+                        </div>
+                        <div class="qa-btn-text">
+                            <div class="qa-btn-title">浏览场馆平面图</div>
+                            <div class="qa-btn-desc">可视化浏览展位分布与状态</div>
+                        </div>
+                        <i class="fas fa-chevron-right qa-btn-arrow"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Footer -->
+    <div class="page-footer">
+        &copy; 2026 Globus Events &middot; 万耀企龙 &middot; 展位AI智能推荐与动态定价系统 V1.1 &nbsp;|&nbsp; 本系统数据仅供演示用途
+    </div>
+
+</main>
+
+<script>
+// Hamburger menu toggle
+const hamburger = document.getElementById('hamburgerBtn');
+const sidebar = document.getElementById('sidebar');
+const overlay = document.getElementById('sidebarOverlay');
+
+function toggleSidebar() {
+    sidebar.classList.toggle('open');
+    overlay.classList.toggle('open');
+}
+
+hamburger.addEventListener('click', toggleSidebar);
+overlay.addEventListener('click', toggleSidebar);
+
+// Close sidebar on window resize back to desktop
+window.addEventListener('resize', () => {
+    if (window.innerWidth > 768) {
+        sidebar.classList.remove('open');
+        overlay.classList.remove('open');
+    }
+});
+
+// Sidebar item click — close sidebar on mobile
+document.querySelectorAll('.sidebar-item').forEach(item => {
+    item.addEventListener('click', function(e) {
+        // Remove active from all items
+        document.querySelectorAll('.sidebar-item').forEach(i => i.classList.remove('active'));
+        this.classList.add('active');
+
+        // On mobile, close sidebar after navigation
+        if (window.innerWidth <= 768) {
+            setTimeout(() => {
+                sidebar.classList.remove('open');
+                overlay.classList.remove('open');
+            }, 150);
+        }
+    });
+});
+</script>
+
+</body>
+</html>

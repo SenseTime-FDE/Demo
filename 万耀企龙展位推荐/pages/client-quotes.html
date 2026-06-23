@@ -1,0 +1,1024 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>我的报价/预约 · 万耀企龙展位智能推荐系统</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Noto+Sans+SC:wght@300;400;500;600;700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<style>
+*, *::before, *::after {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+:root {
+    --navy: #0B2A4A;
+    --navy-dark: #071D35;
+    --navy-deep: #041221;
+    --gold: #C9A84C;
+    --gold-light: #E0C36A;
+    --gold-dark: #A88B3A;
+    --cyan: #00A3E0;
+    --cyan-light: #33B8E8;
+    --cyan-dark: #0089BF;
+    --white: #FFFFFF;
+    --gray-50: #F8F9FA;
+    --gray-100: #F0F2F5;
+    --gray-200: #E4E7EB;
+    --gray-300: #D1D5DB;
+    --gray-400: #9CA3AF;
+    --gray-500: #6B7280;
+    --gray-600: #4B5563;
+    --gray-700: #374151;
+    --gray-800: #1F2937;
+    --green: #10B981;
+    --green-light: #D1FAE5;
+    --red: #EF4444;
+    --red-light: #FEE2E2;
+    --orange: #F59E0B;
+    --orange-light: #FEF3C7;
+    --sidebar-width: 220px;
+    --navbar-height: 64px;
+}
+
+html { scroll-behavior: smooth; }
+
+body {
+    font-family: 'Noto Sans SC', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    color: var(--gray-800);
+    background: var(--gray-50);
+    line-height: 1.6;
+    min-height: 100vh;
+}
+
+/* ============ NAVBAR ============ */
+.navbar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 32px;
+    height: var(--navbar-height);
+    background: var(--white);
+    border-bottom: 1px solid var(--gray-200);
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+}
+
+.nav-left {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.hamburger {
+    display: none;
+    width: 36px;
+    height: 36px;
+    border: none;
+    background: none;
+    cursor: pointer;
+    border-radius: 8px;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    color: var(--gray-600);
+    transition: all 0.2s;
+}
+.hamburger:hover { background: var(--gray-100); }
+
+.nav-brand {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    text-decoration: none;
+}
+
+.nav-logo {
+    width: 40px;
+    height: 40px;
+    background: linear-gradient(135deg, var(--navy), var(--cyan));
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 800;
+    font-size: 18px;
+    color: var(--white);
+    letter-spacing: -1px;
+    flex-shrink: 0;
+}
+
+.nav-title-text {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--gray-800);
+    letter-spacing: 0.5px;
+    white-space: nowrap;
+}
+
+.nav-right {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.nav-company {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--gray-600);
+}
+
+.nav-avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--gold), var(--gold-dark));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--white);
+    flex-shrink: 0;
+}
+
+/* ============ SIDEBAR ============ */
+.sidebar {
+    position: fixed;
+    top: var(--navbar-height);
+    left: 0;
+    bottom: 0;
+    width: var(--sidebar-width);
+    background: var(--white);
+    border-right: 1px solid var(--gray-200);
+    z-index: 900;
+    overflow-y: auto;
+    padding: 16px 0;
+    transition: transform 0.3s ease;
+}
+
+.sidebar-nav {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.sidebar-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 20px;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--gray-600);
+    text-decoration: none;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border-left: 3px solid transparent;
+    position: relative;
+}
+
+.sidebar-item:hover {
+    background: var(--gray-50);
+    color: var(--gray-800);
+}
+
+.sidebar-item.active {
+    background: rgba(0, 163, 224, 0.06);
+    color: var(--cyan);
+    border-left-color: var(--cyan);
+    font-weight: 600;
+}
+
+.sidebar-item .icon {
+    width: 20px;
+    text-align: center;
+    font-size: 16px;
+    flex-shrink: 0;
+}
+
+.sidebar-divider {
+    height: 1px;
+    background: var(--gray-200);
+    margin: 8px 16px;
+}
+
+/* ============ MAIN CONTENT ============ */
+.main-content {
+    margin-left: var(--sidebar-width);
+    margin-top: var(--navbar-height);
+    padding: 32px 40px;
+    min-height: calc(100vh - var(--navbar-height));
+}
+
+.page-header {
+    margin-bottom: 28px;
+}
+
+.page-title {
+    font-size: 26px;
+    font-weight: 700;
+    color: var(--gray-800);
+    margin-bottom: 6px;
+}
+
+.page-subtitle {
+    font-size: 14px;
+    color: var(--gray-500);
+}
+
+/* ============ TABS (underline style) ============ */
+.tabs-wrapper {
+    margin-bottom: 28px;
+}
+
+.tabs-bar {
+    display: flex;
+    gap: 0;
+    border-bottom: 2px solid var(--gray-200);
+    position: relative;
+}
+
+.tab-btn {
+    padding: 12px 28px;
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--gray-500);
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-family: inherit;
+    position: relative;
+    transition: all 0.25s ease;
+    white-space: nowrap;
+}
+
+.tab-btn::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: var(--cyan);
+    transform: scaleX(0);
+    transition: transform 0.25s ease;
+}
+
+.tab-btn:hover {
+    color: var(--gray-700);
+}
+
+.tab-btn.active {
+    color: var(--cyan);
+    font-weight: 600;
+}
+
+.tab-btn.active::after {
+    transform: scaleX(1);
+}
+
+/* ============ TAB CONTENT ============ */
+.tab-content {
+    display: none;
+}
+
+.tab-content.active {
+    display: block;
+}
+
+/* ============ QUOTE CARDS ============ */
+.quote-card {
+    background: var(--white);
+    border-radius: 16px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+    padding: 24px 28px;
+    margin-bottom: 20px;
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.quote-card:hover {
+    box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+    transform: translateY(-2px);
+}
+
+.quote-card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 18px;
+}
+
+.quote-id {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--gray-800);
+}
+
+.badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.3px;
+    white-space: nowrap;
+}
+
+.badge-yellow {
+    background: var(--orange-light);
+    color: #B45309;
+}
+
+.badge-green {
+    background: var(--green-light);
+    color: #065F46;
+}
+
+.badge-red {
+    background: var(--red-light);
+    color: #991B1B;
+}
+
+.quote-info-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    padding: 16px 0;
+    border-top: 1px solid var(--gray-100);
+    border-bottom: 1px solid var(--gray-100);
+    margin-bottom: 18px;
+}
+
+.quote-info-item {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.quote-info-label {
+    font-size: 12px;
+    color: var(--gray-400);
+    font-weight: 500;
+}
+
+.quote-info-value {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--gray-700);
+}
+
+.quote-card-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.quote-price {
+    font-size: 20px;
+    font-weight: 800;
+    color: var(--cyan);
+}
+
+.quote-price .currency {
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.quote-price-old {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--gray-400);
+    text-decoration: line-through;
+}
+
+.quote-actions {
+    display: flex;
+    gap: 10px;
+}
+
+.btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 20px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    font-family: inherit;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    border: none;
+    text-decoration: none;
+    white-space: nowrap;
+}
+
+.btn-primary {
+    background: var(--cyan);
+    color: var(--white);
+}
+
+.btn-primary:hover {
+    background: var(--cyan-dark);
+    box-shadow: 0 4px 12px rgba(0, 163, 224, 0.3);
+}
+
+.btn-outline {
+    background: transparent;
+    color: var(--gray-600);
+    border: 1px solid var(--gray-300);
+}
+
+.btn-outline:hover {
+    border-color: var(--cyan);
+    color: var(--cyan);
+    background: rgba(0, 163, 224, 0.04);
+}
+
+.status-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.status-tag-green {
+    background: var(--green-light);
+    color: #065F46;
+}
+
+/* ============ APPOINTMENT CARDS ============ */
+.appointment-card {
+    background: var(--white);
+    border-radius: 16px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+    padding: 20px 24px;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.appointment-card:hover {
+    box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+    transform: translateY(-2px);
+}
+
+.appt-left {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+}
+
+.appt-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 10px;
+    background: rgba(0, 163, 224, 0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    color: var(--cyan);
+    flex-shrink: 0;
+}
+
+.appt-info {}
+
+.appt-booth {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--gray-800);
+    margin-bottom: 2px;
+}
+
+.appt-datetime {
+    font-size: 13px;
+    color: var(--gray-500);
+}
+
+.appt-right {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.appt-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.appt-status.confirmed {
+    background: var(--green-light);
+    color: #065F46;
+}
+
+.appt-status.pending {
+    background: var(--orange-light);
+    color: #B45309;
+}
+
+.btn-cancel {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 6px 14px;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 500;
+    font-family: inherit;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    border: 1px solid var(--gray-300);
+    background: transparent;
+    color: var(--gray-500);
+}
+
+.btn-cancel:hover {
+    border-color: var(--red);
+    color: var(--red);
+    background: rgba(239, 68, 68, 0.04);
+}
+
+/* ============ SIDEBAR OVERLAY (mobile) ============ */
+.sidebar-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.3);
+    z-index: 899;
+}
+
+/* ============ FOOTER ============ */
+.page-footer {
+    text-align: center;
+    padding: 24px 0 8px;
+    border-top: 1px solid var(--gray-200);
+    font-size: 12px;
+    color: var(--gray-400);
+    margin-top: 40px;
+}
+
+/* ============ RESPONSIVE ============ */
+@media (max-width: 1024px) {
+    .main-content { padding: 24px 24px; }
+    .quote-info-grid { grid-template-columns: repeat(2, 1fr); }
+}
+
+@media (max-width: 768px) {
+    .hamburger { display: flex; }
+
+    .sidebar {
+        transform: translateX(-100%);
+    }
+
+    .sidebar.open {
+        transform: translateX(0);
+    }
+
+    .sidebar-overlay.open {
+        display: block;
+    }
+
+    .main-content {
+        margin-left: 0;
+        padding: 20px 16px;
+    }
+
+    .navbar { padding: 0 16px; }
+    .nav-title-text { font-size: 13px; }
+    .nav-company { display: none; }
+
+    .page-title { font-size: 22px; }
+
+    .tab-btn {
+        padding: 10px 18px;
+        font-size: 14px;
+    }
+
+    .quote-card {
+        padding: 18px 18px;
+    }
+
+    .quote-info-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 12px;
+    }
+
+    .quote-card-footer {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 14px;
+    }
+
+    .quote-actions {
+        width: 100%;
+    }
+
+    .quote-actions .btn {
+        flex: 1;
+        justify-content: center;
+    }
+
+    .appointment-card {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 14px;
+    }
+
+    .appt-right {
+        width: 100%;
+        justify-content: flex-end;
+    }
+}
+
+@media (max-width: 480px) {
+    .main-content { padding: 16px 12px; }
+    .quote-card { padding: 14px 14px; }
+    .quote-info-grid { grid-template-columns: 1fr 1fr; gap: 10px; }
+    .tab-btn { padding: 8px 14px; font-size: 13px; }
+}
+</style>
+</head>
+<body>
+
+<!-- ============ NAVBAR ============ -->
+<nav class="navbar">
+    <div class="nav-left">
+        <button class="hamburger" id="hamburgerBtn" aria-label="菜单">
+            <i class="fas fa-bars"></i>
+        </button>
+        <a class="nav-brand" href="#">
+            <div class="nav-logo">GE</div>
+            <span class="nav-title-text">GLOBUS EVENTS · 万耀企龙</span>
+        </a>
+    </div>
+    <div class="nav-right">
+        <span class="nav-company"><i class="fas fa-building" style="margin-right:6px;color:var(--gray-400);"></i>上海数码科技有限公司</span>
+        <div class="nav-avatar">企</div>
+    </div>
+</nav>
+
+<!-- ============ SIDEBAR OVERLAY ============ -->
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+<!-- ============ SIDEBAR ============ -->
+<aside class="sidebar" id="sidebar">
+    <ul class="sidebar-nav">
+        <li>
+            <a class="sidebar-item" href="#">
+                <span class="icon"><i class="fas fa-chart-pie"></i></span>
+                我的仪表盘
+            </a>
+        </li>
+        <li>
+            <a class="sidebar-item" href="#">
+                <span class="icon"><i class="fas fa-pen-to-square"></i></span>
+                需求录入
+            </a>
+        </li>
+        <li>
+            <a class="sidebar-item" href="#">
+                <span class="icon"><i class="fas fa-robot"></i></span>
+                AI推荐方案
+            </a>
+        </li>
+        <li>
+            <a class="sidebar-item" href="#">
+                <span class="icon"><i class="fas fa-map"></i></span>
+                场馆平面图
+            </a>
+        </li>
+        <li>
+            <a class="sidebar-item" href="#">
+                <span class="icon"><i class="fas fa-tags"></i></span>
+                动态价格
+            </a>
+        </li>
+        <li>
+            <a class="sidebar-item active" href="#">
+                <span class="icon"><i class="fas fa-file-invoice"></i></span>
+                我的报价/预约
+            </a>
+        </li>
+    </ul>
+    <div class="sidebar-divider"></div>
+    <ul class="sidebar-nav">
+        <li>
+            <a class="sidebar-item" href="#" style="font-size:13px;color:var(--gray-400);">
+                <span class="icon"><i class="fas fa-sign-out-alt"></i></span>
+                退出登录
+            </a>
+        </li>
+    </ul>
+</aside>
+
+<!-- ============ MAIN CONTENT ============ -->
+<main class="main-content">
+
+    <!-- Page Header -->
+    <div class="page-header">
+        <h1 class="page-title"><i class="fas fa-file-invoice" style="margin-right:8px;color:var(--cyan);"></i>我的报价 / 预约</h1>
+        <p class="page-subtitle">查看和管理您的展位报价单及现场预约记录</p>
+    </div>
+
+    <!-- Tabs -->
+    <div class="tabs-wrapper">
+        <div class="tabs-bar">
+            <button class="tab-btn active" data-tab="tab-quotes">
+                <i class="fas fa-file-invoice" style="margin-right:6px;"></i>我的报价单
+            </button>
+            <button class="tab-btn" data-tab="tab-appointments">
+                <i class="fas fa-calendar-check" style="margin-right:6px;"></i>我的预约
+            </button>
+        </div>
+    </div>
+
+    <!-- Tab 1: Quotes -->
+    <div class="tab-content active" id="tab-quotes">
+
+        <!-- Card 1: Pending Confirmation -->
+        <div class="quote-card">
+            <div class="quote-card-header">
+                <span class="quote-id">报价单 #QT-2026-001</span>
+                <span class="badge badge-yellow"><i class="fas fa-hourglass-half"></i>待确认</span>
+            </div>
+            <div class="quote-info-grid">
+                <div class="quote-info-item">
+                    <span class="quote-info-label">展位编号</span>
+                    <span class="quote-info-value">A-005</span>
+                </div>
+                <div class="quote-info-item">
+                    <span class="quote-info-label">等级</span>
+                    <span class="quote-info-value">A优选展位</span>
+                </div>
+                <div class="quote-info-item">
+                    <span class="quote-info-label">面积</span>
+                    <span class="quote-info-value">18m²</span>
+                </div>
+                <div class="quote-info-item">
+                    <span class="quote-info-label">生成日期</span>
+                    <span class="quote-info-value">2026-06-18</span>
+                </div>
+                <div class="quote-info-item">
+                    <span class="quote-info-label">有效截止</span>
+                    <span class="quote-info-value">2026-06-25</span>
+                </div>
+                <div class="quote-info-item">
+                    <span class="quote-info-label">状态</span>
+                    <span class="quote-info-value" style="color:var(--orange);">等待您确认</span>
+                </div>
+            </div>
+            <div class="quote-card-footer">
+                <div class="quote-price">
+                    <span class="currency">¥</span>25,800
+                </div>
+                <div class="quote-actions">
+                    <button class="btn btn-primary" onclick="alert('确认预约展位 A-005')">
+                        <i class="fas fa-check-circle"></i>确认预约
+                    </button>
+                    <button class="btn btn-outline" onclick="alert('查看 PDF 报价单 #QT-2026-001')">
+                        <i class="fas fa-file-pdf"></i>查看PDF
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Card 2: Confirmed -->
+        <div class="quote-card">
+            <div class="quote-card-header">
+                <span class="quote-id">报价单 #QT-2026-002</span>
+                <span class="badge badge-green"><i class="fas fa-check-circle"></i>已确认</span>
+            </div>
+            <div class="quote-info-grid">
+                <div class="quote-info-item">
+                    <span class="quote-info-label">展位编号</span>
+                    <span class="quote-info-value">B-022</span>
+                </div>
+                <div class="quote-info-item">
+                    <span class="quote-info-label">等级</span>
+                    <span class="quote-info-value">B标准展位</span>
+                </div>
+                <div class="quote-info-item">
+                    <span class="quote-info-label">面积</span>
+                    <span class="quote-info-value">9m²</span>
+                </div>
+                <div class="quote-info-item">
+                    <span class="quote-info-label">生成日期</span>
+                    <span class="quote-info-value">2026-06-16</span>
+                </div>
+                <div class="quote-info-item">
+                    <span class="quote-info-label">有效截止</span>
+                    <span class="quote-info-value">2026-06-23</span>
+                </div>
+                <div class="quote-info-item">
+                    <span class="quote-info-label">状态</span>
+                    <span class="quote-info-value" style="color:var(--green);">已完成预约</span>
+                </div>
+            </div>
+            <div class="quote-card-footer">
+                <div class="quote-price" style="color:var(--gray-800);">
+                    <span class="currency">¥</span>14,200
+                    <span class="status-tag status-tag-green" style="margin-left:12px;">
+                        <i class="fas fa-calendar-check"></i>已预约
+                    </span>
+                </div>
+                <div class="quote-actions">
+                    <button class="btn btn-outline" onclick="alert('查看详情 B-022')">
+                        <i class="fas fa-eye"></i>查看详情
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Card 3: Expired -->
+        <div class="quote-card">
+            <div class="quote-card-header">
+                <span class="quote-id">报价单 #QT-2026-003</span>
+                <span class="badge badge-red"><i class="fas fa-clock"></i>已过期</span>
+            </div>
+            <div class="quote-info-grid">
+                <div class="quote-info-item">
+                    <span class="quote-info-label">展位编号</span>
+                    <span class="quote-info-value">S-001</span>
+                </div>
+                <div class="quote-info-item">
+                    <span class="quote-info-label">等级</span>
+                    <span class="quote-info-value">S旗舰臻装</span>
+                </div>
+                <div class="quote-info-item">
+                    <span class="quote-info-label">面积</span>
+                    <span class="quote-info-value">36m²</span>
+                </div>
+                <div class="quote-info-item">
+                    <span class="quote-info-label">生成日期</span>
+                    <span class="quote-info-value">2026-06-10</span>
+                </div>
+                <div class="quote-info-item">
+                    <span class="quote-info-label">有效截止</span>
+                    <span class="quote-info-value">2026-06-17</span>
+                </div>
+                <div class="quote-info-item">
+                    <span class="quote-info-label">状态</span>
+                    <span class="quote-info-value" style="color:var(--red);">已失效</span>
+                </div>
+            </div>
+            <div class="quote-card-footer">
+                <div>
+                    <span class="quote-price-old"><span class="currency">¥</span>45,600</span>
+                </div>
+                <div class="quote-actions">
+                    <button class="btn btn-outline" onclick="alert('重新询价 S-001')">
+                        <i class="fas fa-rotate"></i>重新询价
+                    </button>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Tab 2: Appointments -->
+    <div class="tab-content" id="tab-appointments">
+
+        <!-- Appointment 1: Confirmed -->
+        <div class="appointment-card">
+            <div class="appt-left">
+                <div class="appt-icon">
+                    <i class="fas fa-calendar-check"></i>
+                </div>
+                <div class="appt-info">
+                    <div class="appt-booth">A-005 展位</div>
+                    <div class="appt-datetime">
+                        <i class="far fa-calendar-alt" style="margin-right:4px;"></i>2026-06-25 14:00
+                        &nbsp;&middot;&nbsp;
+                        <i class="far fa-clock" style="margin-right:4px;"></i>现场看位
+                    </div>
+                </div>
+            </div>
+            <div class="appt-right">
+                <span class="appt-status confirmed">
+                    <i class="fas fa-check-circle"></i>已确认
+                </span>
+                <button class="btn-cancel" onclick="if(confirm('确定取消该预约？'))alert('已取消 A-005 预约')">
+                    <i class="fas fa-xmark"></i>取消预约
+                </button>
+            </div>
+        </div>
+
+        <!-- Appointment 2: Pending -->
+        <div class="appointment-card">
+            <div class="appt-left">
+                <div class="appt-icon">
+                    <i class="fas fa-calendar-check"></i>
+                </div>
+                <div class="appt-info">
+                    <div class="appt-booth">B-022 展位</div>
+                    <div class="appt-datetime">
+                        <i class="far fa-calendar-alt" style="margin-right:4px;"></i>2026-07-01 10:00
+                        &nbsp;&middot;&nbsp;
+                        <i class="far fa-clock" style="margin-right:4px;"></i>现场看位
+                    </div>
+                </div>
+            </div>
+            <div class="appt-right">
+                <span class="appt-status pending">
+                    <i class="fas fa-hourglass-half"></i>待确认
+                </span>
+                <button class="btn-cancel" onclick="if(confirm('确定取消该预约？'))alert('已取消 B-022 预约')">
+                    <i class="fas fa-xmark"></i>取消预约
+                </button>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Footer -->
+    <div class="page-footer">
+        &copy; 2026 Globus Events &middot; 万耀企龙 &middot; 展位AI智能推荐与动态定价系统 V1.1 &nbsp;|&nbsp; 本系统数据仅供演示用途
+    </div>
+
+</main>
+
+<script>
+// Hamburger menu toggle
+const hamburger = document.getElementById('hamburgerBtn');
+const sidebar = document.getElementById('sidebar');
+const overlay = document.getElementById('sidebarOverlay');
+
+function toggleSidebar() {
+    sidebar.classList.toggle('open');
+    overlay.classList.toggle('open');
+}
+
+hamburger.addEventListener('click', toggleSidebar);
+overlay.addEventListener('click', toggleSidebar);
+
+// Close sidebar on window resize back to desktop
+window.addEventListener('resize', () => {
+    if (window.innerWidth > 768) {
+        sidebar.classList.remove('open');
+        overlay.classList.remove('open');
+    }
+});
+
+// Sidebar item click — close sidebar on mobile
+document.querySelectorAll('.sidebar-item').forEach(item => {
+    item.addEventListener('click', function(e) {
+        document.querySelectorAll('.sidebar-item').forEach(i => i.classList.remove('active'));
+        this.classList.add('active');
+
+        if (window.innerWidth <= 768) {
+            setTimeout(() => {
+                sidebar.classList.remove('open');
+                overlay.classList.remove('open');
+            }, 150);
+        }
+    });
+});
+
+// Tab switching
+const tabBtns = document.querySelectorAll('.tab-btn');
+const tabContents = {
+    'tab-quotes': document.getElementById('tab-quotes'),
+    'tab-appointments': document.getElementById('tab-appointments')
+};
+
+tabBtns.forEach(btn => {
+    btn.addEventListener('click', function() {
+        // Deactivate all tabs
+        tabBtns.forEach(b => b.classList.remove('active'));
+
+        // Hide all tab contents
+        Object.values(tabContents).forEach(content => {
+            content.classList.remove('active');
+        });
+
+        // Activate clicked tab
+        this.classList.add('active');
+        const targetId = this.getAttribute('data-tab');
+        if (tabContents[targetId]) {
+            tabContents[targetId].classList.add('active');
+        }
+    });
+});
+</script>
+
+</body>
+</html>

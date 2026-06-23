@@ -1,0 +1,1269 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>场馆平面图 · 万耀企龙展位智能推荐系统</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Noto+Sans+SC:wght@300;400;500;600;700;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --navy: #0B2A4A;
+      --navy-dark: #071D35;
+      --navy-deep: #041221;
+      --gold: #C9A84C;
+      --gold-light: #E0C36A;
+      --gold-dark: #A88B3A;
+      --cyan: #00A3E0;
+      --cyan-light: #33B8E8;
+      --cyan-dark: #0089BF;
+      --white: #FFFFFF;
+      --gray-50: #F8F9FA;
+      --gray-100: #F0F2F5;
+      --gray-200: #E4E7EB;
+      --gray-300: #D1D5DB;
+      --gray-400: #9CA3AF;
+      --gray-500: #6B7280;
+      --gray-600: #4B5563;
+      --gray-700: #374151;
+      --gray-800: #1F2937;
+      --text-light: rgba(255,255,255,0.85);
+      --text-muted: rgba(255,255,255,0.55);
+      --sidebar-width: 220px;
+      --navbar-height: 64px;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Noto Sans SC', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      color: var(--gray-800);
+      background: var(--gray-50);
+      overflow-x: hidden;
+      line-height: 1.6;
+      min-height: 100vh;
+    }
+
+    /* ============ NAVBAR ============ */
+    .navbar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 1000;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 32px;
+      height: var(--navbar-height);
+      background: var(--white);
+      border-bottom: 1px solid var(--gray-200);
+      box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+    }
+
+    .nav-brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      text-decoration: none;
+    }
+
+    .nav-logo {
+      width: 40px;
+      height: 40px;
+      background: linear-gradient(135deg, var(--navy), var(--cyan));
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      font-size: 18px;
+      color: var(--white);
+      letter-spacing: -1px;
+      flex-shrink: 0;
+    }
+
+    .nav-title {
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--navy);
+      letter-spacing: 0.5px;
+    }
+
+    .nav-subtitle {
+      font-size: 11px;
+      color: var(--gray-400);
+      margin-top: 1px;
+    }
+
+    .nav-right {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .nav-user {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 6px 14px 6px 10px;
+      border-radius: 10px;
+      background: var(--gray-50);
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .nav-user:hover { background: var(--gray-100); }
+
+    .nav-avatar {
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      background: linear-gradient(135deg, var(--gold), var(--gold-dark));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 13px;
+      color: var(--navy-dark);
+    }
+
+    .nav-user-name {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--gray-700);
+    }
+
+    .nav-notif {
+      width: 38px;
+      height: 38px;
+      border-radius: 10px;
+      background: var(--gray-50);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--gray-500);
+      cursor: pointer;
+      transition: all 0.2s;
+      position: relative;
+      border: none;
+      font-size: 16px;
+    }
+    .nav-notif:hover { background: var(--gray-100); color: var(--navy); }
+    .nav-notif-dot {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--cyan);
+      border: 2px solid var(--white);
+    }
+
+    /* ============ SIDEBAR ============ */
+    .sidebar {
+      position: fixed;
+      top: var(--navbar-height);
+      left: 0;
+      bottom: 0;
+      width: var(--sidebar-width);
+      background: var(--white);
+      border-right: 1px solid var(--gray-200);
+      padding: 20px 12px;
+      overflow-y: auto;
+      z-index: 900;
+    }
+
+    .sidebar-menu {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .sidebar-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 14px;
+      border-radius: 10px;
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--gray-600);
+      text-decoration: none;
+      transition: all 0.2s ease;
+      cursor: pointer;
+      border: none;
+      background: none;
+      width: 100%;
+      text-align: left;
+    }
+
+    .sidebar-item i {
+      width: 20px;
+      text-align: center;
+      font-size: 15px;
+      color: var(--gray-400);
+      transition: color 0.2s;
+    }
+
+    .sidebar-item:hover {
+      background: var(--gray-50);
+      color: var(--navy);
+    }
+    .sidebar-item:hover i { color: var(--navy); }
+
+    .sidebar-item.active {
+      background: rgba(0, 163, 224, 0.08);
+      color: var(--cyan);
+      font-weight: 600;
+    }
+    .sidebar-item.active i { color: var(--cyan); }
+
+    .sidebar-section-label {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--gray-400);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      padding: 16px 14px 6px;
+    }
+
+    /* ============ MAIN CONTENT ============ */
+    .main {
+      margin-left: var(--sidebar-width);
+      margin-top: var(--navbar-height);
+      padding: 28px 32px;
+      min-height: calc(100vh - var(--navbar-height));
+    }
+
+    .page-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 24px;
+    }
+
+    .page-title {
+      font-size: 26px;
+      font-weight: 700;
+      color: var(--navy);
+    }
+
+    .page-breadcrumb {
+      font-size: 13px;
+      color: var(--gray-400);
+    }
+    .page-breadcrumb span { color: var(--gray-600); }
+
+    /* ============ TOOLBAR CARD ============ */
+    .toolbar-card {
+      background: var(--white);
+      border-radius: 16px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+      padding: 20px 24px;
+      margin-bottom: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+
+    .toolbar-left {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      flex-wrap: wrap;
+    }
+
+    .floor-switch {
+      display: inline-flex;
+      background: var(--gray-100);
+      border-radius: 999px;
+      padding: 3px;
+    }
+
+    .floor-btn {
+      padding: 8px 20px;
+      border-radius: 999px;
+      font-size: 13px;
+      font-weight: 600;
+      border: none;
+      cursor: pointer;
+      transition: all 0.25s ease;
+      background: transparent;
+      color: var(--gray-500);
+    }
+
+    .floor-btn.active {
+      background: var(--white);
+      color: var(--navy);
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+
+    .floor-btn:hover:not(.active) { color: var(--gray-700); }
+
+    .legend {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      color: var(--gray-600);
+    }
+
+    .legend-dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 3px;
+      flex-shrink: 0;
+    }
+    .legend-dot.green { background: #10B981; }
+    .legend-dot.cyan { background: var(--cyan); }
+    .legend-dot.yellow { background: #F59E0B; }
+    .legend-dot.gray { background: var(--gray-300); }
+
+    .filter-chips {
+      display: flex;
+      gap: 8px;
+    }
+
+    .chip-btn {
+      padding: 6px 16px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 500;
+      border: 1px solid var(--gray-200);
+      cursor: pointer;
+      transition: all 0.2s ease;
+      background: var(--white);
+      color: var(--gray-600);
+    }
+
+    .chip-btn:hover {
+      border-color: var(--cyan);
+      color: var(--cyan);
+    }
+
+    .chip-btn.active {
+      background: var(--cyan);
+      border-color: var(--cyan);
+      color: var(--white);
+    }
+
+    /* ============ LAYOUT: MAP + DETAIL ============ */
+    .map-layout {
+      display: flex;
+      gap: 24px;
+      align-items: flex-start;
+    }
+
+    .map-container {
+      flex: 1;
+      min-width: 0;
+      background: var(--white);
+      border-radius: 16px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+      padding: 32px;
+    }
+
+    .map-canvas-wrapper {
+      background: var(--gray-100);
+      border-radius: 12px;
+      overflow: auto;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 520px;
+      position: relative;
+    }
+
+    .map-svg {
+      display: block;
+      max-width: 100%;
+      height: auto;
+    }
+
+    /* Booth rect styles */
+    .booth-rect {
+      cursor: pointer;
+      transition: opacity 0.15s ease;
+    }
+    .booth-rect:hover { opacity: 0.85; }
+    .booth-rect.selected { stroke: var(--navy) !important; stroke-width: 3 !important; }
+    .booth-rect.hidden { display: none; }
+
+    .booth-label {
+      pointer-events: none;
+      user-select: none;
+      font-family: 'Inter', 'Noto Sans SC', sans-serif;
+    }
+
+    .zone-label {
+      pointer-events: none;
+      user-select: none;
+      font-family: 'Noto Sans SC', 'Inter', sans-serif;
+    }
+
+    /* ============ DETAIL PANEL ============ */
+    .detail-panel {
+      width: 320px;
+      flex-shrink: 0;
+      background: var(--white);
+      border-radius: 16px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+      padding: 28px 24px;
+      position: sticky;
+      top: calc(var(--navbar-height) + 28px);
+    }
+
+    .detail-empty {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 48px 16px;
+      color: var(--gray-400);
+    }
+
+    .detail-empty-icon {
+      font-size: 48px;
+      margin-bottom: 16px;
+      opacity: 0.5;
+    }
+
+    .detail-empty-text {
+      font-size: 14px;
+      line-height: 1.6;
+    }
+
+    .detail-content { display: none; }
+
+    .detail-content.visible { display: block; }
+
+    .detail-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 20px;
+    }
+
+    .detail-booth-id {
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--navy);
+    }
+
+    .detail-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 4px 12px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    .badge-premium {
+      background: linear-gradient(135deg, var(--gold), var(--gold-light));
+      color: var(--navy-dark);
+    }
+
+    .badge-standard {
+      background: var(--gray-100);
+      color: var(--gray-600);
+    }
+
+    .badge-vip {
+      background: linear-gradient(135deg, var(--navy), var(--cyan));
+      color: var(--white);
+    }
+
+    .detail-divider {
+      height: 1px;
+      background: var(--gray-100);
+      margin: 16px 0;
+    }
+
+    .detail-info-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .detail-info-item {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .detail-info-label {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--gray-400);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .detail-info-value {
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--gray-800);
+    }
+
+    .detail-info-value.price {
+      color: var(--cyan);
+      font-size: 20px;
+      font-weight: 700;
+    }
+
+    .match-bar {
+      margin-top: 4px;
+      height: 6px;
+      border-radius: 3px;
+      background: var(--gray-100);
+      overflow: hidden;
+    }
+
+    .match-bar-fill {
+      height: 100%;
+      border-radius: 3px;
+      background: linear-gradient(90deg, var(--cyan), var(--gold));
+      transition: width 0.5s ease;
+    }
+
+    .status-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 4px 12px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    .status-available {
+      background: #D1FAE5;
+      color: #065F46;
+    }
+
+    .status-recommended {
+      background: rgba(0, 163, 224, 0.12);
+      color: var(--cyan-dark);
+    }
+
+    .status-locked {
+      background: #FEF3C7;
+      color: #92400E;
+    }
+
+    .status-sold {
+      background: var(--gray-100);
+      color: var(--gray-500);
+    }
+
+    .detail-actions {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-top: 20px;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 12px 24px;
+      border-radius: 12px;
+      font-size: 14px;
+      font-weight: 600;
+      border: none;
+      cursor: pointer;
+      transition: all 0.25s ease;
+      text-decoration: none;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--cyan), var(--cyan-dark));
+      color: var(--white);
+    }
+    .btn-primary:hover {
+      box-shadow: 0 4px 16px rgba(0, 163, 224, 0.35);
+      transform: translateY(-1px);
+    }
+
+    .btn-outline {
+      background: var(--white);
+      color: var(--navy);
+      border: 1.5px solid var(--gray-200);
+    }
+    .btn-outline:hover {
+      border-color: var(--gold);
+      color: var(--gold-dark);
+    }
+
+    .btn-disabled {
+      background: var(--gray-100);
+      color: var(--gray-400);
+      cursor: not-allowed;
+    }
+
+    /* ============ RESPONSIVE ============ */
+    @media (max-width: 1200px) {
+      .detail-panel { width: 280px; }
+    }
+
+    @media (max-width: 992px) {
+      .map-layout { flex-direction: column; }
+      .detail-panel {
+        width: 100%;
+        position: static;
+      }
+      .toolbar-card { flex-direction: column; align-items: flex-start; }
+      .toolbar-left { width: 100%; }
+      .filter-chips { margin-left: auto; }
+    }
+
+    @media (max-width: 768px) {
+      .sidebar { display: none; }
+      .main {
+        margin-left: 0;
+        padding: 20px 16px;
+      }
+      .navbar { padding: 0 16px; }
+      .nav-title { font-size: 14px; }
+      .nav-subtitle { display: none; }
+      .nav-user-name { display: none; }
+      .page-title { font-size: 20px; }
+      .toolbar-card { padding: 16px; }
+      .toolbar-left { gap: 12px; }
+      .legend { gap: 10px; }
+      .map-container { padding: 16px; }
+      .detail-panel { padding: 20px 16px; }
+    }
+
+    @media (max-width: 480px) {
+      .floor-btn { padding: 6px 14px; font-size: 12px; }
+      .legend-item { font-size: 11px; }
+      .chip-btn { padding: 4px 12px; font-size: 11px; }
+    }
+
+    /* Mobile sidebar overlay */
+    .mobile-sidebar-toggle {
+      display: none;
+      background: none;
+      border: none;
+      font-size: 20px;
+      color: var(--navy);
+      cursor: pointer;
+      padding: 4px;
+    }
+
+    @media (max-width: 768px) {
+      .mobile-sidebar-toggle { display: block; }
+    }
+
+    .sidebar-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.3);
+      z-index: 998;
+    }
+    .sidebar-overlay.open { display: block; }
+
+    @media (max-width: 768px) {
+      .sidebar.mobile-open {
+        display: block;
+        z-index: 999;
+        box-shadow: 4px 0 20px rgba(0,0,0,0.15);
+      }
+    }
+
+    /* Entrance label styling */
+    .entrance-label {
+      fill: var(--navy);
+      font-weight: 700;
+      font-size: 13px;
+      letter-spacing: 1px;
+    }
+    .entrance-sub {
+      fill: var(--gray-400);
+      font-size: 10px;
+    }
+    .entrance-line {
+      stroke: var(--gray-300);
+      stroke-width: 2;
+      stroke-dasharray: 6,4;
+    }
+  </style>
+</head>
+<body>
+
+<!-- ============ NAVBAR ============ -->
+<nav class="navbar">
+  <button class="mobile-sidebar-toggle" onclick="toggleMobileSidebar()" aria-label="Toggle menu">
+    <i class="fas fa-bars"></i>
+  </button>
+  <a class="nav-brand" href="#">
+    <div class="nav-logo">GE</div>
+    <div>
+      <div class="nav-title">万耀企龙 · 展位智能推荐</div>
+      <div class="nav-subtitle">Venue Floor Plan</div>
+    </div>
+  </a>
+  <div class="nav-right">
+    <button class="nav-notif" title="通知">
+      <i class="far fa-bell"></i>
+      <span class="nav-notif-dot"></span>
+    </button>
+    <div class="nav-user">
+      <div class="nav-avatar">王</div>
+      <span class="nav-user-name">王经理</span>
+      <i class="fas fa-chevron-down" style="font-size:10px;color:var(--gray-400);"></i>
+    </div>
+  </div>
+</nav>
+
+<!-- ============ SIDEBAR OVERLAY (mobile) ============ -->
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleMobileSidebar()"></div>
+
+<!-- ============ SIDEBAR ============ -->
+<aside class="sidebar" id="sidebar">
+  <ul class="sidebar-menu">
+    <li class="sidebar-section-label">概览</li>
+    <li><a class="sidebar-item" href="#"><i class="fas fa-th-large"></i> 总览仪表盘</a></li>
+    <li><a class="sidebar-item" href="#"><i class="fas fa-chart-line"></i> 数据分析</a></li>
+
+    <li class="sidebar-section-label">展位管理</li>
+    <li><a class="sidebar-item active" href="#"><i class="fas fa-map-marked-alt"></i> 场馆平面图</a></li>
+    <li><a class="sidebar-item" href="#"><i class="fas fa-star"></i> AI推荐展位</a></li>
+    <li><a class="sidebar-item" href="#"><i class="fas fa-heart"></i> 我的收藏</a></li>
+
+    <li class="sidebar-section-label">交易</li>
+    <li><a class="sidebar-item" href="#"><i class="fas fa-file-invoice-dollar"></i> 报价与订单</a></li>
+    <li><a class="sidebar-item" href="#"><i class="fas fa-history"></i> 浏览历史</a></li>
+
+    <li class="sidebar-section-label">设置</li>
+    <li><a class="sidebar-item" href="#"><i class="fas fa-cog"></i> 偏好设置</a></li>
+  </ul>
+</aside>
+
+<!-- ============ MAIN CONTENT ============ -->
+<div class="main">
+
+  <!-- Page Header -->
+  <div class="page-header">
+    <h1 class="page-title">🗺️ 场馆平面图</h1>
+    <div class="page-breadcrumb">
+      <i class="fas fa-home"></i> 首页 / <span>场馆平面图</span>
+    </div>
+  </div>
+
+  <!-- Toolbar Card -->
+  <div class="toolbar-card">
+    <div class="toolbar-left">
+      <!-- Floor Switch -->
+      <div class="floor-switch" id="floorSwitch">
+        <button class="floor-btn active" data-floor="1" onclick="toggleFloor(1)">1F 一层展位</button>
+        <button class="floor-btn" data-floor="2" onclick="toggleFloor(2)">2F 二层展位</button>
+      </div>
+
+      <!-- Legend -->
+      <div class="legend">
+        <span class="legend-item"><span class="legend-dot green"></span>可订</span>
+        <span class="legend-item"><span class="legend-dot cyan"></span>AI推荐</span>
+        <span class="legend-item"><span class="legend-dot yellow"></span>锁定</span>
+        <span class="legend-item"><span class="legend-dot gray"></span>已售</span>
+      </div>
+    </div>
+
+    <!-- Filter Chips -->
+    <div class="filter-chips" id="filterChips">
+      <button class="chip-btn active" data-filter="all" onclick="filterBooths('all')">全部</button>
+      <button class="chip-btn" data-filter="available" onclick="filterBooths('available')">仅可订</button>
+      <button class="chip-btn" data-filter="recommended" onclick="filterBooths('recommended')">仅AI推荐</button>
+    </div>
+  </div>
+
+  <!-- Map Layout -->
+  <div class="map-layout">
+
+    <!-- SVG Map Container -->
+    <div class="map-container">
+      <div class="map-canvas-wrapper" id="mapCanvas">
+        <!-- SVG rendered by JS -->
+      </div>
+    </div>
+
+    <!-- Detail Panel -->
+    <div class="detail-panel" id="detailPanel">
+      <!-- Empty State -->
+      <div class="detail-empty" id="detailEmpty">
+        <div class="detail-empty-icon">👆</div>
+        <div class="detail-empty-text">点击展位查看详情</div>
+      </div>
+
+      <!-- Detail Content -->
+      <div class="detail-content" id="detailContent">
+        <div class="detail-header">
+          <span class="detail-booth-id" id="detailId">A-001</span>
+          <span class="detail-badge badge-premium" id="detailBadge">标准展位</span>
+        </div>
+
+        <div class="detail-divider"></div>
+
+        <div class="detail-info-grid">
+          <div class="detail-info-item">
+            <span class="detail-info-label">面积</span>
+            <span class="detail-info-value" id="detailArea">36 m²</span>
+          </div>
+          <div class="detail-info-item">
+            <span class="detail-info-label">楼层</span>
+            <span class="detail-info-value" id="detailFloor">1F</span>
+          </div>
+          <div class="detail-info-item" style="grid-column:1/-1;">
+            <span class="detail-info-label">状态</span>
+            <span id="detailStatus"><span class="status-tag status-available"><i class="fas fa-check-circle"></i> 可订</span></span>
+          </div>
+          <div class="detail-info-item" style="grid-column:1/-1;">
+            <span class="detail-info-label">AI匹配度</span>
+            <div style="display:flex;align-items:center;gap:10px;">
+              <span class="detail-info-value" id="detailMatch" style="font-size:15px;">92%</span>
+              <div class="match-bar" style="flex:1;">
+                <div class="match-bar-fill" id="detailMatchBar" style="width:92%"></div>
+              </div>
+            </div>
+          </div>
+          <div class="detail-info-item" style="grid-column:1/-1;">
+            <span class="detail-info-label">动态价格</span>
+            <span class="detail-info-value price" id="detailPrice">¥ 128,000</span>
+          </div>
+        </div>
+
+        <div class="detail-actions">
+          <button class="btn btn-primary" id="btnReserve"><i class="far fa-calendar-check"></i> 预约此展位</button>
+          <button class="btn btn-outline" id="btnQuote"><i class="fas fa-file-invoice"></i> 查看报价</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+// ============================================================
+// DATA
+// ============================================================
+
+const boothStatuses = ['available', 'available', 'available', 'locked', 'sold', 'available', 'recommended', 'available', 'sold', 'available'];
+const boothGrades = ['standard', 'premium', 'standard', 'vip', 'standard', 'premium', 'standard', 'vip', 'standard', 'premium'];
+
+function getRandomStatus() {
+  const r = Math.random();
+  if (r < 0.45) return 'available';
+  if (r < 0.65) return 'recommended';
+  if (r < 0.82) return 'locked';
+  return 'sold';
+}
+
+function getRandomGrade(row, col) {
+  // VIP near center, premium near entrance, standard elsewhere
+  if ((row >= 3 && row <= 6) && (col >= 3 && col <= 6)) return 'vip';
+  if (row <= 2 || row >= 7 || col <= 2 || col >= 7) return 'standard';
+  return 'premium';
+}
+
+function getRandomMatch() {
+  return Math.floor(Math.random() * 35) + 60; // 60-94
+}
+
+function getPrice(grade, area) {
+  const base = grade === 'vip' ? 4500 : grade === 'premium' ? 3200 : 2200;
+  return base * area;
+}
+
+function formatPrice(n) {
+  return '¥ ' + n.toLocaleString('zh-CN');
+}
+
+// Generate booth data
+const booths = [];
+let boothId = 0;
+
+for (let row = 0; row < 10; row++) {
+  for (let col = 0; col < 8; col++) {
+    const prefix = String.fromCharCode(65 + row); // A-J
+    const num = String(col + 1).padStart(3, '0');
+    const id = prefix + '-' + num;
+    const status = getRandomStatus();
+    const grade = getRandomGrade(row, col);
+    const area = grade === 'vip' ? 72 : grade === 'premium' ? 54 : 36;
+    const match = getRandomMatch();
+
+    booths.push({
+      id,
+      row,
+      col,
+      floor: 1,
+      status,
+      grade,
+      area,
+      match,
+      price: getPrice(grade, area),
+      selected: false,
+      hidden: false,
+    });
+  }
+}
+
+// Second floor — fewer booths, different layout
+for (let row = 0; row < 6; row++) {
+  for (let col = 0; col < 6; col++) {
+    const prefix = String.fromCharCode(75 + row); // K-P
+    const num = String(col + 1).padStart(3, '0');
+    const id = prefix + '-' + num;
+    const status = getRandomStatus();
+    const grade = row >= 1 && row <= 4 && col >= 1 && col <= 4 ? 'vip' : 'standard';
+    const area = grade === 'vip' ? 72 : 36;
+    const match = getRandomMatch();
+
+    booths.push({
+      id,
+      row,
+      col,
+      floor: 2,
+      status,
+      grade,
+      area,
+      match,
+      price: getPrice(grade, area),
+      selected: false,
+      hidden: false,
+    });
+  }
+}
+
+// ============================================================
+// STATE
+// ============================================================
+
+let currentFloor = 1;
+let currentFilter = 'all';
+let selectedId = null;
+
+// ============================================================
+// RENDER MAP
+// ============================================================
+
+function renderMap() {
+  const canvas = document.getElementById('mapCanvas');
+
+  const cols = currentFloor === 1 ? 8 : 6;
+  const rows = currentFloor === 1 ? 10 : 6 | 0;
+  const actualRows = currentFloor === 1 ? 10 : 6;
+
+  const bw = 58;   // booth width (including gap)
+  const bh = 42;   // booth height (including gap)
+  const padX = 60;
+  const padY = 80;
+
+  const svgW = padX * 2 + cols * bw + 20;
+  const svgH = padY * 2 + actualRows * bh + 80;
+
+  let svg = `<svg class="map-svg" viewBox="0 0 ${svgW} ${svgH}" xmlns="http://www.w3.org/2000/svg" style="min-width:${Math.min(svgW, 900)}px;">`;
+
+  // Background
+  svg += `<rect width="${svgW}" height="${svgH}" fill="transparent"/>`;
+
+  // Zone labels for 1F
+  if (currentFloor === 1) {
+    // Entrance zone
+    const ex = padX + cols * bw / 2 - 80;
+    svg += `<text x="${ex + 80}" y="38" text-anchor="middle" class="entrance-label">🚪 入口迎宾区</text>`;
+    svg += `<text x="${ex + 80}" y="54" text-anchor="middle" class="entrance-sub">Main Entrance</text>`;
+    // Entrance arrow
+    svg += `<path d="M ${padX + cols * bw / 2 - 30},62 L ${padX + cols * bw / 2},78 L ${padX + cols * bw / 2 + 30},62" fill="none" class="entrance-line"/>`;
+
+    // Center zone
+    const cx = padX + cols * bw / 2;
+    const cy = padY + 4 * bh + bh / 2;
+    svg += `<rect x="${padX + 1.5 * bw}" y="${padY + 2.5 * bh}" width="${cols * bw - 3 * bw}" height="${5 * bh}" rx="8" fill="rgba(201,168,76,0.05)" stroke="rgba(201,168,76,0.2)" stroke-width="1.5" stroke-dasharray="6,4"/>`;
+    svg += `<text x="${cx}" y="${cy}" text-anchor="middle" dominant-baseline="middle" class="entrance-label" fill="var(--gold)">🏛️ 中央展示区</text>`;
+    svg += `<text x="${cx}" y="${cy + 16}" text-anchor="middle" dominant-baseline="middle" class="entrance-sub">Central Exhibition Area</text>`;
+
+    // Standard zone left
+    svg += `<text x="${padX + bw / 2}" y="${padY + actualRows * bh + 50}" text-anchor="middle" class="entrance-sub">📋 标准展区 A-D排</text>`;
+    // Standard zone right
+    svg += `<text x="${padX + cols * bw - bw / 2}" y="${padY + actualRows * bh + 50}" text-anchor="middle" class="entrance-sub">📋 标准展区 G-J排</text>`;
+  } else {
+    // 2F labels
+    const cx = padX + cols * bw / 2;
+    svg += `<text x="${cx}" y="38" text-anchor="middle" class="entrance-label">🌟 二层精品展区</text>`;
+    svg += `<text x="${cx}" y="54" text-anchor="middle" class="entrance-sub">Premium Level · 精品展厅</text>`;
+
+    // Center VIP zone
+    if (actualRows >= 4) {
+      svg += `<rect x="${padX + 1 * bw}" y="${padY + 1 * bh}" width="${(cols - 2) * bw}" height="${(actualRows - 2) * bh}" rx="8" fill="rgba(0,163,224,0.04)" stroke="rgba(0,163,224,0.15)" stroke-width="1.5" stroke-dasharray="6,4"/>`;
+      svg += `<text x="${cx}" y="${padY + (actualRows / 2) * bh}" text-anchor="middle" dominant-baseline="middle" class="entrance-label" fill="var(--cyan)">💎 VIP专属展区</text>`;
+    }
+  }
+
+  // Draw booths
+  const floorBooths = booths.filter(b => b.floor === currentFloor);
+
+  floorBooths.forEach((booth, idx) => {
+    const x = padX + booth.col * bw + 4;
+    const y = padY + booth.row * bh + 4;
+    const w = 50;
+    const h = 34;
+
+    let fill, stroke, textColor;
+    switch (booth.status) {
+      case 'available':
+        fill = '#D1FAE5';
+        stroke = '#10B981';
+        textColor = '#065F46';
+        break;
+      case 'recommended':
+        fill = 'rgba(0,163,224,0.15)';
+        stroke = '#00A3E0';
+        textColor = '#0089BF';
+        break;
+      case 'locked':
+        fill = '#FEF3C7';
+        stroke = '#F59E0B';
+        textColor = '#92400E';
+        break;
+      case 'sold':
+        fill = '#E4E7EB';
+        stroke = '#D1D5DB';
+        textColor = '#6B7280';
+        break;
+    }
+
+    const selectedClass = booth.selected ? 'selected' : '';
+    const hiddenClass = booth.hidden ? 'hidden' : '';
+
+    svg += `<g class="booth-group ${hiddenClass}" onclick="selectBooth('${booth.id}')" style="cursor:pointer;">`;
+    svg += `<rect class="booth-rect ${selectedClass}" x="${x}" y="${y}" width="${w}" height="${h}" rx="4" fill="${fill}" stroke="${stroke}" stroke-width="${booth.selected ? 3 : 1.5}"/>`;
+
+    // Grade indicator stripe for premium/vip
+    if (booth.grade === 'vip') {
+      svg += `<rect x="${x}" y="${y}" width="4" height="${h}" rx="2" fill="url(#vipGrad)"/>`;
+    } else if (booth.grade === 'premium') {
+      svg += `<rect x="${x}" y="${y}" width="4" height="${h}" rx="2" fill="url(#premGrad)"/>`;
+    }
+
+    svg += `<text class="booth-label" x="${x + w / 2}" y="${y + h / 2 + 1}" text-anchor="middle" dominant-baseline="middle" font-size="10" font-weight="600" fill="${textColor}">${booth.id}</text>`;
+    svg += `</g>`;
+  });
+
+  // Gradients
+  svg += `<defs>
+    <linearGradient id="vipGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#0B2A4A"/>
+      <stop offset="100%" stop-color="#00A3E0"/>
+    </linearGradient>
+    <linearGradient id="premGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#C9A84C"/>
+      <stop offset="100%" stop-color="#E0C36A"/>
+    </linearGradient>
+  </defs>`;
+
+  svg += `</svg>`;
+
+  canvas.innerHTML = svg;
+}
+
+// ============================================================
+// SELECT BOOTH
+// ============================================================
+
+function selectBooth(id) {
+  // Deselect previous
+  if (selectedId) {
+    const prev = booths.find(b => b.id === selectedId);
+    if (prev) prev.selected = false;
+  }
+
+  const booth = booths.find(b => b.id === id);
+  if (!booth) return;
+
+  // If sold, maybe still show detail but disable actions
+  booth.selected = true;
+  selectedId = id;
+
+  // Update UI
+  renderMap();
+  updateDetailPanel(booth);
+}
+
+function updateDetailPanel(booth) {
+  const empty = document.getElementById('detailEmpty');
+  const content = document.getElementById('detailContent');
+
+  empty.style.display = 'none';
+  content.classList.add('visible');
+
+  document.getElementById('detailId').textContent = booth.id;
+
+  const badge = document.getElementById('detailBadge');
+  const gradeNames = { standard: '标准展位', premium: '高级展位', vip: 'VIP展位' };
+  const badgeClasses = { standard: 'badge-standard', premium: 'badge-premium', vip: 'badge-vip' };
+  badge.textContent = gradeNames[booth.grade] || '标准展位';
+  badge.className = 'detail-badge ' + (badgeClasses[booth.grade] || 'badge-standard');
+
+  document.getElementById('detailArea').textContent = booth.area + ' m²';
+  document.getElementById('detailFloor').textContent = booth.floor + 'F';
+
+  const statusMap = {
+    available: { label: '可订', icon: 'fa-check-circle', cls: 'status-available' },
+    recommended: { label: 'AI推荐', icon: 'fa-star', cls: 'status-recommended' },
+    locked: { label: '锁定', icon: 'fa-lock', cls: 'status-locked' },
+    sold: { label: '已售', icon: 'fa-times-circle', cls: 'status-sold' },
+  };
+  const s = statusMap[booth.status] || statusMap.available;
+  document.getElementById('detailStatus').innerHTML =
+    `<span class="status-tag ${s.cls}"><i class="fas ${s.icon}"></i> ${s.label}</span>`;
+
+  document.getElementById('detailMatch').textContent = booth.match + '%';
+  document.getElementById('detailMatchBar').style.width = booth.match + '%';
+  document.getElementById('detailPrice').textContent = formatPrice(booth.price);
+
+  // Buttons
+  const btnReserve = document.getElementById('btnReserve');
+  const btnQuote = document.getElementById('btnQuote');
+
+  if (booth.status === 'sold' || booth.status === 'locked') {
+    btnReserve.className = 'btn btn-disabled';
+    btnReserve.innerHTML = '<i class="fas fa-ban"></i> ' + (booth.status === 'sold' ? '已售罄' : '已被锁定');
+    btnReserve.disabled = true;
+    btnQuote.className = 'btn btn-outline';
+    btnQuote.innerHTML = '<i class="fas fa-file-invoice"></i> 查看报价';
+    btnQuote.disabled = false;
+  } else {
+    btnReserve.className = 'btn btn-primary';
+    btnReserve.innerHTML = '<i class="far fa-calendar-check"></i> 预约此展位';
+    btnReserve.disabled = false;
+    btnQuote.className = 'btn btn-outline';
+    btnQuote.innerHTML = '<i class="fas fa-file-invoice"></i> 查看报价';
+    btnQuote.disabled = false;
+  }
+}
+
+// ============================================================
+// TOGGLE FLOOR
+// ============================================================
+
+function toggleFloor(floor) {
+  currentFloor = floor;
+
+  // Update button states
+  document.querySelectorAll('.floor-btn').forEach(btn => {
+    btn.classList.toggle('active', parseInt(btn.dataset.floor) === floor);
+  });
+
+  // Reset selection
+  if (selectedId) {
+    const prev = booths.find(b => b.id === selectedId);
+    if (prev) prev.selected = false;
+  }
+  selectedId = null;
+
+  // Reset detail panel
+  document.getElementById('detailEmpty').style.display = 'flex';
+  document.getElementById('detailContent').classList.remove('visible');
+
+  // Re-apply current filter
+  applyFilter();
+
+  renderMap();
+}
+
+// ============================================================
+// FILTER BOOTHS
+// ============================================================
+
+function filterBooths(type) {
+  currentFilter = type;
+
+  document.querySelectorAll('.chip-btn').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.filter === type);
+  });
+
+  applyFilter();
+  renderMap();
+}
+
+function applyFilter() {
+  booths.forEach(booth => {
+    if (booth.floor !== currentFloor) {
+      booth.hidden = true;
+      return;
+    }
+
+    switch (currentFilter) {
+      case 'all':
+        booth.hidden = false;
+        break;
+      case 'available':
+        booth.hidden = booth.status !== 'available';
+        break;
+      case 'recommended':
+        booth.hidden = booth.status !== 'recommended';
+        break;
+      default:
+        booth.hidden = false;
+    }
+  });
+}
+
+// ============================================================
+// MOBILE SIDEBAR
+// ============================================================
+
+function toggleMobileSidebar() {
+  const sidebar = document.getElementById('sidebar');
+  const overlay = document.getElementById('sidebarOverlay');
+  sidebar.classList.toggle('mobile-open');
+  overlay.classList.toggle('open');
+}
+
+// ============================================================
+// INIT
+// ============================================================
+
+applyFilter();
+renderMap();
+
+// Click outside to deselect on map canvas click
+document.getElementById('mapCanvas').addEventListener('click', function(e) {
+  // Only deselect if clicking directly on the canvas wrapper (not a booth)
+  if (e.target === this || e.target.tagName === 'svg') {
+    if (selectedId) {
+      const prev = booths.find(b => b.id === selectedId);
+      if (prev) prev.selected = false;
+      selectedId = null;
+      document.getElementById('detailEmpty').style.display = 'flex';
+      document.getElementById('detailContent').classList.remove('visible');
+      renderMap();
+    }
+  }
+});
+
+</script>
+
+</body>
+</html>

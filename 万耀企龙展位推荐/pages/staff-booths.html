@@ -1,0 +1,1386 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>展位资源管理 · 万耀企龙展位智能推荐系统</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Noto+Sans+SC:wght@300;400;500;600;700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<style>
+*, *::before, *::after {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+:root {
+    --navy: #0B2A4A;
+    --navy-dark: #071D35;
+    --navy-deep: #041221;
+    --gold: #C9A84C;
+    --gold-light: #E0C36A;
+    --gold-dark: #A88B3A;
+    --cyan: #00A3E0;
+    --cyan-light: #33B8E8;
+    --cyan-dark: #0089BF;
+    --white: #FFFFFF;
+    --gray-50: #F8F9FA;
+    --gray-100: #F0F2F5;
+    --gray-200: #E4E7EB;
+    --gray-300: #D1D5DB;
+    --gray-400: #9CA3AF;
+    --gray-500: #6B7280;
+    --gray-600: #4B5563;
+    --gray-700: #374151;
+    --gray-800: #1F2937;
+    --green: #10B981;
+    --green-light: #D1FAE5;
+    --red: #EF4444;
+    --orange: #F59E0B;
+    --sidebar-width: 220px;
+    --navbar-height: 64px;
+}
+
+html { scroll-behavior: smooth; }
+
+body {
+    font-family: 'Noto Sans SC', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    color: var(--gray-800);
+    background: var(--gray-50);
+    line-height: 1.6;
+    min-height: 100vh;
+}
+
+/* ============ NAVBAR (Staff: dark) ============ */
+.navbar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 32px;
+    height: var(--navbar-height);
+    background: var(--navy-dark);
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+}
+
+.nav-left {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.hamburger {
+    display: none;
+    width: 36px;
+    height: 36px;
+    border: none;
+    background: none;
+    cursor: pointer;
+    border-radius: 8px;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    color: rgba(255,255,255,0.7);
+    transition: all 0.2s;
+}
+.hamburger:hover { background: rgba(255,255,255,0.08); }
+
+.nav-brand {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    text-decoration: none;
+}
+
+.nav-logo {
+    width: 40px;
+    height: 40px;
+    background: linear-gradient(135deg, var(--gold), var(--gold-dark));
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 800;
+    font-size: 18px;
+    color: var(--navy-dark);
+    letter-spacing: -1px;
+    flex-shrink: 0;
+}
+
+.nav-title-text {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--white);
+    letter-spacing: 0.5px;
+    white-space: nowrap;
+}
+
+.nav-right {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.nav-staff-badge {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--gold);
+    background: rgba(201, 168, 76, 0.12);
+    padding: 4px 12px;
+    border-radius: 20px;
+    letter-spacing: 0.5px;
+}
+
+.nav-avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--cyan), var(--cyan-dark));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--white);
+    flex-shrink: 0;
+}
+
+/* ============ SIDEBAR (Staff: dark) ============ */
+.sidebar {
+    position: fixed;
+    top: var(--navbar-height);
+    left: 0;
+    bottom: 0;
+    width: var(--sidebar-width);
+    background: var(--navy-dark);
+    border-right: 1px solid rgba(255,255,255,0.06);
+    z-index: 900;
+    overflow-y: auto;
+    padding: 16px 0;
+    transition: transform 0.3s ease;
+}
+
+.sidebar-nav {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.sidebar-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 20px;
+    font-size: 14px;
+    font-weight: 500;
+    color: rgba(255,255,255,0.55);
+    text-decoration: none;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border-left: 3px solid transparent;
+    position: relative;
+}
+
+.sidebar-item:hover {
+    background: rgba(255,255,255,0.04);
+    color: rgba(255,255,255,0.8);
+}
+
+.sidebar-item.active {
+    background: rgba(0, 163, 224, 0.08);
+    color: var(--cyan-light);
+    border-left-color: var(--cyan);
+    font-weight: 600;
+}
+
+.sidebar-item .icon {
+    width: 20px;
+    text-align: center;
+    font-size: 16px;
+    flex-shrink: 0;
+}
+
+.sidebar-section-label {
+    padding: 16px 20px 8px;
+    font-size: 11px;
+    font-weight: 600;
+    color: rgba(255,255,255,0.25);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.sidebar-divider {
+    height: 1px;
+    background: rgba(255,255,255,0.06);
+    margin: 8px 16px;
+}
+
+/* ============ MAIN CONTENT ============ */
+.main-content {
+    margin-left: var(--sidebar-width);
+    margin-top: var(--navbar-height);
+    padding: 32px 40px;
+    min-height: calc(100vh - var(--navbar-height));
+}
+
+.page-header {
+    margin-bottom: 28px;
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 16px;
+}
+
+.page-title-wrap {}
+
+.page-title {
+    font-size: 26px;
+    font-weight: 700;
+    color: var(--gray-800);
+    margin-bottom: 4px;
+}
+
+.page-subtitle {
+    font-size: 14px;
+    color: var(--gray-500);
+}
+
+/* ============ FILTER BAR ============ */
+.filter-bar {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 24px;
+    flex-wrap: wrap;
+    background: var(--white);
+    padding: 16px 20px;
+    border-radius: 12px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+}
+
+.filter-group {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.filter-label {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--gray-500);
+    white-space: nowrap;
+}
+
+.filter-select {
+    padding: 8px 32px 8px 12px;
+    border: 1px solid var(--gray-200);
+    border-radius: 8px;
+    font-size: 13px;
+    font-family: inherit;
+    color: var(--gray-700);
+    background: var(--white);
+    appearance: none;
+    -webkit-appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%239CA3AF' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+    cursor: pointer;
+    transition: border-color 0.2s;
+    min-width: 100px;
+}
+.filter-select:focus {
+    outline: none;
+    border-color: var(--cyan);
+    box-shadow: 0 0 0 3px rgba(0, 163, 224, 0.1);
+}
+
+.filter-search {
+    position: relative;
+    flex: 1;
+    min-width: 180px;
+    max-width: 280px;
+}
+
+.filter-search input {
+    width: 100%;
+    padding: 8px 12px 8px 36px;
+    border: 1px solid var(--gray-200);
+    border-radius: 8px;
+    font-size: 13px;
+    font-family: inherit;
+    color: var(--gray-700);
+    background: var(--white);
+    transition: border-color 0.2s;
+}
+.filter-search input:focus {
+    outline: none;
+    border-color: var(--cyan);
+    box-shadow: 0 0 0 3px rgba(0, 163, 224, 0.1);
+}
+.filter-search input::placeholder {
+    color: var(--gray-400);
+}
+.filter-search .search-icon {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--gray-400);
+    font-size: 14px;
+    pointer-events: none;
+}
+
+.filter-spacer {
+    flex: 1;
+}
+
+.btn-primary {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 9px 20px;
+    border: none;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    font-family: inherit;
+    color: var(--white);
+    background: linear-gradient(135deg, var(--cyan), var(--cyan-dark));
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    white-space: nowrap;
+}
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0, 163, 224, 0.3);
+}
+
+.btn-sm {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 5px 12px;
+    border: none;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 500;
+    font-family: inherit;
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap;
+}
+
+.btn-edit {
+    background: rgba(0, 163, 224, 0.08);
+    color: var(--cyan);
+}
+.btn-edit:hover {
+    background: rgba(0, 163, 224, 0.15);
+}
+
+.btn-lock {
+    background: rgba(245, 158, 11, 0.08);
+    color: var(--orange);
+}
+.btn-lock:hover {
+    background: rgba(245, 158, 11, 0.15);
+}
+
+.btn-unlock {
+    background: rgba(16, 185, 129, 0.08);
+    color: var(--green);
+}
+.btn-unlock:hover {
+    background: rgba(16, 185, 129, 0.15);
+}
+
+.btn-view {
+    background: rgba(107, 114, 128, 0.08);
+    color: var(--gray-500);
+}
+.btn-view:hover {
+    background: rgba(107, 114, 128, 0.15);
+}
+
+/* ============ TABLE CARD ============ */
+.table-card {
+    background: var(--white);
+    border-radius: 16px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+    overflow: hidden;
+}
+
+.table-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 24px;
+    border-bottom: 1px solid var(--gray-100);
+}
+
+.table-toolbar-left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.table-count {
+    font-size: 13px;
+    color: var(--gray-500);
+}
+
+.table-count strong {
+    color: var(--gray-800);
+    font-weight: 600;
+}
+
+.table-wrapper {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 720px;
+}
+
+thead th {
+    padding: 14px 20px;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--gray-500);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    text-align: left;
+    background: var(--gray-50);
+    border-bottom: 1px solid var(--gray-200);
+    white-space: nowrap;
+}
+
+tbody tr {
+    transition: background 0.2s;
+}
+tbody tr:hover {
+    background: rgba(0, 163, 224, 0.02);
+}
+tbody tr + tr td {
+    border-top: 1px solid var(--gray-100);
+}
+
+tbody td {
+    padding: 14px 20px;
+    font-size: 14px;
+    color: var(--gray-700);
+    vertical-align: middle;
+}
+
+td .booth-id {
+    font-weight: 600;
+    color: var(--gray-800);
+    font-family: 'Inter', monospace;
+}
+
+td .booth-grade {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.grade-badge {
+    display: inline-block;
+    width: 22px;
+    height: 22px;
+    border-radius: 6px;
+    font-size: 11px;
+    font-weight: 700;
+    text-align: center;
+    line-height: 22px;
+    flex-shrink: 0;
+}
+
+.grade-S {
+    background: linear-gradient(135deg, rgba(201, 168, 76, 0.15), rgba(201, 168, 76, 0.08));
+    color: var(--gold-dark);
+}
+.grade-A {
+    background: rgba(0, 163, 224, 0.1);
+    color: var(--cyan);
+}
+.grade-B {
+    background: rgba(16, 185, 129, 0.1);
+    color: var(--green);
+}
+.grade-C {
+    background: rgba(156, 163, 175, 0.1);
+    color: var(--gray-500);
+}
+
+td .price {
+    font-family: 'Inter', monospace;
+    font-weight: 500;
+    white-space: nowrap;
+}
+
+td .price-base {
+    color: var(--gray-500);
+    font-size: 13px;
+}
+
+td .price-dynamic {
+    color: var(--gray-800);
+    font-weight: 600;
+}
+
+.price-up {
+    color: var(--red);
+}
+.price-down {
+    color: var(--green);
+}
+.price-flat {
+    color: var(--gray-500);
+}
+
+.price-change {
+    font-size: 11px;
+    margin-left: 2px;
+}
+
+/* Status badges */
+.status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 500;
+    white-space: nowrap;
+}
+
+.status-badge .dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+.status-available {
+    background: rgba(16, 185, 129, 0.08);
+    color: var(--green);
+}
+.status-available .dot { background: var(--green); }
+
+.status-ai {
+    background: rgba(0, 163, 224, 0.08);
+    color: var(--cyan);
+}
+.status-ai .dot { background: var(--cyan); }
+
+.status-locked {
+    background: rgba(245, 158, 11, 0.08);
+    color: var(--orange);
+}
+.status-locked .dot { background: var(--orange); }
+
+.status-sold {
+    background: rgba(107, 114, 128, 0.08);
+    color: var(--gray-500);
+}
+.status-sold .dot { background: var(--gray-400); }
+
+.action-cell {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+/* ============ FOOTER ============ */
+.page-footer {
+    text-align: center;
+    padding: 24px 0 8px;
+    border-top: 1px solid var(--gray-200);
+    font-size: 12px;
+    color: var(--gray-400);
+    margin-top: 32px;
+}
+
+/* ============ SIDEBAR OVERLAY (mobile) ============ */
+.sidebar-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.4);
+    z-index: 899;
+}
+
+/* ============ MODAL ============ */
+.modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.45);
+    z-index: 2000;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+.modal-overlay.open {
+    display: flex;
+}
+
+.modal {
+    background: var(--white);
+    border-radius: 16px;
+    width: 100%;
+    max-width: 520px;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: 0 24px 48px rgba(0,0,0,0.2);
+    animation: modalIn 0.25s ease;
+}
+
+@keyframes modalIn {
+    from { opacity: 0; transform: scale(0.95) translateY(10px); }
+    to { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+.modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px 24px;
+    border-bottom: 1px solid var(--gray-100);
+}
+
+.modal-title {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--gray-800);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.modal-close {
+    width: 32px;
+    height: 32px;
+    border: none;
+    background: var(--gray-100);
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 16px;
+    color: var(--gray-500);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+}
+.modal-close:hover {
+    background: var(--gray-200);
+    color: var(--gray-700);
+}
+
+.modal-body {
+    padding: 24px;
+}
+
+.form-group {
+    margin-bottom: 18px;
+}
+
+.form-label {
+    display: block;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--gray-600);
+    margin-bottom: 6px;
+}
+
+.form-input,
+.form-select {
+    width: 100%;
+    padding: 10px 14px;
+    border: 1px solid var(--gray-200);
+    border-radius: 8px;
+    font-size: 14px;
+    font-family: inherit;
+    color: var(--gray-700);
+    background: var(--white);
+    transition: border-color 0.2s;
+}
+.form-input:focus,
+.form-select:focus {
+    outline: none;
+    border-color: var(--cyan);
+    box-shadow: 0 0 0 3px rgba(0, 163, 224, 0.1);
+}
+
+.form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+}
+
+.modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    padding: 16px 24px;
+    border-top: 1px solid var(--gray-100);
+}
+
+.btn-secondary {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 9px 20px;
+    border: 1px solid var(--gray-200);
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    font-family: inherit;
+    color: var(--gray-600);
+    background: var(--white);
+    cursor: pointer;
+    transition: all 0.2s;
+}
+.btn-secondary:hover {
+    background: var(--gray-50);
+    border-color: var(--gray-300);
+}
+
+/* ============ RESPONSIVE ============ */
+@media (max-width: 1024px) {
+    .main-content { padding: 24px 24px; }
+}
+
+@media (max-width: 768px) {
+    .hamburger { display: flex; }
+
+    .sidebar {
+        transform: translateX(-100%);
+    }
+
+    .sidebar.open {
+        transform: translateX(0);
+    }
+
+    .sidebar-overlay.open {
+        display: block;
+    }
+
+    .main-content {
+        margin-left: 0;
+        padding: 20px 16px;
+    }
+
+    .navbar { padding: 0 16px; }
+    .nav-title-text { font-size: 13px; }
+    .nav-staff-badge { display: none; }
+
+    .page-title { font-size: 22px; }
+
+    .filter-bar {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 10px;
+        padding: 14px 16px;
+    }
+
+    .filter-group {
+        width: 100%;
+    }
+
+    .filter-select {
+        flex: 1;
+        min-width: 0;
+    }
+
+    .filter-search {
+        max-width: none;
+        width: 100%;
+    }
+
+    .filter-spacer {
+        display: none;
+    }
+
+    .btn-primary {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .table-toolbar {
+        flex-direction: column;
+        gap: 8px;
+        align-items: flex-start;
+    }
+
+    tbody td {
+        padding: 12px 14px;
+        font-size: 13px;
+    }
+
+    thead th {
+        padding: 10px 14px;
+        font-size: 11px;
+    }
+
+    .form-row {
+        grid-template-columns: 1fr;
+    }
+
+    .modal {
+        max-width: 100%;
+        margin: 10px;
+    }
+}
+
+@media (max-width: 480px) {
+    .main-content { padding: 16px 12px; }
+    .page-title { font-size: 20px; }
+    .filter-bar { padding: 12px 14px; }
+}
+</style>
+</head>
+<body>
+
+<!-- ============ NAVBAR (Staff Dark) ============ -->
+<nav class="navbar">
+    <div class="nav-left">
+        <button class="hamburger" id="hamburgerBtn" aria-label="菜单">
+            <i class="fas fa-bars"></i>
+        </button>
+        <a class="nav-brand" href="#">
+            <div class="nav-logo">GE</div>
+            <span class="nav-title-text">GLOBUS EVENTS · 万耀企龙</span>
+        </a>
+    </div>
+    <div class="nav-right">
+        <span class="nav-staff-badge"><i class="fas fa-shield-alt"></i> 员工后台</span>
+        <div class="nav-avatar">管</div>
+    </div>
+</nav>
+
+<!-- ============ SIDEBAR OVERLAY ============ -->
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+<!-- ============ SIDEBAR (Staff Dark) ============ -->
+<aside class="sidebar" id="sidebar">
+    <ul class="sidebar-nav">
+        <li class="sidebar-section-label">运营管理</li>
+        <li>
+            <a class="sidebar-item" href="#">
+                <span class="icon"><i class="fas fa-chart-line"></i></span>
+                数据概览
+            </a>
+        </li>
+        <li>
+            <a class="sidebar-item active" href="#">
+                <span class="icon"><i class="fas fa-cubes"></i></span>
+                展位资源管理
+            </a>
+        </li>
+        <li>
+            <a class="sidebar-item" href="#">
+                <span class="icon"><i class="fas fa-file-invoice"></i></span>
+                报价单管理
+            </a>
+        </li>
+        <li>
+            <a class="sidebar-item" href="#">
+                <span class="icon"><i class="fas fa-users"></i></span>
+                客户管理
+            </a>
+        </li>
+        <li>
+            <a class="sidebar-item" href="#">
+                <span class="icon"><i class="fas fa-map"></i></span>
+                场馆平面图
+            </a>
+        </li>
+    </ul>
+    <div class="sidebar-divider"></div>
+    <ul class="sidebar-nav">
+        <li class="sidebar-section-label">系统</li>
+        <li>
+            <a class="sidebar-item" href="#">
+                <span class="icon"><i class="fas fa-cog"></i></span>
+                系统设置
+            </a>
+        </li>
+        <li>
+            <a class="sidebar-item" href="#" style="font-size:13px;">
+                <span class="icon"><i class="fas fa-sign-out-alt"></i></span>
+                退出登录
+            </a>
+        </li>
+    </ul>
+</aside>
+
+<!-- ============ MAIN CONTENT ============ -->
+<main class="main-content">
+
+    <!-- Page Header -->
+    <div class="page-header">
+        <div class="page-title-wrap">
+            <h1 class="page-title"><i class="fas fa-cubes" style="margin-right:8px;color:var(--cyan);"></i>展位资源管理</h1>
+            <p class="page-subtitle">管理所有展位信息、价格与状态，支持新增、编辑与锁定操作</p>
+        </div>
+    </div>
+
+    <!-- Filter Bar -->
+    <div class="filter-bar">
+        <div class="filter-group">
+            <span class="filter-label"><i class="fas fa-layer-group" style="margin-right:3px;"></i>等级</span>
+            <select class="filter-select" id="gradeFilter">
+                <option value="all">全部</option>
+                <option value="S">S级</option>
+                <option value="A">A级</option>
+                <option value="B">B级</option>
+                <option value="C">C级</option>
+            </select>
+        </div>
+
+        <div class="filter-group">
+            <span class="filter-label"><i class="fas fa-circle" style="margin-right:3px;"></i>状态</span>
+            <select class="filter-select" id="statusFilter">
+                <option value="all">全部</option>
+                <option value="available">可订</option>
+                <option value="locked">锁定</option>
+                <option value="sold">已售</option>
+            </select>
+        </div>
+
+        <div class="filter-search">
+            <i class="fas fa-search search-icon"></i>
+            <input type="text" id="searchInput" placeholder="搜索展位编号..." autocomplete="off">
+        </div>
+
+        <div class="filter-spacer"></div>
+
+        <button class="btn-primary" id="addBoothBtn">
+            <i class="fas fa-plus"></i>
+            新增展位
+        </button>
+    </div>
+
+    <!-- Table Card -->
+    <div class="table-card">
+        <div class="table-toolbar">
+            <div class="table-toolbar-left">
+                <i class="fas fa-table" style="color:var(--gray-400);font-size:14px;"></i>
+                <span class="table-count">共 <strong id="totalCount">12</strong> 个展位</span>
+            </div>
+            <div>
+                <button class="btn-sm btn-edit" onclick="alert('导出功能开发中')">
+                    <i class="fas fa-download"></i> 导出
+                </button>
+            </div>
+        </div>
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                    <tr>
+                        <th>展位编号</th>
+                        <th>等级</th>
+                        <th>面积</th>
+                        <th>基础价格</th>
+                        <th>动态价格</th>
+                        <th>状态</th>
+                        <th style="text-align:center;">操作</th>
+                    </tr>
+                </thead>
+                <tbody id="tableBody">
+                    <!-- Rows rendered by JS -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="page-footer">
+        &copy; 2026 Globus Events &middot; 万耀企龙 &middot; 展位AI智能推荐与动态定价系统 V1.1 &nbsp;|&nbsp; 本系统数据仅供演示用途
+    </div>
+
+</main>
+
+<!-- ============ ADD / EDIT MODAL ============ -->
+<div class="modal-overlay" id="modalOverlay">
+    <div class="modal">
+        <div class="modal-header">
+            <div class="modal-title" id="modalTitle">
+                <i class="fas fa-plus-circle" style="color:var(--cyan);"></i>
+                <span id="modalTitleText">新增展位</span>
+            </div>
+            <button class="modal-close" id="modalClose">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="modal-body">
+            <div class="form-group">
+                <label class="form-label">展位编号</label>
+                <input class="form-input" id="formId" placeholder="例如：S-006" maxlength="10">
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label">等级</label>
+                    <select class="form-select" id="formGrade">
+                        <option value="S">S旗舰臻装</option>
+                        <option value="A">A优选展位</option>
+                        <option value="B">B标准展位</option>
+                        <option value="C">C基础展位</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">面积 (m&sup2;)</label>
+                    <input class="form-input" id="formArea" type="number" placeholder="例如：36" min="1">
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label">基础价格 (&yen;)</label>
+                    <input class="form-input" id="formBasePrice" type="number" placeholder="例如：38000" min="0">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">动态价格 (&yen;)</label>
+                    <input class="form-input" id="formDynamicPrice" type="number" placeholder="例如：45600" min="0">
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="form-label">状态</label>
+                <select class="form-select" id="formStatus">
+                    <option value="available">可订</option>
+                    <option value="ai">AI推荐</option>
+                    <option value="locked">锁定</option>
+                    <option value="sold">已售</option>
+                </select>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn-secondary" id="modalCancel">取消</button>
+            <button class="btn-primary" id="modalConfirm">
+                <i class="fas fa-check"></i>
+                <span id="modalConfirmText">确认新增</span>
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+// ============ DATA ============
+const boothData = [
+    { id: 'S-001', grade: 'S', gradeLabel: 'S旗舰臻装', area: 36, basePrice: 38000, dynamicPrice: 45600, status: 'available' },
+    { id: 'S-002', grade: 'S', gradeLabel: 'S旗舰臻装', area: 36, basePrice: 38000, dynamicPrice: 48200, status: 'ai' },
+    { id: 'S-003', grade: 'S', gradeLabel: 'S旗舰臻装', area: 36, basePrice: 38000, dynamicPrice: 42800, status: 'locked' },
+    { id: 'A-005', grade: 'A', gradeLabel: 'A优选展位', area: 18, basePrice: 22000, dynamicPrice: 25800, status: 'available' },
+    { id: 'A-008', grade: 'A', gradeLabel: 'A优选展位', area: 18, basePrice: 22000, dynamicPrice: 24200, status: 'ai' },
+    { id: 'A-012', grade: 'A', gradeLabel: 'A优选展位', area: 18, basePrice: 22000, dynamicPrice: 26400, status: 'sold' },
+    { id: 'B-022', grade: 'B', gradeLabel: 'B标准展位', area: 9, basePrice: 12800, dynamicPrice: 14200, status: 'available' },
+    { id: 'B-035', grade: 'B', gradeLabel: 'B标准展位', area: 9, basePrice: 12800, dynamicPrice: 13800, status: 'ai' },
+    { id: 'B-048', grade: 'B', gradeLabel: 'B标准展位', area: 9, basePrice: 12800, dynamicPrice: 12900, status: 'locked' },
+    { id: 'C-001', grade: 'C', gradeLabel: 'C基础展位', area: 9, basePrice: 9800, dynamicPrice: 8600, status: 'available' },
+    { id: 'C-015', grade: 'C', gradeLabel: 'C基础展位', area: 9, basePrice: 9800, dynamicPrice: 7900, status: 'sold' },
+    { id: 'C-028', grade: 'C', gradeLabel: 'C基础展位', area: 9, basePrice: 9800, dynamicPrice: 8200, status: 'available' }
+];
+
+let currentData = [...boothData];
+let editingIndex = -1; // -1 = add mode
+
+// ============ HELPERS ============
+function formatPrice(n) {
+    return '¥' + Number(n).toLocaleString();
+}
+
+function getStatusInfo(status) {
+    const map = {
+        available: { cls: 'status-available', label: '🟢 可订' },
+        ai:        { cls: 'status-ai',        label: '🔵 AI推荐' },
+        locked:    { cls: 'status-locked',    label: '🟡 锁定' },
+        sold:      { cls: 'status-sold',      label: '⚫ 已售' }
+    };
+    return map[status] || map.available;
+}
+
+function getGradeBadge(grade) {
+    return `<span class="grade-badge grade-${grade}">${grade}</span>`;
+}
+
+function getPriceChangeClass(base, dynamic) {
+    if (dynamic > base) return 'price-up';
+    if (dynamic < base) return 'price-down';
+    return 'price-flat';
+}
+
+function getPriceArrow(base, dynamic) {
+    if (dynamic > base) return '<i class="fas fa-arrow-up price-change"></i>';
+    if (dynamic < base) return '<i class="fas fa-arrow-down price-change"></i>';
+    return '<i class="fas fa-minus price-change"></i>';
+}
+
+function getActionHtml(item, index) {
+    if (item.status === 'sold') {
+        return `<div class="action-cell"><button class="btn-sm btn-view" data-index="${index}" data-action="view"><i class="fas fa-eye"></i> 查看</button></div>`;
+    }
+    const lockAction = item.status === 'locked' ? 'unlock' : 'lock';
+    const lockLabel = item.status === 'locked' ? '解锁' : '锁定';
+    const lockBtnClass = item.status === 'locked' ? 'btn-unlock' : 'btn-lock';
+    return `<div class="action-cell">
+        <button class="btn-sm btn-edit" data-index="${index}" data-action="edit"><i class="fas fa-pen"></i> 编辑</button>
+        <button class="btn-sm ${lockBtnClass}" data-index="${index}" data-action="${lockAction}"><i class="fas fa-${item.status === 'locked' ? 'unlock' : 'lock'}"></i> ${lockLabel}</button>
+    </div>`;
+}
+
+// ============ RENDER ============
+function renderTable(data) {
+    const tbody = document.getElementById('tableBody');
+    if (data.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;padding:48px 20px;color:var(--gray-400);">
+            <i class="fas fa-inbox" style="font-size:32px;display:block;margin-bottom:12px;"></i>
+            暂无匹配的展位
+        </td></tr>`;
+        document.getElementById('totalCount').textContent = '0';
+        return;
+    }
+    let html = '';
+    data.forEach((item, idx) => {
+        const realIndex = currentData.indexOf(item);
+        const si = getStatusInfo(item.status);
+        const priceCls = getPriceChangeClass(item.basePrice, item.dynamicPrice);
+        const arrow = getPriceArrow(item.basePrice, item.dynamicPrice);
+        html += `<tr>
+            <td><span class="booth-id">${item.id}</span></td>
+            <td><span class="booth-grade">${getGradeBadge(item.grade)} ${item.gradeLabel}</span></td>
+            <td>${item.area}m&sup2;</td>
+            <td><span class="price price-base">${formatPrice(item.basePrice)}</span></td>
+            <td><span class="price price-dynamic ${priceCls}">${formatPrice(item.dynamicPrice)} ${arrow}</span></td>
+            <td><span class="status-badge ${si.cls}"><span class="dot"></span> ${si.label}</span></td>
+            <td>${getActionHtml(item, realIndex)}</td>
+        </tr>`;
+    });
+    tbody.innerHTML = html;
+    document.getElementById('totalCount').textContent = data.length;
+
+    // Bind action buttons
+    tbody.querySelectorAll('[data-action]').forEach(btn => {
+        btn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            const idx = parseInt(this.dataset.index);
+            const action = this.dataset.action;
+            handleAction(idx, action);
+        });
+    });
+}
+
+// ============ ACTIONS ============
+function handleAction(index, action) {
+    const item = currentData[index];
+    if (!item) return;
+
+    switch (action) {
+        case 'edit':
+            openEditModal(index);
+            break;
+        case 'view':
+            alert(`展位 ${item.id} 详情\n\n等级: ${item.gradeLabel}\n面积: ${item.area}m²\n基础价格: ${formatPrice(item.basePrice)}\n动态价格: ${formatPrice(item.dynamicPrice)}\n状态: 已售`);
+            break;
+        case 'lock':
+            if (confirm(`确定锁定展位 ${item.id} 吗？`)) {
+                item.status = 'locked';
+                renderTable(currentData);
+            }
+            break;
+        case 'unlock':
+            if (confirm(`确定解锁展位 ${item.id} 吗？`)) {
+                item.status = 'available';
+                renderTable(currentData);
+            }
+            break;
+    }
+}
+
+// ============ MODAL ============
+function openAddModal() {
+    editingIndex = -1;
+    document.getElementById('modalTitleText').textContent = '新增展位';
+    document.getElementById('modalConfirmText').textContent = '确认新增';
+    document.getElementById('modalTitle').querySelector('i').className = 'fas fa-plus-circle';
+    document.getElementById('modalTitle').querySelector('i').style.color = 'var(--cyan)';
+    document.getElementById('formId').value = '';
+    document.getElementById('formGrade').value = 'S';
+    document.getElementById('formArea').value = '';
+    document.getElementById('formBasePrice').value = '';
+    document.getElementById('formDynamicPrice').value = '';
+    document.getElementById('formStatus').value = 'available';
+    document.getElementById('modalOverlay').classList.add('open');
+    setTimeout(() => document.getElementById('formId').focus(), 100);
+}
+
+function openEditModal(index) {
+    const item = currentData[index];
+    if (!item) return;
+    editingIndex = index;
+    document.getElementById('modalTitleText').textContent = '编辑展位';
+    document.getElementById('modalConfirmText').textContent = '保存修改';
+    document.getElementById('modalTitle').querySelector('i').className = 'fas fa-pen';
+    document.getElementById('modalTitle').querySelector('i').style.color = 'var(--gold)';
+    document.getElementById('formId').value = item.id;
+    document.getElementById('formGrade').value = item.grade;
+    document.getElementById('formArea').value = item.area;
+    document.getElementById('formBasePrice').value = item.basePrice;
+    document.getElementById('formDynamicPrice').value = item.dynamicPrice;
+    document.getElementById('formStatus').value = item.status;
+    document.getElementById('modalOverlay').classList.add('open');
+    setTimeout(() => document.getElementById('formId').focus(), 100);
+}
+
+function closeModal() {
+    document.getElementById('modalOverlay').classList.remove('open');
+}
+
+function confirmModal() {
+    const id = document.getElementById('formId').value.trim();
+    const grade = document.getElementById('formGrade').value;
+    const area = parseInt(document.getElementById('formArea').value);
+    const basePrice = parseInt(document.getElementById('formBasePrice').value);
+    const dynamicPrice = parseInt(document.getElementById('formDynamicPrice').value);
+    const status = document.getElementById('formStatus').value;
+
+    // Validation
+    if (!id) { alert('请输入展位编号'); return; }
+    if (!area || area <= 0) { alert('请输入有效的面积'); return; }
+    if (!basePrice || basePrice <= 0) { alert('请输入有效的基础价格'); return; }
+    if (!dynamicPrice || dynamicPrice <= 0) { alert('请输入有效的动态价格'); return; }
+
+    const gradeLabels = { S: 'S旗舰装装', A: 'A优选展位', B: 'B标准展位', C: 'C基础展位' };
+
+    if (editingIndex === -1) {
+        // Add new
+        // Check duplicate ID
+        if (currentData.some(b => b.id === id)) {
+            alert(`展位编号 "${id}" 已存在，请更换编号`);
+            return;
+        }
+        currentData.push({
+            id: id,
+            grade: grade,
+            gradeLabel: gradeLabels[grade],
+            area: area,
+            basePrice: basePrice,
+            dynamicPrice: dynamicPrice,
+            status: status
+        });
+    } else {
+        // Edit existing
+        const item = currentData[editingIndex];
+        // If ID changed, check duplicates excluding self
+        if (id !== item.id && currentData.some((b, i) => i !== editingIndex && b.id === id)) {
+            alert(`展位编号 "${id}" 已存在，请更换编号`);
+            return;
+        }
+        item.id = id;
+        item.grade = grade;
+        item.gradeLabel = gradeLabels[grade];
+        item.area = area;
+        item.basePrice = basePrice;
+        item.dynamicPrice = dynamicPrice;
+        item.status = status;
+    }
+
+    closeModal();
+    applyFilters();
+}
+
+// ============ FILTERS ============
+function applyFilters() {
+    const gradeVal = document.getElementById('gradeFilter').value;
+    const statusVal = document.getElementById('statusFilter').value;
+    const searchVal = document.getElementById('searchInput').value.trim().toLowerCase();
+
+    let filtered = [...currentData];
+
+    if (gradeVal !== 'all') {
+        filtered = filtered.filter(b => b.grade === gradeVal);
+    }
+    if (statusVal !== 'all') {
+        filtered = filtered.filter(b => b.status === statusVal);
+    }
+    if (searchVal) {
+        filtered = filtered.filter(b => b.id.toLowerCase().includes(searchVal));
+    }
+
+    renderTable(filtered);
+}
+
+// ============ EVENT BINDING ============
+document.addEventListener('DOMContentLoaded', function() {
+    renderTable(currentData);
+
+    // Hamburger
+    document.getElementById('hamburgerBtn').addEventListener('click', function() {
+        document.getElementById('sidebar').classList.toggle('open');
+        document.getElementById('sidebarOverlay').classList.toggle('open');
+    });
+    document.getElementById('sidebarOverlay').addEventListener('click', function() {
+        document.getElementById('sidebar').classList.remove('open');
+        document.getElementById('sidebarOverlay').classList.remove('open');
+    });
+    window.addEventListener('resize', function() {
+        if (window.innerWidth > 768) {
+            document.getElementById('sidebar').classList.remove('open');
+            document.getElementById('sidebarOverlay').classList.remove('open');
+        }
+    });
+
+    // Sidebar items — close on mobile
+    document.querySelectorAll('.sidebar-item').forEach(item => {
+        item.addEventListener('click', function() {
+            document.querySelectorAll('.sidebar-item').forEach(i => i.classList.remove('active'));
+            this.classList.add('active');
+            if (window.innerWidth <= 768) {
+                setTimeout(function() {
+                    document.getElementById('sidebar').classList.remove('open');
+                    document.getElementById('sidebarOverlay').classList.remove('open');
+                }, 150);
+            }
+        });
+    });
+
+    // Filters
+    document.getElementById('gradeFilter').addEventListener('change', applyFilters);
+    document.getElementById('statusFilter').addEventListener('change', applyFilters);
+    document.getElementById('searchInput').addEventListener('input', applyFilters);
+
+    // Add button
+    document.getElementById('addBoothBtn').addEventListener('click', openAddModal);
+
+    // Modal
+    document.getElementById('modalClose').addEventListener('click', closeModal);
+    document.getElementById('modalCancel').addEventListener('click', closeModal);
+    document.getElementById('modalOverlay').addEventListener('click', function(e) {
+        if (e.target === this) closeModal();
+    });
+    document.getElementById('modalConfirm').addEventListener('click', confirmModal);
+
+    // Enter key in form inputs
+    document.querySelectorAll('.form-input, .form-select').forEach(el => {
+        el.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') confirmModal();
+        });
+    });
+});
+</script>
+
+</body>
+</html>

@@ -1,0 +1,1012 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>万耀企龙展位智能推荐与动态定价</title>
+  <style>
+    :root {
+      --primary: #003b7a;
+      --primary-dark: #00264d;
+      --primary-soft: #eaf2f8;
+      --accent: #f5a623;
+      --accent-soft: #fff5df;
+      --bg: #f5f7fa;
+      --card: rgba(255, 255, 255, 0.86);
+      --text: #1f2933;
+      --muted: #6b7280;
+      --line: #dbe4ef;
+      --success: #22c55e;
+      --blue: #2563eb;
+      --warning: #facc15;
+      --gray: #9ca3af;
+      --danger: #ef4444;
+      --shadow: 0 22px 60px rgba(0, 38, 77, 0.13);
+      --radius: 24px;
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      color: var(--text);
+      font-family: "PingFang SC", "Microsoft YaHei", Arial, sans-serif;
+      background:
+        radial-gradient(circle at 8% 4%, rgba(245, 166, 35, 0.18), transparent 28%),
+        radial-gradient(circle at 92% 6%, rgba(0, 59, 122, 0.18), transparent 30%),
+        linear-gradient(180deg, #f7fbff 0%, var(--bg) 48%, #fff 100%);
+      min-height: 100vh;
+    }
+
+    a { color: inherit; text-decoration: none; }
+    button, input, select, textarea { font: inherit; }
+    button { cursor: pointer; }
+
+    .top-nav {
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 24px;
+      padding: 14px 38px;
+      color: #fff;
+      background: rgba(0, 38, 77, 0.92);
+      backdrop-filter: blur(18px);
+      box-shadow: 0 12px 35px rgba(0, 38, 77, 0.22);
+    }
+
+    .brand { display: flex; align-items: center; gap: 14px; min-width: 250px; }
+    .brand-mark {
+      width: 44px;
+      height: 44px;
+      border-radius: 16px;
+      display: grid;
+      place-items: center;
+      font-weight: 800;
+      color: var(--primary-dark);
+      background: linear-gradient(135deg, #fff, #ffd989);
+      box-shadow: 0 12px 28px rgba(245, 166, 35, 0.28);
+    }
+    .brand-name { font-size: 18px; font-weight: 800; letter-spacing: 0.4px; }
+    .brand-line { font-size: 11px; color: rgba(255,255,255,0.72); margin-top: 2px; }
+
+    .nav-links { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px; }
+    .nav-links a {
+      padding: 9px 12px;
+      border-radius: 999px;
+      color: rgba(255,255,255,0.82);
+      font-size: 13px;
+      transition: 0.22s ease;
+    }
+    .nav-links a:hover { color: #fff; background: rgba(255,255,255,0.12); }
+    .demo-badge {
+      white-space: nowrap;
+      padding: 8px 12px;
+      border-radius: 999px;
+      font-size: 12px;
+      color: #2d1b00;
+      background: linear-gradient(135deg, #ffd782, var(--accent));
+      font-weight: 700;
+    }
+
+    .page { max-width: 1440px; margin: 0 auto; padding: 0 26px 60px; }
+    .hero {
+      position: relative;
+      overflow: hidden;
+      margin: 28px 0 24px;
+      border-radius: 34px;
+      min-height: 520px;
+      color: #fff;
+      background:
+        linear-gradient(110deg, rgba(0, 38, 77, 0.95) 0%, rgba(0, 59, 122, 0.84) 43%, rgba(0, 168, 168, 0.48) 100%),
+        url("https://images.unsplash.com/photo-1540575467063-178a50c2df87?auto=format&fit=crop&w=1800&q=80") center/cover;
+      box-shadow: var(--shadow);
+    }
+    .hero::after {
+      content: "";
+      position: absolute;
+      inset: auto -120px -160px auto;
+      width: 520px;
+      height: 520px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(245,166,35,0.44), transparent 66%);
+    }
+    .hero-inner { position: relative; z-index: 1; padding: 72px 70px 42px; max-width: 860px; }
+    .eyebrow {
+      display: inline-flex;
+      gap: 10px;
+      align-items: center;
+      padding: 8px 13px;
+      border: 1px solid rgba(255,255,255,0.24);
+      border-radius: 999px;
+      background: rgba(255,255,255,0.12);
+      color: rgba(255,255,255,0.86);
+      font-size: 13px;
+      letter-spacing: 0.8px;
+    }
+    .hero h1 { margin: 22px 0 16px; font-size: clamp(34px, 5vw, 66px); line-height: 1.04; letter-spacing: -1.8px; }
+    .hero p { margin: 0; color: rgba(255,255,255,0.82); font-size: 18px; line-height: 1.75; max-width: 760px; }
+    .hero-actions { display: flex; gap: 14px; flex-wrap: wrap; margin-top: 34px; }
+    .btn {
+      border: 0;
+      border-radius: 999px;
+      padding: 12px 20px;
+      font-weight: 800;
+      transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+    }
+    .btn:hover { transform: translateY(-2px); }
+    .btn-primary { color: #1d1300; background: linear-gradient(135deg, #ffd782, var(--accent)); box-shadow: 0 18px 36px rgba(245,166,35,0.28); }
+    .btn-secondary { color: #fff; background: rgba(255,255,255,0.14); border: 1px solid rgba(255,255,255,0.22); }
+    .btn-blue { color: #fff; background: linear-gradient(135deg, var(--primary), #0b63c6); }
+    .btn-light { color: var(--primary); background: #fff; border: 1px solid var(--line); }
+    .btn-danger { color: #fff; background: var(--danger); }
+
+    .metric-strip {
+      position: relative;
+      z-index: 1;
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 14px;
+      padding: 0 70px 54px;
+    }
+    .hero-metric {
+      padding: 18px;
+      border-radius: 22px;
+      border: 1px solid rgba(255,255,255,0.2);
+      background: rgba(255,255,255,0.12);
+      backdrop-filter: blur(14px);
+    }
+    .hero-metric strong { display: block; font-size: 30px; margin-bottom: 6px; color: #fff; }
+    .hero-metric span { color: rgba(255,255,255,0.72); font-size: 13px; }
+
+    .section {
+      margin-top: 24px;
+      padding: 30px;
+      border: 1px solid rgba(219,228,239,0.9);
+      border-radius: var(--radius);
+      background: var(--card);
+      box-shadow: 0 18px 42px rgba(0, 38, 77, 0.08);
+      backdrop-filter: blur(18px);
+    }
+    .section-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 24px; margin-bottom: 22px; }
+    .section-kicker { margin: 0 0 6px; color: var(--accent); font-size: 12px; font-weight: 900; letter-spacing: 1.1px; text-transform: uppercase; }
+    h2 { margin: 0; color: #102033; font-size: 30px; line-height: 1.2; }
+    .section-desc { margin: 8px 0 0; color: var(--muted); line-height: 1.7; max-width: 760px; }
+
+    .grid-2 { display: grid; grid-template-columns: minmax(0, 0.95fr) minmax(0, 1.05fr); gap: 24px; }
+    .form-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+    .field { display: flex; flex-direction: column; gap: 7px; }
+    .field.full { grid-column: 1 / -1; }
+    label { color: #334155; font-size: 13px; font-weight: 700; }
+    input, select, textarea {
+      width: 100%;
+      border: 1px solid #d8e2ee;
+      border-radius: 15px;
+      padding: 12px 13px;
+      color: var(--text);
+      background: rgba(255,255,255,0.92);
+      outline: none;
+      transition: border 0.2s ease, box-shadow 0.2s ease;
+    }
+    input:focus, select:focus, textarea:focus { border-color: #4a90e2; box-shadow: 0 0 0 4px rgba(37,99,235,0.12); }
+    textarea { min-height: 92px; resize: vertical; }
+
+    .info-card {
+      padding: 22px;
+      border-radius: 22px;
+      background: linear-gradient(145deg, #fff, #f6f9fd);
+      border: 1px solid #e2eaf4;
+    }
+    .profile-tags { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 14px; }
+    .tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 7px 10px;
+      border-radius: 999px;
+      color: #17446f;
+      background: #eaf2f8;
+      font-size: 12px;
+      font-weight: 800;
+    }
+    .tag.gold { color: #6f4300; background: var(--accent-soft); }
+    .tag.green { color: #116435; background: #dcfce7; }
+    .tag.red { color: #8a1f1f; background: #fee2e2; }
+    .tag.gray { color: #4b5563; background: #f0f2f5; }
+
+    .recommend-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 18px; }
+    .recommend-card {
+      position: relative;
+      overflow: hidden;
+      padding: 22px;
+      border-radius: 24px;
+      border: 1px solid #e1e9f3;
+      background: #fff;
+      box-shadow: 0 14px 35px rgba(0, 38, 77, 0.07);
+      transition: transform 0.22s ease, box-shadow 0.22s ease;
+    }
+    .recommend-card:hover { transform: translateY(-4px); box-shadow: 0 22px 46px rgba(0, 38, 77, 0.13); }
+    .recommend-card.primary { color: #fff; background: linear-gradient(145deg, var(--primary-dark), var(--primary) 58%, #0b8aa0); }
+    .recommend-card.primary .muted, .recommend-card.primary .booth-row, .recommend-card.primary li { color: rgba(255,255,255,0.82); }
+    .recommend-card.primary .booth-row { background: rgba(255,255,255,0.1); border-color: rgba(255,255,255,0.16); }
+    .plan-title { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 12px; }
+    .plan-title h3 { margin: 0; font-size: 21px; }
+    .plan-badge { padding: 6px 9px; border-radius: 999px; background: var(--accent); color: #231500; font-size: 12px; font-weight: 900; }
+    .booth-row {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 10px;
+      align-items: center;
+      padding: 11px 0;
+      border-bottom: 1px dashed #dbe4ef;
+      color: #334155;
+    }
+    .booth-row button { padding: 7px 10px; border: 0; border-radius: 999px; color: var(--primary); background: #eaf2f8; font-weight: 800; }
+    .price { font-weight: 900; color: var(--accent); }
+    .muted { color: var(--muted); font-size: 13px; line-height: 1.65; }
+
+    .map-layout { display: grid; grid-template-columns: 260px minmax(0, 1fr) 300px; gap: 18px; align-items: start; }
+    .side-panel { border-radius: 22px; border: 1px solid #e2eaf4; background: #fff; padding: 18px; }
+    .side-panel h3 { margin: 0 0 14px; font-size: 18px; }
+    .legend { display: grid; gap: 9px; margin-top: 16px; }
+    .legend-item { display: flex; align-items: center; gap: 9px; font-size: 13px; color: #4b5563; }
+    .dot { width: 13px; height: 13px; border-radius: 4px; display: inline-block; }
+
+    .svg-wrap {
+      position: relative;
+      overflow: auto;
+      min-height: 570px;
+      border-radius: 26px;
+      border: 1px solid #d7e2ee;
+      background:
+        linear-gradient(90deg, rgba(0,59,122,0.055) 1px, transparent 1px),
+        linear-gradient(0deg, rgba(0,59,122,0.055) 1px, transparent 1px),
+        linear-gradient(135deg, #ffffff, #f7fbff);
+      background-size: 34px 34px, 34px 34px, auto;
+    }
+    .map-toolbar {
+      position: sticky;
+      top: 0;
+      z-index: 3;
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 12px;
+      background: rgba(255,255,255,0.9);
+      backdrop-filter: blur(10px);
+      border-bottom: 1px solid #e3ebf5;
+    }
+    #boothMap { width: 100%; min-width: 1180px; height: 760px; display: block; }
+
+    .booth { cursor: pointer; rx: 5; transition: 0.18s ease; stroke-width: 1.4; }
+    .booth:hover { filter: drop-shadow(0 0 10px rgba(37,99,235,0.45)); transform: translateY(-1px); }
+    .booth.recommended { stroke: #2563eb; stroke-width: 3; filter: drop-shadow(0 0 7px rgba(37,99,235,0.42)); }
+    .booth-label { pointer-events: none; font-size: 9px; fill: #0f172a; font-weight: 800; }
+    .area-label { font-size: 13px; fill: #335; font-weight: 900; opacity: 0.78; }
+
+    .detail-row { display: flex; justify-content: space-between; gap: 12px; padding: 9px 0; border-bottom: 1px dashed #e0e8f2; font-size: 14px; }
+    .detail-row span:first-child { color: var(--muted); }
+    .detail-row strong { text-align: right; }
+
+    .admin-section { background: linear-gradient(145deg, rgba(0,38,77,0.96), rgba(0,59,122,0.9)); color: #fff; }
+    .admin-section h2, .admin-section h3 { color: #fff; }
+    .admin-section .section-desc, .admin-section .muted { color: rgba(255,255,255,0.72); }
+    .admin-head { align-items: center; }
+    .admin-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; }
+    .admin-card { padding: 20px; border-radius: 22px; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.16); box-shadow: 0 18px 40px rgba(0,0,0,0.12); }
+    .admin-card table th { color: #fff; background: rgba(255,255,255,0.12); }
+    .admin-card table td, .admin-card table th { border-color: rgba(255,255,255,0.14); }
+    .pricing-grid { display: grid; grid-template-columns: 1.1fr 0.9fr; gap: 20px; }
+    .trace-list { display: grid; gap: 12px; }
+    .trace-item { display: grid; grid-template-columns: 160px 1fr 90px; gap: 12px; align-items: center; }
+    .bar { height: 11px; border-radius: 999px; background: rgba(233,238,246,0.42); overflow: hidden; }
+    .bar i { display: block; height: 100%; border-radius: inherit; background: linear-gradient(90deg, var(--accent), #22c55e); }
+    .final-price {
+      padding: 24px;
+      border-radius: 24px;
+      color: #fff;
+      background: linear-gradient(145deg, rgba(245,166,35,0.2), rgba(255,255,255,0.08));
+      border: 1px solid rgba(255,255,255,0.16);
+    }
+    .final-price strong { display: block; margin: 12px 0; font-size: 38px; color: var(--accent); }
+
+
+    .quote-wrap {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 280px;
+      gap: 20px;
+    }
+    .quote-paper {
+      padding: 30px;
+      border-radius: 22px;
+      background: #fff;
+      border: 1px solid #dce6f0;
+      box-shadow: 0 14px 35px rgba(0,38,77,0.08);
+    }
+    .quote-head { display: flex; justify-content: space-between; gap: 18px; border-bottom: 3px solid var(--primary); padding-bottom: 16px; margin-bottom: 18px; }
+    .quote-head h3 { margin: 0; font-size: 24px; color: var(--primary); }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { padding: 11px 10px; border-bottom: 1px solid #e5edf5; text-align: left; font-size: 14px; }
+    th { color: #334155; background: #f4f8fc; }
+
+    .kpi-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; }
+    .kpi-card { padding: 20px; border-radius: 22px; background: linear-gradient(145deg, #fff, #f7fbff); border: 1px solid #e2eaf4; }
+    .kpi-card strong { display: block; margin-top: 8px; font-size: 30px; color: var(--primary); }
+    .chart-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; margin-top: 16px; }
+    .chart-card { padding: 20px; border-radius: 22px; background: #fff; border: 1px solid #e2eaf4; }
+    .mini-bar { display: grid; grid-template-columns: 72px 1fr 52px; gap: 10px; align-items: center; margin: 12px 0; color: #334155; font-size: 13px; }
+
+    .config-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
+    .config-box { padding: 16px; border-radius: 20px; background: #fff; border: 1px solid #e2eaf4; }
+    input[type="range"] { padding: 0; accent-color: var(--primary); }
+
+    .empty-state { padding: 24px; border-radius: 20px; background: #f7fbff; border: 1px dashed #b9cce2; color: var(--muted); text-align: center; }
+    .actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 18px; }
+
+    @media (max-width: 1180px) {
+      .grid-2, .map-layout, .pricing-grid, .quote-wrap, .admin-grid { grid-template-columns: 1fr; }
+      .recommend-grid, .kpi-grid, .chart-grid, .config-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+
+      .top-nav { align-items: flex-start; flex-direction: column; }
+    }
+    @media (max-width: 760px) {
+      .page { padding: 0 14px 40px; }
+      .hero-inner, .metric-strip { padding-left: 22px; padding-right: 22px; }
+      .metric-strip, .recommend-grid, .kpi-grid, .chart-grid, .config-grid, .form-grid, .admin-grid { grid-template-columns: 1fr; }
+
+      .section { padding: 20px; }
+      .section-head { align-items: flex-start; flex-direction: column; }
+      .nav-links { justify-content: flex-start; }
+    }
+
+    @media print {
+      body { background: #fff; }
+      .top-nav, .hero, #requirement, #recommend, #map, #admin, .quote-actions, .section-head .demo-badge { display: none !important; }
+
+      .page { max-width: none; padding: 0; }
+      .section { box-shadow: none; border: 0; padding: 0; margin: 0; }
+      .quote-wrap { display: block; }
+      .quote-paper { box-shadow: none; border: 0; padding: 0; }
+    }
+  </style>
+</head>
+<body>
+  <header class="top-nav">
+    <a class="brand" href="#overview" aria-label="返回首页概览">
+      <span class="brand-mark">GE</span>
+      <span>
+        <span class="brand-name">GLOBUS Events</span>
+        <span class="brand-line">We make business happen.</span>
+      </span>
+    </a>
+    <nav class="nav-links" aria-label="页面导航">
+      <a href="#overview">首页概览</a>
+      <a href="#requirement">客户需求</a>
+      <a href="#recommend">AI推荐</a>
+      <a href="#map">场馆地图</a>
+      <a href="#quote">报价单</a>
+      <a href="#admin">后台管理</a>
+    </nav>
+    <span class="demo-badge">客户展示版</span>
+  </header>
+
+  <main class="page">
+    <section id="overview" class="hero">
+      <div class="hero-inner">
+        <span class="eyebrow">AI BOOTH RECOMMENDATION · DYNAMIC PRICING</span>
+        <h1>展位智能推荐与动态定价</h1>
+        <p>共创无限商机。面向参展企业与销售顾问，快速完成客户需求录入、AI 展位匹配、动态报价、场馆地图选位与报价单输出。</p>
+        <div class="hero-actions">
+          <a class="btn btn-primary" href="#requirement">开始录入客户需求</a>
+          <a class="btn btn-secondary" href="#map">查看场馆地图</a>
+        </div>
+      </div>
+      <div class="metric-strip">
+        <div class="hero-metric"><strong>160</strong><span>S/A/B/C 四级展位</span></div>
+        <div class="hero-metric"><strong>8000㎡</strong><span>上海国际博览中心 N3 馆</span></div>
+        <div class="hero-metric"><strong>3档</strong><span>最优适配 / 高端升级 / 性价比</span></div>
+        <div class="hero-metric"><strong>24h</strong><span>锁价保护与报价有效期</span></div>
+      </div>
+    </section>
+
+    <section id="requirement" class="section">
+      <div class="section-head">
+        <div>
+          <p class="section-kicker">Customer Requirement</p>
+          <h2>客户需求录入</h2>
+          <p class="section-desc">录入客户行业、预算、面积、参展目的和特殊需求，系统会生成客户画像并用于展位匹配与报价方案。</p>
+        </div>
+        <span class="demo-badge">销售代录 / 客户自填</span>
+      </div>
+      <div class="grid-2">
+        <form id="customerForm" class="info-card">
+          <div class="form-grid">
+            <div class="field"><label for="companyName">企业名称</label><input id="companyName" name="companyName" value="上海启曜新能源科技有限公司" /></div>
+            <div class="field"><label for="industry">所属行业</label><select id="industry" name="industry"><option>新能源</option><option>高端制造</option><option>商贸</option><option>供应链</option><option>文创</option><option>小微企业</option><option>消费品</option></select></div>
+            <div class="field"><label for="companySize">企业规模</label><select id="companySize" name="companySize"><option value="1000人以上">1000人以上</option><option value="300-999人">300-999人</option><option value="100-299人">100-299人</option><option value="50-99人">50-99人</option><option value="50人以下">50人以下</option></select></div>
+
+            <div class="field"><label for="purpose">参展目的</label><select id="purpose" name="purpose"><option>品牌曝光</option><option>招商洽谈</option><option>产品展示</option><option>基础参展</option></select></div>
+            <div class="field"><label for="budgetMin">预算下限（元）</label><input id="budgetMin" name="budgetMin" type="number" value="18000" /></div>
+            <div class="field"><label for="budgetMax">预算上限（元）</label><input id="budgetMax" name="budgetMax" type="number" value="52000" /></div>
+            <div class="field"><label for="areaDemand">面积需求</label><select id="areaDemand" name="areaDemand"><option value="36">36㎡ 特装</option><option value="18">18㎡ 标准特装</option><option value="9">9㎡ 标准展位</option></select></div>
+            <div class="field"><label for="schedule">参展档期</label><select id="schedule" name="schedule"><option>开幕前20天</option><option>开幕前45天</option><option>开幕前7天</option><option>早鸟期</option></select></div>
+            <div class="field"><label for="isFirstTime">是否首次参展</label><select id="isFirstTime" name="isFirstTime"><option value="false">否，历史复购客户</option><option value="true">是，首次参展</option></select></div>
+            <div class="field"><label for="historyPreference">历史展位偏好</label><select id="historyPreference" name="historyPreference"><option>主通道</option><option>入口附近</option><option>中央展示区</option><option>高性价比后排</option><option>无偏好</option></select></div>
+            <div class="field full"><label for="specialNeeds">特殊需求</label><textarea id="specialNeeds" name="specialNeeds">希望靠近主通道，便于新品发布和客户接待。</textarea></div>
+          </div>
+          <div class="actions">
+            <button class="btn btn-light" type="button" id="fillSampleBtn">填充样例客户</button>
+            <button class="btn btn-primary" type="submit">生成 AI 推荐</button>
+          </div>
+        </form>
+        <aside class="info-card">
+          <p class="section-kicker">AI Profile</p>
+          <h3 style="margin:0 0 10px;font-size:22px;">客户画像输出</h3>
+          <p class="muted">画像会根据预算、行业、目的、历史参展记录自动更新，后续用于展位匹配和价格权益判断。</p>
+          <div id="profileBox" class="profile-tags"></div>
+          <div style="margin-top:22px;" class="detail-row"><span>推荐策略</span><strong id="strategyText">优先 S/A 级核心展位</strong></div>
+          <div class="detail-row"><span>预算匹配</span><strong id="budgetText">18,000 - 52,000 元</strong></div>
+          <div class="detail-row"><span>匹配说明</span><strong>智能规则匹配</strong></div>
+
+        </aside>
+      </div>
+    </section>
+
+    <section id="recommend" class="section">
+      <div class="section-head">
+        <div>
+          <p class="section-kicker">AI Recommendation</p>
+          <h2>AI 三档推荐方案</h2>
+          <p class="section-desc">每档推荐 3-5 个展位，展示匹配原因、实时价格和方案定位。主推方案会同步高亮到地图。</p>
+        </div>
+        <button class="btn btn-blue" id="recalcBtn" type="button">重新计算推荐</button>
+      </div>
+      <div id="recommendations" class="recommend-grid"></div>
+    </section>
+
+    <section id="map" class="section">
+      <div class="section-head">
+        <div>
+          <p class="section-kicker">Venue Map</p>
+          <h2>上海国际博览中心 N3 馆平面图</h2>
+          <p class="section-desc">内置 160 个展位，支持按等级、状态、面积和价格筛选，点击展位查看详情与报价信息。</p>
+
+        </div>
+        <span class="demo-badge">绿色空置 · 蓝色推荐 · 黄色锁定 · 灰色已售 · 红色热门</span>
+      </div>
+      <div class="map-layout">
+        <aside class="side-panel">
+          <h3>筛选条件</h3>
+          <div class="field"><label for="filterGrade">展位等级</label><select id="filterGrade"><option value="all">全部等级</option><option>S</option><option>A</option><option>B</option><option>C</option></select></div>
+          <div class="field"><label for="filterStatus">展位状态</label><select id="filterStatus"><option value="all">全部状态</option><option value="available">空置可订</option><option value="recommended">AI推荐</option><option value="locked">锁定</option><option value="sold">已售</option><option value="hot">热门溢价</option></select></div>
+          <div class="field"><label for="filterArea">面积</label><select id="filterArea"><option value="all">全部面积</option><option value="36">36㎡</option><option value="18">18㎡</option><option value="9">9㎡</option></select></div>
+          <div class="field"><label for="maxPrice">最高报价：<span id="maxPriceText">60000</span> 元</label><input id="maxPrice" type="range" min="8000" max="70000" value="60000" step="1000" /></div>
+          <div class="legend">
+            <span class="legend-item"><i class="dot" style="background:#22c55e"></i>空置可订</span>
+            <span class="legend-item"><i class="dot" style="background:#2563eb"></i>AI推荐</span>
+            <span class="legend-item"><i class="dot" style="background:#facc15"></i>锁定保护</span>
+            <span class="legend-item"><i class="dot" style="background:#9ca3af"></i>已售展位</span>
+            <span class="legend-item"><i class="dot" style="background:#ef4444"></i>热门溢价</span>
+          </div>
+        </aside>
+        <div class="svg-wrap">
+          <div class="map-toolbar"><strong>展馆入口 · 主通道 · 中央展示区 · 特装展位区</strong><span class="muted" id="mapCount">0 个展位</span></div>
+          <svg id="boothMap" viewBox="0 0 1280 760" role="img" aria-label="上海国际博览中心 N3 馆展位地图"></svg>
+
+        </div>
+        <aside class="side-panel">
+          <h3>展位详情</h3>
+          <div id="boothDetail" class="empty-state">点击地图中的展位，查看编号、价格、适配行业和历史成交记录。</div>
+        </aside>
+      </div>
+    </section>
+
+    <section id="quote" class="section">
+      <div class="section-head">
+        <div>
+          <p class="section-kicker">Quotation</p>
+          <h2>智能报价单</h2>
+          <p class="section-desc">报价单基于当前选中方案生成，可直接打印或通过浏览器保存为 PDF。</p>
+        </div>
+      </div>
+      <div class="quote-wrap">
+        <div id="quotePaper" class="quote-paper"></div>
+        <aside class="side-panel quote-actions">
+          <h3>报价操作</h3>
+          <p class="muted">建议先选择主推方案中的展位，再打印报价单。报价有效期为 24 小时。</p>
+
+          <div class="actions">
+            <button class="btn btn-primary" type="button" id="printBtn">打印 / 保存 PDF</button>
+            <button class="btn btn-light" type="button" id="lockBtn">锁定当前展位</button>
+          </div>
+        </aside>
+      </div>
+    </section>
+
+    <section id="admin" class="section admin-section">
+      <div class="section-head admin-head">
+        <div>
+          <p class="section-kicker">Operation Console</p>
+          <h2>后台管理</h2>
+          <p class="section-desc">面向内部运营团队展示价格策略、模型参数、运营数据、展位状态、客户线索与报价审核记录。客户展示时可停留在前台区域。</p>
+        </div>
+        <button class="btn btn-primary" type="button" id="applyConfigBtn">应用后台配置并重新计算</button>
+      </div>
+      <div class="admin-grid">
+        <div class="admin-card">
+          <h3>价格策略中心</h3>
+          <div class="pricing-grid">
+            <div><div id="pricingTrace" class="trace-list"></div></div>
+            <div id="finalPriceBox" class="final-price"></div>
+          </div>
+        </div>
+        <div class="admin-card">
+          <h3>模型参数配置</h3>
+          <div class="config-grid">
+            <div class="config-box"><label>位置因子权重 <span id="wPositionText">40%</span></label><input id="wPosition" type="range" min="20" max="60" value="40" /></div>
+            <div class="config-box"><label>面积因子权重 <span id="wAreaText">25%</span></label><input id="wArea" type="range" min="10" max="40" value="25" /></div>
+            <div class="config-box"><label>流量因子权重 <span id="wTrafficText">20%</span></label><input id="wTraffic" type="range" min="10" max="40" value="20" /></div>
+            <div class="config-box"><label>配套因子权重 <span id="wFacilityText">15%</span></label><input id="wFacility" type="range" min="5" max="30" value="15" /></div>
+            <div class="config-box"><label>最高溢价上限</label><input id="maxPremium" type="number" min="1.1" max="1.5" step="0.05" value="1.5" /></div>
+            <div class="config-box"><label>最低折扣下限</label><input id="minDiscount" type="number" min="0.7" max="0.95" step="0.05" value="0.7" /></div>
+          </div>
+        </div>
+        <div class="admin-card">
+          <h3>运营数据看板</h3>
+          <div id="kpis" class="kpi-grid"></div>
+          <div id="charts" class="chart-grid"></div>
+        </div>
+        <div class="admin-card">
+          <h3>展位状态管理</h3>
+          <div id="boothStatusTable"></div>
+        </div>
+        <div class="admin-card">
+          <h3>客户线索管理</h3>
+          <div id="leadTable"></div>
+        </div>
+        <div class="admin-card">
+          <h3>报价审核记录</h3>
+          <div id="auditTable"></div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <script>
+    const state = {
+      booths: [],
+      customer: null,
+      profile: null,
+      recommendations: [],
+      selectedBoothId: null,
+      selectedPlan: "best",
+      recommendedIds: new Set(),
+      config: {
+        weights: { position: 40, area: 25, traffic: 20, facility: 15 },
+        maxPremium: 1.5,
+        minDiscount: 0.7
+      },
+      admin: {
+        leadRecords: [],
+        quoteAuditLogs: []
+      }
+
+    };
+
+    const basePrices = { S: 38000, A: 22000, B: 12800, C: 9800 };
+    const gradeArea = { S: 36, A: 18, B: 9, C: 9 };
+    const statusText = { available: "空置可订", recommended: "AI推荐", locked: "锁定保护", sold: "已售", hot: "热门溢价" };
+    const statusColor = { available: "#22c55e", recommended: "#2563eb", locked: "#facc15", sold: "#9ca3af", hot: "#ef4444" };
+    const gradeValueFactor = { S: 1.34, A: 1.16, B: 1.0, C: 0.86 };
+
+    function currency(value) {
+      return "¥" + Math.round(value).toLocaleString("zh-CN");
+    }
+
+    function generateBooths() {
+      const booths = [];
+      const make = (grade, count, startX, startY, cols, cellW, cellH, gapX, gapY, prefix, positionType, industries) => {
+        for (let i = 0; i < count; i++) {
+          const col = i % cols;
+          const row = Math.floor(i / cols);
+          const statusSeed = (i * 7 + grade.charCodeAt(0)) % 17;
+          const status = statusSeed === 0 ? "sold" : statusSeed === 1 ? "locked" : statusSeed <= 3 ? "hot" : "available";
+          booths.push({
+            id: `${grade}-${i + 1}`,
+            code: `${prefix}${String(i + 1).padStart(2, "0")}`,
+            grade,
+            area: gradeArea[grade],
+            basePrice: basePrices[grade],
+            status,
+            x: startX + col * (cellW + gapX),
+            y: startY + row * (cellH + gapY),
+            width: cellW,
+            height: cellH,
+            positionType,
+            traffic: Math.min(100, 95 - row * 5 + (grade === "S" ? 8 : grade === "A" ? 4 : 0)),
+            facility: 64 + ((i * 13) % 32),
+            suitableIndustries: industries,
+            history: `${2023 + (i % 3)}年同级展位成交${currency(basePrices[grade] * (0.92 + (i % 6) * 0.04))}`
+          });
+        }
+      };
+      make("S", 12, 210, 112, 6, 76, 50, 30, 34, "S", "入口/中央核心", ["新能源", "高端制造", "消费品"]);
+      make("A", 36, 150, 250, 9, 62, 38, 28, 28, "A", "主通道两侧", ["商贸", "供应链", "新能源", "高端制造"]);
+      make("B", 80, 90, 400, 16, 48, 32, 20, 22, "B", "次通道标准区", ["商贸", "供应链", "文创", "消费品"]);
+      make("C", 32, 920, 135, 4, 58, 34, 24, 26, "C", "边角/后排基础区", ["文创", "小微企业", "消费品"]);
+
+      return booths;
+    }
+
+    function getCustomer() {
+      const form = document.getElementById("customerForm");
+      const data = new FormData(form);
+      return {
+        companyName: data.get("companyName") || "未命名企业",
+        industry: data.get("industry"),
+        companySize: data.get("companySize"),
+        purpose: data.get("purpose"),
+        budgetMin: Number(data.get("budgetMin") || 0),
+        budgetMax: Number(data.get("budgetMax") || 0),
+        areaDemand: Number(data.get("areaDemand") || 9),
+        schedule: data.get("schedule"),
+        isFirstTime: data.get("isFirstTime") === "true",
+        historyPreference: data.get("historyPreference"),
+        specialNeeds: data.get("specialNeeds") || ""
+      };
+    }
+
+    function buildCustomerProfile(customer) {
+      const budgetMid = (customer.budgetMin + customer.budgetMax) / 2;
+      const budgetLevel = budgetMid >= 35000 ? "高端" : budgetMid >= 16000 ? "中端" : "性价比";
+      const demandType = customer.purpose === "品牌曝光" ? "品牌展示" : customer.purpose === "招商洽谈" ? "招商引流" : customer.purpose === "产品展示" ? "产品展示" : "基础参展";
+      const customerLevel = !customer.isFirstTime && ["1000人以上", "300-999人"].includes(customer.companySize) ? "核心客户" : customer.isFirstTime ? "新客户" : "普通客户";
+
+      let preferredGrades = ["B", "C"];
+      if (["新能源", "高端制造"].includes(customer.industry) || customer.purpose === "品牌曝光") preferredGrades = ["S", "A"];
+      if (["商贸", "供应链"].includes(customer.industry) || customer.historyPreference === "主通道") preferredGrades = ["A", "B"];
+      if (["文创", "小微企业"].includes(customer.industry)) preferredGrades = ["B", "C"];
+      return { budgetLevel, demandType, customerLevel, preferredGrades, budgetMid };
+    }
+
+    function scoreBooth(booth, customer, profile) {
+      const w = state.config.weights;
+      const totalWeight = w.position + w.area + w.traffic + w.facility;
+      const positionScore = booth.grade === "S" ? 100 : booth.grade === "A" ? 86 : booth.grade === "B" ? 70 : 55;
+      const areaScore = Math.max(45, 100 - Math.abs(booth.area - customer.areaDemand) * 4);
+      const trafficScore = booth.traffic;
+      const facilityScore = booth.facility;
+      let score = (positionScore * w.position + areaScore * w.area + trafficScore * w.traffic + facilityScore * w.facility) / totalWeight;
+      if (profile.preferredGrades.includes(booth.grade)) score += 13;
+      if (booth.suitableIndustries.includes(customer.industry)) score += 10;
+      if (booth.status === "sold") score -= 70;
+      if (booth.status === "locked") score -= 30;
+      if (booth.status === "hot" && profile.budgetLevel === "高端") score += 6;
+      return Math.max(0, Math.min(100, score));
+    }
+
+    function demandFactor(customer, booth) {
+      let factor = 1;
+      if (customer.schedule === "开幕前20天") factor += booth.status === "hot" || ["S", "A"].includes(booth.grade) ? 0.1 : 0.04;
+      if (customer.schedule === "开幕前7天") factor += booth.grade === "C" ? -0.15 : 0.03;
+      if (customer.schedule === "开幕前45天") factor += 0.02;
+      if (customer.schedule === "早鸟期") factor -= 0.08;
+      return factor;
+    }
+
+    function customerFactor(profile) {
+      if (profile.customerLevel === "核心客户") return 0.94;
+      if (profile.customerLevel === "普通客户") return 0.97;
+      return 1;
+    }
+
+    function timeFactor(customer) {
+      if (customer.schedule === "早鸟期") return 0.95;
+      if (customer.schedule === "开幕前7天") return 0.93;
+      if (customer.schedule === "开幕前20天") return 1.04;
+      return 1;
+    }
+
+    function calculateDynamicPrice(booth, customer, profile) {
+      const base = booth.basePrice;
+      const valueFactor = gradeValueFactor[booth.grade];
+      const supplyFactor = demandFactor(customer, booth);
+      const clientFactor = customerFactor(profile);
+      const tFactor = timeFactor(customer);
+      let raw = base * valueFactor * supplyFactor * clientFactor * tFactor;
+      const max = base * Number(state.config.maxPremium);
+      const min = base * Number(state.config.minDiscount);
+      const limits = [];
+      if (raw > max) { raw = max; limits.push("触发最高溢价保护"); }
+      if (raw < min) { raw = min; limits.push("触发最低折扣保护"); }
+      if (booth.status === "locked") limits.push("锁定展位享 24 小时价格保护");
+      return { basePrice: base, boothValueFactor: valueFactor, demandFactor: supplyFactor, customerFactor: clientFactor, timeFactor: tFactor, finalPrice: Math.round(raw), limitsApplied: limits };
+    }
+
+    function recommendationReason(plan, booth, customer, profile, price) {
+      const reasons = [];
+      reasons.push(`${booth.grade}级${booth.area}㎡展位适配${profile.demandType}`);
+      if (booth.suitableIndustries.includes(customer.industry)) reasons.push(`历史数据中${customer.industry}客户偏好该区域`);
+      if (plan === "upgrade") reasons.push("位置价值更高，适合品牌曝光和重点客户接待");
+      if (plan === "budget") reasons.push("控制预算，兼顾基础展示与成本效率");
+      if (price.finalPrice <= customer.budgetMax) reasons.push("报价处于客户预算范围内");
+      return reasons;
+    }
+
+    function generateRecommendations() {
+      const customer = state.customer;
+      const profile = state.profile;
+      const candidates = state.booths
+        .filter(b => b.status !== "sold" && b.status !== "locked")
+        .map(b => ({ booth: b, score: scoreBooth(b, customer, profile), price: calculateDynamicPrice(b, customer, profile) }));
+
+      const sortByScore = arr => arr.sort((a, b) => b.score - a.score);
+      const inBudget = c => c.price.finalPrice >= customer.budgetMin * 0.75 && c.price.finalPrice <= customer.budgetMax;
+      const upgrade = c => ["S", "A"].includes(c.booth.grade) && c.price.finalPrice <= customer.budgetMax * 1.35;
+      const budget = c => ["B", "C"].includes(c.booth.grade) && c.price.finalPrice <= customer.budgetMax;
+      const bestItems = sortByScore(candidates.filter(inBudget)).slice(0, 4);
+      const upgradeItems = sortByScore(candidates.filter(upgrade)).slice(0, 4);
+      const budgetItems = sortByScore(candidates.filter(budget)).slice(0, 4);
+      const plans = [
+        { id: "best", title: "最优适配方案", badge: "主推", desc: "预算匹配、行业适配和展位价值综合最优。", items: bestItems },
+        { id: "upgrade", title: "高端升级方案", badge: "品牌曝光", desc: "更靠近入口或主通道，适合新品发布与重点招商。", items: upgradeItems },
+        { id: "budget", title: "性价比备选方案", badge: "控成本", desc: "在预算内控制成本，适合基础参展和首次试水。", items: budgetItems }
+      ];
+      state.recommendedIds = new Set(bestItems.map(i => i.booth.id));
+      plans.forEach(plan => plan.items.forEach(item => item.reasons = recommendationReason(plan.id, item.booth, customer, profile, item.price)));
+      return plans;
+    }
+
+    function renderProfile() {
+      const p = state.profile;
+      document.getElementById("profileBox").innerHTML = `
+        <span class="tag gold">预算档位：${p.budgetLevel}</span>
+        <span class="tag">需求类型：${p.demandType}</span>
+        <span class="tag green">客户等级：${p.customerLevel}</span>
+        <span class="tag">偏好等级：${p.preferredGrades.join(" / ")}</span>`;
+      document.getElementById("strategyText").textContent = `优先 ${p.preferredGrades.join("/")} 级展位`;
+      document.getElementById("budgetText").textContent = `${currency(state.customer.budgetMin)} - ${currency(state.customer.budgetMax)}`;
+    }
+
+    function renderRecommendations() {
+      const box = document.getElementById("recommendations");
+      box.innerHTML = state.recommendations.map(plan => `
+        <article class="recommend-card ${plan.id === "best" ? "primary" : ""}">
+          <div class="plan-title"><h3>${plan.title}</h3><span class="plan-badge">${plan.badge}</span></div>
+          <p class="muted">${plan.desc}</p>
+          <div>${plan.items.map(item => `
+            <div class="booth-row">
+              <div><strong>${item.booth.code}</strong> · ${item.booth.grade}级 · ${item.booth.area}㎡<br><span class="muted">${item.booth.positionType} · 匹配度 ${Math.round(item.score)}分</span></div>
+              <div><div class="price">${currency(item.price.finalPrice)}</div><button type="button" onclick="selectBooth('${item.booth.id}', '${plan.id}')">查看</button></div>
+            </div>`).join("")}</div>
+          <ul class="muted">${(plan.items[0]?.reasons || ["请先生成推荐"]).map(r => `<li>${r}</li>`).join("")}</ul>
+        </article>`).join("");
+    }
+
+    function renderMap() {
+      const grade = document.getElementById("filterGrade").value;
+      const status = document.getElementById("filterStatus").value;
+      const area = document.getElementById("filterArea").value;
+      const maxPrice = Number(document.getElementById("maxPrice").value);
+      document.getElementById("maxPriceText").textContent = maxPrice;
+      const svg = document.getElementById("boothMap");
+      const visible = [];
+      const boothMarkup = state.booths.map(booth => {
+        const price = calculateDynamicPrice(booth, state.customer, state.profile).finalPrice;
+        const isRecommended = state.recommendedIds.has(booth.id);
+        const visualStatus = isRecommended ? "recommended" : booth.status;
+        const match = (grade === "all" || booth.grade === grade) && (status === "all" || visualStatus === status) && (area === "all" || String(booth.area) === area) && price <= maxPrice;
+        if (match) visible.push(booth);
+        const opacity = match ? 1 : 0.12;
+        return `<g><rect class="booth ${isRecommended ? "recommended" : ""}" x="${booth.x}" y="${booth.y}" width="${booth.width}" height="${booth.height}" fill="${statusColor[visualStatus]}" stroke="#ffffff" opacity="${opacity}" onclick="selectBooth('${booth.id}', '${isRecommended ? "best" : state.selectedPlan}')"></rect><text class="booth-label" x="${booth.x + 6}" y="${booth.y + 18}" opacity="${opacity}">${booth.code}</text></g>`;
+      }).join("");
+      svg.innerHTML = `
+        <rect x="34" y="34" width="1212" height="690" rx="30" fill="none" stroke="#b8c9dc" stroke-width="2" />
+        <rect x="520" y="48" width="210" height="58" rx="18" fill="#003b7a" opacity="0.92"/><text x="568" y="84" fill="#fff" font-size="18" font-weight="800">入口迎宾区</text>
+        <rect x="585" y="124" width="120" height="552" fill="#f5a623" opacity="0.12"/><text class="area-label" x="606" y="704">主通道</text>
+        <rect x="118" y="222" width="855" height="112" rx="20" fill="#2563eb" opacity="0.07"/><text class="area-label" x="418" y="214">中央展示区 / 主通道两侧</text>
+        <rect x="895" y="104" width="330" height="292" rx="24" fill="#ef4444" opacity="0.055"/><text class="area-label" x="954" y="94">侧边标准与基础展位区</text>
+        <rect x="72" y="382" width="870" height="318" rx="24" fill="#22c55e" opacity="0.045"/><text class="area-label" x="116" y="722">后排标准展区</text>
+        ${boothMarkup}
+        <rect x="1000" y="520" width="190" height="86" rx="18" fill="#eaf2f8" stroke="#b8c9dc"/><text x="1036" y="556" fill="#003b7a" font-size="15" font-weight="800">配套服务区</text><text x="1046" y="582" fill="#6b7280" font-size="12">咨询台 / 媒体区</text>`;
+
+      document.getElementById("mapCount").textContent = `${visible.length} / ${state.booths.length} 个展位`;
+    }
+
+    function selectBooth(id, planId = state.selectedPlan) {
+      state.selectedBoothId = id;
+      state.selectedPlan = planId;
+      renderBoothDetail();
+      renderPricingTrace();
+      renderQuote();
+      location.hash = "quote";
+
+    }
+
+    function selectedBooth() {
+      return state.booths.find(b => b.id === state.selectedBoothId) || state.recommendations[0]?.items[0]?.booth || state.booths[0];
+    }
+
+    function renderBoothDetail() {
+      const booth = selectedBooth();
+      const price = calculateDynamicPrice(booth, state.customer, state.profile);
+      document.getElementById("boothDetail").innerHTML = `
+        <div class="detail-row"><span>展位编号</span><strong>${booth.code}</strong></div>
+        <div class="detail-row"><span>等级 / 面积</span><strong>${booth.grade}级 / ${booth.area}㎡</strong></div>
+        <div class="detail-row"><span>状态</span><strong>${state.recommendedIds.has(booth.id) ? "AI推荐" : statusText[booth.status]}</strong></div>
+        <div class="detail-row"><span>位置</span><strong>${booth.positionType}</strong></div>
+        <div class="detail-row"><span>实时价格</span><strong class="price">${currency(price.finalPrice)}</strong></div>
+        <div class="detail-row"><span>适配行业</span><strong>${booth.suitableIndustries.join("、")}</strong></div>
+        <div class="detail-row"><span>历史记录</span><strong>${booth.history}</strong></div>
+        <div class="actions"><button class="btn btn-blue" type="button" onclick="lockSelectedBooth()">锁定展位</button><button class="btn btn-light" type="button" onclick="renderQuote(); location.hash='quote';">加入报价单</button></div>`;
+    }
+
+    function renderPricingTrace() {
+      const booth = selectedBooth();
+      const trace = calculateDynamicPrice(booth, state.customer, state.profile);
+      const items = [
+        ["基础价", "展位等级标准基准价", trace.basePrice, 70],
+        ["展位价值系数", `${booth.grade}级位置与面积价值`, trace.boothValueFactor.toFixed(2), trace.boothValueFactor / 1.5 * 100],
+        ["档期供需系数", `${state.customer.schedule}供需热度`, trace.demandFactor.toFixed(2), trace.demandFactor / 1.3 * 100],
+        ["客户权益系数", `${state.profile.customerLevel}权益`, trace.customerFactor.toFixed(2), trace.customerFactor * 100],
+        ["时间浮动系数", "早鸟/临期/热度策略", trace.timeFactor.toFixed(2), trace.timeFactor * 92]
+      ];
+      document.getElementById("pricingTrace").innerHTML = items.map(item => `
+        <div class="trace-item"><strong>${item[0]}</strong><div><div class="muted">${item[1]}</div><div class="bar"><i style="width:${Math.min(100, item[3])}%"></i></div></div><strong>${typeof item[2] === "number" ? currency(item[2]) : item[2]}</strong></div>`).join("") +
+        `<div class="tag ${trace.limitsApplied.length ? "red" : "green"}">${trace.limitsApplied.length ? trace.limitsApplied.join("；") : "未触发价格边界，报价在合理区间"}</div>`;
+      document.querySelectorAll("#pricingTrace .trace-item").forEach((row, index) => {
+        const value = items[index][2];
+        row.querySelector("strong:last-child").textContent = index === 0 ? currency(value) : String(value);
+      });
+      document.getElementById("finalPriceBox").innerHTML = `<span>当前展位最终报价</span><strong>${currency(trace.finalPrice)}</strong><p>${booth.code} · ${booth.grade}级 · ${booth.area}㎡ · ${booth.positionType}</p><p class="muted" style="color:rgba(255,255,255,0.76)">内部公式：基础价 × 展位价值系数 × 档期供需系数 × 客户权益系数 × 时间浮动系数。</p>`;
+
+
+    }
+
+    function renderQuote() {
+      const booth = selectedBooth();
+      const trace = calculateDynamicPrice(booth, state.customer, state.profile);
+      const validUntil = new Date(Date.now() + 24 * 3600 * 1000).toLocaleString("zh-CN", { hour12: false });
+      document.getElementById("quotePaper").innerHTML = `
+        <div class="quote-head"><div><h3>万耀企龙展位推荐报价单</h3><p class="muted">GLOBUS Events · We make business happen.</p></div><div><span class="tag gold">报价有效期24小时</span></div></div>
+        <div class="detail-row"><span>客户企业</span><strong>${state.customer.companyName}</strong></div>
+        <div class="detail-row"><span>行业 / 目的</span><strong>${state.customer.industry} / ${state.customer.purpose}</strong></div>
+        <div class="detail-row"><span>预算范围</span><strong>${currency(state.customer.budgetMin)} - ${currency(state.customer.budgetMax)}</strong></div>
+        <table><thead><tr><th>展位</th><th>等级</th><th>面积</th><th>位置</th><th>报价</th></tr></thead><tbody><tr><td>${booth.code}</td><td>${booth.grade}级</td><td>${booth.area}㎡</td><td>${booth.positionType}</td><td><strong>${currency(trace.finalPrice)}</strong></td></tr></tbody></table>
+        <h4>推荐理由</h4><p>该展位匹配客户“${state.profile.demandType}”需求，适配行业包含 ${booth.suitableIndustries.join("、")}，位置与面积适合当前参展目标。</p>
+        <h4>服务说明</h4><p>报价包含展位锁定、销售顾问对接、展前基础服务协调和现场位置确认。最终合同条款以双方正式确认为准。</p>
+        <div class="detail-row"><span>报价有效期至</span><strong>${validUntil}</strong></div>
+        <div class="detail-row"><span>联系信息</span><strong>万耀企龙展会顾问 · sales@globusevents.com</strong></div>
+        <p class="muted">注：本报价单用于客户沟通展示，最终价格与服务内容以正式合同为准。</p>`;
+
+    }
+
+    function renderDashboard() {
+      const total = state.booths.length;
+      const available = state.booths.filter(b => b.status === "available").length;
+      const sold = state.booths.filter(b => b.status === "sold").length;
+      const avgPremium = state.booths.reduce((sum, b) => sum + Math.max(0, calculateDynamicPrice(b, state.customer, state.profile).finalPrice - b.basePrice), 0);
+
+      document.getElementById("kpis").innerHTML = `
+        <div class="kpi-card"><span class="muted">展位空置率</span><strong>${Math.round(available / total * 100)}%</strong></div>
+        <div class="kpi-card"><span class="muted">AI推荐成交率</span><strong>36%</strong></div>
+        <div class="kpi-card"><span class="muted">动态定价溢价收益</span><strong>${currency(avgPremium)}</strong></div>
+        <div class="kpi-card"><span class="muted">已售展位</span><strong>${sold}</strong></div>`;
+      const gradeStats = ["S", "A", "B", "C"].map(g => ({ name: `${g}级`, value: state.booths.filter(b => b.grade === g).length }));
+      const hot = [...state.booths].sort((a, b) => b.traffic - a.traffic).slice(0, 6);
+      const slow = [...state.booths].sort((a, b) => a.traffic - b.traffic).slice(0, 6);
+      document.getElementById("charts").innerHTML = `
+        <div class="chart-card"><h3>各等级展位占比</h3>${gradeStats.map(s => `<div class="mini-bar"><span>${s.name}</span><div class="bar"><i style="width:${s.value / total * 100 * 3}%"></i></div><strong>${s.value}</strong></div>`).join("")}</div>
+        <div class="chart-card"><h3>客户预算分布</h3>${[["10k以下",18],["10-20k",32],["20-40k",41],["40k以上",9]].map(s => `<div class="mini-bar"><span>${s[0]}</span><div class="bar"><i style="width:${s[1]}%"></i></div><strong>${s[1]}%</strong></div>`).join("")}</div>
+        <div class="chart-card"><h3>热门展位 TOP6</h3>${hot.map((b, i) => `<div class="detail-row"><span>${i + 1}. ${b.code}</span><strong>${b.traffic} 热度</strong></div>`).join("")}</div>
+        <div class="chart-card"><h3>滞销风险 TOP6</h3>${slow.map((b, i) => `<div class="detail-row"><span>${i + 1}. ${b.code}</span><strong>${b.traffic} 热度</strong></div>`).join("")}</div>`;
+    }
+
+    function renderAdminManagement() {
+      const counts = ["S", "A", "B", "C"].map(grade => {
+        const items = state.booths.filter(b => b.grade === grade);
+        const available = items.filter(b => b.status === "available").length;
+        const locked = items.filter(b => b.status === "locked").length;
+        const sold = items.filter(b => b.status === "sold").length;
+        return { grade, total: items.length, available, locked, sold };
+      });
+      document.getElementById("boothStatusTable").innerHTML = `
+        <table><thead><tr><th>等级</th><th>总数</th><th>可订</th><th>锁定</th><th>已售</th></tr></thead><tbody>
+        ${counts.map(row => `<tr><td>${row.grade}级</td><td>${row.total}</td><td>${row.available}</td><td>${row.locked}</td><td>${row.sold}</td></tr>`).join("")}
+        </tbody></table>`;
+
+      state.admin.leadRecords = [
+        { company: state.customer.companyName, need: state.profile.demandType, budget: `${currency(state.customer.budgetMin)}-${currency(state.customer.budgetMax)}`, status: "重点跟进" },
+        { company: "杭州澜芯智能装备有限公司", need: "产品展示", budget: "¥20,000-¥45,000", status: "方案沟通" },
+        { company: "苏州云栖供应链管理有限公司", need: "招商引流", budget: "¥12,000-¥28,000", status: "待回访" }
+      ];
+      document.getElementById("leadTable").innerHTML = `
+        <table><thead><tr><th>客户</th><th>需求</th><th>预算</th><th>状态</th></tr></thead><tbody>
+        ${state.admin.leadRecords.map(row => `<tr><td>${row.company}</td><td>${row.need}</td><td>${row.budget}</td><td>${row.status}</td></tr>`).join("")}
+        </tbody></table>`;
+
+      const booth = selectedBooth();
+      const trace = calculateDynamicPrice(booth, state.customer, state.profile);
+      state.admin.quoteAuditLogs = [
+        { item: "客户报价单", booth: booth.code, price: currency(trace.finalPrice), result: "待销售经理确认" },
+        { item: "价格边界", booth: booth.grade + "级", price: trace.limitsApplied.length ? trace.limitsApplied.join("；") : "未触发", result: "系统通过" },
+        { item: "展位锁定", booth: booth.code, price: statusText[booth.status], result: booth.status === "locked" ? "已锁定" : "可提交" }
+      ];
+      document.getElementById("auditTable").innerHTML = `
+        <table><thead><tr><th>审核项</th><th>对象</th><th>内容</th><th>结果</th></tr></thead><tbody>
+        ${state.admin.quoteAuditLogs.map(row => `<tr><td>${row.item}</td><td>${row.booth}</td><td>${row.price}</td><td>${row.result}</td></tr>`).join("")}
+        </tbody></table>`;
+    }
+
+    function lockSelectedBooth() {
+
+      const booth = selectedBooth();
+      booth.status = "locked";
+      state.recommendedIds.delete(booth.id);
+      renderAll(false);
+      alert(`${booth.code} 已锁定，享 24 小时价格保护。`);
+
+    }
+
+    function applyConfigFromInputs() {
+      ["Position", "Area", "Traffic", "Facility"].forEach(name => {
+        const key = name.toLowerCase();
+        const value = Number(document.getElementById(`w${name}`).value);
+        state.config.weights[key] = value;
+        document.getElementById(`w${name}Text`).textContent = `${value}%`;
+      });
+      state.config.maxPremium = Number(document.getElementById("maxPremium").value);
+      state.config.minDiscount = Number(document.getElementById("minDiscount").value);
+    }
+
+    function fillSample() {
+      document.getElementById("companyName").value = "上海启曜新能源科技有限公司";
+      document.getElementById("industry").value = "新能源";
+      document.getElementById("companySize").value = "大型企业";
+      document.getElementById("purpose").value = "品牌曝光";
+      document.getElementById("budgetMin").value = "18000";
+      document.getElementById("budgetMax").value = "52000";
+      document.getElementById("areaDemand").value = "36";
+      document.getElementById("schedule").value = "开幕前20天";
+      document.getElementById("isFirstTime").value = "false";
+      document.getElementById("historyPreference").value = "主通道";
+      document.getElementById("specialNeeds").value = "希望靠近主通道，便于新品发布和客户接待。";
+      renderAll(true);
+    }
+
+    function renderAll(regenerateRecommendations = true) {
+      state.customer = getCustomer();
+      state.profile = buildCustomerProfile(state.customer);
+      if (regenerateRecommendations) {
+        state.recommendations = generateRecommendations();
+        state.selectedBoothId = state.recommendations[0]?.items[0]?.booth.id || state.booths[0].id;
+        state.selectedPlan = "best";
+      }
+      renderProfile();
+      renderRecommendations();
+      renderMap();
+      renderBoothDetail();
+      renderPricingTrace();
+      renderQuote();
+      renderDashboard();
+      renderAdminManagement();
+
+    }
+
+    document.getElementById("customerForm").addEventListener("submit", event => { event.preventDefault(); renderAll(true); location.hash = "recommend"; });
+    document.getElementById("fillSampleBtn").addEventListener("click", fillSample);
+    document.getElementById("recalcBtn").addEventListener("click", () => renderAll(true));
+    document.getElementById("applyConfigBtn").addEventListener("click", () => { applyConfigFromInputs(); renderAll(true); });
+    document.getElementById("printBtn").addEventListener("click", () => window.print());
+    document.getElementById("lockBtn").addEventListener("click", lockSelectedBooth);
+    ["filterGrade", "filterStatus", "filterArea", "maxPrice"].forEach(id => document.getElementById(id).addEventListener("input", renderMap));
+    ["wPosition", "wArea", "wTraffic", "wFacility"].forEach(id => document.getElementById(id).addEventListener("input", applyConfigFromInputs));
+
+    state.booths = generateBooths();
+    renderAll(true);
+  </script>
+</body>
+</html>

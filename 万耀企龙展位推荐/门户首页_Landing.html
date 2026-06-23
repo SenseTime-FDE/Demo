@@ -1,0 +1,1191 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>万耀企龙 · 展位AI智能推荐与动态定价系统</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Noto+Sans+SC:wght@300;400;500;600;700;900&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+:root {
+    --navy: #0B2A4A;
+    --navy-dark: #071D35;
+    --navy-deep: #041221;
+    --gold: #C9A84C;
+    --gold-light: #E0C36A;
+    --gold-dark: #A88B3A;
+    --cyan: #00A3E0;
+    --cyan-light: #33B8E8;
+    --cyan-dark: #0089BF;
+    --white: #FFFFFF;
+    --gray-50: #F8F9FA;
+    --gray-100: #F0F2F5;
+    --gray-200: #E4E7EB;
+    --gray-600: #6B7280;
+    --gray-800: #1F2937;
+    --text-light: rgba(255,255,255,0.85);
+    --text-muted: rgba(255,255,255,0.55);
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+body {
+    font-family: 'Noto Sans SC', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    color: var(--gray-800);
+    background: var(--white);
+    overflow-x: hidden;
+    line-height: 1.6;
+}
+
+/* ============ NAV BAR ============ */
+.navbar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 60px;
+    height: 72px;
+    background: rgba(7, 29, 53, 0.85);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+    transition: all 0.3s ease;
+}
+
+.navbar.scrolled {
+    background: rgba(7, 29, 53, 0.96);
+    box-shadow: 0 4px 30px rgba(0,0,0,0.3);
+}
+
+.nav-brand {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    text-decoration: none;
+}
+
+.nav-logo {
+    width: 40px;
+    height: 40px;
+    background: linear-gradient(135deg, var(--gold), var(--gold-light));
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 800;
+    font-size: 18px;
+    color: var(--navy-dark);
+    letter-spacing: -1px;
+}
+
+.nav-title {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--white);
+    letter-spacing: 1px;
+}
+
+.nav-subtitle {
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-top: 1px;
+}
+
+.nav-links {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.nav-link {
+    padding: 8px 18px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text-light);
+    text-decoration: none;
+    transition: all 0.2s ease;
+    cursor: pointer;
+    border: none;
+    background: none;
+}
+
+.nav-link:hover {
+    background: rgba(255,255,255,0.08);
+    color: var(--white);
+}
+
+.nav-link.active {
+    background: rgba(201, 168, 76, 0.15);
+    color: var(--gold);
+}
+
+/* ============ HERO ============ */
+.hero {
+    position: relative;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    background: var(--navy-deep);
+}
+
+.hero-bg {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+}
+
+/* Animated grid background */
+.hero-grid {
+    position: absolute;
+    inset: 0;
+    background-image:
+        linear-gradient(rgba(0, 163, 224, 0.06) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0, 163, 224, 0.06) 1px, transparent 1px);
+    background-size: 60px 60px;
+    animation: gridMove 20s linear infinite;
+}
+
+@keyframes gridMove {
+    0% { transform: translate(0, 0); }
+    100% { transform: translate(60px, 60px); }
+}
+
+/* Gradient orbs */
+.hero-orb {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(80px);
+    opacity: 0.4;
+    animation: orbFloat 8s ease-in-out infinite alternate;
+}
+
+.hero-orb-1 {
+    width: 600px;
+    height: 600px;
+    background: radial-gradient(circle, rgba(0, 163, 224, 0.3), transparent 70%);
+    top: -10%;
+    right: -5%;
+    animation-delay: 0s;
+}
+
+.hero-orb-2 {
+    width: 500px;
+    height: 500px;
+    background: radial-gradient(circle, rgba(201, 168, 76, 0.25), transparent 70%);
+    bottom: -10%;
+    left: -5%;
+    animation-delay: -3s;
+}
+
+.hero-orb-3 {
+    width: 400px;
+    height: 400px;
+    background: radial-gradient(circle, rgba(0, 163, 224, 0.2), transparent 70%);
+    top: 40%;
+    left: 30%;
+    animation-delay: -5s;
+}
+
+@keyframes orbFloat {
+    0% { transform: translate(0, 0) scale(1); }
+    100% { transform: translate(30px, -30px) scale(1.1); }
+}
+
+/* Particle dots */
+.hero-particles {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+}
+
+.particle {
+    position: absolute;
+    width: 3px;
+    height: 3px;
+    background: rgba(201, 168, 76, 0.6);
+    border-radius: 50%;
+    animation: particleFloat linear infinite;
+}
+
+@keyframes particleFloat {
+    0% { transform: translateY(100vh) scale(0); opacity: 0; }
+    10% { opacity: 1; }
+    90% { opacity: 1; }
+    100% { transform: translateY(-10vh) scale(1); opacity: 0; }
+}
+
+.hero-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+        180deg,
+        rgba(4, 18, 33, 0.3) 0%,
+        rgba(4, 18, 33, 0.1) 40%,
+        rgba(4, 18, 33, 0.5) 100%
+    );
+    z-index: 1;
+}
+
+.hero-content {
+    position: relative;
+    z-index: 2;
+    text-align: center;
+    max-width: 900px;
+    padding: 0 40px;
+}
+
+.hero-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 20px;
+    border-radius: 50px;
+    background: rgba(201, 168, 76, 0.12);
+    border: 1px solid rgba(201, 168, 76, 0.25);
+    color: var(--gold-light);
+    font-size: 13px;
+    font-weight: 500;
+    margin-bottom: 32px;
+    backdrop-filter: blur(10px);
+}
+
+.hero-badge-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--gold);
+    animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.5; transform: scale(0.8); }
+}
+
+.hero-title {
+    font-size: 56px;
+    font-weight: 800;
+    color: var(--white);
+    line-height: 1.2;
+    margin-bottom: 10px;
+    letter-spacing: -1px;
+}
+
+.hero-title-accent {
+    background: linear-gradient(135deg, var(--gold), var(--gold-light), var(--cyan-light));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.hero-title-brand {
+    font-size: 32px;
+    font-weight: 600;
+    color: var(--text-muted);
+    letter-spacing: 4px;
+    margin-bottom: 8px;
+    display: block;
+}
+
+.hero-desc {
+    font-size: 18px;
+    color: var(--text-light);
+    max-width: 680px;
+    margin: 24px auto 48px;
+    line-height: 1.8;
+    font-weight: 300;
+}
+
+/* Entry buttons */
+.hero-entries {
+    display: flex;
+    gap: 24px;
+    justify-content: center;
+    margin-bottom: 60px;
+}
+
+.entry-card {
+    flex: 1;
+    max-width: 340px;
+    padding: 36px 32px;
+    border-radius: 20px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    position: relative;
+    overflow: hidden;
+    text-decoration: none;
+}
+
+.entry-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 20px;
+    padding: 1.5px;
+    mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+}
+
+.entry-client {
+    background: rgba(201, 168, 76, 0.06);
+    backdrop-filter: blur(20px);
+    border: 1.5px solid rgba(201, 168, 76, 0.3);
+}
+
+.entry-client::before {
+    background: linear-gradient(135deg, var(--gold), var(--gold-light));
+}
+
+.entry-client:hover {
+    background: rgba(201, 168, 76, 0.12);
+    border-color: var(--gold);
+    transform: translateY(-8px);
+    box-shadow: 0 20px 60px rgba(201, 168, 76, 0.2);
+}
+
+.entry-staff {
+    background: rgba(0, 163, 224, 0.06);
+    backdrop-filter: blur(20px);
+    border: 1.5px solid rgba(0, 163, 224, 0.3);
+}
+
+.entry-staff::before {
+    background: linear-gradient(135deg, var(--cyan), var(--cyan-light));
+}
+
+.entry-staff:hover {
+    background: rgba(0, 163, 224, 0.12);
+    border-color: var(--cyan);
+    transform: translateY(-8px);
+    box-shadow: 0 20px 60px rgba(0, 163, 224, 0.2);
+}
+
+.entry-icon {
+    width: 64px;
+    height: 64px;
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 20px;
+    font-size: 28px;
+}
+
+.entry-client .entry-icon {
+    background: linear-gradient(135deg, rgba(201, 168, 76, 0.2), rgba(201, 168, 76, 0.08));
+}
+
+.entry-staff .entry-icon {
+    background: linear-gradient(135deg, rgba(0, 163, 224, 0.2), rgba(0, 163, 224, 0.08));
+}
+
+.entry-title {
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--white);
+    margin-bottom: 8px;
+}
+
+.entry-desc {
+    font-size: 14px;
+    color: var(--text-muted);
+    margin-bottom: 24px;
+    line-height: 1.6;
+}
+
+.entry-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 28px;
+    border-radius: 12px;
+    font-size: 14px;
+    font-weight: 600;
+    border: none;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    color: var(--white);
+}
+
+.entry-client .entry-btn {
+    background: linear-gradient(135deg, var(--gold), var(--gold-dark));
+    color: var(--navy-dark);
+}
+
+.entry-client .entry-btn:hover {
+    box-shadow: 0 8px 30px rgba(201, 168, 76, 0.4);
+}
+
+.entry-staff .entry-btn {
+    background: linear-gradient(135deg, var(--cyan), var(--cyan-dark));
+}
+
+.entry-staff .entry-btn:hover {
+    box-shadow: 0 8px 30px rgba(0, 163, 224, 0.4);
+}
+
+.entry-arrow {
+    transition: transform 0.3s ease;
+}
+
+.entry-card:hover .entry-arrow {
+    transform: translateX(4px);
+}
+
+/* Scroll indicator */
+.scroll-indicator {
+    position: absolute;
+    bottom: 40px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    color: var(--text-muted);
+    font-size: 12px;
+    animation: scrollBounce 2s ease-in-out infinite;
+}
+
+.scroll-mouse {
+    width: 24px;
+    height: 38px;
+    border: 2px solid rgba(255,255,255,0.25);
+    border-radius: 12px;
+    position: relative;
+}
+
+.scroll-mouse::after {
+    content: '';
+    position: absolute;
+    top: 8px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 3px;
+    height: 8px;
+    border-radius: 2px;
+    background: var(--gold);
+    animation: scrollWheel 2s ease-in-out infinite;
+}
+
+@keyframes scrollWheel {
+    0%, 100% { opacity: 1; transform: translateX(-50%) translateY(0); }
+    50% { opacity: 0.3; transform: translateX(-50%) translateY(8px); }
+}
+
+@keyframes scrollBounce {
+    0%, 100% { transform: translateX(-50%) translateY(0); }
+    50% { transform: translateX(-50%) translateY(8px); }
+}
+
+/* ============ FEATURES ============ */
+.features {
+    padding: 120px 60px;
+    background: var(--gray-50);
+    position: relative;
+}
+
+.features::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 120px;
+    background: linear-gradient(180deg, var(--navy-deep), transparent);
+    pointer-events: none;
+}
+
+.section-header {
+    text-align: center;
+    margin-bottom: 80px;
+    position: relative;
+    z-index: 1;
+}
+
+.section-label {
+    display: inline-block;
+    padding: 6px 16px;
+    border-radius: 6px;
+    background: rgba(0, 163, 224, 0.08);
+    color: var(--cyan);
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin-bottom: 16px;
+}
+
+.section-title {
+    font-size: 40px;
+    font-weight: 800;
+    color: var(--gray-800);
+    margin-bottom: 16px;
+    letter-spacing: -0.5px;
+}
+
+.section-desc {
+    font-size: 16px;
+    color: var(--gray-600);
+    max-width: 560px;
+    margin: 0 auto;
+    line-height: 1.7;
+}
+
+.features-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 32px;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.feature-card {
+    background: var(--white);
+    border-radius: 24px;
+    padding: 48px 36px;
+    text-align: center;
+    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    border: 1px solid var(--gray-200);
+    position: relative;
+    overflow: hidden;
+}
+
+.feature-card::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--cyan), var(--gold));
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.feature-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 24px 64px rgba(0,0,0,0.08);
+    border-color: transparent;
+}
+
+.feature-card:hover::after {
+    opacity: 1;
+}
+
+.feature-icon-wrap {
+    width: 80px;
+    height: 80px;
+    border-radius: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 28px;
+    font-size: 36px;
+    position: relative;
+}
+
+.feature-icon-ai {
+    background: linear-gradient(135deg, rgba(0, 163, 224, 0.12), rgba(0, 163, 224, 0.04));
+}
+
+.feature-icon-price {
+    background: linear-gradient(135deg, rgba(201, 168, 76, 0.12), rgba(201, 168, 76, 0.04));
+}
+
+.feature-icon-map {
+    background: linear-gradient(135deg, rgba(16, 185, 129, 0.12), rgba(16, 185, 129, 0.04));
+}
+
+.feature-title {
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--gray-800);
+    margin-bottom: 12px;
+}
+
+.feature-desc {
+    font-size: 14px;
+    color: var(--gray-600);
+    line-height: 1.8;
+    margin-bottom: 24px;
+}
+
+.feature-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    justify-content: center;
+}
+
+.feature-tag {
+    padding: 4px 12px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 500;
+    background: var(--gray-100);
+    color: var(--gray-600);
+}
+
+/* ============ STATS ============ */
+.stats {
+    padding: 100px 60px;
+    background: var(--white);
+}
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 40px;
+    max-width: 1100px;
+    margin: 0 auto;
+}
+
+.stat-item {
+    text-align: center;
+}
+
+.stat-number {
+    font-size: 52px;
+    font-weight: 800;
+    background: linear-gradient(135deg, var(--navy), var(--cyan-dark));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    line-height: 1;
+    margin-bottom: 8px;
+}
+
+.stat-label {
+    font-size: 15px;
+    color: var(--gray-600);
+    font-weight: 500;
+}
+
+/* ============ WORKFLOW ============ */
+.workflow {
+    padding: 120px 60px;
+    background: var(--navy);
+    position: relative;
+    overflow: hidden;
+}
+
+.workflow .hero-grid {
+    opacity: 0.5;
+}
+
+.workflow .section-label {
+    background: rgba(0, 163, 224, 0.15);
+}
+
+.workflow .section-title {
+    color: var(--white);
+}
+
+.workflow .section-desc {
+    color: var(--text-muted);
+}
+
+.workflow-steps {
+    display: flex;
+    gap: 0;
+    max-width: 1100px;
+    margin: 0 auto;
+    position: relative;
+}
+
+.workflow-step {
+    flex: 1;
+    text-align: center;
+    position: relative;
+    padding: 0 24px;
+}
+
+.workflow-step::after {
+    content: '';
+    position: absolute;
+    top: 32px;
+    right: 0;
+    width: 50%;
+    height: 2px;
+    background: linear-gradient(90deg, var(--gold), rgba(201, 168, 76, 0.2));
+}
+
+.workflow-step:last-child::after {
+    display: none;
+}
+
+.workflow-step::before {
+    content: '';
+    position: absolute;
+    top: 32px;
+    left: 0;
+    width: 50%;
+    height: 2px;
+    background: linear-gradient(90deg, rgba(201, 168, 76, 0.2), var(--gold));
+}
+
+.workflow-step:first-child::before {
+    display: none;
+}
+
+.step-number {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--gold), var(--gold-dark));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    font-weight: 800;
+    color: var(--navy-dark);
+    margin: 0 auto 20px;
+    position: relative;
+    z-index: 1;
+}
+
+.step-title {
+    font-size: 17px;
+    font-weight: 700;
+    color: var(--white);
+    margin-bottom: 8px;
+}
+
+.step-desc {
+    font-size: 13px;
+    color: var(--text-muted);
+    line-height: 1.7;
+}
+
+/* ============ FOOTER ============ */
+.footer {
+    padding: 60px;
+    background: var(--navy-deep);
+    border-top: 1px solid rgba(255,255,255,0.06);
+}
+
+.footer-content {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: start;
+}
+
+.footer-brand {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 16px;
+}
+
+.footer-text {
+    font-size: 13px;
+    color: var(--text-muted);
+    line-height: 1.8;
+    max-width: 360px;
+}
+
+.footer-links {
+    display: flex;
+    gap: 48px;
+}
+
+.footer-col-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--white);
+    margin-bottom: 16px;
+}
+
+.footer-col a {
+    display: block;
+    font-size: 13px;
+    color: var(--text-muted);
+    text-decoration: none;
+    margin-bottom: 10px;
+    transition: color 0.2s;
+}
+
+.footer-col a:hover {
+    color: var(--gold-light);
+}
+
+.footer-bottom {
+    max-width: 1200px;
+    margin: 40px auto 0;
+    padding-top: 24px;
+    border-top: 1px solid rgba(255,255,255,0.06);
+    text-align: center;
+    font-size: 12px;
+    color: var(--text-muted);
+}
+
+/* ============ RESPONSIVE ============ */
+@media (max-width: 1024px) {
+    .hero-title { font-size: 42px; }
+    .features-grid { grid-template-columns: repeat(2, 1fr); }
+    .stats-grid { grid-template-columns: repeat(2, 1fr); gap: 32px; }
+    .workflow-steps { flex-wrap: wrap; }
+    .workflow-step { flex: 0 0 50%; margin-bottom: 40px; }
+    .workflow-step::after, .workflow-step::before { display: none; }
+}
+
+@media (max-width: 768px) {
+    .navbar { padding: 0 24px; }
+    .hero-title { font-size: 32px; }
+    .hero-title-brand { font-size: 24px; }
+    .hero-desc { font-size: 16px; }
+    .hero-entries { flex-direction: column; align-items: center; }
+    .entry-card { max-width: 100%; width: 100%; }
+    .features { padding: 80px 24px; }
+    .features-grid { grid-template-columns: 1fr; }
+    .stats { padding: 60px 24px; }
+    .stats-grid { grid-template-columns: repeat(2, 1fr); }
+    .stat-number { font-size: 36px; }
+    .workflow { padding: 80px 24px; }
+    .workflow-steps { flex-direction: column; }
+    .workflow-step { flex: none; }
+    .section-title { font-size: 28px; }
+    .footer { padding: 40px 24px; }
+    .footer-content { flex-direction: column; gap: 32px; }
+    .footer-links { gap: 32px; }
+}
+</style>
+</head>
+<body>
+
+<!-- NAVBAR -->
+<nav class="navbar" id="navbar">
+    <a class="nav-brand" href="#">
+        <div class="nav-logo">GE</div>
+        <div>
+            <div class="nav-title">GLOBUS EVENTS</div>
+            <div class="nav-subtitle">万耀企龙 · 展位智能推荐系统</div>
+        </div>
+    </a>
+    <div class="nav-links">
+        <a class="nav-link active" href="#hero">首页</a>
+        <a class="nav-link" href="#features">核心功能</a>
+        <a class="nav-link" href="#workflow">工作流程</a>
+        <a class="nav-link" href="#" onclick="alert('即将跳转至客户前台登录')">客户前台</a>
+        <a class="nav-link" href="#" onclick="alert('即将跳转至员工后台登录')">员工后台</a>
+    </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero" id="hero">
+    <div class="hero-bg">
+        <div class="hero-grid"></div>
+        <div class="hero-orb hero-orb-1"></div>
+        <div class="hero-orb hero-orb-2"></div>
+        <div class="hero-orb hero-orb-3"></div>
+        <div class="hero-particles" id="particles"></div>
+        <div class="hero-overlay"></div>
+    </div>
+
+    <div class="hero-content">
+        <div class="hero-badge">
+            <span class="hero-badge-dot"></span>
+            AI-Powered Exhibition Platform · V1.1
+        </div>
+
+        <span class="hero-title-brand">万 耀 企 龙</span>
+        <h1 class="hero-title">
+            展位<span class="hero-title-accent">AI智能推荐</span>与<br>
+            <span class="hero-title-accent">动态定价</span>系统
+        </h1>
+
+        <p class="hero-desc">
+            AI 智选展位，让每一次参展都更省心
+        </p>
+
+        <div class="hero-entries">
+            <div class="entry-card entry-client" onclick="alert('即将跳转至客户前台')">
+                <div class="entry-icon">🏢</div>
+                <div class="entry-title">参展商入口</div>
+                <div class="entry-desc">
+                    智能推荐 · 可视化选位<br>
+                    实时报价 · 一键预约
+                </div>
+                <button class="entry-btn">
+                    进入前台
+                    <span class="entry-arrow">→</span>
+                </button>
+            </div>
+
+            <div class="entry-card entry-staff" onclick="alert('即将跳转至员工后台')">
+                <div class="entry-icon">⚙️</div>
+                <div class="entry-title">员工后台入口</div>
+                <div class="entry-desc">
+                    数据看板 · 模型调优<br>
+                    定价规则 · 客户管理
+                </div>
+                <button class="entry-btn">
+                    进入后台
+                    <span class="entry-arrow">→</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div class="scroll-indicator">
+        <div class="scroll-mouse"></div>
+        <span>向下了解更多</span>
+    </div>
+</section>
+
+<!-- FEATURES -->
+<section class="features" id="features">
+    <div class="section-header">
+        <div class="section-label">Core Capabilities</div>
+        <h2 class="section-title">三大核心能力</h2>
+        <p class="section-desc">
+            贯穿前后台全流程，以AI驱动展位推荐、定价决策与选位体验
+        </p>
+    </div>
+
+    <div class="features-grid">
+        <div class="feature-card">
+            <div class="feature-icon-wrap feature-icon-ai">🧠</div>
+            <h3 class="feature-title">AI 智能推荐</h3>
+            <p class="feature-desc">
+                基于企业画像、预算范围、参展目标等多维度输入，通过AI模型生成最优适配、高端升级、性价比三档推荐方案，展位匹配度评分0-100精准量化
+            </p>
+            <div class="feature-tags">
+                <span class="feature-tag">用户画像AI</span>
+                <span class="feature-tag">展位价值评估</span>
+                <span class="feature-tag">多维匹配</span>
+            </div>
+        </div>
+
+        <div class="feature-card">
+            <div class="feature-icon-wrap feature-icon-price">💰</div>
+            <h3 class="feature-title">动态定价引擎</h3>
+            <p class="feature-desc">
+                综合基础价格、AI价值系数、供需关系、客户权益、时段浮动等多维因子，实现一岗一价实时计算，支持24小时价格浮动与阶梯折扣
+            </p>
+            <div class="feature-tags">
+                <span class="feature-tag">动态定价AI</span>
+                <span class="feature-tag">实时计算</span>
+                <span class="feature-tag">供需模型</span>
+            </div>
+        </div>
+
+        <div class="feature-card">
+            <div class="feature-icon-wrap feature-icon-map">🗺️</div>
+            <h3 class="feature-title">可视化选位</h3>
+            <p class="feature-desc">
+                二维展馆平面图直观展示160个展位分布，颜色编码实时状态（可订/AI推荐/锁定/已售），点击即查详细信息与实时报价
+            </p>
+            <div class="feature-tags">
+                <span class="feature-tag">二维平面图</span>
+                <span class="feature-tag">状态可视</span>
+                <span class="feature-tag">交互选位</span>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- STATS -->
+<section class="stats">
+    <div class="stats-grid">
+        <div class="stat-item">
+            <div class="stat-number" data-target="160">0</div>
+            <div class="stat-label">标准展位数</div>
+        </div>
+        <div class="stat-item">
+            <div class="stat-number" data-target="5">0</div>
+            <div class="stat-label">AI 专业模型</div>
+        </div>
+        <div class="stat-item">
+            <div class="stat-number" data-target="8000">0</div>
+            <div class="stat-label">展厅面积 (m²)</div>
+        </div>
+        <div class="stat-item">
+            <div class="stat-number" data-target="4">0</div>
+            <div class="stat-label">展位等级 (S/A/B/C)</div>
+        </div>
+    </div>
+</section>
+
+<!-- WORKFLOW -->
+<section class="workflow" id="workflow">
+    <div class="hero-grid"></div>
+    <div class="section-header" style="position:relative; z-index:1;">
+        <div class="section-label">How It Works</div>
+        <h2 class="section-title">参展商使用流程</h2>
+        <p class="section-desc">
+            从需求录入到展位预约，四步完成智能选位
+        </p>
+    </div>
+
+    <div class="workflow-steps" style="position:relative; z-index:1;">
+        <div class="workflow-step">
+            <div class="step-number">1</div>
+            <h3 class="step-title">填写需求</h3>
+            <p class="step-desc">录入企业信息、预算、参展目标与面积偏好</p>
+        </div>
+        <div class="workflow-step">
+            <div class="step-number">2</div>
+            <h3 class="step-title">AI 推荐</h3>
+            <p class="step-desc">系统3秒生成三档智能推荐方案</p>
+        </div>
+        <div class="workflow-step">
+            <div class="step-number">3</div>
+            <h3 class="step-title">可视化选位</h3>
+            <p class="step-desc">在展馆平面图中浏览、筛选、查看展位详情</p>
+        </div>
+        <div class="workflow-step">
+            <div class="step-number">4</div>
+            <h3 class="step-title">预约展位</h3>
+            <p class="step-desc">查看报价单、确认价格、一键预约心仪展位</p>
+        </div>
+    </div>
+</section>
+
+<!-- FOOTER -->
+<footer class="footer">
+    <div class="footer-content">
+        <div>
+            <div class="footer-brand">
+                <div class="nav-logo">GE</div>
+                <div>
+                    <div class="nav-title">GLOBUS EVENTS</div>
+                </div>
+            </div>
+            <p class="footer-text">
+                万耀企龙展位AI智能推荐与动态定价系统<br>
+                让每一次参展决策都精准高效
+            </p>
+        </div>
+        <div class="footer-links">
+            <div class="footer-col">
+                <div class="footer-col-title">快速入口</div>
+                <a href="#">参展商前台</a>
+                <a href="#">员工后台</a>
+                <a href="#">需求录入</a>
+                <a href="#">AI推荐</a>
+            </div>
+            <div class="footer-col">
+                <div class="footer-col-title">核心功能</div>
+                <a href="#">智能推荐</a>
+                <a href="#">动态定价</a>
+                <a href="#">可视化选位</a>
+                <a href="#">数据看板</a>
+            </div>
+            <div class="footer-col">
+                <div class="footer-col-title">关于</div>
+                <a href="#">系统介绍</a>
+                <a href="#">联系我们</a>
+                <a href="#">隐私政策</a>
+            </div>
+        </div>
+    </div>
+    <div class="footer-bottom">
+        © 2026 Globus Events · 万耀企龙 · 展位AI智能推荐与动态定价系统 V1.1 &nbsp;|&nbsp; 本系统数据仅供演示用途，实际商务报价以正式合同为准
+    </div>
+</footer>
+
+<script>
+// Navbar scroll effect
+window.addEventListener('scroll', () => {
+    const nav = document.getElementById('navbar');
+    nav.classList.toggle('scrolled', window.scrollY > 50);
+});
+
+// Generate particles
+const particlesContainer = document.getElementById('particles');
+for (let i = 0; i < 30; i++) {
+    const p = document.createElement('div');
+    p.className = 'particle';
+    p.style.left = Math.random() * 100 + '%';
+    p.style.animationDuration = (8 + Math.random() * 12) + 's';
+    p.style.animationDelay = (Math.random() * 10) + 's';
+    p.style.width = p.style.height = (2 + Math.random() * 3) + 'px';
+    particlesContainer.appendChild(p);
+}
+
+// Counter animation
+function animateCounters() {
+    const counters = document.querySelectorAll('.stat-number');
+    counters.forEach(counter => {
+        const target = parseInt(counter.dataset.target);
+        const duration = 2000;
+        const start = performance.now();
+
+        function update(now) {
+            const elapsed = now - start;
+            const progress = Math.min(elapsed / duration, 1);
+            const eased = 1 - Math.pow(1 - progress, 3);
+            counter.textContent = Math.floor(eased * target);
+            if (progress < 1) requestAnimationFrame(update);
+            else counter.textContent = target;
+        }
+        requestAnimationFrame(update);
+    });
+}
+
+// Intersection Observer for counter animation
+const statsSection = document.querySelector('.stats');
+let counterAnimated = false;
+const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+        if (entry.isIntersecting && !counterAnimated) {
+            counterAnimated = true;
+            animateCounters();
+        }
+    });
+}, { threshold: 0.3 });
+observer.observe(statsSection);
+
+// Smooth scroll for nav links
+document.querySelectorAll('a[href^="#"]').forEach(link => {
+    link.addEventListener('click', e => {
+        e.preventDefault();
+        const target = document.querySelector(link.getAttribute('href'));
+        if (target) {
+            target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+    });
+});
+
+// Active nav link on scroll
+const sections = document.querySelectorAll('section[id]');
+window.addEventListener('scroll', () => {
+    let current = '';
+    sections.forEach(section => {
+        const sectionTop = section.offsetTop - 100;
+        if (scrollY >= sectionTop) current = section.getAttribute('id');
+    });
+    document.querySelectorAll('.nav-link').forEach(link => {
+        link.classList.remove('active');
+        if (link.getAttribute('href') === '#' + current) {
+            link.classList.add('active');
+        }
+    });
+});
+</script>
+
+</body>
+</html>

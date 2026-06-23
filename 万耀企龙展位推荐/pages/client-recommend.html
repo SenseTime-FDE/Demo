@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI智能推荐方案 - 万耀企龙</title>
+  <link rel="stylesheet" href="../styles.css">
+  <style>
+    /* ===== Demand Summary Bar ===== */
+    .demand-bar {
+      background: linear-gradient(135deg, #e0f7fa 0%, #b2ebf2 100%);
+      border-radius: 12px;
+      padding: 20px 28px;
+      margin-bottom: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+    .demand-bar-left {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      flex-wrap: wrap;
+    }
+    .demand-bar-label {
+      font-weight: 600;
+      font-size: 15px;
+      color: #00838f;
+      white-space: nowrap;
+    }
+    .demand-tag {
+      display: inline-block;
+      background: #ffffffcc;
+      backdrop-filter: blur(4px);
+      border: 1px solid #80deea;
+      border-radius: 20px;
+      padding: 6px 16px;
+      font-size: 13px;
+      color: #006064;
+      font-weight: 500;
+    }
+    .demand-bar-right .btn-outline {
+      border-color: #00acc1;
+      color: #00838f;
+      background: transparent;
+      padding: 8px 22px;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 500;
+      transition: all 0.25s;
+      cursor: pointer;
+    }
+    .demand-bar-right .btn-outline:hover {
+      background: #00acc1;
+      color: #fff;
+    }
+
+    /* ===== Recommendation Cards Stack ===== */
+    .rec-stack {
+      display: flex;
+      flex-direction: column;
+      gap: 28px;
+    }
+    .rec-card {
+      background: #fff;
+      border-radius: 16px;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+      overflow: hidden;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    .rec-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 8px 28px rgba(0,0,0,0.10);
+    }
+    .rec-card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 18px 28px;
+      border-bottom: 1px solid #eee;
+    }
+    .rec-card-header h3 {
+      margin: 0;
+      font-size: 18px;
+      font-weight: 700;
+    }
+    .rec-card-header .rec-subtitle {
+      font-size: 13px;
+      color: #888;
+      margin-top: 2px;
+    }
+    .rec-score {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .rec-score-value {
+      font-size: 28px;
+      font-weight: 800;
+    }
+    .rec-score-label {
+      font-size: 12px;
+      color: #999;
+    }
+    .score-progress {
+      width: 80px;
+      height: 6px;
+      background: #e9ecef;
+      border-radius: 4px;
+      overflow: hidden;
+    }
+    .score-progress-fill {
+      height: 100%;
+      border-radius: 4px;
+      transition: width 0.6s ease;
+    }
+
+    /* Card variants */
+    .rec-card.best-match { border-top: 4px solid #00bcd4; }
+    .rec-card.best-match .rec-card-header { background: #f0fcff; }
+    .rec-card.best-match .rec-score-value { color: #00bcd4; }
+    .rec-card.best-match .score-progress-fill { background: linear-gradient(90deg, #26c6da, #00acc1); }
+
+    .rec-card.premium { border-top: 4px solid #d4a017; }
+    .rec-card.premium .rec-card-header { background: #fffbf0; }
+    .rec-card.premium .rec-score-value { color: #d4a017; }
+    .rec-card.premium .score-progress-fill { background: linear-gradient(90deg, #e6b422, #d4a017); }
+
+    .rec-card.value { border-top: 4px solid #43a047; }
+    .rec-card.value .rec-card-header { background: #f0faf0; }
+    .rec-card.value .rec-score-value { color: #43a047; }
+    .rec-card.value .score-progress-fill { background: linear-gradient(90deg, #66bb6a, #43a047); }
+
+    /* Table inside card */
+    .rec-table-wrap {
+      padding: 20px 28px;
+    }
+    .rec-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    .rec-table th {
+      text-align: left;
+      font-size: 12px;
+      font-weight: 600;
+      color: #999;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid #eee;
+    }
+    .rec-table td {
+      padding: 12px 0;
+      border-bottom: 1px solid #f5f5f5;
+      font-size: 14px;
+      vertical-align: middle;
+    }
+    .rec-table tr:last-child td { border-bottom: none; }
+    .rec-table .booth-id {
+      font-weight: 700;
+      color: #333;
+    }
+    .rec-table .booth-price {
+      font-weight: 700;
+      color: #00bcd4;
+    }
+    .rec-table .booth-area {
+      color: #666;
+    }
+    .level-badge {
+      display: inline-block;
+      padding: 2px 12px;
+      border-radius: 12px;
+      font-size: 12px;
+      font-weight: 700;
+    }
+    .level-badge.A { background: #e0f7fa; color: #00838f; }
+    .level-badge.S { background: #fff3e0; color: #e65100; }
+    .level-badge.B { background: #e8f5e9; color: #2e7d32; }
+
+    .match-bar-wrap {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .match-bar {
+      width: 70px;
+      height: 6px;
+      background: #e9ecef;
+      border-radius: 4px;
+      overflow: hidden;
+    }
+    .match-bar-fill {
+      height: 100%;
+      border-radius: 4px;
+      background: linear-gradient(90deg, #26c6da, #00acc1);
+    }
+    .match-bar-fill.gold { background: linear-gradient(90deg, #e6b422, #d4a017); }
+    .match-bar-fill.green { background: linear-gradient(90deg, #66bb6a, #43a047); }
+    .match-pct {
+      font-size: 13px;
+      font-weight: 600;
+      color: #555;
+      min-width: 36px;
+    }
+
+    .rec-card-footer {
+      padding: 14px 28px;
+      border-top: 1px solid #eee;
+      text-align: right;
+    }
+    .rec-card-footer .btn-link {
+      background: none;
+      border: none;
+      color: #00acc1;
+      font-weight: 600;
+      font-size: 14px;
+      cursor: pointer;
+      padding: 6px 0;
+      transition: color 0.2s;
+    }
+    .rec-card-footer .btn-link:hover {
+      color: #00838f;
+      text-decoration: underline;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .demand-bar { flex-direction: column; align-items: stretch; }
+      .rec-card-header { flex-direction: column; align-items: flex-start; gap: 12px; }
+      .rec-table-wrap { overflow-x: auto; }
+    }
+  </style>
+</head>
+<body>
+  <!-- Navbar -->
+  <nav class="navbar navbar-white">
+    <div class="navbar-brand">
+      <img src="https://via.placeholder.com/120x36?text=VNU+Logo" alt="万耀企龙" class="brand-logo">
+      <span class="brand-text">展位智能推荐系统</span>
+    </div>
+    <div class="navbar-right">
+      <div class="user-info">
+        <span class="user-avatar">张明</span>
+        <span class="user-name">张明</span>
+      </div>
+      <button class="btn btn-outline btn-sm">退出登录</button>
+    </div>
+  </nav>
+
+  <div class="layout">
+    <!-- Sidebar -->
+    <aside class="sidebar sidebar-white">
+      <ul class="sidebar-menu">
+        <li><a href="#"><span>📊</span> 总览看板</a></li>
+        <li><a href="#"><span>🗺️</span> 展位地图</a></li>
+        <li><a href="#"><span>🔍</span> 展位查询</a></li>
+        <li><a href="#" class="active"><span>🤖</span> AI推荐方案</a></li>
+        <li><a href="#"><span>❤️</span> 我的收藏</a></li>
+        <li><a href="#"><span>📄</span> 申请记录</a></li>
+        <li><a href="#"><span>👤</span> 个人中心</a></li>
+      </ul>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+      <!-- Page Header -->
+      <div class="page-header">
+        <h1>🤖 AI智能推荐方案</h1>
+        <p class="text-muted">基于您的参展需求，AI 智能分析为您生成以下推荐方案</p>
+      </div>
+
+      <!-- Demand Summary Bar -->
+      <div class="demand-bar">
+        <div class="demand-bar-left">
+          <span class="demand-bar-label">📋 当前需求：</span>
+          <span class="demand-tag">信息技术</span>
+          <span class="demand-tag">中型企业</span>
+          <span class="demand-tag">预算 10-20 万</span>
+          <span class="demand-tag">产品发布</span>
+        </div>
+        <div class="demand-bar-right">
+          <button class="btn-outline">修改需求</button>
+        </div>
+      </div>
+
+      <!-- Recommendation Cards Stack -->
+      <div class="rec-stack">
+
+        <!-- Card 1: Best Match -->
+        <div class="rec-card best-match">
+          <div class="rec-card-header">
+            <div>
+              <h3>🏆 最优适配方案</h3>
+              <div class="rec-subtitle">综合评分最高的展位组合，精准匹配您的需求</div>
+            </div>
+            <div class="rec-score">
+              <div>
+                <div class="rec-score-value">92<span style="font-size:16px;font-weight:400;">%</span></div>
+                <div class="rec-score-label">匹配度</div>
+              </div>
+              <div class="score-progress">
+                <div class="score-progress-fill" style="width:92%;"></div>
+              </div>
+            </div>
+          </div>
+          <div class="rec-table-wrap">
+            <table class="rec-table">
+              <thead>
+                <tr>
+                  <th>展位编号</th>
+                  <th>等级</th>
+                  <th>面积</th>
+                  <th>价格（元）</th>
+                  <th>匹配度</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td class="booth-id">A-005</td>
+                  <td><span class="level-badge A">A</span></td>
+                  <td class="booth-area">54 m²</td>
+                  <td class="booth-price">¥126,000</td>
+                  <td>
+                    <div class="match-bar-wrap">
+                      <div class="match-bar"><div class="match-bar-fill" style="width:96%;"></div></div>
+                      <span class="match-pct">96%</span>
+                    </div>
+                  </td>
+                </tr>
+                <tr>
+                  <td class="booth-id">A-012</td>
+                  <td><span class="level-badge A">A</span></td>
+                  <td class="booth-area">48 m²</td>
+                  <td class="booth-price">¥112,000</td>
+                  <td>
+                    <div class="match-bar-wrap">
+                      <div class="match-bar"><div class="match-bar-fill" style="width:91%;"></div></div>
+                      <span class="match-pct">91%</span>
+                    </div>
+                  </td>
+                </tr>
+                <tr>
+                  <td class="booth-id">A-018</td>
+                  <td><span class="level-badge A">A</span></td>
+                  <td class="booth-area">60 m²</td>
+                  <td class="booth-price">¥140,000</td>
+                  <td>
+                    <div class="match-bar-wrap">
+                      <div class="match-bar"><div class="match-bar-fill" style="width:88%;"></div></div>
+                      <span class="match-pct">88%</span>
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="rec-card-footer">
+            <button class="btn-link">📍 在地图上查看全部推荐 &rarr;</button>
+          </div>
+        </div>
+
+        <!-- Card 2: Premium Upgrade -->
+        <div class="rec-card premium">
+          <div class="rec-card-header">
+            <div>
+              <h3>💎 高端升级方案</h3>
+              <div class="rec-subtitle">更高曝光度的特装展位，适合品牌形象展示</div>
+            </div>
+            <div class="rec-score">
+              <div>
+                <div class="rec-score-value">78<span style="font-size:16px;font-weight:400;">%</span></div>
+                <div class="rec-score-label">匹配度</div>
+              </div>
+              <div class="score-progress">
+                <div class="score-progress-fill" style="width:78%;"></div>
+              </div>
+            </div>
+          </div>
+          <div class="rec-table-wrap">
+            <table class="rec-table">
+              <thead>
+                <tr>
+                  <th>展位编号</th>
+                  <th>等级</th>
+                  <th>面积</th>
+                  <th>价格（元）</th>
+                  <th>匹配度</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td class="booth-id">S-001</td>
+                  <td><span class="level-badge S">S</span></td>
+                  <td class="booth-area">108 m²</td>
+                  <td class="booth-price">¥320,000</td>
+                  <td>
+                    <div class="match-bar-wrap">
+                      <div class="match-bar"><div class="match-bar-fill gold" style="width:82%;"></div></div>
+                      <span class="match-pct">82%</span>
+                    </div>
+                  </td>
+                </tr>
+                <tr>
+                  <td class="booth-id">S-003</td>
+                  <td><span class="level-badge S">S</span></td>
+                  <td class="booth-area">96 m²</td>
+                  <td class="booth-price">¥285,000</td>
+                  <td>
+                    <div class="match-bar-wrap">
+                      <div class="match-bar"><div class="match-bar-fill gold" style="width:75%;"></div></div>
+                      <span class="match-pct">75%</span>
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="rec-card-footer">
+            <button class="btn-link">🗺️ 查看高端展位分布 &rarr;</button>
+          </div>
+        </div>
+
+        <!-- Card 3: Value Choice -->
+        <div class="rec-card value">
+          <div class="rec-card-header">
+            <div>
+              <h3>💰 性价比之选</h3>
+              <div class="rec-subtitle">预算友好型展位，功能齐全成本可控</div>
+            </div>
+            <div class="rec-score">
+              <div>
+                <div class="rec-score-value">65<span style="font-size:16px;font-weight:400;">%</span></div>
+                <div class="rec-score-label">匹配度</div>
+              </div>
+              <div class="score-progress">
+                <div class="score-progress-fill" style="width:65%;"></div>
+              </div>
+            </div>
+          </div>
+          <div class="rec-table-wrap">
+            <table class="rec-table">
+              <thead>
+                <tr>
+                  <th>展位编号</th>
+                  <th>等级</th>
+                  <th>面积</th>
+                  <th>价格（元）</th>
+                  <th>匹配度</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td class="booth-id">B-022</td>
+                  <td><span class="level-badge B">B</span></td>
+                  <td class="booth-area">36 m²</td>
+                  <td class="booth-price">¥72,000</td>
+                  <td>
+                    <div class="match-bar-wrap">
+                      <div class="match-bar"><div class="match-bar-fill green" style="width:70%;"></div></div>
+                      <span class="match-pct">70%</span>
+                    </div>
+                  </td>
+                </tr>
+                <tr>
+                  <td class="booth-id">B-035</td>
+                  <td><span class="level-badge B">B</span></td>
+                  <td class="booth-area">42 m²</td>
+                  <td class="booth-price">¥84,000</td>
+                  <td>
+                    <div class="match-bar-wrap">
+                      <div class="match-bar"><div class="match-bar-fill green" style="width:64%;"></div></div>
+                      <span class="match-pct">64%</span>
+                    </div>
+                  </td>
+                </tr>
+                <tr>
+                  <td class="booth-id">B-048</td>
+                  <td><span class="level-badge B">B</span></td>
+                  <td class="booth-area">30 m²</td>
+                  <td class="booth-price">¥60,000</td>
+                  <td>
+                    <div class="match-bar-wrap">
+                      <div class="match-bar"><div class="match-bar-fill green" style="width:58%;"></div></div>
+                      <span class="match-pct">58%</span>
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="rec-card-footer">
+            <button class="btn-link">📊 查看性价比展位 &rarr;</button>
+          </div>
+        </div>
+
+      </div><!-- /rec-stack -->
+    </main>
+  </div>
+</body>
+</html>

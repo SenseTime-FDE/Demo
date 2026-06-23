@@ -1,0 +1,1380 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI模型参数 · 万耀企龙展位智能推荐系统</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Noto+Sans+SC:wght@300;400;500;600;700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<style>
+*, *::before, *::after {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+:root {
+    --navy: #0B2A4A;
+    --navy-dark: #071D35;
+    --navy-deep: #041221;
+    --gold: #C9A84C;
+    --gold-light: #E0C36A;
+    --gold-dark: #A88B3A;
+    --cyan: #00A3E0;
+    --cyan-light: #33B8E8;
+    --cyan-dark: #0089BF;
+    --white: #FFFFFF;
+    --gray-50: #F8F9FA;
+    --gray-100: #F0F2F5;
+    --gray-200: #E4E7EB;
+    --gray-300: #D1D5DB;
+    --gray-400: #9CA3AF;
+    --gray-500: #6B7280;
+    --gray-600: #4B5563;
+    --gray-700: #374151;
+    --gray-800: #1F2937;
+    --green: #10B981;
+    --green-light: #D1FAE5;
+    --red: #EF4444;
+    --red-light: #FEE2E2;
+    --orange: #F59E0B;
+    --purple: #8B5CF6;
+    --sidebar-width: 230px;
+    --navbar-height: 64px;
+}
+
+html { scroll-behavior: smooth; }
+
+body {
+    font-family: 'Noto Sans SC', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    color: var(--gray-800);
+    background: var(--gray-50);
+    line-height: 1.6;
+    min-height: 100vh;
+}
+
+/* ============ NAVBAR ============ */
+.navbar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 32px;
+    height: var(--navbar-height);
+    background: var(--navy-dark);
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+    box-shadow: 0 2px 12px rgba(0,0,0,0.2);
+}
+
+.nav-left {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.hamburger {
+    display: none;
+    width: 36px;
+    height: 36px;
+    border: none;
+    background: none;
+    cursor: pointer;
+    border-radius: 8px;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    color: rgba(255,255,255,0.7);
+    transition: all 0.2s;
+}
+.hamburger:hover { background: rgba(255,255,255,0.08); }
+
+.nav-brand {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    text-decoration: none;
+}
+
+.nav-logo {
+    width: 40px;
+    height: 40px;
+    background: linear-gradient(135deg, var(--gold), var(--gold-light));
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 800;
+    font-size: 18px;
+    color: var(--navy-dark);
+    letter-spacing: -1px;
+    flex-shrink: 0;
+}
+
+.nav-title-text {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--white);
+    letter-spacing: 0.5px;
+    white-space: nowrap;
+}
+
+.nav-right {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.nav-user-wrap {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.nav-avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--cyan), var(--cyan-dark));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--white);
+    flex-shrink: 0;
+}
+
+.nav-user-info {
+    display: flex;
+    flex-direction: column;
+}
+
+.nav-user-name {
+    font-size: 13px;
+    font-weight: 600;
+    color: rgba(255,255,255,0.9);
+    line-height: 1.2;
+}
+
+.nav-user-role {
+    font-size: 11px;
+    color: rgba(255,255,255,0.45);
+}
+
+.btn-logout {
+    padding: 6px 16px;
+    border: 1px solid rgba(255,255,255,0.15);
+    border-radius: 6px;
+    background: transparent;
+    color: rgba(255,255,255,0.65);
+    font-size: 13px;
+    font-family: inherit;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+.btn-logout:hover {
+    background: rgba(255,255,255,0.08);
+    color: var(--white);
+    border-color: rgba(255,255,255,0.25);
+}
+
+/* ============ SIDEBAR ============ */
+.sidebar {
+    position: fixed;
+    top: var(--navbar-height);
+    left: 0;
+    bottom: 0;
+    width: var(--sidebar-width);
+    background: var(--navy-dark);
+    z-index: 900;
+    overflow-y: auto;
+    padding: 16px 0;
+    transition: transform 0.3s ease;
+}
+
+.sidebar::-webkit-scrollbar { width: 4px; }
+.sidebar::-webkit-scrollbar-track { background: transparent; }
+.sidebar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 2px; }
+
+.sidebar-nav {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.sidebar-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 13px 20px;
+    font-size: 14px;
+    font-weight: 500;
+    color: rgba(255,255,255,0.55);
+    text-decoration: none;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border-left: 3px solid transparent;
+    position: relative;
+}
+
+.sidebar-item:hover {
+    background: rgba(255,255,255,0.04);
+    color: rgba(255,255,255,0.8);
+}
+
+.sidebar-item.active {
+    background: rgba(0, 163, 224, 0.08);
+    color: var(--white);
+    border-left-color: var(--cyan);
+    font-weight: 600;
+}
+
+.sidebar-item .icon {
+    width: 22px;
+    text-align: center;
+    font-size: 16px;
+    flex-shrink: 0;
+}
+
+/* ============ MAIN CONTENT ============ */
+.main-content {
+    margin-left: var(--sidebar-width);
+    margin-top: var(--navbar-height);
+    padding: 32px 40px;
+    min-height: calc(100vh - var(--navbar-height));
+}
+
+.page-header {
+    margin-bottom: 28px;
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+}
+
+.page-title {
+    font-size: 26px;
+    font-weight: 700;
+    color: var(--gray-800);
+    margin-bottom: 4px;
+}
+
+.page-subtitle {
+    font-size: 14px;
+    color: var(--gray-500);
+}
+
+/* ============ INFO BANNER ============ */
+.info-banner {
+    background: rgba(0, 163, 224, 0.07);
+    border: 1px solid rgba(0, 163, 224, 0.15);
+    border-radius: 12px;
+    padding: 16px 22px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 28px;
+    color: var(--gray-700);
+    font-size: 14px;
+    line-height: 1.6;
+}
+
+.info-banner i {
+    font-size: 20px;
+    color: var(--cyan);
+    flex-shrink: 0;
+}
+
+/* ============ CARD ============ */
+.card {
+    background: var(--white);
+    border-radius: 14px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    overflow: hidden;
+    margin-bottom: 24px;
+}
+
+.card-header {
+    padding: 18px 24px;
+    border-bottom: 1px solid var(--gray-100);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.card-title {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--gray-800);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.card-body {
+    padding: 24px;
+}
+
+/* ============ WEIGHT SLIDER SECTION ============ */
+.weight-sliders {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.slider-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.slider-label-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.slider-label {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--gray-700);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.slider-value-wrap {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.slider-current-value {
+    font-size: 18px;
+    font-weight: 800;
+    color: var(--cyan);
+    min-width: 44px;
+    text-align: right;
+    font-family: 'Inter', monospace;
+}
+
+.slider-range-label {
+    font-size: 12px;
+    color: var(--gray-400);
+    font-weight: 500;
+}
+
+.slider-track {
+    position: relative;
+    width: 100%;
+    height: 6px;
+    background: var(--gray-100);
+    border-radius: 3px;
+    cursor: pointer;
+}
+
+.slider-fill {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    border-radius: 3px;
+    transition: width 0.15s ease;
+    pointer-events: none;
+}
+
+.slider-fill.location { background: linear-gradient(90deg, var(--cyan), var(--cyan-light)); }
+.slider-fill.area { background: linear-gradient(90deg, var(--gold), var(--gold-light)); }
+.slider-fill.traffic { background: linear-gradient(90deg, var(--green), #34D399); }
+.slider-fill.support { background: linear-gradient(90deg, var(--purple), #A78BFA); }
+
+input[type="range"] {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 100%;
+    height: 6px;
+    background: transparent;
+    outline: none;
+    position: relative;
+    z-index: 2;
+    cursor: pointer;
+    margin-top: -6px;
+}
+
+input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: var(--white);
+    border: 3px solid var(--cyan);
+    cursor: pointer;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+    transition: all 0.15s ease;
+}
+
+input[type="range"]::-webkit-slider-thumb:hover {
+    transform: scale(1.15);
+    box-shadow: 0 3px 10px rgba(0,0,0,0.2);
+}
+
+input[type="range"]::-moz-range-thumb {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: var(--white);
+    border: 3px solid var(--cyan);
+    cursor: pointer;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+}
+
+/* Weight total bar */
+.weight-total-bar {
+    margin-top: 8px;
+    padding: 14px 20px;
+    background: var(--gray-50);
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.weight-total-label {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--gray-700);
+}
+
+.weight-total-value {
+    font-size: 20px;
+    font-weight: 800;
+    font-family: 'Inter', monospace;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.weight-total-value.valid {
+    color: var(--green);
+}
+
+.weight-total-value.invalid {
+    color: var(--red);
+}
+
+.weight-total-check {
+    font-size: 14px;
+    font-weight: 600;
+}
+
+/* ============ PARAMETER SETTINGS (2 columns) ============ */
+.params-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 32px;
+}
+
+.param-section-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--gray-500);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 18px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.param-field {
+    margin-bottom: 20px;
+}
+
+.param-field:last-child {
+    margin-bottom: 0;
+}
+
+.param-label {
+    display: block;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--gray-700);
+    margin-bottom: 8px;
+}
+
+.param-label .hint {
+    font-weight: 400;
+    font-size: 12px;
+    color: var(--gray-400);
+    margin-left: 4px;
+}
+
+.input-number-wrap {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+}
+
+.input-number-wrap input[type="number"] {
+    width: 120px;
+    padding: 10px 14px;
+    border: 1.5px solid var(--gray-200);
+    border-radius: 8px;
+    font-size: 15px;
+    font-weight: 600;
+    font-family: 'Inter', monospace;
+    color: var(--gray-800);
+    background: var(--white);
+    outline: none;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.input-number-wrap input[type="number"]:focus {
+    border-color: var(--cyan);
+    box-shadow: 0 0 0 3px rgba(0, 163, 224, 0.12);
+}
+
+.input-number-wrap .suffix {
+    position: absolute;
+    right: 14px;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--gray-400);
+    pointer-events: none;
+}
+
+/* Custom select */
+.custom-select {
+    position: relative;
+    display: inline-block;
+}
+
+.custom-select select {
+    width: 140px;
+    padding: 10px 36px 10px 14px;
+    border: 1.5px solid var(--gray-200);
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    font-family: inherit;
+    color: var(--gray-800);
+    background: var(--white);
+    outline: none;
+    appearance: none;
+    -webkit-appearance: none;
+    cursor: pointer;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.custom-select select:focus {
+    border-color: var(--cyan);
+    box-shadow: 0 0 0 3px rgba(0, 163, 224, 0.12);
+}
+
+.custom-select::after {
+    content: '\f107';
+    font-family: 'Font Awesome 6 Free';
+    font-weight: 900;
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--gray-400);
+    pointer-events: none;
+    font-size: 14px;
+}
+
+/* Checkbox group */
+.checkbox-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+
+.checkbox-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    padding: 8px 16px;
+    border: 1.5px solid var(--gray-200);
+    border-radius: 8px;
+    transition: all 0.2s ease;
+    user-select: none;
+}
+
+.checkbox-item:hover {
+    border-color: var(--cyan);
+    background: rgba(0, 163, 224, 0.03);
+}
+
+.checkbox-item.checked {
+    border-color: var(--cyan);
+    background: rgba(0, 163, 224, 0.06);
+}
+
+.checkbox-item input[type="checkbox"] {
+    display: none;
+}
+
+.checkbox-custom {
+    width: 18px;
+    height: 18px;
+    border: 2px solid var(--gray-300);
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: all 0.2s ease;
+    font-size: 10px;
+    color: transparent;
+}
+
+.checkbox-item.checked .checkbox-custom {
+    background: var(--cyan);
+    border-color: var(--cyan);
+    color: var(--white);
+}
+
+.checkbox-text {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--gray-700);
+}
+
+/* Toggle switch */
+.toggle-wrap {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.toggle {
+    position: relative;
+    width: 48px;
+    height: 26px;
+    flex-shrink: 0;
+    cursor: pointer;
+}
+
+.toggle input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.toggle-slider {
+    position: absolute;
+    inset: 0;
+    background: var(--gray-300);
+    border-radius: 26px;
+    transition: all 0.3s ease;
+}
+
+.toggle-slider::before {
+    content: '';
+    position: absolute;
+    left: 3px;
+    top: 3px;
+    width: 20px;
+    height: 20px;
+    background: var(--white);
+    border-radius: 50%;
+    transition: all 0.3s ease;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.15);
+}
+
+.toggle input:checked + .toggle-slider {
+    background: var(--cyan);
+}
+
+.toggle input:checked + .toggle-slider::before {
+    transform: translateX(22px);
+}
+
+.toggle-status {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--gray-600);
+}
+
+.toggle-status.on {
+    color: var(--green);
+}
+
+.toggle-status.off {
+    color: var(--gray-400);
+}
+
+/* ============ ACTION BUTTONS ============ */
+.action-bar {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 20px 24px;
+    border-top: 1px solid var(--gray-100);
+}
+
+.btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 28px;
+    border: none;
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 600;
+    font-family: inherit;
+    cursor: pointer;
+    transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    text-decoration: none;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, var(--cyan), var(--cyan-dark));
+    color: var(--white);
+    box-shadow: 0 4px 14px rgba(0, 163, 224, 0.3);
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(0, 163, 224, 0.35);
+}
+
+.btn-primary:active {
+    transform: translateY(0);
+}
+
+.btn-outline {
+    background: transparent;
+    color: var(--gray-600);
+    border: 1.5px solid var(--gray-200);
+}
+
+.btn-outline:hover {
+    border-color: var(--gray-400);
+    background: var(--gray-50);
+}
+
+/* ============ TOAST ============ */
+.toast-container {
+    position: fixed;
+    top: 80px;
+    right: 24px;
+    z-index: 9999;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.toast {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 20px;
+    background: var(--white);
+    border-radius: 12px;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.12);
+    border-left: 4px solid var(--green);
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--gray-800);
+    animation: toastIn 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+    min-width: 260px;
+}
+
+.toast-icon {
+    font-size: 20px;
+    color: var(--green);
+}
+
+@keyframes toastIn {
+    from {
+        opacity: 0;
+        transform: translateX(60px) scale(0.92);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0) scale(1);
+    }
+}
+
+@keyframes toastOut {
+    from {
+        opacity: 1;
+        transform: translateX(0) scale(1);
+    }
+    to {
+        opacity: 0;
+        transform: translateX(60px) scale(0.92);
+    }
+}
+
+.toast.removing {
+    animation: toastOut 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* ============ SIDEBAR OVERLAY ============ */
+.sidebar-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.4);
+    z-index: 899;
+}
+
+/* ============ FOOTER ============ */
+.page-footer {
+    text-align: center;
+    padding: 20px 0 4px;
+    border-top: 1px solid var(--gray-200);
+    font-size: 12px;
+    color: var(--gray-400);
+}
+
+/* ============ RESPONSIVE ============ */
+@media (max-width: 1024px) {
+    .main-content { padding: 24px 24px; }
+    .params-grid { gap: 24px; }
+}
+
+@media (max-width: 768px) {
+    .hamburger { display: flex; }
+
+    .sidebar {
+        transform: translateX(-100%);
+    }
+
+    .sidebar.open {
+        transform: translateX(0);
+    }
+
+    .sidebar-overlay.open {
+        display: block;
+    }
+
+    .main-content {
+        margin-left: 0;
+        padding: 20px 16px;
+    }
+
+    .navbar { padding: 0 16px; }
+    .nav-title-text { font-size: 13px; }
+    .nav-user-info { display: none; }
+    .btn-logout span { display: none; }
+
+    .page-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+    }
+
+    .page-title { font-size: 22px; }
+
+    .params-grid {
+        grid-template-columns: 1fr;
+        gap: 28px;
+    }
+
+    .card-body { padding: 18px; }
+    .action-bar { flex-direction: column; align-items: stretch; }
+    .btn { justify-content: center; }
+}
+
+@media (max-width: 480px) {
+    .main-content { padding: 16px 12px; }
+    .card-header { padding: 14px 16px; }
+    .card-body { padding: 14px; }
+    .info-banner { padding: 12px 16px; font-size: 13px; }
+    .weight-total-bar { flex-direction: column; gap: 6px; text-align: center; }
+    .checkbox-group { flex-direction: column; }
+}
+</style>
+</head>
+<body>
+
+<!-- ============ NAVBAR ============ -->
+<nav class="navbar">
+    <div class="nav-left">
+        <button class="hamburger" id="hamburgerBtn" aria-label="菜单">
+            <i class="fas fa-bars"></i>
+        </button>
+        <a class="nav-brand" href="#">
+            <div class="nav-logo">GE</div>
+            <span class="nav-title-text">GLOBUS EVENTS · 运营管理中心</span>
+        </a>
+    </div>
+    <div class="nav-right">
+        <div class="nav-user-wrap">
+            <div class="nav-avatar">张</div>
+            <div class="nav-user-info">
+                <span class="nav-user-name">管理员 · 张三</span>
+                <span class="nav-user-role">超级管理员</span>
+            </div>
+        </div>
+        <button class="btn-logout" onclick="alert('确认退出登录？')">
+            <i class="fas fa-sign-out-alt"></i>
+            <span>退出</span>
+        </button>
+    </div>
+</nav>
+
+<!-- ============ SIDEBAR OVERLAY ============ -->
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+<!-- ============ SIDEBAR ============ -->
+<aside class="sidebar" id="sidebar">
+    <ul class="sidebar-nav">
+        <li><a class="sidebar-item" href="#">
+            <span class="icon"><i class="fas fa-chart-pie"></i></span>
+            运营数据看板
+        </a></li>
+        <li><a class="sidebar-item" href="#">
+            <span class="icon"><i class="fas fa-users"></i></span>
+            客户线索管理
+        </a></li>
+        <li><a class="sidebar-item" href="#">
+            <span class="icon"><i class="fas fa-cubes"></i></span>
+            展位资源管理
+        </a></li>
+        <li><a class="sidebar-item active" href="#">
+            <span class="icon"><i class="fas fa-brain"></i></span>
+            AI模型参数
+        </a></li>
+        <li><a class="sidebar-item" href="#">
+            <span class="icon"><i class="fas fa-tags"></i></span>
+            动态定价规则
+        </a></li>
+        <li><a class="sidebar-item" href="#">
+            <span class="icon"><i class="fas fa-file-invoice"></i></span>
+            订单管理
+        </a></li>
+        <li><a class="sidebar-item" href="#">
+            <span class="icon"><i class="fas fa-chart-line"></i></span>
+            数据报表
+        </a></li>
+    </ul>
+</aside>
+
+<!-- ============ MAIN CONTENT ============ -->
+<main class="main-content">
+
+    <!-- Page Header -->
+    <div class="page-header">
+        <div>
+            <h1 class="page-title"><i class="fas fa-brain" style="margin-right:8px;color:var(--cyan);"></i>AI模型参数配置</h1>
+            <p class="page-subtitle">调整AI模型的权重参数将影响推荐结果和定价策略</p>
+        </div>
+    </div>
+
+    <!-- Info Banner -->
+    <div class="info-banner">
+        <i class="fas fa-info-circle"></i>
+        <span>调整AI模型的权重参数将影响推荐结果和定价策略。修改后实时生效。</span>
+    </div>
+
+    <!-- Weight Slider Card -->
+    <div class="card">
+        <div class="card-header">
+            <div class="card-title">
+                <i class="fas fa-sliders-h" style="color:var(--cyan);"></i>
+                权重滑块配置
+            </div>
+            <span style="font-size:12px;color:var(--gray-400);">拖动滑块调整各维度权重</span>
+        </div>
+        <div class="card-body">
+            <div class="weight-sliders">
+
+                <!-- 位置权重 -->
+                <div class="slider-group">
+                    <div class="slider-label-row">
+                        <div class="slider-label">
+                            <span style="color:var(--cyan);">📍</span> 位置权重
+                        </div>
+                        <div class="slider-value-wrap">
+                            <span class="slider-range-label">范围 0–100%</span>
+                            <span class="slider-current-value" id="valLocation">35</span><span style="font-size:14px;font-weight:600;color:var(--gray-500);">%</span>
+                        </div>
+                    </div>
+                    <div class="slider-track">
+                        <div class="slider-fill location" id="fillLocation" style="width:35%;"></div>
+                        <input type="range" id="sliderLocation" min="0" max="100" value="35" step="1">
+                    </div>
+                </div>
+
+                <!-- 面积权重 -->
+                <div class="slider-group">
+                    <div class="slider-label-row">
+                        <div class="slider-label">
+                            <span style="color:var(--gold);">📐</span> 面积权重
+                        </div>
+                        <div class="slider-value-wrap">
+                            <span class="slider-range-label">范围 0–100%</span>
+                            <span class="slider-current-value" id="valArea">25</span><span style="font-size:14px;font-weight:600;color:var(--gray-500);">%</span>
+                        </div>
+                    </div>
+                    <div class="slider-track">
+                        <div class="slider-fill area" id="fillArea" style="width:25%;"></div>
+                        <input type="range" id="sliderArea" min="0" max="100" value="25" step="1">
+                    </div>
+                </div>
+
+                <!-- 流量权重 -->
+                <div class="slider-group">
+                    <div class="slider-label-row">
+                        <div class="slider-label">
+                            <span style="color:var(--green);">👥</span> 流量权重
+                        </div>
+                        <div class="slider-value-wrap">
+                            <span class="slider-range-label">范围 0–100%</span>
+                            <span class="slider-current-value" id="valTraffic">22</span><span style="font-size:14px;font-weight:600;color:var(--gray-500);">%</span>
+                        </div>
+                    </div>
+                    <div class="slider-track">
+                        <div class="slider-fill traffic" id="fillTraffic" style="width:22%;"></div>
+                        <input type="range" id="sliderTraffic" min="0" max="100" value="22" step="1">
+                    </div>
+                </div>
+
+                <!-- 配套权重 -->
+                <div class="slider-group">
+                    <div class="slider-label-row">
+                        <div class="slider-label">
+                            <span style="color:var(--purple);">🏗️</span> 配套权重
+                        </div>
+                        <div class="slider-value-wrap">
+                            <span class="slider-range-label">范围 0–100%</span>
+                            <span class="slider-current-value" id="valSupport">18</span><span style="font-size:14px;font-weight:600;color:var(--gray-500);">%</span>
+                        </div>
+                    </div>
+                    <div class="slider-track">
+                        <div class="slider-fill support" id="fillSupport" style="width:18%;"></div>
+                        <input type="range" id="sliderSupport" min="0" max="100" value="18" step="1">
+                    </div>
+                </div>
+
+                <!-- Weight Total -->
+                <div class="weight-total-bar">
+                    <span class="weight-total-label">权重合计</span>
+                    <span class="weight-total-value valid" id="weightTotal">
+                        <span id="totalPercent">100</span>%
+                        <span class="weight-total-check" id="totalCheck">✅</span>
+                    </span>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- Parameter Settings Card -->
+    <div class="card">
+        <div class="card-header">
+            <div class="card-title">
+                <i class="fas fa-cog" style="color:var(--gold);"></i>
+                参数设置
+            </div>
+            <span style="font-size:12px;color:var(--gray-400);">高级配置项</span>
+        </div>
+        <div class="card-body">
+            <div class="params-grid">
+
+                <!-- Left Column -->
+                <div>
+                    <div class="param-section-title">
+                        <i class="fas fa-dollar-sign" style="color:var(--gold);"></i> 价格与推荐
+                    </div>
+
+                    <div class="param-field">
+                        <label class="param-label" for="premiumCap">
+                            最高溢价上限
+                            <span class="hint">(超出底价比例)</span>
+                        </label>
+                        <div class="input-number-wrap">
+                            <input type="number" id="premiumCap" value="50" min="0" max="200" step="5">
+                            <span class="suffix">%</span>
+                        </div>
+                    </div>
+
+                    <div class="param-field">
+                        <label class="param-label" for="discountFloor">
+                            最低折扣下限
+                            <span class="hint">(低于底价比例)</span>
+                        </label>
+                        <div class="input-number-wrap">
+                            <input type="number" id="discountFloor" value="15" min="0" max="100" step="5">
+                            <span class="suffix">%</span>
+                        </div>
+                    </div>
+
+                    <div class="param-field">
+                        <label class="param-label" for="recommendCount">
+                            推荐方案数量
+                        </label>
+                        <div class="custom-select">
+                            <select id="recommendCount">
+                                <option value="3" selected>3 个方案</option>
+                                <option value="5">5 个方案</option>
+                                <option value="10">10 个方案</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right Column -->
+                <div>
+                    <div class="param-section-title">
+                        <i class="fas fa-tags" style="color:var(--cyan);"></i> 标签与自动化
+                    </div>
+
+                    <div class="param-field">
+                        <label class="param-label">客户标签来源</label>
+                        <div class="checkbox-group" id="tagSourceGroup">
+                            <label class="checkbox-item checked" data-value="industry">
+                                <input type="checkbox" value="industry" checked>
+                                <span class="checkbox-custom"><i class="fas fa-check"></i></span>
+                                <span class="checkbox-text">行业</span>
+                            </label>
+                            <label class="checkbox-item checked" data-value="scale">
+                                <input type="checkbox" value="scale" checked>
+                                <span class="checkbox-custom"><i class="fas fa-check"></i></span>
+                                <span class="checkbox-text">规模</span>
+                            </label>
+                            <label class="checkbox-item checked" data-value="budget">
+                                <input type="checkbox" value="budget" checked>
+                                <span class="checkbox-custom"><i class="fas fa-check"></i></span>
+                                <span class="checkbox-text">预算</span>
+                            </label>
+                            <label class="checkbox-item checked" data-value="history">
+                                <input type="checkbox" value="history" checked>
+                                <span class="checkbox-custom"><i class="fas fa-check"></i></span>
+                                <span class="checkbox-text">参展历史</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="param-field">
+                        <label class="param-label">AI自动优化</label>
+                        <div class="toggle-wrap">
+                            <label class="toggle">
+                                <input type="checkbox" id="aiAutoToggle" checked>
+                                <span class="toggle-slider"></span>
+                            </label>
+                            <span class="toggle-status on" id="toggleStatus">已开启</span>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="action-bar">
+            <button class="btn btn-primary" id="saveBtn">
+                <i class="fas fa-save"></i> 保存配置
+            </button>
+            <button class="btn btn-outline" id="resetBtn">
+                <i class="fas fa-undo-alt"></i> 恢复默认
+            </button>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="page-footer">
+        &copy; 2026 Globus Events &middot; 万耀企龙 &middot; 展位AI智能推荐与动态定价系统 V1.1 &nbsp;|&nbsp; 本系统数据仅供演示用途
+    </div>
+
+</main>
+
+<!-- Toast Container -->
+<div class="toast-container" id="toastContainer"></div>
+
+<script>
+// ============ Slider Logic ============
+const sliders = [
+    { id: 'sliderLocation', valId: 'valLocation', fillId: 'fillLocation' },
+    { id: 'sliderArea',     valId: 'valArea',     fillId: 'fillArea' },
+    { id: 'sliderTraffic',  valId: 'valTraffic',  fillId: 'fillTraffic' },
+    { id: 'sliderSupport',  valId: 'valSupport',  fillId: 'fillSupport' },
+];
+
+function updateSlider(slider) {
+    const el = document.getElementById(slider.id);
+    const val = parseInt(el.value, 10);
+    document.getElementById(slider.valId).textContent = val;
+    document.getElementById(slider.fillId).style.width = val + '%';
+    updateTotal();
+}
+
+function updateTotal() {
+    let sum = 0;
+    sliders.forEach(s => {
+        sum += parseInt(document.getElementById(s.id).value, 10);
+    });
+    const totalEl = document.getElementById('totalPercent');
+    const totalWrap = document.getElementById('weightTotal');
+    const checkEl = document.getElementById('totalCheck');
+    totalEl.textContent = sum;
+    if (sum === 100) {
+        totalWrap.className = 'weight-total-value valid';
+        checkEl.textContent = '✅';
+    } else {
+        totalWrap.className = 'weight-total-value invalid';
+        checkEl.textContent = '⚠️ 需等于100%';
+    }
+}
+
+sliders.forEach(s => {
+    const el = document.getElementById(s.id);
+    el.addEventListener('input', function() { updateSlider(s); });
+});
+
+// Initial total
+updateTotal();
+
+// ============ Checkbox custom styling ============
+document.querySelectorAll('.checkbox-item').forEach(item => {
+    item.addEventListener('click', function(e) {
+        if (e.target.tagName === 'INPUT') return;
+        const cb = this.querySelector('input[type="checkbox"]');
+        cb.checked = !cb.checked;
+        this.classList.toggle('checked', cb.checked);
+    });
+
+    const cb = item.querySelector('input[type="checkbox"]');
+    cb.addEventListener('change', function() {
+        item.classList.toggle('checked', this.checked);
+    });
+});
+
+// ============ Toggle switch status text ============
+const aiToggle = document.getElementById('aiAutoToggle');
+const toggleStatus = document.getElementById('toggleStatus');
+
+aiToggle.addEventListener('change', function() {
+    if (this.checked) {
+        toggleStatus.textContent = '已开启';
+        toggleStatus.className = 'toggle-status on';
+    } else {
+        toggleStatus.textContent = '已关闭';
+        toggleStatus.className = 'toggle-status off';
+    }
+});
+
+// ============ Toast notification ============
+function showToast(message, icon) {
+    const container = document.getElementById('toastContainer');
+    const toast = document.createElement('div');
+    toast.className = 'toast';
+    toast.innerHTML = `
+        <span class="toast-icon">${icon || '&#10004;&#65039;'}</span>
+        <span>${message}</span>
+    `;
+    container.appendChild(toast);
+
+    // Auto remove after 3 seconds
+    setTimeout(() => {
+        toast.classList.add('removing');
+        setTimeout(() => {
+            if (toast.parentNode) toast.remove();
+        }, 300);
+    }, 3000);
+}
+
+// ============ Save button ============
+document.getElementById('saveBtn').addEventListener('click', function() {
+    const total = parseInt(document.getElementById('totalPercent').textContent, 10);
+    if (total !== 100) {
+        showToast('权重合计必须等于100%，请重新调整', '&#9888;&#65039;');
+        return;
+    }
+    showToast('配置已保存成功', '&#10004;&#65039;');
+});
+
+// ============ Reset to defaults ============
+const defaultValues = {
+    sliderLocation: 35,
+    sliderArea: 25,
+    sliderTraffic: 22,
+    sliderSupport: 18,
+    premiumCap: 50,
+    discountFloor: 15,
+    recommendCount: 3,
+    tagSources: ['industry', 'scale', 'budget', 'history'],
+    aiAuto: true,
+};
+
+document.getElementById('resetBtn').addEventListener('click', function() {
+    // Reset sliders
+    sliders.forEach(s => {
+        const el = document.getElementById(s.id);
+        el.value = defaultValues[s.id];
+        updateSlider(s);
+    });
+
+    // Reset number inputs
+    document.getElementById('premiumCap').value = defaultValues.premiumCap;
+    document.getElementById('discountFloor').value = defaultValues.discountFloor;
+
+    // Reset select
+    document.getElementById('recommendCount').value = defaultValues.recommendCount;
+
+    // Reset checkboxes
+    document.querySelectorAll('#tagSourceGroup .checkbox-item').forEach(item => {
+        const cb = item.querySelector('input[type="checkbox"]');
+        const val = cb.value;
+        const shouldCheck = defaultValues.tagSources.includes(val);
+        cb.checked = shouldCheck;
+        item.classList.toggle('checked', shouldCheck);
+    });
+
+    // Reset toggle
+    aiToggle.checked = defaultValues.aiAuto;
+    aiToggle.dispatchEvent(new Event('change'));
+
+    showToast('已恢复默认配置', '&#8635;&#65039;');
+});
+
+// ============ Hamburger menu toggle ============
+const hamburger = document.getElementById('hamburgerBtn');
+const sidebar = document.getElementById('sidebar');
+const overlay = document.getElementById('sidebarOverlay');
+
+function toggleSidebar() {
+    sidebar.classList.toggle('open');
+    overlay.classList.toggle('open');
+}
+
+hamburger.addEventListener('click', toggleSidebar);
+overlay.addEventListener('click', toggleSidebar);
+
+window.addEventListener('resize', () => {
+    if (window.innerWidth > 768) {
+        sidebar.classList.remove('open');
+        overlay.classList.remove('open');
+    }
+});
+
+document.querySelectorAll('.sidebar-item').forEach(item => {
+    item.addEventListener('click', function(e) {
+        document.querySelectorAll('.sidebar-item').forEach(i => i.classList.remove('active'));
+        this.classList.add('active');
+        if (window.innerWidth <= 768) {
+            setTimeout(() => {
+                sidebar.classList.remove('open');
+                overlay.classList.remove('open');
+            }, 150);
+        }
+    });
+});
+</script>
+
+</body>
+</html>

@@ -1,0 +1,4697 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>万耀企龙 - 展位AI智能推荐与动态定价系统</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Noto+Sans+SC:wght@300;400;500;600;700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<style>
+
+/* ============================================================
+   万耀企龙展位AI智能推荐与动态定价系统 — Complete CSS Stylesheet
+   ============================================================ */
+
+/* ============ GOOGLE FONTS IMPORT ============ */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Noto+Sans+SC:wght@300;400;500;600;700;900&display=swap');
+
+/* ============ CSS CUSTOM PROPERTIES ============ */
+:root {
+    /* Navy tones */
+    --navy: #0B2A4A;
+    --navy-dark: #071D35;
+    --navy-deep: #041221;
+
+    /* Gold accent */
+    --gold: #C9A84C;
+    --gold-light: #E0C36A;
+    --gold-dark: #A88B3A;
+
+    /* Cyan accent */
+    --cyan: #00A3E0;
+    --cyan-light: #33B8E8;
+    --cyan-dark: #0089BF;
+
+    /* Status colors */
+    --green: #10B981;
+    --green-light: #D1FAE5;
+    --green-dark: #059669;
+    --red: #EF4444;
+    --red-light: #FEE2E2;
+    --red-dark: #DC2626;
+    --yellow: #F59E0B;
+    --yellow-light: #FEF3C7;
+    --yellow-dark: #D97706;
+    --purple: #8B5CF6;
+    --purple-light: #EDE9FE;
+    --purple-dark: #7C3AED;
+
+    /* Grays */
+    --white: #FFFFFF;
+    --gray-50: #F8F9FA;
+    --gray-100: #F0F2F5;
+    --gray-200: #E4E7EB;
+    --gray-300: #D1D5DB;
+    --gray-400: #9CA3AF;
+    --gray-500: #6B7280;
+    --gray-600: #4B5563;
+    --gray-700: #374151;
+    --gray-800: #1F2937;
+
+    /* Text helpers */
+    --text-light: rgba(255, 255, 255, 0.85);
+    --text-muted: rgba(255, 255, 255, 0.55);
+    --text-muted-dark: rgba(0, 0, 0, 0.45);
+
+    /* Shadows */
+    --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.04);
+    --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08), 0 2px 6px rgba(0, 0, 0, 0.04);
+    --shadow-lg: 0 12px 32px rgba(0, 0, 0, 0.1), 0 4px 12px rgba(0, 0, 0, 0.05);
+    --shadow-xl: 0 24px 64px rgba(0, 0, 0, 0.12), 0 8px 24px rgba(0, 0, 0, 0.06);
+    --shadow-gold: 0 8px 30px rgba(201, 168, 76, 0.3);
+    --shadow-cyan: 0 8px 30px rgba(0, 163, 224, 0.3);
+
+    /* Border radius */
+    --radius-sm: 8px;
+    --radius-md: 12px;
+    --radius-lg: 16px;
+    --radius-xl: 24px;
+
+    /* Transitions */
+    --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+    --transition-fast: 0.15s ease;
+    --transition-base: 0.3s ease;
+    --transition-slow: 0.4s var(--ease-out);
+
+    /* Layout */
+    --sidebar-width: 260px;
+    --navbar-height: 64px;
+}
+
+/* ============ RESET & BASE ============ */
+*, *::before, *::after {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html {
+    scroll-behavior: smooth;
+    font-size: 16px;
+    -webkit-text-size-adjust: 100%;
+}
+
+body {
+    font-family: 'Noto Sans SC', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    color: var(--gray-800);
+    background: var(--white);
+    overflow-x: hidden;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+a {
+    text-decoration: none;
+    color: inherit;
+    transition: color var(--transition-fast);
+}
+
+ul, ol {
+    list-style: none;
+}
+
+img {
+    max-width: 100%;
+    height: auto;
+    display: block;
+}
+
+button {
+    cursor: pointer;
+    border: none;
+    background: none;
+    font-family: inherit;
+    font-size: inherit;
+}
+
+input, select, textarea {
+    font-family: inherit;
+    font-size: inherit;
+}
+
+table {
+    border-collapse: collapse;
+    width: 100%;
+}
+
+/* Focus styles for accessibility */
+:focus-visible {
+    outline: 2px solid var(--cyan);
+    outline-offset: 2px;
+}
+
+/* Selection color */
+::selection {
+    background: rgba(0, 163, 224, 0.15);
+    color: var(--navy);
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--gray-300);
+    border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--gray-400);
+}
+
+/* ============ UTILITY CLASSES ============ */
+.text-center { text-align: center; }
+.text-left { text-align: left; }
+.text-right { text-align: right; }
+.flex-center { display: flex; align-items: center; justify-content: center; }
+.gap-8 { gap: 8px; }
+.gap-16 { gap: 16px; }
+.gap-24 { gap: 24px; }
+.mt-8 { margin-top: 8px; }
+.mt-16 { margin-top: 16px; }
+.mt-24 { margin-top: 24px; }
+.mb-8 { margin-bottom: 8px; }
+.mb-16 { margin-bottom: 16px; }
+.mb-24 { margin-bottom: 24px; }
+.w-full { width: 100%; }
+.hidden { display: none !important; }
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border-width: 0;
+}
+
+/* ============ LANDING PAGE NAVBAR ============ */
+.navbar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 60px;
+    height: 72px;
+    background: rgba(7, 29, 53, 0.85);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    transition: all var(--transition-base);
+}
+
+.navbar.scrolled {
+    background: rgba(7, 29, 53, 0.96);
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.3);
+}
+
+.nav-brand {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    text-decoration: none;
+}
+
+.nav-logo {
+    width: 40px;
+    height: 40px;
+    background: linear-gradient(135deg, var(--gold), var(--gold-light));
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 800;
+    font-size: 18px;
+    color: var(--navy-dark);
+    letter-spacing: -1px;
+    flex-shrink: 0;
+}
+
+.nav-title {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--white);
+    letter-spacing: 1px;
+}
+
+.nav-subtitle {
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-top: 1px;
+}
+
+.nav-links {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.nav-link {
+    padding: 8px 18px;
+    border-radius: var(--radius-sm);
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text-light);
+    text-decoration: none;
+    transition: all var(--transition-fast);
+    cursor: pointer;
+    border: none;
+    background: none;
+}
+
+.nav-link:hover {
+    background: rgba(255, 255, 255, 0.08);
+    color: var(--white);
+}
+
+.nav-link.active {
+    background: rgba(201, 168, 76, 0.15);
+    color: var(--gold);
+}
+
+/* Mobile nav toggle */
+.nav-toggle {
+    display: none;
+    flex-direction: column;
+    gap: 5px;
+    padding: 8px;
+    cursor: pointer;
+}
+
+.nav-toggle span {
+    display: block;
+    width: 22px;
+    height: 2px;
+    background: var(--white);
+    border-radius: 2px;
+    transition: all var(--transition-fast);
+}
+
+/* ============ HERO SECTION ============ */
+.hero {
+    position: relative;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    background: var(--navy-deep);
+}
+
+.hero-bg {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+}
+
+/* Animated grid background */
+.hero-grid {
+    position: absolute;
+    inset: 0;
+    background-image:
+        linear-gradient(rgba(0, 163, 224, 0.06) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0, 163, 224, 0.06) 1px, transparent 1px);
+    background-size: 60px 60px;
+    animation: gridMove 20s linear infinite;
+}
+
+@keyframes gridMove {
+    0% { transform: translate(0, 0); }
+    100% { transform: translate(60px, 60px); }
+}
+
+/* Gradient orbs */
+.hero-orb {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(80px);
+    opacity: 0.4;
+    animation: orbFloat 8s ease-in-out infinite alternate;
+}
+
+.hero-orb-1 {
+    width: 600px;
+    height: 600px;
+    background: radial-gradient(circle, rgba(0, 163, 224, 0.3), transparent 70%);
+    top: -10%;
+    right: -5%;
+    animation-delay: 0s;
+}
+
+.hero-orb-2 {
+    width: 500px;
+    height: 500px;
+    background: radial-gradient(circle, rgba(201, 168, 76, 0.25), transparent 70%);
+    bottom: -10%;
+    left: -5%;
+    animation-delay: -3s;
+}
+
+.hero-orb-3 {
+    width: 400px;
+    height: 400px;
+    background: radial-gradient(circle, rgba(0, 163, 224, 0.2), transparent 70%);
+    top: 40%;
+    left: 30%;
+    animation-delay: -5s;
+}
+
+@keyframes orbFloat {
+    0% { transform: translate(0, 0) scale(1); }
+    100% { transform: translate(30px, -30px) scale(1.1); }
+}
+
+/* Particle dots */
+.hero-particles {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+}
+
+.particle {
+    position: absolute;
+    width: 3px;
+    height: 3px;
+    background: rgba(201, 168, 76, 0.6);
+    border-radius: 50%;
+    animation: particleFloat linear infinite;
+}
+
+@keyframes particleFloat {
+    0% { transform: translateY(100vh) scale(0); opacity: 0; }
+    10% { opacity: 1; }
+    90% { opacity: 1; }
+    100% { transform: translateY(-10vh) scale(1); opacity: 0; }
+}
+
+.hero-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+        180deg,
+        rgba(4, 18, 33, 0.3) 0%,
+        rgba(4, 18, 33, 0.1) 40%,
+        rgba(4, 18, 33, 0.5) 100%
+    );
+    z-index: 1;
+}
+
+.hero-content {
+    position: relative;
+    z-index: 2;
+    text-align: center;
+    max-width: 900px;
+    padding: 0 40px;
+}
+
+.hero-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 20px;
+    border-radius: 50px;
+    background: rgba(201, 168, 76, 0.12);
+    border: 1px solid rgba(201, 168, 76, 0.25);
+    color: var(--gold-light);
+    font-size: 13px;
+    font-weight: 500;
+    margin-bottom: 32px;
+    backdrop-filter: blur(10px);
+}
+
+.hero-badge-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--gold);
+    animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.5; transform: scale(0.8); }
+}
+
+.hero-title {
+    font-size: 56px;
+    font-weight: 800;
+    color: var(--white);
+    line-height: 1.2;
+    margin-bottom: 10px;
+    letter-spacing: -1px;
+}
+
+.hero-title-accent {
+    background: linear-gradient(135deg, var(--gold), var(--gold-light), var(--cyan-light));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.hero-title-brand {
+    font-size: 32px;
+    font-weight: 600;
+    color: var(--text-muted);
+    letter-spacing: 4px;
+    margin-bottom: 8px;
+    display: block;
+}
+
+.hero-desc {
+    font-size: 18px;
+    color: var(--text-light);
+    max-width: 680px;
+    margin: 24px auto 48px;
+    line-height: 1.8;
+    font-weight: 300;
+}
+
+/* Entry cards */
+.hero-entries {
+    display: flex;
+    gap: 24px;
+    justify-content: center;
+    margin-bottom: 60px;
+}
+
+.entry-card {
+    flex: 1;
+    max-width: 340px;
+    padding: 36px 32px;
+    border-radius: var(--radius-xl);
+    text-align: center;
+    cursor: pointer;
+    transition: all var(--transition-slow);
+    position: relative;
+    overflow: hidden;
+    text-decoration: none;
+}
+
+.entry-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: var(--radius-xl);
+    padding: 1.5px;
+    mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+}
+
+.entry-client {
+    background: rgba(201, 168, 76, 0.06);
+    backdrop-filter: blur(20px);
+    border: 1.5px solid rgba(201, 168, 76, 0.3);
+}
+
+.entry-client::before {
+    background: linear-gradient(135deg, var(--gold), var(--gold-light));
+}
+
+.entry-client:hover {
+    background: rgba(201, 168, 76, 0.12);
+    border-color: var(--gold);
+    transform: translateY(-8px);
+    box-shadow: 0 20px 60px rgba(201, 168, 76, 0.2);
+}
+
+.entry-staff {
+    background: rgba(0, 163, 224, 0.06);
+    backdrop-filter: blur(20px);
+    border: 1.5px solid rgba(0, 163, 224, 0.3);
+}
+
+.entry-staff::before {
+    background: linear-gradient(135deg, var(--cyan), var(--cyan-light));
+}
+
+.entry-staff:hover {
+    background: rgba(0, 163, 224, 0.12);
+    border-color: var(--cyan);
+    transform: translateY(-8px);
+    box-shadow: 0 20px 60px rgba(0, 163, 224, 0.2);
+}
+
+.entry-icon {
+    width: 64px;
+    height: 64px;
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 20px;
+    font-size: 28px;
+}
+
+.entry-client .entry-icon {
+    background: linear-gradient(135deg, rgba(201, 168, 76, 0.2), rgba(201, 168, 76, 0.08));
+}
+
+.entry-staff .entry-icon {
+    background: linear-gradient(135deg, rgba(0, 163, 224, 0.2), rgba(0, 163, 224, 0.08));
+}
+
+.entry-title {
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--white);
+    margin-bottom: 8px;
+}
+
+.entry-desc {
+    font-size: 14px;
+    color: var(--text-muted);
+    margin-bottom: 24px;
+    line-height: 1.6;
+}
+
+.entry-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 28px;
+    border-radius: var(--radius-md);
+    font-size: 14px;
+    font-weight: 600;
+    border: none;
+    cursor: pointer;
+    transition: all var(--transition-base);
+    color: var(--white);
+}
+
+.entry-client .entry-btn {
+    background: linear-gradient(135deg, var(--gold), var(--gold-dark));
+    color: var(--navy-dark);
+}
+
+.entry-client .entry-btn:hover {
+    box-shadow: var(--shadow-gold);
+}
+
+.entry-staff .entry-btn {
+    background: linear-gradient(135deg, var(--cyan), var(--cyan-dark));
+}
+
+.entry-staff .entry-btn:hover {
+    box-shadow: var(--shadow-cyan);
+}
+
+.entry-arrow {
+    transition: transform var(--transition-base);
+}
+
+.entry-card:hover .entry-arrow {
+    transform: translateX(4px);
+}
+
+/* Scroll indicator */
+.scroll-indicator {
+    position: absolute;
+    bottom: 40px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    color: var(--text-muted);
+    font-size: 12px;
+    animation: scrollBounce 2s ease-in-out infinite;
+}
+
+.scroll-mouse {
+    width: 24px;
+    height: 38px;
+    border: 2px solid rgba(255, 255, 255, 0.25);
+    border-radius: 12px;
+    position: relative;
+}
+
+.scroll-mouse::after {
+    content: '';
+    position: absolute;
+    top: 8px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 3px;
+    height: 8px;
+    border-radius: 2px;
+    background: var(--gold);
+    animation: scrollWheel 2s ease-in-out infinite;
+}
+
+@keyframes scrollWheel {
+    0%, 100% { opacity: 1; transform: translateX(-50%) translateY(0); }
+    50% { opacity: 0.3; transform: translateX(-50%) translateY(8px); }
+}
+
+@keyframes scrollBounce {
+    0%, 100% { transform: translateX(-50%) translateY(0); }
+    50% { transform: translateX(-50%) translateY(8px); }
+}
+
+/* ============ FEATURES SECTION ============ */
+.features {
+    padding: 120px 60px;
+    background: var(--gray-50);
+    position: relative;
+}
+
+.features::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 120px;
+    background: linear-gradient(180deg, var(--navy-deep), transparent);
+    pointer-events: none;
+}
+
+.section-header {
+    text-align: center;
+    margin-bottom: 80px;
+    position: relative;
+    z-index: 1;
+}
+
+.section-label {
+    display: inline-block;
+    padding: 6px 16px;
+    border-radius: 6px;
+    background: rgba(0, 163, 224, 0.08);
+    color: var(--cyan);
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin-bottom: 16px;
+}
+
+.section-title {
+    font-size: 40px;
+    font-weight: 800;
+    color: var(--gray-800);
+    margin-bottom: 16px;
+    letter-spacing: -0.5px;
+}
+
+.section-desc {
+    font-size: 16px;
+    color: var(--gray-500);
+    max-width: 560px;
+    margin: 0 auto;
+    line-height: 1.7;
+}
+
+.features-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 32px;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.feature-card {
+    background: var(--white);
+    border-radius: var(--radius-xl);
+    padding: 48px 36px;
+    text-align: center;
+    transition: all var(--transition-slow);
+    border: 1px solid var(--gray-200);
+    position: relative;
+    overflow: hidden;
+}
+
+.feature-card::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--cyan), var(--gold));
+    opacity: 0;
+    transition: opacity var(--transition-base);
+}
+
+.feature-card:hover {
+    transform: translateY(-8px);
+    box-shadow: var(--shadow-xl);
+    border-color: transparent;
+}
+
+.feature-card:hover::after {
+    opacity: 1;
+}
+
+.feature-icon-wrap {
+    width: 80px;
+    height: 80px;
+    border-radius: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 28px;
+    font-size: 36px;
+    position: relative;
+}
+
+.feature-icon-ai {
+    background: linear-gradient(135deg, rgba(0, 163, 224, 0.12), rgba(0, 163, 224, 0.04));
+}
+
+.feature-icon-price {
+    background: linear-gradient(135deg, rgba(201, 168, 76, 0.12), rgba(201, 168, 76, 0.04));
+}
+
+.feature-icon-map {
+    background: linear-gradient(135deg, rgba(16, 185, 129, 0.12), rgba(16, 185, 129, 0.04));
+}
+
+.feature-title {
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--gray-800);
+    margin-bottom: 12px;
+}
+
+.feature-desc {
+    font-size: 14px;
+    color: var(--gray-500);
+    line-height: 1.8;
+    margin-bottom: 24px;
+}
+
+.feature-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    justify-content: center;
+}
+
+.feature-tag {
+    padding: 4px 12px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 500;
+    background: var(--gray-100);
+    color: var(--gray-600);
+}
+
+/* ============ STATS SECTION ============ */
+.stats {
+    padding: 100px 60px;
+    background: var(--white);
+}
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 40px;
+    max-width: 1100px;
+    margin: 0 auto;
+}
+
+.stat-item {
+    text-align: center;
+}
+
+.stat-number {
+    font-size: 52px;
+    font-weight: 800;
+    background: linear-gradient(135deg, var(--navy), var(--cyan-dark));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    line-height: 1;
+    margin-bottom: 8px;
+}
+
+.stat-label {
+    font-size: 15px;
+    color: var(--gray-500);
+    font-weight: 500;
+}
+
+/* ============ WORKFLOW SECTION ============ */
+.workflow {
+    padding: 120px 60px;
+    background: var(--navy);
+    position: relative;
+    overflow: hidden;
+}
+
+.workflow .hero-grid {
+    opacity: 0.5;
+}
+
+.workflow .section-label {
+    background: rgba(0, 163, 224, 0.15);
+}
+
+.workflow .section-title {
+    color: var(--white);
+}
+
+.workflow .section-desc {
+    color: var(--text-muted);
+}
+
+.workflow-steps {
+    display: flex;
+    gap: 0;
+    max-width: 1100px;
+    margin: 0 auto;
+    position: relative;
+}
+
+.workflow-step {
+    flex: 1;
+    text-align: center;
+    position: relative;
+    padding: 0 24px;
+}
+
+.workflow-step::after {
+    content: '';
+    position: absolute;
+    top: 32px;
+    right: 0;
+    width: 50%;
+    height: 2px;
+    background: linear-gradient(90deg, var(--gold), rgba(201, 168, 76, 0.2));
+}
+
+.workflow-step:last-child::after {
+    display: none;
+}
+
+.workflow-step::before {
+    content: '';
+    position: absolute;
+    top: 32px;
+    left: 0;
+    width: 50%;
+    height: 2px;
+    background: linear-gradient(90deg, rgba(201, 168, 76, 0.2), var(--gold));
+}
+
+.workflow-step:first-child::before {
+    display: none;
+}
+
+.step-number {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--gold), var(--gold-dark));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    font-weight: 800;
+    color: var(--navy-dark);
+    margin: 0 auto 20px;
+    position: relative;
+    z-index: 1;
+}
+
+.step-title {
+    font-size: 17px;
+    font-weight: 700;
+    color: var(--white);
+    margin-bottom: 8px;
+}
+
+.step-desc {
+    font-size: 13px;
+    color: var(--text-muted);
+    line-height: 1.7;
+}
+
+/* ============ FOOTER ============ */
+.footer {
+    padding: 60px;
+    background: var(--navy-deep);
+    border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.footer-content {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+}
+
+.footer-brand {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 16px;
+}
+
+.footer-text {
+    font-size: 13px;
+    color: var(--text-muted);
+    line-height: 1.8;
+    max-width: 360px;
+}
+
+.footer-links {
+    display: flex;
+    gap: 48px;
+}
+
+.footer-col-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--white);
+    margin-bottom: 16px;
+}
+
+.footer-col a {
+    display: block;
+    font-size: 13px;
+    color: var(--text-muted);
+    text-decoration: none;
+    margin-bottom: 10px;
+    transition: color var(--transition-fast);
+}
+
+.footer-col a:hover {
+    color: var(--gold-light);
+}
+
+.footer-bottom {
+    max-width: 1200px;
+    margin: 40px auto 0;
+    padding-top: 24px;
+    border-top: 1px solid rgba(255, 255, 255, 0.06);
+    text-align: center;
+    font-size: 12px;
+    color: var(--text-muted);
+}
+
+/* ================================================================
+   LOGIN PAGES
+   ================================================================ */
+.login-page {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--navy-deep);
+    position: relative;
+    overflow: hidden;
+}
+
+.login-page .hero-grid {
+    opacity: 0.4;
+}
+
+.login-page .hero-orb-1 {
+    opacity: 0.25;
+}
+
+.login-page .hero-orb-2 {
+    opacity: 0.2;
+}
+
+.login-card {
+    position: relative;
+    z-index: 2;
+    width: 100%;
+    max-width: 440px;
+    background: rgba(255, 255, 255, 0.04);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: var(--radius-xl);
+    padding: 48px 40px;
+    margin: 24px;
+}
+
+.login-card-header {
+    text-align: center;
+    margin-bottom: 36px;
+}
+
+.login-logo {
+    width: 56px;
+    height: 56px;
+    background: linear-gradient(135deg, var(--gold), var(--gold-light));
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 800;
+    font-size: 22px;
+    color: var(--navy-dark);
+    margin: 0 auto 20px;
+}
+
+.login-title {
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--white);
+    margin-bottom: 8px;
+}
+
+.login-subtitle {
+    font-size: 14px;
+    color: var(--text-muted);
+}
+
+.login-form .form-group {
+    margin-bottom: 20px;
+}
+
+.login-form label {
+    display: block;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-light);
+    margin-bottom: 8px;
+}
+
+.login-form input {
+    width: 100%;
+    padding: 12px 16px;
+    border-radius: var(--radius-sm);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    background: rgba(255, 255, 255, 0.06);
+    color: var(--white);
+    font-size: 14px;
+    transition: all var(--transition-fast);
+}
+
+.login-form input::placeholder {
+    color: var(--text-muted);
+}
+
+.login-form input:focus {
+    outline: none;
+    border-color: var(--gold);
+    background: rgba(255, 255, 255, 0.1);
+    box-shadow: 0 0 0 3px rgba(201, 168, 76, 0.15);
+}
+
+.login-options {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+}
+
+.login-remember {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    color: var(--text-light);
+    cursor: pointer;
+}
+
+.login-remember input[type="checkbox"] {
+    width: 16px;
+    height: 16px;
+    accent-color: var(--gold);
+}
+
+.login-forgot {
+    font-size: 13px;
+    color: var(--gold-light);
+    cursor: pointer;
+    transition: color var(--transition-fast);
+}
+
+.login-forgot:hover {
+    color: var(--gold);
+}
+
+.login-submit {
+    width: 100%;
+    padding: 14px;
+    border-radius: var(--radius-md);
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--navy-dark);
+    background: linear-gradient(135deg, var(--gold), var(--gold-light));
+    border: none;
+    cursor: pointer;
+    transition: all var(--transition-base);
+}
+
+.login-submit:hover {
+    box-shadow: var(--shadow-gold);
+    transform: translateY(-1px);
+}
+
+.login-submit:active {
+    transform: translateY(0);
+}
+
+.login-back {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin-top: 24px;
+    font-size: 13px;
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: color var(--transition-fast);
+}
+
+.login-back:hover {
+    color: var(--text-light);
+}
+
+/* Staff login variant */
+.login-staff .login-logo {
+    background: linear-gradient(135deg, var(--cyan), var(--cyan-light));
+}
+
+.login-staff .login-submit {
+    background: linear-gradient(135deg, var(--cyan), var(--cyan-light));
+    color: var(--white);
+}
+
+.login-staff .login-submit:hover {
+    box-shadow: var(--shadow-cyan);
+}
+
+.login-staff .login-forgot {
+    color: var(--cyan-light);
+}
+
+.login-staff .login-form input:focus {
+    border-color: var(--cyan);
+    box-shadow: 0 0 0 3px rgba(0, 163, 224, 0.15);
+}
+
+/* ================================================================
+   PORTAL LAYOUT (shared between client and staff)
+   ================================================================ */
+.portal-layout {
+    display: flex;
+    min-height: 100vh;
+}
+
+/* ================================================================
+   CLIENT PORTAL NAV BAR (white theme)
+   ================================================================ */
+.client-navbar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 900;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 32px;
+    height: var(--navbar-height);
+    background: var(--white);
+    border-bottom: 1px solid var(--gray-200);
+    box-shadow: var(--shadow-sm);
+}
+
+.client-navbar .nav-brand .nav-logo {
+    width: 36px;
+    height: 36px;
+    font-size: 16px;
+}
+
+.client-navbar .nav-title {
+    color: var(--navy);
+    font-size: 15px;
+}
+
+.client-navbar .nav-subtitle {
+    color: var(--gray-500);
+}
+
+.client-nav-right {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.client-nav-user {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 6px 12px;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    transition: background var(--transition-fast);
+}
+
+.client-nav-user:hover {
+    background: var(--gray-100);
+}
+
+.client-nav-avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--gold), var(--gold-light));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--navy-dark);
+}
+
+.client-nav-name {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--gray-800);
+}
+
+.client-nav-role {
+    font-size: 11px;
+    color: var(--gray-500);
+}
+
+.client-nav-logout {
+    padding: 6px 14px;
+    border-radius: var(--radius-sm);
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--gray-500);
+    border: 1px solid var(--gray-200);
+    transition: all var(--transition-fast);
+}
+
+.client-nav-logout:hover {
+    color: var(--red);
+    border-color: var(--red);
+    background: var(--red-light);
+}
+
+/* ================================================================
+   STAFF PORTAL NAV BAR (dark navy theme)
+   ================================================================ */
+.staff-navbar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 900;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 32px;
+    height: var(--navbar-height);
+    background: var(--navy-dark);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.3);
+}
+
+.staff-navbar .nav-title {
+    color: var(--white);
+    font-size: 15px;
+}
+
+.staff-navbar .nav-subtitle {
+    color: var(--text-muted);
+}
+
+.staff-nav-right {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.staff-nav-user {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 6px 12px;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    transition: background var(--transition-fast);
+}
+
+.staff-nav-user:hover {
+    background: rgba(255, 255, 255, 0.08);
+}
+
+.staff-nav-avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--cyan), var(--cyan-light));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--white);
+}
+
+.staff-nav-name {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--white);
+}
+
+.staff-nav-role {
+    font-size: 11px;
+    color: var(--text-muted);
+}
+
+.staff-nav-logout {
+    padding: 6px 14px;
+    border-radius: var(--radius-sm);
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-muted);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    transition: all var(--transition-fast);
+}
+
+.staff-nav-logout:hover {
+    color: var(--red);
+    border-color: var(--red);
+    background: rgba(239, 68, 68, 0.1);
+}
+
+/* ================================================================
+   SIDEBARS
+   ================================================================ */
+
+/* Client sidebar (white) */
+.sidebar {
+    position: fixed;
+    top: var(--navbar-height);
+    bottom: 0;
+    width: var(--sidebar-width);
+    overflow-y: auto;
+    z-index: 800;
+    transition: transform var(--transition-base);
+}
+
+.sidebar-client {
+    left: 0;
+    background: var(--white);
+    border-right: 1px solid var(--gray-200);
+}
+
+.sidebar-staff {
+    left: 0;
+    background: var(--navy-dark);
+    border-right: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.sidebar-section {
+    padding: 20px 16px 8px;
+}
+
+.sidebar-section-title {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+}
+
+.sidebar-client .sidebar-section-title {
+    color: var(--gray-400);
+}
+
+.sidebar-staff .sidebar-section-title {
+    color: rgba(255, 255, 255, 0.3);
+}
+
+.sidebar-nav {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.sidebar-link {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 16px;
+    border-radius: var(--radius-sm);
+    font-size: 14px;
+    font-weight: 500;
+    transition: all var(--transition-fast);
+    cursor: pointer;
+    border: none;
+    width: 100%;
+    text-align: left;
+}
+
+.sidebar-link-icon {
+    width: 20px;
+    text-align: center;
+    font-size: 16px;
+    flex-shrink: 0;
+}
+
+/* Client sidebar link colors */
+.sidebar-client .sidebar-link {
+    color: var(--gray-600);
+}
+
+.sidebar-client .sidebar-link:hover {
+    background: var(--gray-100);
+    color: var(--gray-800);
+}
+
+.sidebar-client .sidebar-link.active {
+    background: rgba(0, 163, 224, 0.08);
+    color: var(--cyan);
+    font-weight: 600;
+}
+
+.sidebar-client .sidebar-link.active .sidebar-link-icon {
+    color: var(--cyan);
+}
+
+/* Staff sidebar link colors */
+.sidebar-staff .sidebar-link {
+    color: var(--text-light);
+}
+
+.sidebar-staff .sidebar-link:hover {
+    background: rgba(255, 255, 255, 0.06);
+    color: var(--white);
+}
+
+.sidebar-staff .sidebar-link.active {
+    background: rgba(0, 163, 224, 0.15);
+    color: var(--cyan-light);
+    font-weight: 600;
+}
+
+.sidebar-staff .sidebar-link.active .sidebar-link-icon {
+    color: var(--cyan-light);
+}
+
+/* Sidebar badge */
+.sidebar-badge {
+    margin-left: auto;
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-size: 11px;
+    font-weight: 600;
+}
+
+.sidebar-client .sidebar-badge {
+    background: var(--gray-100);
+    color: var(--gray-600);
+}
+
+.sidebar-staff .sidebar-badge {
+    background: rgba(255, 255, 255, 0.1);
+    color: var(--text-muted);
+}
+
+.sidebar-badge.warning {
+    background: var(--yellow-light);
+    color: var(--yellow-dark);
+}
+
+.sidebar-badge.danger {
+    background: var(--red-light);
+    color: var(--red-dark);
+}
+
+/* ================================================================
+   MAIN CONTENT AREA
+   ================================================================ */
+.main-content {
+    flex: 1;
+    min-height: 100vh;
+    padding-top: var(--navbar-height);
+}
+
+.main-content.with-sidebar {
+    margin-left: var(--sidebar-width);
+}
+
+.page-container {
+    padding: 32px;
+    max-width: 1400px;
+}
+
+.page-header {
+    margin-bottom: 32px;
+}
+
+.page-title {
+    font-size: 26px;
+    font-weight: 700;
+    color: var(--gray-800);
+    margin-bottom: 8px;
+}
+
+.page-desc {
+    font-size: 14px;
+    color: var(--gray-500);
+    line-height: 1.6;
+}
+
+/* Staff page title override */
+.staff-theme .page-title {
+    color: var(--white);
+}
+
+.staff-theme .page-desc {
+    color: var(--text-muted);
+}
+
+/* ================================================================
+   DASHBOARD STAT CARDS / KPI CARDS
+   ================================================================ */
+.kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 24px;
+    margin-bottom: 32px;
+}
+
+.kpi-card {
+    background: var(--white);
+    border-radius: var(--radius-lg);
+    padding: 24px;
+    border: 1px solid var(--gray-200);
+    transition: all var(--transition-base);
+    position: relative;
+    overflow: hidden;
+}
+
+.kpi-card:hover {
+    box-shadow: var(--shadow-md);
+    transform: translateY(-2px);
+}
+
+.kpi-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+}
+
+.kpi-card.cyan::before { background: var(--cyan); }
+.kpi-card.gold::before { background: var(--gold); }
+.kpi-card.green::before { background: var(--green); }
+.kpi-card.red::before { background: var(--red); }
+.kpi-card.purple::before { background: var(--purple); }
+.kpi-card.yellow::before { background: var(--yellow); }
+
+.kpi-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 16px;
+}
+
+.kpi-label {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--gray-500);
+}
+
+.kpi-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+}
+
+.kpi-icon.cyan { background: rgba(0, 163, 224, 0.1); }
+.kpi-icon.gold { background: rgba(201, 168, 76, 0.1); }
+.kpi-icon.green { background: rgba(16, 185, 129, 0.1); }
+.kpi-icon.red { background: rgba(239, 68, 68, 0.1); }
+.kpi-icon.purple { background: rgba(139, 92, 246, 0.1); }
+.kpi-icon.yellow { background: rgba(245, 158, 11, 0.1); }
+
+.kpi-value {
+    font-size: 32px;
+    font-weight: 800;
+    color: var(--gray-800);
+    line-height: 1;
+    margin-bottom: 8px;
+}
+
+.kpi-change {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 12px;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 6px;
+}
+
+.kpi-change.up {
+    background: var(--green-light);
+    color: var(--green-dark);
+}
+
+.kpi-change.down {
+    background: var(--red-light);
+    color: var(--red-dark);
+}
+
+.kpi-change.neutral {
+    background: var(--gray-100);
+    color: var(--gray-500);
+}
+
+/* Staff theme KPI cards */
+.staff-theme .kpi-card {
+    background: rgba(255, 255, 255, 0.04);
+    border-color: rgba(255, 255, 255, 0.08);
+}
+
+.staff-theme .kpi-card:hover {
+    background: rgba(255, 255, 255, 0.06);
+}
+
+.staff-theme .kpi-label {
+    color: var(--text-muted);
+}
+
+.staff-theme .kpi-value {
+    color: var(--white);
+}
+
+/* ================================================================
+   FORM ELEMENTS
+   ================================================================ */
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-label {
+    display: block;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--gray-700);
+    margin-bottom: 6px;
+}
+
+.form-label .required {
+    color: var(--red);
+    margin-left: 2px;
+}
+
+.form-input,
+.form-select,
+.form-textarea {
+    width: 100%;
+    padding: 10px 14px;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--gray-300);
+    background: var(--white);
+    color: var(--gray-800);
+    font-size: 14px;
+    transition: all var(--transition-fast);
+    outline: none;
+}
+
+.form-input::placeholder,
+.form-textarea::placeholder {
+    color: var(--gray-400);
+}
+
+.form-input:hover,
+.form-select:hover,
+.form-textarea:hover {
+    border-color: var(--gray-400);
+}
+
+.form-input:focus,
+.form-select:focus,
+.form-textarea:focus {
+    border-color: var(--cyan);
+    box-shadow: 0 0 0 3px rgba(0, 163, 224, 0.1);
+}
+
+.form-input.error,
+.form-select.error,
+.form-textarea.error {
+    border-color: var(--red);
+    box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
+}
+
+.form-error {
+    font-size: 12px;
+    color: var(--red);
+    margin-top: 4px;
+}
+
+.form-hint {
+    font-size: 12px;
+    color: var(--gray-400);
+    margin-top: 4px;
+}
+
+.form-select {
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%236B7280' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    padding-right: 36px;
+    cursor: pointer;
+}
+
+.form-textarea {
+    resize: vertical;
+    min-height: 100px;
+    line-height: 1.6;
+}
+
+.form-row {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+}
+
+.form-row-3 {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+}
+
+.form-check {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    font-size: 14px;
+    color: var(--gray-700);
+}
+
+.form-check input[type="checkbox"],
+.form-check input[type="radio"] {
+    width: 16px;
+    height: 16px;
+    accent-color: var(--cyan);
+    cursor: pointer;
+}
+
+/* Dark form inputs (for staff portal) */
+.staff-theme .form-input,
+.staff-theme .form-select,
+.staff-theme .form-textarea {
+    background: rgba(255, 255, 255, 0.06);
+    border-color: rgba(255, 255, 255, 0.12);
+    color: var(--white);
+}
+
+.staff-theme .form-input::placeholder,
+.staff-theme .form-textarea::placeholder {
+    color: var(--text-muted);
+}
+
+.staff-theme .form-input:focus,
+.staff-theme .form-select:focus,
+.staff-theme .form-textarea:focus {
+    border-color: var(--cyan);
+    box-shadow: 0 0 0 3px rgba(0, 163, 224, 0.15);
+}
+
+.staff-theme .form-label {
+    color: var(--text-light);
+}
+
+/* ================================================================
+   BUTTONS
+   ================================================================ */
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 10px 20px;
+    border-radius: var(--radius-sm);
+    font-size: 14px;
+    font-weight: 600;
+    border: none;
+    cursor: pointer;
+    transition: all var(--transition-base);
+    white-space: nowrap;
+    text-decoration: none;
+}
+
+.btn:active {
+    transform: scale(0.97);
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, var(--cyan), var(--cyan-dark));
+    color: var(--white);
+}
+
+.btn-primary:hover {
+    box-shadow: var(--shadow-cyan);
+    transform: translateY(-1px);
+}
+
+.btn-gold {
+    background: linear-gradient(135deg, var(--gold), var(--gold-dark));
+    color: var(--navy-dark);
+}
+
+.btn-gold:hover {
+    box-shadow: var(--shadow-gold);
+    transform: translateY(-1px);
+}
+
+.btn-outline {
+    background: transparent;
+    border: 1px solid var(--gray-300);
+    color: var(--gray-700);
+}
+
+.btn-outline:hover {
+    border-color: var(--cyan);
+    color: var(--cyan);
+    background: rgba(0, 163, 224, 0.04);
+}
+
+.btn-success {
+    background: var(--green);
+    color: var(--white);
+}
+
+.btn-success:hover {
+    background: var(--green-dark);
+    box-shadow: 0 4px 16px rgba(16, 185, 129, 0.3);
+}
+
+.btn-danger {
+    background: var(--red);
+    color: var(--white);
+}
+
+.btn-danger:hover {
+    background: var(--red-dark);
+    box-shadow: 0 4px 16px rgba(239, 68, 68, 0.3);
+}
+
+.btn-ghost {
+    background: transparent;
+    color: var(--gray-600);
+}
+
+.btn-ghost:hover {
+    background: var(--gray-100);
+    color: var(--gray-800);
+}
+
+.btn-white {
+    background: var(--white);
+    color: var(--navy);
+    border: 1px solid var(--gray-200);
+}
+
+.btn-white:hover {
+    box-shadow: var(--shadow-md);
+    transform: translateY(-1px);
+}
+
+/* Button sizes */
+.btn-sm {
+    padding: 6px 12px;
+    font-size: 12px;
+    border-radius: 6px;
+}
+
+.btn-lg {
+    padding: 14px 32px;
+    font-size: 16px;
+    border-radius: var(--radius-md);
+}
+
+.btn-block {
+    width: 100%;
+}
+
+.btn-icon {
+    padding: 8px;
+    width: 36px;
+    height: 36px;
+}
+
+.btn-icon.btn-sm {
+    width: 28px;
+    height: 28px;
+    padding: 4px;
+}
+
+.btn:disabled,
+.btn.disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    pointer-events: none;
+}
+
+/* ================================================================
+   AI RECOMMENDATION CARDS (3 tiers)
+   ================================================================ */
+.recommendation-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
+    margin-bottom: 32px;
+}
+
+.rec-card {
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    transition: all var(--transition-slow);
+    position: relative;
+}
+
+.rec-card:hover {
+    transform: translateY(-4px);
+}
+
+/* Best match card */
+.rec-card.best {
+    border: 2px solid var(--cyan);
+    box-shadow: 0 8px 32px rgba(0, 163, 224, 0.15);
+}
+
+.rec-card.best .rec-header {
+    background: linear-gradient(135deg, var(--cyan), var(--cyan-dark));
+    color: var(--white);
+}
+
+/* Premium card */
+.rec-card.premium {
+    border: 2px solid var(--gold);
+    box-shadow: 0 8px 32px rgba(201, 168, 76, 0.15);
+}
+
+.rec-card.premium .rec-header {
+    background: linear-gradient(135deg, var(--gold), var(--gold-dark));
+    color: var(--navy-dark);
+}
+
+/* Value card */
+.rec-card.value {
+    border: 2px solid var(--gray-300);
+    box-shadow: var(--shadow-sm);
+}
+
+.rec-card.value .rec-header {
+    background: linear-gradient(135deg, var(--gray-700), var(--gray-800));
+    color: var(--white);
+}
+
+.rec-header {
+    padding: 20px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.rec-tier {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.rec-tier-icon {
+    font-size: 22px;
+}
+
+.rec-tier-name {
+    font-size: 16px;
+    font-weight: 700;
+}
+
+.rec-score {
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 700;
+}
+
+.rec-card.best .rec-score {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+.rec-card.premium .rec-score {
+    background: rgba(255, 255, 255, 0.3);
+}
+
+.rec-card.value .rec-score {
+    background: rgba(255, 255, 255, 0.15);
+}
+
+.rec-body {
+    padding: 24px;
+    background: var(--white);
+}
+
+.rec-booth-id {
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--gray-800);
+    margin-bottom: 4px;
+}
+
+.rec-booth-level {
+    font-size: 13px;
+    color: var(--gray-500);
+    margin-bottom: 16px;
+}
+
+.rec-details {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+    margin-bottom: 20px;
+}
+
+.rec-detail-item {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.rec-detail-label {
+    font-size: 11px;
+    color: var(--gray-400);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.rec-detail-value {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--gray-800);
+}
+
+.rec-price {
+    font-size: 28px;
+    font-weight: 800;
+    color: var(--cyan);
+    margin-bottom: 4px;
+}
+
+.rec-price-unit {
+    font-size: 13px;
+    color: var(--gray-500);
+    font-weight: 400;
+}
+
+.rec-reasons {
+    margin-top: 16px;
+    padding-top: 16px;
+    border-top: 1px solid var(--gray-200);
+}
+
+.rec-reasons-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--gray-700);
+    margin-bottom: 8px;
+}
+
+.rec-reason {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    font-size: 13px;
+    color: var(--gray-600);
+    margin-bottom: 6px;
+    line-height: 1.5;
+}
+
+.rec-reason-dot {
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: var(--cyan);
+    margin-top: 7px;
+    flex-shrink: 0;
+}
+
+.rec-footer {
+    padding: 16px 24px;
+    border-top: 1px solid var(--gray-200);
+    display: flex;
+    gap: 12px;
+}
+
+.rec-footer .btn {
+    flex: 1;
+}
+
+/* ================================================================
+   DATA TABLES WITH STATUS BADGES
+   ================================================================ */
+.table-wrapper {
+    overflow-x: auto;
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--gray-200);
+    background: var(--white);
+}
+
+.data-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+}
+
+.data-table thead {
+    background: var(--gray-50);
+}
+
+.data-table th {
+    padding: 12px 16px;
+    text-align: left;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--gray-500);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    border-bottom: 1px solid var(--gray-200);
+    white-space: nowrap;
+}
+
+.data-table td {
+    padding: 14px 16px;
+    border-bottom: 1px solid var(--gray-100);
+    color: var(--gray-700);
+    vertical-align: middle;
+}
+
+.data-table tbody tr {
+    transition: background var(--transition-fast);
+}
+
+.data-table tbody tr:hover {
+    background: var(--gray-50);
+}
+
+.data-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+/* Status badges */
+.badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.badge-green {
+    background: var(--green-light);
+    color: var(--green-dark);
+}
+
+.badge-red {
+    background: var(--red-light);
+    color: var(--red-dark);
+}
+
+.badge-yellow {
+    background: var(--yellow-light);
+    color: var(--yellow-dark);
+}
+
+.badge-purple {
+    background: var(--purple-light);
+    color: var(--purple-dark);
+}
+
+.badge-gray {
+    background: var(--gray-100);
+    color: var(--gray-600);
+}
+
+.badge-cyan {
+    background: rgba(0, 163, 224, 0.1);
+    color: var(--cyan-dark);
+}
+
+.badge-gold {
+    background: rgba(201, 168, 76, 0.12);
+    color: var(--gold-dark);
+}
+
+.badge-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+}
+
+.badge-green .badge-dot { background: var(--green); }
+.badge-red .badge-dot { background: var(--red); }
+.badge-yellow .badge-dot { background: var(--yellow); }
+.badge-purple .badge-dot { background: var(--purple); }
+.badge-cyan .badge-dot { background: var(--cyan); }
+
+/* Table actions */
+.table-actions {
+    display: flex;
+    gap: 8px;
+}
+
+.table-action-btn {
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    border: 1px solid var(--gray-200);
+    background: var(--white);
+    color: var(--gray-600);
+}
+
+.table-action-btn:hover {
+    border-color: var(--cyan);
+    color: var(--cyan);
+}
+
+.table-action-btn.danger:hover {
+    border-color: var(--red);
+    color: var(--red);
+}
+
+/* Table pagination */
+.table-pagination {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px;
+    border-top: 1px solid var(--gray-200);
+}
+
+.table-pagination-info {
+    font-size: 13px;
+    color: var(--gray-500);
+}
+
+.table-pagination-buttons {
+    display: flex;
+    gap: 4px;
+}
+
+.page-btn {
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--gray-600);
+    border: 1px solid var(--gray-200);
+    background: var(--white);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.page-btn:hover {
+    border-color: var(--cyan);
+    color: var(--cyan);
+}
+
+.page-btn.active {
+    background: var(--cyan);
+    border-color: var(--cyan);
+    color: var(--white);
+}
+
+/* ================================================================
+   VENUE MAP AREA
+   ================================================================ */
+.venue-map-container {
+    background: var(--white);
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--gray-200);
+    overflow: hidden;
+    margin-bottom: 32px;
+}
+
+.venue-map-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 24px;
+    border-bottom: 1px solid var(--gray-200);
+    flex-wrap: wrap;
+    gap: 12px;
+}
+
+.floor-tabs {
+    display: flex;
+    gap: 4px;
+    background: var(--gray-100);
+    padding: 4px;
+    border-radius: var(--radius-sm);
+}
+
+.floor-tab {
+    padding: 8px 20px;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--gray-500);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    border: none;
+    background: none;
+}
+
+.floor-tab:hover {
+    color: var(--gray-700);
+}
+
+.floor-tab.active {
+    background: var(--white);
+    color: var(--cyan);
+    box-shadow: var(--shadow-sm);
+}
+
+.map-legend {
+    display: flex;
+    gap: 16px;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    color: var(--gray-600);
+}
+
+.legend-color {
+    width: 14px;
+    height: 14px;
+    border-radius: 4px;
+    border: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+.legend-color.available { background: var(--green-light); border-color: var(--green); }
+.legend-color.recommended { background: rgba(0, 163, 224, 0.15); border-color: var(--cyan); }
+.legend-color.locked { background: var(--yellow-light); border-color: var(--yellow); }
+.legend-color.sold { background: var(--gray-200); border-color: var(--gray-400); }
+.legend-color.selected { background: var(--cyan); border-color: var(--cyan-dark); }
+
+/* SVG booth map area */
+.venue-map-area {
+    position: relative;
+    padding: 32px;
+    min-height: 500px;
+    background: var(--gray-50);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.venue-map-svg {
+    max-width: 100%;
+    height: auto;
+}
+
+/* SVG booth styling */
+.booth-rect {
+    stroke-width: 1.5;
+    rx: 4;
+    ry: 4;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.booth-rect.available {
+    fill: var(--green-light);
+    stroke: var(--green);
+}
+
+.booth-rect.recommended {
+    fill: rgba(0, 163, 224, 0.15);
+    stroke: var(--cyan);
+}
+
+.booth-rect.locked {
+    fill: var(--yellow-light);
+    stroke: var(--yellow);
+}
+
+.booth-rect.sold {
+    fill: var(--gray-200);
+    stroke: var(--gray-400);
+    cursor: default;
+}
+
+.booth-rect.selected {
+    fill: var(--cyan);
+    stroke: var(--cyan-dark);
+}
+
+.booth-rect:hover:not(.sold) {
+    filter: brightness(0.95);
+    stroke-width: 2.5;
+}
+
+.booth-label {
+    font-size: 10px;
+    font-weight: 600;
+    fill: var(--gray-700);
+    text-anchor: middle;
+    pointer-events: none;
+}
+
+.booth-label.recommended {
+    fill: var(--cyan-dark);
+}
+
+/* Map zone labels */
+.zone-label {
+    font-size: 12px;
+    font-weight: 600;
+    fill: var(--gray-400);
+    text-anchor: middle;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+}
+
+/* ================================================================
+   BOOTH DETAIL PANEL
+   ================================================================ */
+.booth-detail-panel {
+    background: var(--white);
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--gray-200);
+    overflow: hidden;
+    margin-bottom: 32px;
+}
+
+.booth-detail-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px 24px;
+    border-bottom: 1px solid var(--gray-200);
+}
+
+.booth-detail-title {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--gray-800);
+}
+
+.booth-detail-close {
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+    font-size: 18px;
+    color: var(--gray-400);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.booth-detail-close:hover {
+    background: var(--gray-100);
+    color: var(--gray-700);
+}
+
+.booth-detail-body {
+    padding: 24px;
+}
+
+.booth-detail-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+}
+
+.booth-detail-field {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.booth-detail-field-label {
+    font-size: 12px;
+    color: var(--gray-400);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.booth-detail-field-value {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--gray-800);
+}
+
+.booth-detail-price {
+    grid-column: 1 / -1;
+    padding: 20px;
+    background: var(--gray-50);
+    border-radius: var(--radius-md);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.booth-detail-price-value {
+    font-size: 32px;
+    font-weight: 800;
+    color: var(--cyan);
+}
+
+.booth-detail-price-unit {
+    font-size: 14px;
+    color: var(--gray-500);
+    font-weight: 400;
+}
+
+.booth-detail-footer {
+    padding: 16px 24px;
+    border-top: 1px solid var(--gray-200);
+    display: flex;
+    gap: 12px;
+    justify-content: flex-end;
+}
+
+/* ================================================================
+   PRICE BREAKDOWN CARDS
+   ================================================================ */
+.price-breakdown {
+    background: var(--white);
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--gray-200);
+    overflow: hidden;
+    margin-bottom: 32px;
+}
+
+.price-breakdown-header {
+    padding: 20px 24px;
+    border-bottom: 1px solid var(--gray-200);
+}
+
+.price-breakdown-title {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--gray-800);
+}
+
+.price-breakdown-body {
+    padding: 24px;
+}
+
+.price-line {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--gray-100);
+}
+
+.price-line:last-child {
+    border-bottom: none;
+}
+
+.price-line-label {
+    font-size: 14px;
+    color: var(--gray-600);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.price-line-value {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--gray-800);
+}
+
+.price-line.total {
+    border-top: 2px solid var(--gray-200);
+    border-bottom: none;
+    margin-top: 8px;
+    padding-top: 16px;
+}
+
+.price-line.total .price-line-label {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--gray-800);
+}
+
+.price-line.total .price-line-value {
+    font-size: 22px;
+    font-weight: 800;
+    color: var(--cyan);
+}
+
+.price-coefficient {
+    display: inline-flex;
+    align-items: center;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.price-coefficient.high {
+    background: var(--green-light);
+    color: var(--green-dark);
+}
+
+.price-coefficient.medium {
+    background: var(--yellow-light);
+    color: var(--yellow-dark);
+}
+
+.price-coefficient.low {
+    background: var(--red-light);
+    color: var(--red-dark);
+}
+
+/* ================================================================
+   QUOTE / ORDER LIST CARDS
+   ================================================================ */
+.quote-list {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    margin-bottom: 32px;
+}
+
+.quote-card {
+    background: var(--white);
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--gray-200);
+    padding: 24px;
+    transition: all var(--transition-base);
+}
+
+.quote-card:hover {
+    box-shadow: var(--shadow-md);
+}
+
+.quote-card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 16px;
+}
+
+.quote-card-id {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--gray-800);
+}
+
+.quote-card-date {
+    font-size: 13px;
+    color: var(--gray-500);
+}
+
+.quote-card-body {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    margin-bottom: 16px;
+}
+
+.quote-card-field {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.quote-card-field-label {
+    font-size: 12px;
+    color: var(--gray-400);
+}
+
+.quote-card-field-value {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--gray-800);
+}
+
+.quote-card-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-top: 16px;
+    border-top: 1px solid var(--gray-100);
+}
+
+.quote-card-total {
+    font-size: 20px;
+    font-weight: 800;
+    color: var(--cyan);
+}
+
+.quote-card-actions {
+    display: flex;
+    gap: 8px;
+}
+
+/* ================================================================
+   CHART CONTAINERS
+   ================================================================ */
+.chart-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 24px;
+    margin-bottom: 32px;
+}
+
+.chart-card {
+    background: var(--white);
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--gray-200);
+    overflow: hidden;
+}
+
+.chart-card.full-width {
+    grid-column: 1 / -1;
+}
+
+.chart-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px 24px;
+    border-bottom: 1px solid var(--gray-200);
+}
+
+.chart-title {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--gray-800);
+}
+
+.chart-subtitle {
+    font-size: 12px;
+    color: var(--gray-500);
+    margin-top: 2px;
+}
+
+.chart-actions {
+    display: flex;
+    gap: 4px;
+}
+
+.chart-tab {
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--gray-500);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    border: none;
+    background: none;
+}
+
+.chart-tab:hover {
+    color: var(--gray-700);
+}
+
+.chart-tab.active {
+    background: var(--cyan);
+    color: var(--white);
+}
+
+.chart-body {
+    padding: 24px;
+    min-height: 280px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.chart-body canvas,
+.chart-body svg {
+    max-width: 100%;
+    height: auto;
+}
+
+/* Chart placeholder when no data */
+.chart-placeholder {
+    text-align: center;
+    color: var(--gray-400);
+    font-size: 14px;
+}
+
+.chart-placeholder-icon {
+    font-size: 40px;
+    margin-bottom: 8px;
+    opacity: 0.5;
+}
+
+/* Staff chart cards */
+.staff-theme .chart-card {
+    background: rgba(255, 255, 255, 0.04);
+    border-color: rgba(255, 255, 255, 0.08);
+}
+
+.staff-theme .chart-title {
+    color: var(--white);
+}
+
+.staff-theme .chart-subtitle {
+    color: var(--text-muted);
+}
+
+.staff-theme .chart-header {
+    border-color: rgba(255, 255, 255, 0.08);
+}
+
+/* ================================================================
+   SLIDER INPUTS FOR AI CONFIG
+   ================================================================ */
+.slider-config {
+    margin-bottom: 24px;
+}
+
+.slider-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 10px;
+}
+
+.slider-label {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--gray-700);
+}
+
+.slider-value {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--cyan);
+    min-width: 48px;
+    text-align: right;
+}
+
+.slider-track {
+    position: relative;
+    width: 100%;
+    height: 6px;
+    background: var(--gray-200);
+    border-radius: 3px;
+    cursor: pointer;
+}
+
+.slider-fill {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    background: linear-gradient(90deg, var(--cyan), var(--cyan-light));
+    border-radius: 3px;
+    transition: width 0.1s ease;
+}
+
+.slider-thumb {
+    position: absolute;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: var(--white);
+    border: 2px solid var(--cyan);
+    box-shadow: var(--shadow-sm);
+    cursor: grab;
+    transition: box-shadow var(--transition-fast);
+}
+
+.slider-thumb:hover,
+.slider-thumb.dragging {
+    box-shadow: 0 0 0 4px rgba(0, 163, 224, 0.15), var(--shadow-md);
+}
+
+.slider-range {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 6px;
+    font-size: 11px;
+    color: var(--gray-400);
+}
+
+/* Native range input fallback */
+input[type="range"] {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 100%;
+    height: 6px;
+    background: var(--gray-200);
+    border-radius: 3px;
+    outline: none;
+    cursor: pointer;
+}
+
+input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: var(--white);
+    border: 2px solid var(--cyan);
+    box-shadow: var(--shadow-sm);
+    cursor: grab;
+    transition: box-shadow var(--transition-fast);
+}
+
+input[type="range"]::-webkit-slider-thumb:hover {
+    box-shadow: 0 0 0 4px rgba(0, 163, 224, 0.15), var(--shadow-md);
+}
+
+input[type="range"]::-moz-range-thumb {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: var(--white);
+    border: 2px solid var(--cyan);
+    box-shadow: var(--shadow-sm);
+    cursor: grab;
+}
+
+/* ================================================================
+   FILTER BARS
+   ================================================================ */
+.filter-bar {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 16px 24px;
+    background: var(--white);
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--gray-200);
+    margin-bottom: 24px;
+    flex-wrap: wrap;
+}
+
+.filter-bar-label {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--gray-700);
+    white-space: nowrap;
+}
+
+.filter-select {
+    padding: 8px 32px 8px 12px;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--gray-300);
+    background: var(--white);
+    font-size: 13px;
+    color: var(--gray-700);
+    cursor: pointer;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 10 10'%3E%3Cpath fill='%236B7280' d='M5 7L1 3h8z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+    transition: all var(--transition-fast);
+    outline: none;
+}
+
+.filter-select:focus {
+    border-color: var(--cyan);
+    box-shadow: 0 0 0 3px rgba(0, 163, 224, 0.1);
+}
+
+.filter-search {
+    padding: 8px 12px 8px 32px;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--gray-300);
+    background: var(--white);
+    font-size: 13px;
+    color: var(--gray-700);
+    width: 200px;
+    transition: all var(--transition-fast);
+    outline: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%239CA3AF' stroke-width='2'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cline x1='21' y1='21' x2='16.65' y2='16.65'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: 10px center;
+}
+
+.filter-search:focus {
+    border-color: var(--cyan);
+    box-shadow: 0 0 0 3px rgba(0, 163, 224, 0.1);
+    width: 260px;
+}
+
+.filter-divider {
+    width: 1px;
+    height: 28px;
+    background: var(--gray-200);
+}
+
+.filter-chips {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.filter-chip {
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 500;
+    border: 1px solid var(--gray-300);
+    color: var(--gray-600);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    background: var(--white);
+}
+
+.filter-chip:hover {
+    border-color: var(--cyan);
+    color: var(--cyan);
+}
+
+.filter-chip.active {
+    background: var(--cyan);
+    border-color: var(--cyan);
+    color: var(--white);
+}
+
+.filter-reset {
+    margin-left: auto;
+    font-size: 13px;
+    color: var(--gray-400);
+    cursor: pointer;
+    transition: color var(--transition-fast);
+}
+
+.filter-reset:hover {
+    color: var(--red);
+}
+
+/* ================================================================
+   MODAL OVERLAY
+   ================================================================ */
+.modal-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 2000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    padding: 24px;
+    animation: modalFadeIn 0.2s ease;
+}
+
+@keyframes modalFadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+.modal {
+    background: var(--white);
+    border-radius: var(--radius-xl);
+    width: 100%;
+    max-width: 560px;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: var(--shadow-xl);
+    animation: modalSlideIn 0.3s var(--ease-out);
+}
+
+@keyframes modalSlideIn {
+    from { opacity: 0; transform: translateY(20px) scale(0.97); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.modal-lg {
+    max-width: 800px;
+}
+
+.modal-sm {
+    max-width: 420px;
+}
+
+.modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 24px 28px 20px;
+    border-bottom: 1px solid var(--gray-200);
+}
+
+.modal-title {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--gray-800);
+}
+
+.modal-close {
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+    font-size: 20px;
+    color: var(--gray-400);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.modal-close:hover {
+    background: var(--gray-100);
+    color: var(--gray-700);
+}
+
+.modal-body {
+    padding: 24px 28px;
+}
+
+.modal-footer {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 12px;
+    padding: 20px 28px;
+    border-top: 1px solid var(--gray-200);
+}
+
+/* ================================================================
+   TOAST NOTIFICATIONS
+   ================================================================ */
+.toast-container {
+    position: fixed;
+    top: 80px;
+    right: 24px;
+    z-index: 3000;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.toast {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 20px;
+    border-radius: var(--radius-md);
+    background: var(--white);
+    box-shadow: var(--shadow-lg);
+    border-left: 4px solid;
+    min-width: 320px;
+    max-width: 440px;
+    animation: toastSlideIn 0.3s var(--ease-out);
+}
+
+@keyframes toastSlideIn {
+    from { opacity: 0; transform: translateX(40px); }
+    to { opacity: 1; transform: translateX(0); }
+}
+
+.toast.success { border-color: var(--green); }
+.toast.error { border-color: var(--red); }
+.toast.warning { border-color: var(--yellow); }
+.toast.info { border-color: var(--cyan); }
+
+.toast-icon {
+    font-size: 18px;
+    flex-shrink: 0;
+}
+
+.toast-message {
+    font-size: 14px;
+    color: var(--gray-700);
+    flex: 1;
+}
+
+.toast-close {
+    font-size: 16px;
+    color: var(--gray-400);
+    cursor: pointer;
+    padding: 4px;
+    transition: color var(--transition-fast);
+}
+
+.toast-close:hover {
+    color: var(--gray-700);
+}
+
+/* ================================================================
+   EMPTY STATE
+   ================================================================ */
+.empty-state {
+    text-align: center;
+    padding: 60px 24px;
+    color: var(--gray-400);
+}
+
+.empty-state-icon {
+    font-size: 48px;
+    margin-bottom: 16px;
+    opacity: 0.5;
+}
+
+.empty-state-title {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--gray-500);
+    margin-bottom: 8px;
+}
+
+.empty-state-desc {
+    font-size: 14px;
+    color: var(--gray-400);
+    margin-bottom: 24px;
+}
+
+/* ================================================================
+   LOADING SPINNER
+   ================================================================ */
+.spinner {
+    width: 24px;
+    height: 24px;
+    border: 3px solid var(--gray-200);
+    border-top-color: var(--cyan);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+.loading-overlay {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255, 255, 255, 0.8);
+    backdrop-filter: blur(2px);
+    z-index: 10;
+    border-radius: inherit;
+}
+
+/* ================================================================
+   TAB COMPONENT
+   ================================================================ */
+.tabs {
+    display: flex;
+    gap: 0;
+    border-bottom: 2px solid var(--gray-200);
+    margin-bottom: 24px;
+}
+
+.tab {
+    padding: 12px 24px;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--gray-500);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    border: none;
+    background: none;
+    position: relative;
+}
+
+.tab::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: var(--cyan);
+    transform: scaleX(0);
+    transition: transform var(--transition-fast);
+}
+
+.tab:hover {
+    color: var(--gray-700);
+}
+
+.tab.active {
+    color: var(--cyan);
+}
+
+.tab.active::after {
+    transform: scaleX(1);
+}
+
+/* ================================================================
+   CARD COMPONENT (generic)
+   ================================================================ */
+.card {
+    background: var(--white);
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--gray-200);
+    overflow: hidden;
+    margin-bottom: 24px;
+}
+
+.card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px 24px;
+    border-bottom: 1px solid var(--gray-200);
+}
+
+.card-title {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--gray-800);
+}
+
+.card-body {
+    padding: 24px;
+}
+
+.card-footer {
+    padding: 16px 24px;
+    border-top: 1px solid var(--gray-200);
+}
+
+/* ================================================================
+   STAFF THEME OVERRIDES
+   ================================================================ */
+.staff-theme {
+    background: var(--navy-deep);
+    color: var(--text-light);
+}
+
+.staff-theme .card {
+    background: rgba(255, 255, 255, 0.04);
+    border-color: rgba(255, 255, 255, 0.08);
+}
+
+.staff-theme .card-header {
+    border-color: rgba(255, 255, 255, 0.08);
+}
+
+.staff-theme .card-title {
+    color: var(--white);
+}
+
+.staff-theme .table-wrapper {
+    background: rgba(255, 255, 255, 0.04);
+    border-color: rgba(255, 255, 255, 0.08);
+}
+
+.staff-theme .data-table thead {
+    background: rgba(255, 255, 255, 0.04);
+}
+
+.staff-theme .data-table th {
+    color: var(--text-muted);
+    border-color: rgba(255, 255, 255, 0.08);
+}
+
+.staff-theme .data-table td {
+    color: var(--text-light);
+    border-color: rgba(255, 255, 255, 0.06);
+}
+
+.staff-theme .data-table tbody tr:hover {
+    background: rgba(255, 255, 255, 0.04);
+}
+
+.staff-theme .filter-bar {
+    background: rgba(255, 255, 255, 0.04);
+    border-color: rgba(255, 255, 255, 0.08);
+}
+
+.staff-theme .filter-bar-label {
+    color: var(--text-light);
+}
+
+.staff-theme .tabs {
+    border-color: rgba(255, 255, 255, 0.1);
+}
+
+.staff-theme .tab {
+    color: var(--text-muted);
+}
+
+.staff-theme .tab:hover {
+    color: var(--text-light);
+}
+
+.staff-theme .tab.active {
+    color: var(--cyan-light);
+}
+
+.staff-theme .empty-state {
+    color: var(--text-muted);
+}
+
+.staff-theme .empty-state-title {
+    color: var(--text-light);
+}
+
+/* ================================================================
+   PRINT STYLES
+   ================================================================ */
+@media print {
+    .navbar,
+    .client-navbar,
+    .staff-navbar,
+    .sidebar,
+    .scroll-indicator,
+    .modal-overlay,
+    .toast-container,
+    .btn,
+    .filter-bar,
+    .table-actions {
+        display: none !important;
+    }
+
+    .main-content.with-sidebar {
+        margin-left: 0 !important;
+    }
+
+    body {
+        background: white;
+        color: black;
+    }
+
+    .kpi-card,
+    .card,
+    .quote-card,
+    .price-breakdown {
+        break-inside: avoid;
+        border: 1px solid #ddd;
+        box-shadow: none;
+    }
+}
+
+/* ================================================================
+   RESPONSIVE BREAKPOINTS
+   ================================================================ */
+
+/* Tablet: 1024px */
+@media (max-width: 1024px) {
+    .hero-title { font-size: 42px; }
+    .features-grid { grid-template-columns: repeat(2, 1fr); }
+    .stats-grid { grid-template-columns: repeat(2, 1fr); gap: 32px; }
+    .workflow-steps { flex-wrap: wrap; }
+    .workflow-step { flex: 0 0 50%; margin-bottom: 40px; }
+    .workflow-step::after,
+    .workflow-step::before { display: none; }
+
+    /* Portal responsive */
+    .kpi-grid { grid-template-columns: repeat(2, 1fr); }
+    .recommendation-grid { grid-template-columns: 1fr; max-width: 500px; margin-left: auto; margin-right: auto; }
+    .chart-grid { grid-template-columns: 1fr; }
+    .form-row { grid-template-columns: 1fr; }
+    .form-row-3 { grid-template-columns: 1fr; }
+    .booth-detail-grid { grid-template-columns: 1fr; }
+    .quote-card-body { grid-template-columns: repeat(2, 1fr); }
+
+    /* Hide sidebar on tablet, show hamburger */
+    .sidebar {
+        transform: translateX(-100%);
+    }
+
+    .sidebar.open {
+        transform: translateX(0);
+        box-shadow: var(--shadow-xl);
+    }
+
+    .main-content.with-sidebar {
+        margin-left: 0;
+    }
+
+    .nav-toggle {
+        display: flex;
+    }
+}
+
+/* Mobile: 768px */
+@media (max-width: 768px) {
+    /* Landing page */
+    .navbar { padding: 0 20px; }
+    .nav-links { display: none; }
+    .nav-links.open {
+        display: flex;
+        flex-direction: column;
+        position: absolute;
+        top: 72px;
+        left: 0;
+        right: 0;
+        background: rgba(7, 29, 53, 0.98);
+        padding: 16px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    }
+
+    .hero-title { font-size: 32px; }
+    .hero-title-brand { font-size: 24px; }
+    .hero-desc { font-size: 16px; }
+    .hero-entries { flex-direction: column; align-items: center; }
+    .entry-card { max-width: 100%; width: 100%; }
+    .features { padding: 80px 20px; }
+    .features-grid { grid-template-columns: 1fr; }
+    .stats { padding: 60px 20px; }
+    .stats-grid { grid-template-columns: repeat(2, 1fr); }
+    .stat-number { font-size: 36px; }
+    .workflow { padding: 80px 20px; }
+    .workflow-steps { flex-direction: column; }
+    .workflow-step { flex: none; }
+    .section-title { font-size: 28px; }
+    .footer { padding: 40px 20px; }
+    .footer-content { flex-direction: column; gap: 32px; }
+    .footer-links { gap: 32px; }
+
+    /* Portal mobile */
+    .page-container { padding: 20px 16px; }
+    .page-title { font-size: 22px; }
+    .kpi-grid { grid-template-columns: 1fr; }
+    .kpi-value { font-size: 28px; }
+    .filter-bar { padding: 12px 16px; }
+    .filter-search { width: 140px; }
+    .filter-search:focus { width: 180px; }
+    .quote-card-body { grid-template-columns: 1fr; }
+    .venue-map-toolbar { flex-direction: column; align-items: stretch; }
+    .map-legend { justify-content: center; }
+    .booth-detail-grid { grid-template-columns: 1fr; }
+    .booth-detail-price { flex-direction: column; align-items: flex-start; gap: 8px; }
+
+    /* Navbar adjustments */
+    .client-navbar,
+    .staff-navbar { padding: 0 16px; }
+    .client-nav-name,
+    .client-nav-role,
+    .staff-nav-name,
+    .staff-nav-role { display: none; }
+
+    /* Modal full screen on mobile */
+    .modal {
+        max-width: 100%;
+        max-height: 100vh;
+        border-radius: 0;
+        margin: 0;
+    }
+
+    .modal-overlay {
+        padding: 0;
+    }
+
+    /* Login card */
+    .login-card {
+        padding: 36px 24px;
+        margin: 16px;
+    }
+}
+
+/* Small mobile: 480px */
+@media (max-width: 480px) {
+    .hero-title { font-size: 26px; }
+    .hero-title-brand { font-size: 20px; letter-spacing: 2px; }
+    .hero-badge { font-size: 11px; }
+    .section-title { font-size: 24px; }
+    .stat-number { font-size: 30px; }
+    .entry-card { padding: 28px 20px; }
+    .entry-title { font-size: 18px; }
+    .feature-card { padding: 32px 24px; }
+    .rec-body { padding: 16px; }
+    .rec-details { grid-template-columns: 1fr; }
+    .rec-footer { flex-direction: column; }
+    .data-table { font-size: 12px; }
+    .data-table th,
+    .data-table td { padding: 10px 8px; }
+}
+
+
+/* SPA overrides */
+.view{display:none}.view.active{display:block}
+.client-portal-view,.staff-portal-view{display:none;min-height:100vh;background:var(--gray-50)}
+.client-portal-view.active,.staff-portal-view.active{display:flex;flex-direction:column}
+.portal-layout{display:flex;flex:1}
+.portal-main-content{flex:1;margin-left:var(--sidebar-width);padding-top:var(--navbar-height);min-height:100vh}
+.page-container{padding:32px;max-width:1400px}
+.toast-container{position:fixed;top:80px;right:24px;z-index:9999;display:flex;flex-direction:column;gap:8px}
+.toast{display:flex;align-items:center;gap:12px;padding:14px 20px;border-radius:var(--radius-md);background:var(--white);box-shadow:var(--shadow-lg);border-left:4px solid;min-width:320px;animation:toastIn .3s ease}
+.toast.success{border-color:var(--green)}.toast.error{border-color:var(--red)}.toast.info{border-color:var(--cyan)}
+.toast-message{font-size:14px;color:var(--gray-700);flex:1}
+@keyframes toastIn{from{opacity:0;transform:translateX(40px)}to{opacity:1;transform:translateX(0)}}
+@media(max-width:1024px){.portal-main-content{margin-left:0}}
+@media(max-width:768px){.page-container{padding:20px 16px}}
+</style>
+</head>
+<body>
+<div id="view-landing" class="view active">
+
+
+<!-- NAVBAR -->
+<nav class="navbar" id="navbar">
+    <a class="nav-brand" href="#">
+        <div class="nav-logo">GE</div>
+        <div>
+            <div class="nav-title">GLOBUS EVENTS</div>
+            <div class="nav-subtitle">万耀企龙 · 展位智能推荐系统</div>
+        </div>
+    </a>
+    <div class="nav-links">
+        <a class="nav-link active" href="#hero">首页</a>
+        <a class="nav-link" href="#features">核心功能</a>
+        <a class="nav-link" href="#workflow">工作流程</a>
+        <a class="nav-link" href="#" onclick="showView('client-login')">客户前台</a>
+        <a class="nav-link" href="#" onclick="showView('staff-login')">员工后台</a>
+    </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero" id="hero">
+    <div class="hero-bg">
+        <div class="hero-grid"></div>
+        <div class="hero-orb hero-orb-1"></div>
+        <div class="hero-orb hero-orb-2"></div>
+        <div class="hero-orb hero-orb-3"></div>
+        <div class="hero-particles" id="particles"></div>
+        <div class="hero-overlay"></div>
+    </div>
+
+    <div class="hero-content">
+        <div class="hero-badge">
+            <span class="hero-badge-dot"></span>
+            AI-Powered Exhibition Platform · V1.1
+        </div>
+
+        <span class="hero-title-brand">万 耀 企 龙</span>
+        <h1 class="hero-title">
+            展位<span class="hero-title-accent">AI智能推荐</span>与<br>
+            <span class="hero-title-accent">动态定价</span>系统
+        </h1>
+
+        <p class="hero-desc">
+            基于五大AI模型引擎，为参展商精准匹配最优展位方案<br>
+            实时动态定价，智能价值评估，让每一个展位物尽其值
+        </p>
+
+        <div class="hero-entries">
+            <div class="entry-card entry-client" onclick="showView('client-login')">
+                <div class="entry-icon">🏢</div>
+                <div class="entry-title">参展商入口</div>
+                <div class="entry-desc">
+                    智能推荐 · 可视化选位<br>
+                    实时报价 · 一键预约
+                </div>
+                <button class="entry-btn">
+                    进入前台
+                    <span class="entry-arrow">→</span>
+                </button>
+            </div>
+
+            <div class="entry-card entry-staff" onclick="showView('staff-login')">
+                <div class="entry-icon">⚙️</div>
+                <div class="entry-title">员工后台入口</div>
+                <div class="entry-desc">
+                    数据看板 · 模型调优<br>
+                    定价规则 · 客户管理
+                </div>
+                <button class="entry-btn">
+                    进入后台
+                    <span class="entry-arrow">→</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div class="scroll-indicator">
+        <div class="scroll-mouse"></div>
+        <span>向下了解更多</span>
+    </div>
+</section>
+
+<!-- FEATURES -->
+<section class="features" id="features">
+    <div class="section-header">
+        <div class="section-label">Core Capabilities</div>
+        <h2 class="section-title">三大核心能力</h2>
+        <p class="section-desc">
+            贯穿前后台全流程，以AI驱动展位推荐、定价决策与选位体验
+        </p>
+    </div>
+
+    <div class="features-grid">
+        <div class="feature-card">
+            <div class="feature-icon-wrap feature-icon-ai">🧠</div>
+            <h3 class="feature-title">AI 智能推荐</h3>
+            <p class="feature-desc">
+                基于企业画像、预算范围、参展目标等多维度输入，通过AI模型生成最优适配、高端升级、性价比三档推荐方案，展位匹配度评分0-100精准量化
+            </p>
+            <div class="feature-tags">
+                <span class="feature-tag">用户画像AI</span>
+                <span class="feature-tag">展位价值评估</span>
+                <span class="feature-tag">多维匹配</span>
+            </div>
+        </div>
+
+        <div class="feature-card">
+            <div class="feature-icon-wrap feature-icon-price">💰</div>
+            <h3 class="feature-title">动态定价引擎</h3>
+            <p class="feature-desc">
+                综合基础价格、AI价值系数、供需关系、客户权益、时段浮动等多维因子，实现一岗一价实时计算，支持24小时价格浮动与阶梯折扣
+            </p>
+            <div class="feature-tags">
+                <span class="feature-tag">动态定价AI</span>
+                <span class="feature-tag">实时计算</span>
+                <span class="feature-tag">供需模型</span>
+            </div>
+        </div>
+
+        <div class="feature-card">
+            <div class="feature-icon-wrap feature-icon-map">🗺️</div>
+            <h3 class="feature-title">可视化选位</h3>
+            <p class="feature-desc">
+                二维展馆平面图直观展示160个展位分布，颜色编码实时状态（可订/AI推荐/锁定/已售），点击即查详细信息与实时报价
+            </p>
+            <div class="feature-tags">
+                <span class="feature-tag">二维平面图</span>
+                <span class="feature-tag">状态可视</span>
+                <span class="feature-tag">交互选位</span>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- STATS -->
+<section class="stats">
+    <div class="stats-grid">
+        <div class="stat-item">
+            <div class="stat-number" data-target="160">0</div>
+            <div class="stat-label">标准展位数</div>
+        </div>
+        <div class="stat-item">
+            <div class="stat-number" data-target="5">0</div>
+            <div class="stat-label">AI 专业模型</div>
+        </div>
+        <div class="stat-item">
+            <div class="stat-number" data-target="8000">0</div>
+            <div class="stat-label">展厅面积 (m²)</div>
+        </div>
+        <div class="stat-item">
+            <div class="stat-number" data-target="4">0</div>
+            <div class="stat-label">展位等级 (S/A/B/C)</div>
+        </div>
+    </div>
+</section>
+
+<!-- WORKFLOW -->
+<section class="workflow" id="workflow">
+    <div class="hero-grid"></div>
+    <div class="section-header" style="position:relative; z-index:1;">
+        <div class="section-label">How It Works</div>
+        <h2 class="section-title">参展商使用流程</h2>
+        <p class="section-desc">
+            从需求录入到展位预约，四步完成智能选位
+        </p>
+    </div>
+
+    <div class="workflow-steps" style="position:relative; z-index:1;">
+        <div class="workflow-step">
+            <div class="step-number">1</div>
+            <h3 class="step-title">填写需求</h3>
+            <p class="step-desc">录入企业信息、预算、参展目标与面积偏好</p>
+        </div>
+        <div class="workflow-step">
+            <div class="step-number">2</div>
+            <h3 class="step-title">AI 推荐</h3>
+            <p class="step-desc">系统3秒生成三档智能推荐方案</p>
+        </div>
+        <div class="workflow-step">
+            <div class="step-number">3</div>
+            <h3 class="step-title">可视化选位</h3>
+            <p class="step-desc">在展馆平面图中浏览、筛选、查看展位详情</p>
+        </div>
+        <div class="workflow-step">
+            <div class="step-number">4</div>
+            <h3 class="step-title">预约展位</h3>
+            <p class="step-desc">查看报价单、确认价格、一键预约心仪展位</p>
+        </div>
+    </div>
+</section>
+
+<!-- FOOTER -->
+<footer class="footer">
+    <div class="footer-content">
+        <div>
+            <div class="footer-brand">
+                <div class="nav-logo">GE</div>
+                <div>
+                    <div class="nav-title">GLOBUS EVENTS</div>
+                </div>
+            </div>
+            <p class="footer-text">
+                万耀企龙展位AI智能推荐与动态定价系统<br>
+                让每一次参展决策都精准高效
+            </p>
+        </div>
+        <div class="footer-links">
+            <div class="footer-col">
+                <div class="footer-col-title">快速入口</div>
+                <a href="#">参展商前台</a>
+                <a href="#">员工后台</a>
+                <a href="#">需求录入</a>
+                <a href="#">AI推荐</a>
+            </div>
+            <div class="footer-col">
+                <div class="footer-col-title">核心功能</div>
+                <a href="#">智能推荐</a>
+                <a href="#">动态定价</a>
+                <a href="#">可视化选位</a>
+                <a href="#">数据看板</a>
+            </div>
+            <div class="footer-col">
+                <div class="footer-col-title">关于</div>
+                <a href="#">系统介绍</a>
+                <a href="#">联系我们</a>
+                <a href="#">隐私政策</a>
+            </div>
+        </div>
+    </div>
+    <div class="footer-bottom">
+        © 2026 Globus Events · 万耀企龙 · 展位AI智能推荐与动态定价系统 V1.1 &nbsp;|&nbsp; 本系统数据仅供演示用途，实际商务报价以正式合同为准
+    </div>
+</footer>
+
+
+
+
+</div>
+<div id="view-client-login" class="view" style="display:none;">
+<div class="login-page">
+<div class="hero-grid"></div>
+<div class="login-card">
+<div class="login-card-header">
+<div class="login-logo">GE</div>
+<div class="login-title">参展商登录</div>
+<div class="login-subtitle">万耀企龙 - 展位智能推荐系统</div>
+</div>
+<div class="login-error" id="clientLoginError" style="display:none;padding:10px 14px;border-radius:var(--radius-sm);background:var(--red-light);color:var(--red);font-size:13px;margin-bottom:16px;">账号或密码错误，请重试</div>
+<div class="login-form">
+<div class="form-group"><label>企业邮箱</label><input type="email" id="clientEmail" placeholder="请输入企业邮箱" value="demo@globusevents.com"></div>
+<div class="form-group"><label>密码</label><input type="password" id="clientPassword" placeholder="请输入密码" value="123456"></div>
+<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;">
+<label style="display:flex;align-items:center;gap:8px;font-size:13px;color:var(--text-light);cursor:pointer;"><input type="checkbox" checked style="accent-color:var(--gold);"> 记住账号</label>
+<span style="font-size:13px;color:var(--gold-light);cursor:pointer;" onclick="alert('请联系管理员重置密码')">忘记密码？</span>
+</div>
+<button class="login-submit" onclick="doClientLogin()">登 录</button>
+<div style="display:flex;align-items:center;justify-content:center;gap:8px;margin-top:24px;font-size:13px;color:var(--text-muted);cursor:pointer;transition:color .2s;" onclick="showView('landing')" onmouseover="this.style.color='var(--text-light)'" onmouseout="this.style.color='var(--text-muted)'">← 返回首页</div>
+</div>
+</div>
+</div>
+</div>
+<div id="view-staff-login" class="view" style="display:none;">
+<div class="login-page login-staff">
+<div class="hero-grid"></div>
+<div class="login-card">
+<div class="login-card-header">
+<div class="login-logo" style="background:linear-gradient(135deg,var(--cyan),var(--cyan-light));">GE</div>
+<div class="login-title">员工后台登录</div>
+<div class="login-subtitle">万耀企龙 - 运营管理系统</div>
+</div>
+<div class="login-error" id="staffLoginError" style="display:none;padding:10px 14px;border-radius:var(--radius-sm);background:var(--red-light);color:var(--red);font-size:13px;margin-bottom:16px;">账号或密码错误，请重试</div>
+<div class="login-form">
+<div class="form-group"><label>工号 / 邮箱</label><input type="text" id="staffAccount" placeholder="请输入工号或邮箱" value="admin@globusevents.com"></div>
+<div class="form-group"><label>密码</label><input type="password" id="staffPassword" placeholder="请输入密码" value="admin123"></div>
+<button class="login-submit" onclick="doStaffLogin()" style="background:linear-gradient(135deg,var(--cyan),var(--cyan-light));color:var(--white);">登 录</button>
+<div style="display:flex;align-items:center;justify-content:center;gap:8px;margin-top:24px;font-size:13px;color:var(--text-muted);cursor:pointer;transition:color .2s;" onclick="showView('landing')" onmouseover="this.style.color='var(--text-light)'" onmouseout="this.style.color='var(--text-muted)'">← 返回首页</div>
+</div>
+</div>
+</div>
+</div>
+<div id="view-client" class="client-portal-view">
+<nav class="client-navbar">
+<div style="display:flex;align-items:center;gap:12px;">
+<button class="menu-toggle" id="clientMenuToggle" style="display:none;" onclick="toggleSidebar('client')"><i class="fas fa-bars"></i></button>
+<div class="nav-brand"><div class="nav-logo">GE</div><div><div class="nav-title">GLOBUS EVENTS</div><div class="nav-subtitle">万耀企龙 - 参展商工作台</div></div></div>
+</div>
+<div class="client-nav-right">
+<div class="client-nav-user"><div class="client-nav-avatar">企</div><div><div class="client-nav-name" id="clientUserName">上海数码科技有限公司</div><div class="client-nav-role">参展商</div></div></div>
+<button class="client-nav-logout" onclick="doClientLogout()"><i class="fas fa-sign-out-alt"></i> 退出</button>
+</div>
+</nav>
+<div class="portal-layout">
+<aside class="sidebar sidebar-client" id="clientSidebar">
+<div class="sidebar-section"><div class="sidebar-section-title">参展管理</div>
+<nav class="sidebar-nav">
+<button class="sidebar-link active" data-page="dashboard"><span class="sidebar-link-icon">📊</span> 我的仪表盘</button>
+<button class="sidebar-link" data-page="demand"><span class="sidebar-link-icon">📝</span> 需求录入</button>
+<button class="sidebar-link" data-page="recommend"><span class="sidebar-link-icon">🤖</span> AI推荐方案</button>
+<button class="sidebar-link" data-page="map"><span class="sidebar-link-icon">🗺️</span> 场馆平面图</button>
+<button class="sidebar-link" data-page="price"><span class="sidebar-link-icon">💰</span> 动态价格</button>
+<button class="sidebar-link" data-page="quotes"><span class="sidebar-link-icon">📄</span> 我的报价/预约</button>
+</nav></div></aside>
+<main class="portal-main-content" id="clientMain"><div class="page-container"></div></main>
+</div></div>
+<div id="view-staff" class="staff-portal-view">
+<nav class="staff-navbar">
+<div style="display:flex;align-items:center;gap:12px;">
+<button class="menu-toggle" id="staffMenuToggle" style="display:none;" onclick="toggleSidebar('staff')"><i class="fas fa-bars"></i></button>
+<div class="nav-brand"><div class="nav-logo" style="background:linear-gradient(135deg,var(--gold),var(--gold-light));color:var(--navy-dark);">GE</div><div><div class="nav-title">GLOBUS EVENTS</div><div class="nav-subtitle">运营管理中心</div></div></div>
+</div>
+<div class="staff-nav-right">
+<div class="staff-nav-user"><div class="staff-nav-avatar">管</div><div><div class="staff-nav-name">管理员 - 张三</div><div class="staff-nav-role">超级管理员</div></div></div>
+<button class="staff-nav-logout" onclick="doStaffLogout()"><i class="fas fa-sign-out-alt"></i> 退出</button>
+</div>
+</nav>
+<div class="portal-layout">
+<aside class="sidebar sidebar-staff" id="staffSidebar">
+<div class="sidebar-section"><div class="sidebar-section-title">运营管理</div>
+<nav class="sidebar-nav">
+<button class="sidebar-link active" data-page="dashboard"><span class="sidebar-link-icon">📊</span> 运营数据看板</button>
+<button class="sidebar-link" data-page="leads"><span class="sidebar-link-icon">👥</span> 客户线索管理</button>
+<button class="sidebar-link" data-page="booths"><span class="sidebar-link-icon">🏗️</span> 展位资源管理</button>
+</nav></div>
+<div class="sidebar-section"><div class="sidebar-section-title">系统配置</div>
+<nav class="sidebar-nav">
+<button class="sidebar-link" data-page="ai-config"><span class="sidebar-link-icon">🧠</span> AI模型参数</button>
+<button class="sidebar-link" data-page="pricing"><span class="sidebar-link-icon">💲</span> 动态定价规则</button>
+</nav></div>
+<div class="sidebar-section"><div class="sidebar-section-title">交易数据</div>
+<nav class="sidebar-nav">
+<button class="sidebar-link" data-page="orders"><span class="sidebar-link-icon">📋</span> 订单管理</button>
+<button class="sidebar-link" data-page="reports"><span class="sidebar-link-icon">📈</span> 数据报表</button>
+</nav></div></aside>
+<main class="portal-main-content" id="staffMain"><div class="page-container"></div></main>
+</div></div>
+<div class="toast-container" id="toastContainer"></div>
+<script>
+
+// ============================================================
+// DATA
+// ============================================================
+const BOOTH_DATA = [];
+const levels = ['S','A','B','C'];
+const levelNames = { S:'旗舰臻装', A:'优选展位', B:'标准展位', C:'基础展位' };
+const basePrices = { S:38000, A:22000, B:12800, C:9800 };
+const boothCounts = { S:12, A:36, B:80, C:32 };
+let bid = 1;
+for(const lv of levels){
+  for(let i=1;i<=boothCounts[lv];i++){
+    const statuses=['available','available','available','available','available','ai-recommended','locked','sold'];
+    const status=statuses[Math.floor(Math.random()*statuses.length)];
+    const pf = lv==='S'?1.2+Math.random()*0.3:lv==='A'?1+Math.random()*0.2:lv==='B'?0.85+Math.random()*0.15:0.7+Math.random()*0.2;
+    BOOTH_DATA.push({id:bid,number:`${lv}-${String(i).padStart(3,'0')}`,level:lv,levelName:levelNames[lv],area:lv==='S'?36:lv==='A'?18:9,basePrice:basePrices[lv],dynamicPrice:Math.round(basePrices[lv]*pf),status,status,row:Math.floor((i-1)/8),col:(i-1)%8,floor:(lv==='S')?1:(lv==='A'&&i>18)?2:(lv==='B'&&i>40)?2:(lv==='C'&&i>16)?2:1,matchScore:Math.round(60+Math.random()*35)});
+    bid++;
+  }
+}
+
+const LEADS_DATA=[
+  {id:1,company:'上海数码科技有限公司',industry:'信息技术',budget:'15-25万',date:'2026-06-18',status:'new',contact:'李经理'},
+  {id:2,company:'北京创新医疗集团',industry:'医疗健康',budget:'25-40万',date:'2026-06-17',status:'negotiating',contact:'王总监'},
+  {id:3,company:'深圳绿色能源股份',industry:'新能源',budget:'10-20万',date:'2026-06-16',status:'quoted',contact:'赵总'},
+  {id:4,company:'杭州智造科技公司',industry:'智能制造',budget:'20-35万',date:'2026-06-15',status:'new',contact:'陈经理'},
+  {id:5,company:'广州时尚品牌集团',industry:'消费品',budget:'30-50万',date:'2026-06-14',status:'booked',contact:'刘董'},
+];
+
+const QUOTES_DATA=[
+  {id:1,booth:'A-005',level:'A',price:25800,status:'pending',date:'2026-06-18',company:'上海数码科技有限公司'},
+  {id:2,booth:'B-022',level:'B',price:14200,status:'confirmed',date:'2026-06-16',company:'上海数码科技有限公司'},
+  {id:3,booth:'S-001',level:'S',price:45600,status:'expired',date:'2026-06-10',company:'上海数码科技有限公司'},
+];
+
+// ============================================================
+// NAVIGATION
+// ============================================================
+function showView(name){
+  document.querySelectorAll('.view,.client-portal-view,.staff-portal-view').forEach(v=>{v.classList.remove('active');v.style.display='none';});
+  const el=document.getElementById('view-'+name);
+  if(el){el.classList.add('active');el.style.display='';}
+  window.scrollTo(0,0);
+}
+
+function doClientLogin(){
+  const e=document.getElementById('clientEmail').value;
+  const p=document.getElementById('clientPassword').value;
+  if(!e||!p){document.getElementById('clientLoginError').style.display='block';return;}
+  document.getElementById('clientLoginError').style.display='none';
+  showView('client');
+  navigateClient('dashboard');
+}
+
+function doStaffLogin(){
+  const a=document.getElementById('staffAccount').value;
+  const p=document.getElementById('staffPassword').value;
+  if(!a||!p){document.getElementById('staffLoginError').style.display='block';return;}
+  document.getElementById('staffLoginError').style.display='none';
+  showView('staff');
+  navigateStaff('dashboard');
+}
+
+function doClientLogout(){showView('landing');}
+function doStaffLogout(){showView('landing');}
+
+function toggleSidebar(type){
+  const sb=document.getElementById(type==='client'?'clientSidebar':'staffSidebar');
+  sb.classList.toggle('open');
+}
+
+// Client sidebar navigation
+document.addEventListener('click', function(e){
+  const link=e.target.closest('.sidebar-link');
+  if(!link) return;
+  const sidebar=link.closest('.sidebar');
+  const isStaff=sidebar.classList.contains('sidebar-staff');
+  sidebar.querySelectorAll('.sidebar-link').forEach(l=>l.classList.remove('active'));
+  link.classList.add('active');
+  if(isStaff) navigateStaff(link.dataset.page);
+  else navigateClient(link.dataset.page);
+});
+
+function navigateClient(page){
+  const mc=document.querySelector('#clientMain .page-container');
+  if(!mc) return;
+  switch(page){
+    case 'dashboard': renderClientDashboard(mc); break;
+    case 'demand': renderDemandForm(mc); break;
+    case 'recommend': renderRecommendations(mc); break;
+    case 'map': renderVenueMap(mc); break;
+    case 'price': renderPriceDetail(mc); break;
+    case 'quotes': renderQuotes(mc); break;
+    default: renderClientDashboard(mc);
+  }
+}
+
+function navigateStaff(page){
+  const mc=document.querySelector('#staffMain .page-container');
+  if(!mc) return;
+  switch(page){
+    case 'dashboard': renderStaffDashboard(mc); break;
+    case 'leads': renderStaffLeads(mc); break;
+    case 'booths': renderStaffBooths(mc); break;
+    case 'ai-config': renderStaffAIConfig(mc); break;
+    case 'pricing': renderStaffPricing(mc); break;
+    case 'orders': renderStaffOrders(mc); break;
+    case 'reports': renderStaffReports(mc); break;
+    default: renderStaffDashboard(mc);
+  }
+}
+
+// Toast notification
+function showToast(msg,type='info'){
+  const c=document.getElementById('toastContainer');
+  const t=document.createElement('div');
+  t.className='toast '+type;
+  const icons={success:'✅',error:'❌',info:'ℹ️'};
+  t.innerHTML=`<span>${icons[type]||'ℹ️'}</span><span class="toast-message">${msg}</span>`;
+  c.appendChild(t);
+  setTimeout(()=>t.remove(),3000);
+}
+
+// ============================================================
+// CLIENT RENDER FUNCTIONS
+// ============================================================
+
+function renderClientDashboard(c){
+  c.innerHTML=`
+  <div class="page-header"><h1 class="page-title">📊 我的仪表盘</h1><p class="page-desc">欢迎回来，以下是您的参展概览</p></div>
+  <div class="kpi-grid">
+    <div class="kpi-card cyan"><div class="kpi-header"><span class="kpi-label">我的报价单</span><div class="kpi-icon cyan">📝</div></div><div class="kpi-value">3</div></div>
+    <div class="kpi-card gold"><div class="kpi-header"><span class="kpi-label">待处理报价</span><div class="kpi-icon gold">⏳</div></div><div class="kpi-value">1</div></div>
+    <div class="kpi-card green"><div class="kpi-header"><span class="kpi-label">已确认展位</span><div class="kpi-icon green">✅</div></div><div class="kpi-value">1</div></div>
+  </div>
+  <div class="chart-grid">
+    <div class="card"><div class="card-header"><div class="card-title"><i class="fas fa-bullhorn" style="color:var(--cyan);margin-right:8px;"></i>系统公告</div><span class="badge badge-cyan">3条新消息</span></div><div class="card-body">
+      <div style="display:flex;gap:12px;padding:12px 0;border-bottom:1px solid var(--gray-100);"><span style="padding:2px 8px;border-radius:4px;background:#dbeafe;color:#1d4ed8;font-size:12px;font-weight:600;white-space:nowrap;">新功能</span><span style="font-size:14px;color:var(--gray-700);">AI推荐系统已升级至V2.0，新增三档方案对比功能</span><span style="font-size:12px;color:var(--gray-400);margin-left:auto;white-space:nowrap;">2026-06-20</span></div>
+      <div style="display:flex;gap:12px;padding:12px 0;border-bottom:1px solid var(--gray-100);"><span style="padding:2px 8px;border-radius:4px;background:#fef3c7;color:#b45309;font-size:12px;font-weight:600;white-space:nowrap;">活动</span><span style="font-size:14px;color:var(--gray-700);">早鸟优惠：6月30日前预约可享额外9折折扣</span><span style="font-size:12px;color:var(--gray-400);margin-left:auto;white-space:nowrap;">2026-06-18</span></div>
+      <div style="display:flex;gap:12px;padding:12px 0;"><span style="padding:2px 8px;border-radius:4px;background:#fef9c3;color:#a16207;font-size:12px;font-weight:600;white-space:nowrap;">提醒</span><span style="font-size:14px;color:var(--gray-700);">您有1份报价单待确认，请及时处理</span><span style="font-size:12px;color:var(--gray-400);margin-left:auto;white-space:nowrap;">2026-06-17</span></div>
+    </div></div>
+    <div class="card"><div class="card-header"><div class="card-title"><i class="fas fa-bolt" style="color:var(--gold);margin-right:8px;"></i>快捷操作</div></div><div class="card-body">
+      <p style="font-size:14px;color:var(--gray-500);margin-bottom:16px;">选择您需要的操作，快速开始</p>
+      <div style="display:flex;flex-wrap:wrap;gap:12px;">
+        <button class="btn btn-primary" onclick="navigateClient('demand')"><i class="fas fa-pen"></i> 录入参展需求</button>
+        <button class="btn btn-gold" onclick="navigateClient('recommend')"><i class="fas fa-robot"></i> 查看AI推荐</button>
+        <button class="btn btn-outline" onclick="navigateClient('map')"><i class="fas fa-map"></i> 浏览场馆地图</button>
+      </div>
+    </div></div>
+  </div>`;
+}
+
+function renderDemandForm(c){
+  c.innerHTML=`
+  <div class="page-header"><h1 class="page-title">📝 参展需求录入</h1><p class="page-desc">请填写以下信息，AI将为您智能匹配最优展位方案</p></div>
+  <div class="card" style="max-width:800px;"><div class="card-body" id="demandFormContent">
+    <div id="demandFormBody">
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">企业名称 <span style="color:var(--red);">*</span></label><input class="form-input" id="fCompany" value="上海数码科技有限公司" placeholder="请输入企业全称"></div>
+        <div class="form-group"><label class="form-label">所属行业 <span style="color:var(--red);">*</span></label><select class="form-select" id="fIndustry"><option>信息技术</option><option>医疗健康</option><option>新能源</option><option>智能制造</option><option>消费品</option><option>金融保险</option><option>教育文化</option><option>其他</option></select></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">企业规模 <span style="color:var(--red);">*</span></label><select class="form-select" id="fScale"><option>小型（&lt;50人）</option><option selected>中型（50-500人）</option><option>大型（500-2000人）</option><option>集团（&gt;2000人）</option></select></div>
+        <div class="form-group"><label class="form-label">参展预算范围 <span style="color:var(--red);">*</span></label><select class="form-select" id="fBudget"><option>5-10万元</option><option selected>10-20万元</option><option>20-35万元</option><option>35-50万元</option><option>50万元以上</option></select></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">期望展位面积 <span style="color:var(--red);">*</span></label><select class="form-select" id="fArea"><option>9 m²（标准）</option><option selected>18 m²（中等）</option><option>36 m²（大型）</option><option>72 m²以上（特装）</option></select></div>
+        <div class="form-group"><label class="form-label">是否首次参展</label><select class="form-select" id="fFirstTime"><option>是，首次参展</option><option selected>否，有参展经验</option></select></div>
+      </div>
+      <div class="form-group"><label class="form-label">参展主要目的 <span style="color:var(--red);">*</span></label><select class="form-select" id="fGoal"><option>品牌曝光与形象展示</option><option selected>产品发布与推广</option><option>客户拓展与商务洽谈</option><option>行业交流与趋势洞察</option><option>综合目的</option></select></div>
+      <div class="form-group"><label class="form-label">特殊需求说明</label><textarea class="form-textarea" id="fNotes" placeholder="如有特殊位置偏好、搭建要求等，请在此说明..."></textarea><div class="form-hint">可选，详细描述有助于AI更精准地为您推荐展位</div></div>
+      <button class="btn btn-gold btn-block" id="submitBtn" onclick="submitDemand()" style="padding:14px;font-size:15px;"><i class="fas fa-robot"></i> 提交并生成AI推荐方案</button>
+    </div>
+    <div id="demandSuccess" style="display:none;text-align:center;padding:40px 24px;">
+      <div style="width:72px;height:72px;border-radius:50%;background:var(--green);color:white;display:flex;align-items:center;justify-content:center;font-size:32px;margin:0 auto 20px;"><i class="fas fa-check"></i></div>
+      <h3 style="font-size:20px;color:var(--navy);margin-bottom:8px;">需求已提交成功！</h3>
+      <p style="font-size:14px;color:var(--gray-500);margin-bottom:24px;">AI正在分析您的需求，即将为您展示最佳推荐方案...</p>
+      <button class="btn btn-gold" style="width:auto;padding:10px 32px;" onclick="navigateClient('recommend')"><i class="fas fa-lightbulb"></i> 查看AI推荐方案</button>
+    </div>
+  </div></div>`;
+}
+
+function submitDemand(){
+  const btn=document.getElementById('submitBtn');
+  btn.disabled=true;
+  btn.innerHTML='<i class="fas fa-spinner fa-spin"></i> AI正在分析...';
+  setTimeout(()=>{
+    document.getElementById('demandFormBody').style.display='none';
+    document.getElementById('demandSuccess').style.display='block';
+  },1800);
+}
+
+function renderRecommendations(c){
+  const best=BOOTH_DATA.filter(b=>b.level==='A'&&b.status!=='sold').slice(0,3);
+  const premium=BOOTH_DATA.filter(b=>b.level==='S'&&b.status!=='sold').slice(0,2);
+  const value=BOOTH_DATA.filter(b=>b.level==='B'&&b.status!=='sold').slice(0,3);
+  function bRows(bs){
+    return bs.map(b=>`<tr><td><strong>${b.number}</strong></td><td><span class="badge badge-${b.level==='S'?'gold':b.level==='A'?'cyan':'green'}">${b.levelName}</span></td><td>${b.area}m²</td><td style="font-weight:700;color:var(--cyan);">¥${b.dynamicPrice.toLocaleString()}</td><td><div style="display:flex;align-items:center;gap:6px;"><div style="width:60px;height:5px;border-radius:3px;background:var(--gray-200);overflow:hidden;"><div style="height:100%;width:${b.matchScore}%;border-radius:3px;background:${b.matchScore>=80?'var(--green)':b.matchScore>=65?'var(--gold)':'var(--cyan)'}"></div></div><span style="font-size:12px;color:var(--gray-500);">${b.matchScore}%</span></div></td><td><button class="btn btn-outline btn-sm" onclick="navigateClient('map')"><i class="fas fa-map-marker-alt"></i> 查看位置</button></td></tr>`).join('');
+  }
+  c.innerHTML=`
+  <div class="page-header"><h1 class="page-title">🤖 AI智能推荐方案</h1><p class="page-desc">基于您的需求，AI为您生成了以下三档推荐方案</p></div>
+  <div style="background:linear-gradient(135deg,rgba(0,163,224,0.06),rgba(0,163,224,0.02));border:1px solid rgba(0,163,224,0.15);border-radius:var(--radius-lg);padding:16px 24px;display:flex;justify-content:space-between;align-items:center;margin-bottom:28px;flex-wrap:wrap;gap:12px;">
+    <div><i class="fas fa-clipboard-list" style="color:var(--cyan);margin-right:8px;"></i><strong>本次需求概要：</strong>信息技术 · 中型企业 · 预算10-20万 · 参展目的：产品发布</div>
+    <button class="btn btn-outline" onclick="navigateClient('demand')"><i class="fas fa-edit"></i> 修改需求</button>
+  </div>
+  <div class="recommendation-grid" style="grid-template-columns:1fr;gap:24px;">
+    ${recCard('best','⭐ 最优适配','综合评分最高，完美匹配您的需求','92%','high',bRows(best),'btn-primary','在地图上查看全部推荐')}
+    ${recCard('premium','👑 高端升级','旗舰级展位，最大化品牌影响力','78%','mid',bRows(premium),'btn-gold','查看高端展位分布')}
+    ${recCard('value','💰 性价比之选','经济实惠，适合预算有限的企业','65%','low',bRows(value),'btn-success','查看性价比展位')}
+  </div>`;
+}
+
+function recCard(cls,title,desc,score,fillClass,rows,btnCls,btnText){
+  return `<div class="rec-card ${cls}">
+    <div class="rec-header"><div class="rec-tier"><span class="rec-tier-icon">${title.split(' ')[0]}</span><div><div class="rec-tier-name">${title.split(' ').slice(1).join(' ')}</div><div style="font-size:13px;color:var(--gray-500);">${desc}</div></div></div><div class="rec-score">${score}</div></div>
+    <div class="rec-body"><table class="data-table"><thead><tr><th>展位编号</th><th>等级</th><th>面积</th><th>动态价格</th><th>匹配度</th><th>操作</th></tr></thead><tbody>${rows}</tbody></table></div>
+    <div class="rec-footer"><button class="btn ${btnCls}" onclick="navigateClient('map')"><i class="fas fa-map-marked-alt"></i> ${btnText}</button></div></div>`;
+}
+
+function renderVenueMap(c){
+  let currentFloor=1,selectedBooth=null;
+  const floor1Booths=BOOTH_DATA.filter(b=>b.floor===1).slice(0,80);
+  const floor2Booths=BOOTH_DATA.filter(b=>b.floor===2).slice(0,36);
+  function genSVG(floor){
+    const booths=floor===1?floor1Booths:floor2Booths;
+    const cols=Math.min(booths.length,8);
+    const rows=Math.ceil(booths.length/cols);
+    const bw=55,bh=35,gap=8;
+    const sw=cols*(bw+gap)+40;
+    const sh=rows*(bh+gap)+80;
+    let svg=`<svg viewBox="0 0 ${sw} ${sh}" style="width:100%;max-width:700px;margin:0 auto;">`;
+    // Entrance zone label
+    svg+=`<text x="${sw/2}" y="24" text-anchor="middle" font-size="12" fill="var(--gray-400)" font-weight="600" letter-spacing="2">${floor===1?'一层展馆平面':'二层展馆平面'}</text>`;
+    svg+=`<text x="30" y="50" font-size="11" fill="var(--gray-400)">入口迎宾区 →</text>`;
+    booths.forEach((b,i)=>{
+      const col=i%cols;
+      const row=Math.floor(i/cols);
+      const x=20+col*(bw+gap);
+      const y=55+row*(bh+gap);
+      const colors={available:'#D1FAE5',recommended:'#00A3E0',locked:'#FEF3C7',sold:'#E4E7EB'};
+      const strokes={available:'#10B981',recommended:'#00A3E0',locked:'#F59E0B',sold:'#D1D5DB'};
+      const fill=b.status==='ai-recommended'?colors.recommended:colors[b.status]||'#D1FAE5';
+      const stroke=b.status==='ai-recommended'?strokes.recommended:strokes[b.status]||'#10B981';
+      svg+=`<rect x="${x}" y="${y}" width="${bw}" height="${bh}" rx="4" fill="${fill}" stroke="${stroke}" stroke-width="1.5" class="booth-rect" onclick="window._selBooth('${b.number}',${b.id})" style="cursor:pointer;" />`;
+      svg+=`<text x="${x+bw/2}" y="${y+bh/2+1}" text-anchor="middle" dominant-baseline="central" font-size="9" font-weight="600" fill="${b.status==='sold'?'var(--gray-400)':'var(--gray-700)'}" pointer-events="none">${b.number}</text>`;
+    });
+    svg+=`</svg>`;
+    return svg;
+  }
+  c.innerHTML=`
+  <div class="page-header"><h1 class="page-title">🗺️ 场馆平面图</h1><p class="page-desc">点击展位查看详情，颜色编码显示实时状态</p></div>
+  <div class="venue-map-container">
+    <div class="venue-map-toolbar">
+      <div class="floor-tabs">
+        <button class="floor-tab active" onclick="window._switchFloor(1,this)">1F 一层展位</button>
+        <button class="floor-tab" onclick="window._switchFloor(2,this)">2F 二层展位</button>
+      </div>
+      <div class="map-legend">
+        <div class="legend-item"><div class="legend-color available"></div>可订</div>
+        <div class="legend-item"><div class="legend-color recommended"></div>AI推荐</div>
+        <div class="legend-item"><div class="legend-color locked"></div>锁定</div>
+        <div class="legend-item"><div class="legend-color sold"></div>已售</div>
+      </div>
+    </div>
+    <div class="venue-map-area" id="venueMapArea">${genSVG(1)}</div>
+  </div>
+  <div class="booth-detail-panel" id="boothDetailPanel">
+    <div class="booth-detail-header"><span class="booth-detail-title">展位详情</span><span class="booth-detail-close" onclick="window._clearBooth()">✕</span></div>
+    <div class="booth-detail-body" id="boothDetailBody">
+      <div style="text-align:center;padding:60px 24px;color:var(--gray-400);"><div style="font-size:48px;margin-bottom:16px;opacity:0.5;">👆</div><div>点击展位查看详情</div></div>
+    </div>
+  </div>`;
+  window._currentFloor=1;
+  window._switchFloor=function(f,btn){
+    window._currentFloor=f;
+    document.querySelectorAll('.floor-tab').forEach(t=>t.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('venueMapArea').innerHTML=genSVG(f);
+  };
+  window._selBooth=function(num,id){
+    const b=BOOTH_DATA.find(x=>x.number===num);
+    if(!b) return;
+    selectedBooth=b;
+    const bd=document.getElementById('boothDetailBody');
+    const statusMap={available:['可订','badge-green'],recommended:['AI推荐','badge-cyan'],locked:['锁定','badge-yellow'],sold:['已售','badge-gray']};
+    const [stLabel,stCls]=statusMap[b.status]||['未知','badge-gray'];
+    bd.innerHTML=`
+      <div class="booth-detail-grid">
+        <div class="booth-detail-field"><span class="booth-detail-field-label">展位编号</span><span class="booth-detail-field-value">${b.number}</span></div>
+        <div class="booth-detail-field"><span class="booth-detail-field-label">等级</span><span class="booth-detail-field-value"><span class="badge badge-${b.level==='S'?'gold':b.level==='A'?'cyan':'green'}">${b.levelName}</span></span></div>
+        <div class="booth-detail-field"><span class="booth-detail-field-label">面积</span><span class="booth-detail-field-value">${b.area} m²</span></div>
+        <div class="booth-detail-field"><span class="booth-detail-field-label">楼层</span><span class="booth-detail-field-value">${b.floor}F</span></div>
+        <div class="booth-detail-field"><span class="booth-detail-field-label">状态</span><span class="booth-detail-field-value"><span class="badge ${stCls}">${stLabel}</span></span></div>
+        <div class="booth-detail-field"><span class="booth-detail-field-label">AI匹配度</span><span class="booth-detail-field-value">${b.matchScore}%</span></div>
+        <div class="booth-detail-price"><div><div style="font-size:12px;color:var(--gray-400);">动态价格</div><div style="font-size:28px;font-weight:800;color:var(--cyan);">¥${b.dynamicPrice.toLocaleString()}</div></div>
+        ${b.status!=='sold'?`<button class="btn btn-success" onclick="showToast('预约请求已提交！','success')"><i class="fas fa-calendar-check"></i> 预约此展位</button>`:`<span style="color:var(--gray-400);font-size:13px;">该展位已售出</span>`}
+        </div>
+      </div>`;
+  };
+  window._clearBooth=function(){
+    document.getElementById('boothDetailBody').innerHTML='<div style="text-align:center;padding:60px 24px;color:var(--gray-400);"><div style="font-size:48px;margin-bottom:16px;opacity:0.5;">👆</div><div>点击展位查看详情</div></div>';
+  };
+}
+
+function renderPriceDetail(c){
+  const booths=BOOTH_DATA.filter(b=>b.status!=='sold').slice(0,10);
+  const opts=booths.map(b=>`<option value="${b.number}" ${b.number==='A-005'?'selected':''}>${b.number} (${b.levelName})</option>`).join('');
+  c.innerHTML=`
+  <div class="page-header"><h1 class="page-title">💰 动态价格详情</h1><p class="page-desc">查看展位的实时动态价格构成与波动趋势</p></div>
+  <div class="filter-bar">
+    <span class="filter-bar-label">选择展位：</span>
+    <select class="filter-select" id="priceBoothSelect">${opts}</select>
+    <button class="btn btn-primary" onclick="updatePrice()"><i class="fas fa-search"></i> 查看价格</button>
+  </div>
+  <div class="chart-grid">
+    <div class="card"><div class="card-header"><div class="card-title">📋 价格构成</div></div><div class="card-body" id="priceBreakdown"></div></div>
+    <div class="card"><div class="card-header"><div class="card-title">📈 24小时价格趋势</div></div><div class="card-body"><div class="chart-body"><canvas id="priceChart"></canvas></div></div></div>
+  </div>
+  <div class="card"><div class="card-header"><div class="card-title">📋 价格说明</div></div><div class="card-body">
+    <ul style="list-style:none;padding:0;">
+      <li style="padding:8px 0;font-size:14px;color:var(--gray-600);">• 价格基于AI实时计算，综合考虑展位位置、面积、流量等多维因子</li>
+      <li style="padding:8px 0;font-size:14px;color:var(--gray-600);">• 早鸟优惠：6月30日前预约可享额外9折折扣</li>
+      <li style="padding:8px 0;font-size:14px;color:var(--gray-600);">• 价格有效期至2026-07-01，过期后需重新询价</li>
+    </ul>
+  </div></div>`;
+  updatePrice();
+}
+
+let priceChartInstance=null;
+function updatePrice(){
+  const sel=document.getElementById('priceBoothSelect');
+  if(!sel) return;
+  const b=BOOTH_DATA.find(x=>x.number===sel.value)||BOOTH_DATA[0];
+  const aiCoeff=(1+Math.random()*0.3).toFixed(2);
+  const supplyCoeff=(1+Math.random()*0.15).toFixed(2);
+  const discount=Math.round(5+Math.random()*15);
+  const timeCoeff=(1+Math.random()*0.05).toFixed(2);
+  const finalPrice=Math.round(b.basePrice*aiCoeff*supplyCoeff*(1-discount/100)*timeCoeff);
+  const bd=document.getElementById('priceBreakdown');
+  if(!bd) return;
+  bd.innerHTML=`
+    <div style="display:flex;justify-content:space-between;padding:12px 0;border-bottom:1px solid var(--gray-100);"><span style="font-size:14px;color:var(--gray-600);">基础价格</span><span style="font-weight:600;">¥${b.basePrice.toLocaleString()}</span></div>
+    <div style="display:flex;justify-content:space-between;padding:12px 0;border-bottom:1px solid var(--gray-100);"><span style="font-size:14px;color:var(--gray-600);">AI价值系数</span><span style="font-weight:600;">×${aiCoeff} <span class="badge badge-green" style="margin-left:4px;">高</span></span></div>
+    <div style="display:flex;justify-content:space-between;padding:12px 0;border-bottom:1px solid var(--gray-100);"><span style="font-size:14px;color:var(--gray-600);">供需关系系数</span><span style="font-weight:600;">×${supplyCoeff} <span class="badge badge-green" style="margin-left:4px;">高</span></span></div>
+    <div style="display:flex;justify-content:space-between;padding:12px 0;border-bottom:1px solid var(--gray-100);"><span style="font-size:14px;color:var(--gray-600);">客户权益折扣</span><span style="font-weight:600;color:var(--green);">-${discount}%</span></div>
+    <div style="display:flex;justify-content:space-between;padding:12px 0;border-bottom:1px solid var(--gray-100);"><span style="font-size:14px;color:var(--gray-600);">时段浮动系数</span><span style="font-weight:600;">×${timeCoeff} <span class="badge badge-yellow" style="margin-left:4px;">中</span></span></div>
+    <div style="display:flex;justify-content:space-between;padding:16px 0;border-top:2px solid var(--gray-200);margin-top:8px;"><span style="font-size:16px;font-weight:700;color:var(--gray-800);">最终价格</span><span style="font-size:22px;font-weight:800;color:var(--cyan);">¥${finalPrice.toLocaleString()}</span></div>`;
+  // Chart
+  const ctx=document.getElementById('priceChart');
+  if(!ctx) return;
+  if(priceChartInstance) priceChartInstance.destroy();
+  const labels=[];const data=[];
+  for(let h=0;h<24;h++){labels.push(h+'时');data.push(finalPrice+Math.round((Math.random()-0.5)*800));}
+  priceChartInstance=new Chart(ctx,{type:'line',data:{labels,datasets:[{label:'实时价格',data,backgroundColor:'rgba(0,163,224,0.1)',borderColor:'#00A3E0',borderWidth:2,fill:true,tension:0.4,pointRadius:2}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{beginAtZero:false}}}});
+}
+
+function renderQuotes(c){
+  const myQuotes=QUOTES_DATA;
+  c.innerHTML=`
+  <div class="page-header"><h1 class="page-title">📄 我的报价 / 预约</h1><p class="page-desc">查看和管理您的报价单与预约记录</p></div>
+  <div class="tabs">
+    <button class="tab active" onclick="switchQuoteTab('quotes',this)">我的报价单</button>
+    <button class="tab" onclick="switchQuoteTab('bookings',this)">我的预约</button>
+  </div>
+  <div id="quoteTab_quotes">
+    ${myQuotes.map(q=>{
+      const smap={pending:['待确认','badge-yellow'],confirmed:['已确认','badge-green'],expired:['已过期','badge-red']};
+      const [sl,sc]=smap[q.status]||['未知','badge-gray'];
+      const actions=q.status==='pending'?'<button class="btn btn-primary btn-sm"><i class="fas fa-check"></i> 确认预约</button><button class="btn btn-outline btn-sm"><i class="fas fa-file-pdf"></i> 查看PDF</button>':q.status==='confirmed'?'<span class="badge badge-green">已预约</span><button class="btn btn-outline btn-sm"><i class="fas fa-eye"></i> 查看详情</button>':'<button class="btn btn-outline btn-sm"><i class="fas fa-redo"></i> 重新询价</button>';
+      const priceStyle=q.status==='expired'?'text-decoration:line-through;color:var(--gray-400)':'';
+      return `<div class="quote-card"><div class="quote-card-header"><span class="quote-card-id">报价单 #QT-2026-${String(q.id).padStart(3,'0')}</span><span class="badge ${sc}">${sl}</span></div><div class="quote-card-body"><div class="quote-card-field"><span class="quote-card-field-label">展位编号</span><span class="quote-card-field-value">${q.booth}</span></div><div class="quote-card-field"><span class="quote-card-field-label">等级</span><span class="quote-card-field-value">${levelNames[q.level]||q.level}</span></div><div class="quote-card-field"><span class="quote-card-field-label">面积</span><span class="quote-card-field-value">${q.level==='S'?'36':q.level==='A'?'18':'9'} m²</span></div><div class="quote-card-field"><span class="quote-card-field-label">生成日期</span><span class="quote-card-field-value">${q.date}</span></div></div><div class="quote-card-footer"><span class="quote-card-total" style="${priceStyle}">¥${q.price.toLocaleString()}</span><div class="quote-card-actions">${actions}</div></div></div>`;
+    }).join('')}
+  </div>
+  <div id="quoteTab_bookings" style="display:none;">
+    <div class="quote-card"><div class="quote-card-header"><span class="quote-card-id">预约 #BK-2026-001</span><span class="badge badge-green">已确认</span></div><div class="quote-card-body"><div class="quote-card-field"><span class="quote-card-field-label">展位编号</span><span class="quote-card-field-value">A-005</span></div><div class="quote-card-field"><span class="quote-card-field-label">预约时间</span><span class="quote-card-field-value">2026-06-25 14:00</span></div><div class="quote-card-field"><span class="quote-card-field-label">金额</span><span class="quote-card-field-value">¥25,800</span></div></div><div class="quote-card-footer"><span class="quote-card-total">¥25,800</span><button class="btn btn-danger btn-sm"><i class="fas fa-times"></i> 取消预约</button></div></div>
+    <div class="quote-card"><div class="quote-card-header"><span class="quote-card-id">预约 #BK-2026-002</span><span class="badge badge-yellow">待确认</span></div><div class="quote-card-body"><div class="quote-card-field"><span class="quote-card-field-label">展位编号</span><span class="quote-card-field-value">B-022</span></div><div class="quote-card-field"><span class="quote-card-field-label">预约时间</span><span class="quote-card-field-value">2026-07-01 10:00</span></div><div class="quote-card-field"><span class="quote-card-field-label">金额</span><span class="quote-card-field-value">¥14,200</span></div></div><div class="quote-card-footer"><span class="quote-card-total">¥14,200</span><button class="btn btn-danger btn-sm"><i class="fas fa-times"></i> 取消预约</button></div></div>
+  </div>`;
+}
+
+function switchQuoteTab(tab,btn){
+  document.querySelectorAll('.tabs .tab').forEach(t=>t.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('quoteTab_quotes').style.display=tab==='quotes'?'block':'none';
+  document.getElementById('quoteTab_bookings').style.display=tab==='bookings'?'block':'none';
+}
+
+// ============================================================
+// STAFF RENDER FUNCTIONS
+// ============================================================
+
+function renderStaffDashboard(c){
+  c.innerHTML=`
+  <div class="page-header"><h1 class="page-title">📊 运营数据看板</h1><p class="page-desc">实时查看系统运营核心指标</p></div>
+  <div class="kpi-grid">
+    <div class="kpi-card cyan"><div class="kpi-header"><span class="kpi-label">总展位数</span><div class="kpi-icon cyan">🏪</div></div><div class="kpi-value">160</div><span class="kpi-change up">↑ 稳定</span></div>
+    <div class="kpi-card gold"><div class="kpi-header"><span class="kpi-label">空置率</span><div class="kpi-icon gold">📉</div></div><div class="kpi-value">23.8%</div><span class="kpi-change down">↓ 2.1%</span></div>
+    <div class="kpi-card green"><div class="kpi-header"><span class="kpi-label">推荐成交率</span><div class="kpi-icon green">📈</div></div><div class="kpi-value">67.5%</div><span class="kpi-change up">↑ 5.3%</span></div>
+    <div class="kpi-card purple"><div class="kpi-header"><span class="kpi-label">溢价收益</span><div class="kpi-icon purple">💰</div></div><div class="kpi-value">¥186,200</div><span class="kpi-change up">↑ 12.8%</span></div>
+  </div>
+  <div class="chart-grid">
+    <div class="card"><div class="card-header"><div class="card-title">展位等级分布</div></div><div class="card-body"><div class="chart-body"><canvas id="levelDistChart"></canvas></div></div></div>
+    <div class="card"><div class="card-header"><div class="card-title">展位状态分布</div></div><div class="card-body"><div class="chart-body"><canvas id="statusDistChart"></canvas></div></div></div>
+  </div>
+  <div class="card"><div class="card-header"><div class="card-title">热门展位 TOP 10</div></div><div class="card-body" style="overflow-x:auto;">
+    <table class="data-table"><thead><tr><th>排名</th><th>展位编号</th><th>等级</th><th>浏览量</th><th>预约次数</th><th>热度指数</th></tr></thead><tbody>
+    ${[1,2,3,4,5,6,7,8,9,10].map(i=>`<tr><td><span style="display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;border-radius:50%;background:${i<=3?'var(--gold)':'var(--gray-200)'};color:${i<=3?'var(--navy-dark)':'var(--gray-600)'};font-size:12px;font-weight:700;">${i}</span></td><td>A-${String(i*5).padStart(3,'0')}</td><td><span class="badge badge-cyan">A优选</span></td><td>${Math.round(100+Math.random()*200)}</td><td>${Math.round(5+Math.random()*15)}</td><td><div style="display:flex;align-items:center;gap:6px;"><div style="width:60px;height:5px;border-radius:3px;background:var(--gray-200);overflow:hidden;"><div style="height:100%;width:${Math.round(60+Math.random()*40)}%;border-radius:3px;background:var(--cyan);"></div></div></div></td></tr>`).join('')}
+    </tbody></table>
+  </div></div>`;
+  // Charts
+  setTimeout(()=>{
+    const lc=document.getElementById('levelDistChart');
+    if(lc) new Chart(lc,{type:'bar',data:{labels:['S级旗舰','A级优选','B级标准','C级基础'],datasets:[{label:'数量',data:[12,36,80,32],backgroundColor:['rgba(201,168,76,0.7)','rgba(0,163,224,0.7)','rgba(16,185,129,0.7)','rgba(156,163,175,0.7)'],borderColor:['#C9A84C','#00A3E0','#10B981','#9CA3AF'],borderWidth:1}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}}}});
+    const sc=document.getElementById('statusDistChart');
+    if(sc) new Chart(sc,{type:'doughnut',data:{labels:['可订','AI推荐','锁定','已售'],datasets:[{data:[42,18,15,25],backgroundColor:['#10B981','#00A3E0','#F59E0B','#9CA3AF'],borderWidth:0}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom'}}}});
+  },100);
+}
+
+function renderStaffLeads(c){
+  const statusMap={new:['新线索','badge-yellow'],negotiating:['洽谈中','badge-cyan'],quoted:['已报价','badge-purple'],booked:['已预约','badge-green']};
+  c.innerHTML=`
+  <div class="page-header"><h1 class="page-title">👥 客户线索管理</h1><p class="page-desc">查看和跟进所有客户提交的参展需求</p></div>
+  <div class="filter-bar">
+    <span class="filter-bar-label">筛选：</span>
+    <select class="filter-select"><option>全部行业</option><option>信息技术</option><option>医疗健康</option><option>新能源</option><option>智能制造</option><option>消费品</option></select>
+    <select class="filter-select"><option>全部状态</option><option>新线索</option><option>洽谈中</option><option>已报价</option><option>已预约</option></select>
+    <input class="filter-search" placeholder="搜索客户名称...">
+    <button class="btn btn-outline btn-sm" onclick="showToast('筛选已重置','info')"><i class="fas fa-redo"></i> 重置</button>
+  </div>
+  <div class="table-wrapper">
+    <table class="data-table"><thead><tr><th>客户名称</th><th>所属行业</th><th>预算范围</th><th>提交日期</th><th>状态</th><th>联系人</th><th>操作</th></tr></thead><tbody>
+    ${LEADS_DATA.map(l=>{
+      const [sl,sc]=statusMap[l.status]||['未知','badge-gray'];
+      return `<tr><td><strong>${l.company}</strong></td><td>${l.industry}</td><td>${l.budget}</td><td>${l.date}</td><td><span class="badge ${sc}">${sl}</span></td><td>${l.contact}</td><td><div style="display:flex;gap:4px;"><button class="btn btn-outline btn-sm"><i class="fas fa-eye"></i> 查看</button><button class="btn btn-primary btn-sm"><i class="fas fa-phone"></i> 跟进</button></div></td></tr>`;
+    }).join('')}
+    </tbody></table>
+  </div>`;
+}
+
+function renderStaffBooths(c){
+  const sample=BOOTH_DATA.slice(0,20);
+  const statusMap={available:['可订','badge-green'],recommended:['AI推荐','badge-cyan'],locked:['锁定','badge-yellow'],sold:['已售','badge-gray']};
+  c.innerHTML=`
+  <div class="page-header"><h1 class="page-title">🏗️ 展位资源管理</h1><p class="page-desc">管理和编辑所有展位资源信息</p></div>
+  <div class="filter-bar">
+    <span class="filter-bar-label">筛选：</span>
+    <select class="filter-select"><option>全部等级</option><option>S级</option><option>A级</option><option>B级</option><option>C级</option></select>
+    <select class="filter-select"><option>全部状态</option><option>可订</option><option>AI推荐</option><option>锁定</option><option>已售</option></select>
+    <input class="filter-search" placeholder="搜索展位编号...">
+    <button class="btn btn-primary btn-sm"><i class="fas fa-plus"></i> 新增展位</button>
+  </div>
+  <div class="table-wrapper">
+    <table class="data-table"><thead><tr><th>展位编号</th><th>等级</th><th>面积</th><th>基础价格</th><th>动态价格</th><th>状态</th><th>操作</th></tr></thead><tbody>
+    ${sample.map(b=>{
+      const [sl,sc]=statusMap[b.status]||['未知','badge-gray'];
+      const lvlCls=b.level==='S'?'badge-gold':b.level==='A'?'badge-cyan':b.level==='B'?'badge-green':'badge-gray';
+      const actions=b.status==='sold'?`<button class="btn btn-outline btn-sm">查看</button>`:`<div style="display:flex;gap:4px;"><button class="btn btn-outline btn-sm">编辑</button><button class="btn btn-primary btn-sm">${b.status==='locked'?'解锁':'锁定'}</button></div>`;
+      return `<tr><td><strong>${b.number}</strong></td><td><span class="badge ${lvlCls}">${b.levelName}</span></td><td>${b.area}m²</td><td>¥${b.basePrice.toLocaleString()}</td><td>¥${b.dynamicPrice.toLocaleString()}</td><td><span class="badge ${sc}">${sl}</span></td><td>${actions}</td></tr>`;
+    }).join('')}
+    </tbody></table>
+  </div>`;
+}
+
+function renderStaffAIConfig(c){
+  c.innerHTML=`
+  <div class="page-header"><h1 class="page-title">🧠 AI模型参数配置</h1><p class="page-desc">调整AI模型的权重参数将影响推荐结果和定价策略</p></div>
+  <div style="background:linear-gradient(135deg,rgba(0,163,224,0.06),rgba(0,163,224,0.02));border:1px solid rgba(0,163,224,0.15);border-radius:var(--radius-lg);padding:16px 24px;margin-bottom:24px;"><i class="fas fa-info-circle" style="color:var(--cyan);margin-right:8px;"></i>修改后实时生效，建议谨慎调整</div>
+  <div class="card"><div class="card-header"><div class="card-title">权重参数</div><span style="font-size:13px;color:var(--gray-500);" id="weightTotal">权重合计：100%</span></div><div class="card-body">
+    <div class="slider-config"><div class="slider-header"><span class="slider-label">📍 位置权重</span><span class="slider-value" id="w1Val">35%</span></div><input type="range" min="0" max="100" value="35" oninput="updateWeights()" style="width:100%;"><div class="slider-range"><span>0%</span><span>100%</span></div></div>
+    <div class="slider-config"><div class="slider-header"><span class="slider-label">📐 面积权重</span><span class="slider-value" id="w2Val">25%</span></div><input type="range" min="0" max="100" value="25" oninput="updateWeights()" style="width:100%;"><div class="slider-range"><span>0%</span><span>100%</span></div></div>
+    <div class="slider-config"><div class="slider-header"><span class="slider-label">👥 流量权重</span><span class="slider-value" id="w3Val">22%</span></div><input type="range" min="0" max="100" value="22" oninput="updateWeights()" style="width:100%;"><div class="slider-range"><span>0%</span><span>100%</span></div></div>
+    <div class="slider-config"><div class="slider-header"><span class="slider-label">🏗️ 配套权重</span><span class="slider-value" id="w4Val">18%</span></div><input type="range" min="0" max="100" value="18" oninput="updateWeights()" style="width:100%;"><div class="slider-range"><span>0%</span><span>100%</span></div></div>
+  </div></div>
+  <div class="card"><div class="card-header"><div class="card-title">参数设置</div></div><div class="card-body">
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">最高溢价上限</label><input class="form-input" type="number" value="50" min="0" max="100"><div class="form-hint">百分比，默认50%</div></div>
+      <div class="form-group"><label class="form-label">最低折扣下限</label><input class="form-input" type="number" value="15" min="0" max="100"><div class="form-hint">百分比，默认15%</div></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">推荐方案数量</label><select class="form-select"><option>3</option><option>5</option><option>10</option></select></div>
+      <div class="form-group"><label class="form-label">AI自动优化</label><div style="padding:10px 0;"><label style="display:flex;align-items:center;gap:8px;cursor:pointer;"><input type="checkbox" checked style="accent-color:var(--cyan);width:18px;height:18px;"> 开启自动学习优化</label></div></div>
+    </div>
+  </div></div>
+  <div style="display:flex;gap:12px;margin-top:20px;">
+    <button class="btn btn-primary" onclick="showToast('配置已保存成功！','success')"><i class="fas fa-save"></i> 保存配置</button>
+    <button class="btn btn-outline" onclick="showToast('已恢复默认配置','info')"><i class="fas fa-undo"></i> 恢复默认</button>
+  </div>`;
+}
+
+function updateWeights(){
+  const sliders=document.querySelectorAll('#staffMain input[type="range"]');
+  let total=0;
+  sliders.forEach((s,i)=>{
+    document.getElementById('w'+(i+1)+'Val').textContent=s.value+'%';
+    total+=parseInt(s.value);
+  });
+  const el=document.getElementById('weightTotal');
+  if(el){el.textContent='权重合计：'+total+'%';el.style.color=total===100?'var(--green)':'var(--red)';}
+}
+
+function renderStaffPricing(c){
+  c.innerHTML=`
+  <div class="page-header"><h1 class="page-title">💲 动态定价规则管理</h1><p class="page-desc">配置定价公式、阶梯折扣与客户权益系数</p></div>
+  <div class="card"><div class="card-header"><div class="card-title">基础定价公式</div></div><div class="card-body">
+    <div style="padding:16px;background:var(--gray-50);border-radius:var(--radius-sm);margin-bottom:16px;font-family:monospace;font-size:14px;color:var(--navy);">最终价格 = 基础价格 × (1 + AI价值系数) × (1 + 供需系数) × (1 - 权益折扣) × (1 + 时段浮动)</div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">基础价倍率范围</label><div style="display:flex;gap:8px;"><input class="form-input" type="number" value="1.0" step="0.1" style="width:80px;"><span style="line-height:40px;color:var(--gray-400);">~</span><input class="form-input" type="number" value="2.0" step="0.1" style="width:80px;"></div></div>
+      <div class="form-group"><label class="form-label">AI价值系数范围</label><div style="display:flex;gap:8px;"><input class="form-input" type="number" value="0.8" step="0.1" style="width:80px;"><span style="line-height:40px;color:var(--gray-400);">~</span><input class="form-input" type="number" value="1.5" step="0.1" style="width:80px;"></div></div>
+    </div>
+  </div></div>
+  <div class="card"><div class="card-header"><div class="card-title">阶梯折扣模板</div></div><div class="card-body">
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">早鸟折扣 - 提前30天</label><input class="form-input" type="text" value="9折"></div>
+      <div class="form-group"><label class="form-label">早鸟折扣 - 提前60天</label><input class="form-input" type="text" value="85折"></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">早鸟折扣 - 提前90天</label><input class="form-input" type="text" value="8折"></div>
+      <div class="form-group"><label class="form-label">批量折扣 - 2个以上</label><input class="form-input" type="text" value="95折"></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">批量折扣 - 5个以上</label><input class="form-input" type="text" value="9折"></div>
+    </div>
+  </div></div>
+  <div class="card"><div class="card-header"><div class="card-title">客户权益系数</div></div><div class="card-body">
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">老客户系数</label><input class="form-input" type="number" value="0.95" step="0.01"></div>
+      <div class="form-group"><label class="form-label">VIP客户系数</label><input class="form-input" type="number" value="0.88" step="0.01"></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">战略合作系数</label><input class="form-input" type="number" value="0.82" step="0.01"></div>
+      <div class="form-group"><label class="form-label">新客户系数</label><input class="form-input" type="number" value="1.0" step="0.01"></div>
+    </div>
+  </div></div>
+  <div style="display:flex;gap:12px;margin-top:20px;">
+    <button class="btn btn-primary" onclick="showToast('定价规则已保存！','success')"><i class="fas fa-save"></i> 保存全部</button>
+  </div>`;
+}
+
+function renderStaffOrders(c){
+  const orders=[
+    {id:'ORD-001',company:'上海数码科技',booth:'A-005',price:25800,status:'completed',date:'2026-06-18'},
+    {id:'ORD-002',company:'北京创新医疗',booth:'S-001',price:45600,status:'processing',date:'2026-06-17'},
+    {id:'ORD-003',company:'深圳绿色能源',booth:'B-022',price:14200,status:'pending',date:'2026-06-16'},
+    {id:'ORD-004',company:'杭州智造科技',booth:'A-012',price:24200,status:'processing',date:'2026-06-15'},
+    {id:'ORD-005',company:'广州时尚品牌',booth:'C-015',price:7900,status:'completed',date:'2026-06-14'},
+  ];
+  const smap={completed:['已完成','badge-green'],processing:['处理中','badge-cyan'],pending:['待付款','badge-yellow']};
+  c.innerHTML=`
+  <div class="page-header"><h1 class="page-title">📋 订单管理</h1><p class="page-desc">查看和管理所有展位订单</p></div>
+  <div class="filter-bar">
+    <select class="filter-select"><option>全部状态</option><option>已完成</option><option>处理中</option><option>待付款</option></select>
+    <input class="filter-search" placeholder="搜索订单编号或客户...">
+    <button class="btn btn-primary btn-sm"><i class="fas fa-plus"></i> 新建订单</button>
+  </div>
+  <div class="table-wrapper">
+    <table class="data-table"><thead><tr><th>订单编号</th><th>客户名称</th><th>展位编号</th><th>金额</th><th>状态</th><th>创建时间</th><th>操作</th></tr></thead><tbody>
+    ${orders.map(o=>{
+      const [sl,sc]=smap[o.status]||['未知','badge-gray'];
+      const extra=o.status==='processing'?'<button class="btn btn-primary btn-sm" style="margin-left:4px;">审核</button>':'';
+      const pendingExtra=o.status==='pending'?'<button class="btn btn-outline btn-sm" style="margin-left:4px;color:var(--red);border-color:var(--red);">催款</button>':'';
+      return `<tr><td>${o.id}</td><td>${o.company}</td><td>${o.booth}</td><td>¥${o.price.toLocaleString()}</td><td><span class="badge ${sc}">${sl}</span></td><td>${o.date}</td><td><button class="btn btn-outline btn-sm">查看</button>${extra}${pendingExtra}</td></tr>`;
+    }).join('')}
+    </tbody></table>
+  </div>`;
+}
+
+function renderStaffReports(c){
+  c.innerHTML=`
+  <div class="page-header"><h1 class="page-title">📈 数据报表</h1><p class="page-desc">查看系统运营数据统计与分析</p></div>
+  <div style="display:flex;gap:12px;justify-content:flex-end;margin-bottom:24px;">
+    <button class="btn btn-gold" onclick="showToast('Excel报表导出成功！','success')"><i class="fas fa-file-excel"></i> 导出Excel报表</button>
+    <button class="btn btn-outline" onclick="showToast('PDF报表导出成功！','success')"><i class="fas fa-file-pdf"></i> 导出PDF</button>
+  </div>
+  <div class="kpi-grid">
+    <div class="kpi-card cyan"><div class="kpi-header"><span class="kpi-label">总成交额</span></div><div class="kpi-value">¥117,700</div></div>
+    <div class="kpi-card gold"><div class="kpi-header"><span class="kpi-label">总订单数</span></div><div class="kpi-value">5</div></div>
+    <div class="kpi-card green"><div class="kpi-header"><span class="kpi-label">平均客单价</span></div><div class="kpi-value">¥23,540</div></div>
+    <div class="kpi-card purple"><div class="kpi-header"><span class="kpi-label">AI转化率</span></div><div class="kpi-value">67.5%</div></div>
+  </div>
+  <div class="chart-grid">
+    <div class="card"><div class="card-header"><div class="card-title">月度成交趋势</div></div><div class="card-body"><div class="chart-body"><canvas id="monthlyChart"></canvas></div></div></div>
+    <div class="card"><div class="card-header"><div class="card-title">展位等级分布</div></div><div class="card-body"><div class="chart-body"><canvas id="levelReportChart"></canvas></div></div></div>
+  </div>`;
+  setTimeout(()=>{
+    const mc=document.getElementById('monthlyChart');
+    if(mc) new Chart(mc,{type:'bar',data:{labels:['1月','2月','3月','4月','5月','6月'],datasets:[{label:'成交额(万元)',data:[0,0,0,0,4.56,7.21],backgroundColor:'rgba(0,163,224,0.7)',borderColor:'#00A3E0',borderWidth:1}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}}}});
+    const rc=document.getElementById('levelReportChart');
+    if(rc) new Chart(rc,{type:'pie',data:{labels:['S级旗舰','A级优选','B级标准','C级基础'],datasets:[{data:[20,40,30,10],backgroundColor:['#C9A84C','#00A3E0','#10B981','#9CA3AF'],borderWidth:0}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom'}}}});
+  },100);
+}
+
+// ============================================================
+// INITIALIZATION
+// ============================================================
+(function init(){
+  // Navbar scroll effect for landing
+  window.addEventListener('scroll',function(){
+    const nav=document.querySelector('#view-landing .navbar');
+    if(nav) nav.classList.toggle('scrolled',window.scrollY>50);
+  });
+  // Generate particles for landing
+  const pc=document.getElementById('particles');
+  if(pc){
+    for(let i=0;i<30;i++){
+      const p=document.createElement('div');
+      p.className='particle';
+      p.style.left=Math.random()*100+'%';
+      p.style.animationDuration=(8+Math.random()*12)+'s';
+      p.style.animationDelay=Math.random()*10+'s';
+      p.style.width=p.style.height=(2+Math.random()*3)+'px';
+      pc.appendChild(p);
+    }
+  }
+  // Counter animation for stats section
+  const statsSection=document.querySelector('.stats');
+  let counterAnimated=false;
+  if(statsSection){
+    const observer=new IntersectionObserver(function(entries){
+      entries.forEach(function(entry){
+        if(entry.isIntersecting&&!counterAnimated){
+          counterAnimated=true;
+          document.querySelectorAll('.stat-number').forEach(function(counter){
+            const target=parseInt(counter.dataset.target);
+            const duration=2000;
+            const start=performance.now();
+            function update(now){
+              const elapsed=now-start;
+              const progress=Math.min(elapsed/duration,1);
+              const eased=1-Math.pow(1-progress,3);
+              counter.textContent=Math.floor(eased*target);
+              if(progress<1) requestAnimationFrame(update);
+              else counter.textContent=target;
+            }
+            requestAnimationFrame(update);
+          });
+        }
+      });
+    },{threshold:0.3});
+    observer.observe(statsSection);
+  }
+  // Smooth scroll for nav links
+  document.querySelectorAll('#view-landing a[href^="#"]').forEach(function(link){
+    link.addEventListener('click',function(e){
+      const target=document.querySelector(this.getAttribute('href'));
+      if(target){e.preventDefault();target.scrollIntoView({behavior:'smooth',block:'start'});}
+    });
+  });
+  // Responsive sidebar toggle
+  function checkResponsive(){
+    const w=window.innerWidth;
+    const cm=document.getElementById('clientMenuToggle');
+    const sm=document.getElementById('staffMenuToggle');
+    if(cm) cm.style.display=w<=768?'flex':'none';
+    if(sm) sm.style.display=w<=768?'flex':'none';
+  }
+  checkResponsive();
+  window.addEventListener('resize',checkResponsive);
+})();
+
+</script>
+</body>
+</html>

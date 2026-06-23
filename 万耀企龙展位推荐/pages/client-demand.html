@@ -1,0 +1,935 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>参展需求录入 · 万耀企龙展位智能推荐系统</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Noto+Sans+SC:wght@300;400;500;600;700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<style>
+*, *::before, *::after {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+:root {
+    --navy: #0B2A4A;
+    --navy-dark: #071D35;
+    --navy-deep: #041221;
+    --gold: #C9A84C;
+    --gold-light: #E0C36A;
+    --gold-dark: #A88B3A;
+    --cyan: #00A3E0;
+    --cyan-light: #33B8E8;
+    --cyan-dark: #0089BF;
+    --green: #10B981;
+    --green-light: #D1FAE5;
+    --green-dark: #059669;
+    --red: #EF4444;
+    --white: #FFFFFF;
+    --gray-50: #F8F9FA;
+    --gray-100: #F0F2F5;
+    --gray-200: #E4E7EB;
+    --gray-300: #D1D5DB;
+    --gray-400: #9CA3AF;
+    --gray-500: #6B7280;
+    --gray-600: #4B5563;
+    --gray-700: #374151;
+    --gray-800: #1F2937;
+    --text-light: rgba(255,255,255,0.85);
+    --text-muted: rgba(255,255,255,0.55);
+    --shadow-sm: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+    --shadow-md: 0 4px 12px rgba(0,0,0,0.08), 0 2px 6px rgba(0,0,0,0.04);
+    --shadow-lg: 0 12px 32px rgba(0,0,0,0.1), 0 4px 12px rgba(0,0,0,0.05);
+    --shadow-gold: 0 8px 30px rgba(201,168,76,0.3);
+    --radius-sm: 8px;
+    --radius-md: 12px;
+    --radius-lg: 16px;
+    --radius-xl: 24px;
+    --sidebar-width: 220px;
+    --navbar-height: 64px;
+    --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+html { scroll-behavior: smooth; }
+
+body {
+    font-family: 'Noto Sans SC', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    color: var(--gray-800);
+    background: var(--gray-50);
+    overflow-x: hidden;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+}
+
+/* ============ CLIENT NAVBAR ============ */
+.client-navbar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 900;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 32px;
+    height: var(--navbar-height);
+    background: var(--white);
+    border-bottom: 1px solid var(--gray-200);
+    box-shadow: var(--shadow-sm);
+}
+
+.nav-brand {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    text-decoration: none;
+}
+
+.nav-logo {
+    width: 40px;
+    height: 40px;
+    background: linear-gradient(135deg, var(--navy), var(--cyan));
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 800;
+    font-size: 18px;
+    color: var(--white);
+    letter-spacing: -1px;
+    flex-shrink: 0;
+}
+
+.nav-title {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--navy);
+    letter-spacing: 1px;
+}
+
+.nav-subtitle {
+    font-size: 11px;
+    color: var(--gray-500);
+    margin-top: 1px;
+}
+
+.client-nav-right {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.client-nav-user {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 6px 12px;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    transition: background 0.2s ease;
+}
+
+.client-nav-user:hover {
+    background: var(--gray-100);
+}
+
+.client-nav-avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--gold), var(--gold-light));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--navy-dark);
+}
+
+.client-nav-name {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--gray-800);
+}
+
+.client-nav-role {
+    font-size: 11px;
+    color: var(--gray-500);
+}
+
+.client-nav-logout {
+    padding: 6px 14px;
+    border-radius: var(--radius-sm);
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--gray-500);
+    border: 1px solid var(--gray-200);
+    background: none;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.client-nav-logout:hover {
+    color: var(--red);
+    border-color: var(--red);
+    background: #FEE2E2;
+}
+
+/* Mobile nav toggle */
+.nav-toggle {
+    display: none;
+    flex-direction: column;
+    gap: 5px;
+    padding: 8px;
+    cursor: pointer;
+    background: none;
+    border: none;
+}
+
+.nav-toggle span {
+    display: block;
+    width: 22px;
+    height: 2px;
+    background: var(--gray-600);
+    border-radius: 2px;
+    transition: all 0.2s ease;
+}
+
+/* ============ SIDEBAR ============ */
+.sidebar {
+    position: fixed;
+    top: var(--navbar-height);
+    left: 0;
+    bottom: 0;
+    width: var(--sidebar-width);
+    overflow-y: auto;
+    z-index: 800;
+    background: var(--white);
+    border-right: 1px solid var(--gray-200);
+    transition: transform 0.3s ease;
+}
+
+.sidebar-section {
+    padding: 20px 16px 8px;
+}
+
+.sidebar-section-title {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--gray-400);
+    margin-bottom: 8px;
+    padding: 0 16px;
+}
+
+.sidebar-nav {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.sidebar-link {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 16px;
+    border-radius: var(--radius-sm);
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--gray-600);
+    text-decoration: none;
+    transition: all 0.2s ease;
+    cursor: pointer;
+    border: none;
+    width: 100%;
+    text-align: left;
+    background: none;
+}
+
+.sidebar-link:hover {
+    background: var(--gray-100);
+    color: var(--gray-800);
+}
+
+.sidebar-link.active {
+    background: rgba(0, 163, 224, 0.08);
+    color: var(--cyan);
+    font-weight: 600;
+}
+
+.sidebar-link-icon {
+    width: 20px;
+    text-align: center;
+    font-size: 16px;
+    flex-shrink: 0;
+}
+
+.sidebar-link.active .sidebar-link-icon {
+    color: var(--cyan);
+}
+
+/* ============ MAIN CONTENT ============ */
+.main-content {
+    flex: 1;
+    min-height: 100vh;
+    padding-top: var(--navbar-height);
+    margin-left: var(--sidebar-width);
+}
+
+.page-container {
+    padding: 32px;
+    max-width: 1200px;
+}
+
+.page-header {
+    margin-bottom: 32px;
+}
+
+.page-title {
+    font-size: 26px;
+    font-weight: 700;
+    color: var(--gray-800);
+    margin-bottom: 8px;
+}
+
+.page-desc {
+    font-size: 14px;
+    color: var(--gray-500);
+    line-height: 1.6;
+}
+
+/* ============ FORM CARD ============ */
+.form-card {
+    background: var(--white);
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--gray-200);
+    box-shadow: var(--shadow-sm);
+    max-width: 820px;
+    overflow: hidden;
+}
+
+.form-card-body {
+    padding: 32px;
+}
+
+.form-row {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-label {
+    display: block;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--gray-700);
+    margin-bottom: 6px;
+}
+
+.form-label .required {
+    color: var(--red);
+    margin-left: 2px;
+}
+
+.form-input,
+.form-select,
+.form-textarea {
+    width: 100%;
+    padding: 10px 14px;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--gray-300);
+    background: var(--white);
+    color: var(--gray-800);
+    font-size: 14px;
+    transition: all 0.2s ease;
+    outline: none;
+    font-family: inherit;
+}
+
+.form-input::placeholder,
+.form-textarea::placeholder {
+    color: var(--gray-400);
+}
+
+.form-input:hover,
+.form-select:hover,
+.form-textarea:hover {
+    border-color: var(--gray-400);
+}
+
+.form-input:focus,
+.form-select:focus,
+.form-textarea:focus {
+    border-color: var(--cyan);
+    box-shadow: 0 0 0 3px rgba(0, 163, 224, 0.1);
+}
+
+.form-select {
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%236B7280' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    padding-right: 36px;
+    cursor: pointer;
+}
+
+.form-textarea {
+    resize: vertical;
+    min-height: 100px;
+    line-height: 1.6;
+}
+
+.form-hint {
+    font-size: 12px;
+    color: var(--gray-400);
+    margin-top: 4px;
+}
+
+/* ============ BUTTONS ============ */
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 12px 24px;
+    border-radius: var(--radius-sm);
+    font-size: 15px;
+    font-weight: 600;
+    border: none;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    white-space: nowrap;
+    text-decoration: none;
+    font-family: inherit;
+}
+
+.btn-block {
+    width: 100%;
+}
+
+.btn-gold {
+    background: linear-gradient(135deg, var(--gold), var(--gold-dark));
+    color: var(--navy-dark);
+}
+
+.btn-gold:hover {
+    box-shadow: var(--shadow-gold);
+    transform: translateY(-2px);
+}
+
+.btn-gold:active {
+    transform: translateY(0);
+}
+
+.btn-gold:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+}
+
+.btn-cyan {
+    background: linear-gradient(135deg, var(--cyan), var(--cyan-dark));
+    color: var(--white);
+}
+
+.btn-cyan:hover {
+    box-shadow: 0 8px 30px rgba(0, 163, 224, 0.3);
+    transform: translateY(-2px);
+}
+
+.btn-outline {
+    background: transparent;
+    border: 1px solid var(--gray-300);
+    color: var(--gray-700);
+}
+
+.btn-outline:hover {
+    border-color: var(--cyan);
+    color: var(--cyan);
+    background: rgba(0, 163, 224, 0.04);
+    transform: translateY(-1px);
+}
+
+.btn-lg {
+    padding: 14px 32px;
+    font-size: 16px;
+    border-radius: var(--radius-md);
+}
+
+/* ============ SUBMIT SUCCESS STATE ============ */
+.submit-success {
+    display: none;
+    text-align: center;
+    padding: 48px 32px;
+    animation: fadeInUp 0.5s var(--ease-out);
+}
+
+.submit-success.show {
+    display: block;
+}
+
+.success-icon {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    background: var(--green-light);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 24px;
+    font-size: 36px;
+    color: var(--green);
+    animation: successPop 0.5s var(--ease-out);
+}
+
+@keyframes successPop {
+    0% { transform: scale(0); }
+    60% { transform: scale(1.15); }
+    100% { transform: scale(1); }
+}
+
+.success-title {
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--gray-800);
+    margin-bottom: 8px;
+}
+
+.success-desc {
+    font-size: 14px;
+    color: var(--gray-500);
+    margin-bottom: 32px;
+    line-height: 1.7;
+}
+
+.success-actions {
+    display: flex;
+    gap: 16px;
+    justify-content: center;
+}
+
+/* ============ ANIMATIONS ============ */
+@keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* ============ RESPONSIVE ============ */
+@media (max-width: 1024px) {
+    .sidebar {
+        transform: translateX(-100%);
+    }
+
+    .sidebar.open {
+        transform: translateX(0);
+        box-shadow: 0 24px 64px rgba(0,0,0,0.12);
+    }
+
+    .main-content {
+        margin-left: 0;
+    }
+
+    .nav-toggle {
+        display: flex;
+    }
+
+    .form-row {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 768px) {
+    .client-navbar {
+        padding: 0 16px;
+    }
+
+    .client-nav-name,
+    .client-nav-role {
+        display: none;
+    }
+
+    .page-container {
+        padding: 20px 16px;
+    }
+
+    .page-title {
+        font-size: 22px;
+    }
+
+    .form-card-body {
+        padding: 24px 20px;
+    }
+
+    .success-actions {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .btn-lg {
+        width: 100%;
+    }
+}
+
+@media (max-width: 480px) {
+    .page-title {
+        font-size: 20px;
+    }
+
+    .form-card-body {
+        padding: 20px 16px;
+    }
+
+    .success-icon {
+        width: 64px;
+        height: 64px;
+        font-size: 28px;
+    }
+
+    .success-title {
+        font-size: 18px;
+    }
+}
+</style>
+</head>
+<body>
+
+<!-- ============ NAVBAR ============ -->
+<nav class="client-navbar">
+    <div style="display:flex;align-items:center;gap:16px;">
+        <button class="nav-toggle" id="navToggle" aria-label="Toggle sidebar">
+            <span></span>
+            <span></span>
+            <span></span>
+        </button>
+        <a class="nav-brand" href="../门户首页_Landing.html">
+            <div class="nav-logo">GE</div>
+            <div>
+                <div class="nav-title">GLOBUS EVENTS</div>
+                <div class="nav-subtitle">万耀企龙 · 展位智能推荐系统</div>
+            </div>
+        </a>
+    </div>
+    <div class="client-nav-right">
+        <div class="client-nav-user">
+            <div class="client-nav-avatar">企</div>
+            <div>
+                <div class="client-nav-name">上海科技集团</div>
+                <div class="client-nav-role">参展商</div>
+            </div>
+        </div>
+        <button class="client-nav-logout">
+            <i class="fas fa-sign-out-alt"></i>
+        </button>
+    </div>
+</nav>
+
+<!-- ============ SIDEBAR ============ -->
+<aside class="sidebar" id="sidebar">
+    <div class="sidebar-section">
+        <div class="sidebar-section-title">参展管理</div>
+        <nav class="sidebar-nav">
+            <a class="sidebar-link" href="#">
+                <span class="sidebar-link-icon"><i class="fas fa-chart-line"></i></span>
+                仪表盘
+            </a>
+            <a class="sidebar-link active" href="client-demand.html">
+                <span class="sidebar-link-icon"><i class="fas fa-pen-to-square"></i></span>
+                需求录入
+            </a>
+            <a class="sidebar-link" href="#">
+                <span class="sidebar-link-icon"><i class="fas fa-robot"></i></span>
+                AI推荐方案
+            </a>
+            <a class="sidebar-link" href="#">
+                <span class="sidebar-link-icon"><i class="fas fa-map"></i></span>
+                可视化选位
+            </a>
+            <a class="sidebar-link" href="#">
+                <span class="sidebar-link-icon"><i class="fas fa-file-invoice"></i></span>
+                报价与预约
+            </a>
+        </nav>
+    </div>
+    <div class="sidebar-section">
+        <div class="sidebar-section-title">个人中心</div>
+        <nav class="sidebar-nav">
+            <a class="sidebar-link" href="#">
+                <span class="sidebar-link-icon"><i class="fas fa-user"></i></span>
+                企业信息
+            </a>
+            <a class="sidebar-link" href="#">
+                <span class="sidebar-link-icon"><i class="fas fa-clock-rotate"></i></span>
+                历史记录
+            </a>
+        </nav>
+    </div>
+</aside>
+
+<!-- ============ MAIN CONTENT ============ -->
+<div class="main-content">
+    <div class="page-container">
+
+        <!-- Page Header -->
+        <div class="page-header">
+            <h1 class="page-title"><i class="fas fa-pen-to-square" style="color:var(--cyan);margin-right:8px;"></i>参展需求录入</h1>
+            <p class="page-desc">请填写以下信息，AI将根据您的需求生成最优展位推荐方案</p>
+        </div>
+
+        <!-- Form Card -->
+        <div class="form-card" id="formCard">
+            <div class="form-card-body" id="formBody">
+
+                <!-- ===== FORM ===== -->
+                <form id="demandForm" onsubmit="return handleSubmit(event)">
+
+                    <!-- Row 1: Company Name + Industry -->
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label" for="companyName">企业名称 <span class="required">*</span></label>
+                            <input class="form-input" type="text" id="companyName" placeholder="请输入企业全称" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="industry">所属行业 <span class="required">*</span></label>
+                            <select class="form-select" id="industry" required>
+                                <option value="">请选择行业</option>
+                                <option value="IT互联网">IT / 互联网</option>
+                                <option value="电子科技">电子科技</option>
+                                <option value="医疗器械">医疗器械</option>
+                                <option value="生物医药">生物医药</option>
+                                <option value="汽车制造">汽车制造</option>
+                                <option value="新能源">新能源</option>
+                                <option value="食品饮料">食品饮料</option>
+                                <option value="时尚服饰">时尚服饰</option>
+                                <option value="家居建材">家居建材</option>
+                                <option value="教育文化">教育文化</option>
+                                <option value="金融保险">金融保险</option>
+                                <option value="其他">其他</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Row 2: Scale + Budget -->
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label" for="scale">企业规模 <span class="required">*</span></label>
+                            <select class="form-select" id="scale" required>
+                                <option value="">请选择规模</option>
+                                <option value="初创（1-50人）">初创（1-50人）</option>
+                                <option value="小型（50-200人）">小型（50-200人）</option>
+                                <option value="中型（200-1000人）">中型（200-1000人）</option>
+                                <option value="大型（1000-5000人）">大型（1000-5000人）</option>
+                                <option value="集团（5000人以上）">集团（5000人以上）</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="budget">预算范围 <span class="required">*</span></label>
+                            <select class="form-select" id="budget" required>
+                                <option value="">请选择预算范围</option>
+                                <option value="5万以下">5万以下</option>
+                                <option value="5-10万">5 - 10万</option>
+                                <option value="10-20万">10 - 20万</option>
+                                <option value="20-50万">20 - 50万</option>
+                                <option value="50-100万">50 - 100万</option>
+                                <option value="100万以上">100万以上</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Row 3: Area + First time -->
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label" for="area">期望面积 <span class="required">*</span></label>
+                            <select class="form-select" id="area" required>
+                                <option value="">请选择面积</option>
+                                <option value="9m²（标准标摊）">9m²（标准标摊）</option>
+                                <option value="18m²（双开标摊）">18m²（双开标摊）</option>
+                                <option value="36m²（小特装）">36m²（小特装）</option>
+                                <option value="54m²（中特装）">54m²（中特装）</option>
+                                <option value="72m²（大特装）">72m²（大特装）</option>
+                                <option value="108m²及以上">108m²及以上</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="firstTime">是否首次参展 <span class="required">*</span></label>
+                            <select class="form-select" id="firstTime" required>
+                                <option value="">请选择</option>
+                                <option value="是">是，首次参展</option>
+                                <option value="否">否，有参展经验</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Full width: Purpose -->
+                    <div class="form-group">
+                        <label class="form-label" for="purpose">参展目的 <span class="required">*</span></label>
+                        <select class="form-select" id="purpose" required>
+                            <option value="">请选择主要参展目的</option>
+                            <option value="品牌推广">品牌推广 — 提升品牌知名度与行业影响力</option>
+                            <option value="客户拓展">客户拓展 — 获取潜在客户与销售线索</option>
+                            <option value="新品发布">新品发布 — 展示最新产品与技术</option>
+                            <option value="渠道招商">渠道招商 — 招募代理商与合作伙伴</option>
+                            <option value="行业交流">行业交流 — 了解行业趋势与竞品动态</option>
+                            <option value="综合目标">综合目标 — 以上多项兼顾</option>
+                        </select>
+                    </div>
+
+                    <!-- Full width: Special requirements -->
+                    <div class="form-group">
+                        <label class="form-label" for="specialNeeds">特殊需求</label>
+                        <textarea class="form-textarea" id="specialNeeds" placeholder="请描述您的特殊需求，例如：需要双层展台、靠近主通道、特定楼层偏好、电源要求等...（选填）"></textarea>
+                        <div class="form-hint">可选填写，帮助AI更精准匹配展位</div>
+                    </div>
+
+                    <!-- Submit button -->
+                    <button type="submit" class="btn btn-gold btn-block btn-lg" id="submitBtn">
+                        <i class="fas fa-robot"></i>
+                        提交并生成AI推荐方案
+                    </button>
+                </form>
+
+                <!-- ===== SUCCESS STATE ===== -->
+                <div class="submit-success" id="submitSuccess">
+                    <div class="success-icon">
+                        <i class="fas fa-check"></i>
+                    </div>
+                    <h2 class="success-title">需求提交成功！</h2>
+                    <p class="success-desc">
+                        AI已接收您的参展需求，正在为您分析最优展位方案。<br>
+                        点击下方按钮查看AI智能推荐结果。
+                    </p>
+                    <div class="success-actions">
+                        <a class="btn btn-cyan btn-lg" href="#">
+                            <i class="fas fa-eye"></i>
+                            查看AI推荐方案
+                        </a>
+                        <button class="btn btn-outline btn-lg" onclick="resetForm()">
+                            <i class="fas fa-redo"></i>
+                            重新录入
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<script>
+// ============ Sidebar Toggle (Mobile) ============
+document.getElementById('navToggle').addEventListener('click', function() {
+    document.getElementById('sidebar').classList.toggle('open');
+});
+
+// Close sidebar when clicking outside on mobile
+document.addEventListener('click', function(e) {
+    const sidebar = document.getElementById('sidebar');
+    const toggle = document.getElementById('navToggle');
+    if (window.innerWidth <= 1024 &&
+        !sidebar.contains(e.target) &&
+        !toggle.contains(e.target) &&
+        sidebar.classList.contains('open')) {
+        sidebar.classList.remove('open');
+    }
+});
+
+// ============ Form Submission ============
+function handleSubmit(event) {
+    event.preventDefault();
+
+    // Basic validation
+    const form = document.getElementById('demandForm');
+    const requiredFields = form.querySelectorAll('[required]');
+    let valid = true;
+
+    requiredFields.forEach(field => {
+        if (!field.value || field.value === '') {
+            field.style.borderColor = 'var(--red)';
+            field.style.boxShadow = '0 0 0 3px rgba(239,68,68,0.1)';
+            valid = false;
+        } else {
+            field.style.borderColor = '';
+            field.style.boxShadow = '';
+        }
+    });
+
+    if (!valid) {
+        // Scroll to first invalid field
+        const firstInvalid = form.querySelector('[required]:invalid') || form.querySelector('[style*="border-color: var(--red)"]');
+        if (firstInvalid) firstInvalid.focus();
+        return false;
+    }
+
+    // Collect form data
+    const data = {
+        company: document.getElementById('companyName').value,
+        industry: document.getElementById('industry').value,
+        scale: document.getElementById('scale').value,
+        budget: document.getElementById('budget').value,
+        area: document.getElementById('area').value,
+        firstTime: document.getElementById('firstTime').value,
+        purpose: document.getElementById('purpose').value,
+        specialNeeds: document.getElementById('specialNeeds').value
+    };
+
+    console.log('Demand Data:', data);
+
+    // Button loading state
+    const btn = document.getElementById('submitBtn');
+    const originalHtml = btn.innerHTML;
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> ⏳ AI正在分析...';
+
+    // Simulate AI analysis delay (1.8s)
+    setTimeout(function() {
+        // Hide form, show success
+        document.getElementById('demandForm').style.display = 'none';
+        document.getElementById('submitSuccess').classList.add('show');
+
+        // Reset button state (for potential re-entry)
+        btn.disabled = false;
+        btn.innerHTML = originalHtml;
+    }, 1800);
+
+    return false;
+}
+
+// ============ Reset Form ============
+function resetForm() {
+    document.getElementById('demandForm').reset();
+    document.getElementById('demandForm').style.display = 'block';
+    document.getElementById('submitSuccess').classList.remove('show');
+
+    // Clear any error styling
+    document.querySelectorAll('.form-input, .form-select, .form-textarea').forEach(el => {
+        el.style.borderColor = '';
+        el.style.boxShadow = '';
+    });
+
+    // Scroll to top of form
+    document.getElementById('formCard').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+// ============ Auto-clear error styling on input ============
+document.querySelectorAll('.form-input, .form-select, .form-textarea').forEach(el => {
+    el.addEventListener('input', function() {
+        this.style.borderColor = '';
+        this.style.boxShadow = '';
+    });
+    el.addEventListener('change', function() {
+        this.style.borderColor = '';
+        this.style.boxShadow = '';
+    });
+});
+</script>
+
+</body>
+</html>

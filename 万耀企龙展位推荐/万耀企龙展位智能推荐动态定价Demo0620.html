@@ -1,0 +1,1180 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>万耀企龙展位智能推荐与动态定价</title>
+  <style>
+    :root {
+      --primary: #003b7a;
+      --primary-dark: #00264d;
+      --primary-soft: #eaf2f8;
+      --accent: #f5a623;
+      --accent-soft: #fff5df;
+      --bg: #f5f7fa;
+      --card: rgba(255, 255, 255, 0.86);
+      --text: #1f2933;
+      --muted: #6b7280;
+      --line: #dbe4ef;
+      --success: #22c55e;
+      --blue: #2563eb;
+      --warning: #facc15;
+      --gray: #9ca3af;
+      --danger: #ef4444;
+      --shadow: 0 22px 60px rgba(0, 38, 77, 0.13);
+      --radius: 24px;
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      color: var(--text);
+      font-family: "PingFang SC", "Microsoft YaHei", Arial, sans-serif;
+      background:
+        radial-gradient(circle at 8% 4%, rgba(245, 166, 35, 0.18), transparent 28%),
+        radial-gradient(circle at 92% 6%, rgba(0, 59, 122, 0.18), transparent 30%),
+        linear-gradient(180deg, #f7fbff 0%, var(--bg) 48%, #fff 100%);
+      min-height: 100vh;
+    }
+
+    a { color: inherit; text-decoration: none; }
+    button, input, select, textarea { font: inherit; }
+    button { cursor: pointer; }
+
+    .top-nav {
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 24px;
+      padding: 14px 38px;
+      color: #fff;
+      background: rgba(0, 38, 77, 0.92);
+      backdrop-filter: blur(18px);
+      box-shadow: 0 12px 35px rgba(0, 38, 77, 0.22);
+    }
+
+    /* Brand Logo */
+    .brand { display: flex; align-items: center; gap: 14px; min-width: 280px; text-decoration: none; }
+    .brand-logo { flex-shrink: 0; display: block; }
+    .brand-logo-img { height: 40px; width: auto; flex-shrink: 0; display: block; object-fit: contain; background: #fff; border-radius: 8px; padding: 4px 10px; }
+    .brand-text { display: flex; flex-direction: column; gap: 2px; }
+    .brand-name-row { display: flex; align-items: baseline; gap: 9px; }
+    .brand-en {
+      font-size: 21px;
+      font-weight: 900;
+      letter-spacing: 3px;
+      color: #fff;
+      line-height: 1;
+      font-family: "Arial Black", "Impact", sans-serif;
+    }
+    .brand-zh {
+      font-size: 13px;
+      font-weight: 600;
+      color: rgba(255,255,255,0.75);
+      letter-spacing: 2px;
+    }
+    .brand-sub {
+      font-size: 10px;
+      color: rgba(255,255,255,0.42);
+      letter-spacing: 0.4px;
+      margin-top: 1px;
+    }
+
+    /* Navigation */
+    .nav-links {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 2px;
+    }
+    .nav-links a, .nav-links button {
+      border: 0;
+      padding: 8px 14px;
+      border-radius: 999px;
+      color: rgba(255,255,255,0.7);
+      background: transparent;
+      font-size: 13px;
+      transition: 0.2s ease;
+      white-space: nowrap;
+    }
+    .nav-links a:hover { color: #fff; background: rgba(255,255,255,0.1); }
+    .nav-sep {
+      width: 1px;
+      height: 18px;
+      background: rgba(255,255,255,0.16);
+      margin: 0 6px;
+      flex-shrink: 0;
+    }
+    .view-switch {
+      display: inline-flex;
+      align-items: center;
+      gap: 3px;
+      padding: 4px;
+      border: 1px solid rgba(255,255,255,0.15);
+      border-radius: 999px;
+      background: rgba(255,255,255,0.06);
+    }
+    .view-switch button {
+      padding: 7px 20px !important;
+      font-size: 13px;
+      font-weight: 600;
+      border-radius: 999px;
+      color: rgba(255,255,255,0.7);
+      background: transparent;
+      border: 0;
+      transition: 0.22s ease;
+      cursor: pointer;
+    }
+    .view-switch button.active-nav {
+      background: linear-gradient(135deg, #ffd782, var(--accent));
+      color: #241500;
+      font-weight: 700;
+      box-shadow: 0 4px 14px rgba(245,166,35,0.35);
+    }
+    .view-switch button:hover:not(.active-nav) { background: rgba(255,255,255,0.11); color: #fff; }
+
+    /* Auto-hide customer page links in admin view */
+    .top-nav[data-activeview="admin"] .nav-customer-link { display: none !important; }
+    .top-nav[data-activeview="admin"] .nav-sep { display: none !important; }
+
+    .app-view { display: none; }
+    .app-view.active-view { display: block; }
+
+    .page { max-width: 1440px; margin: 0 auto; padding: 0 26px 60px; }
+    .hero {
+      position: relative;
+      overflow: hidden;
+      margin: 28px 0 24px;
+      border-radius: 34px;
+      min-height: 520px;
+      color: #fff;
+      background:
+        linear-gradient(110deg, rgba(0, 38, 77, 0.95) 0%, rgba(0, 59, 122, 0.84) 43%, rgba(0, 168, 168, 0.48) 100%),
+        url("https://images.unsplash.com/photo-1540575467063-178a50c2df87?auto=format&fit=crop&w=1800&q=80") center/cover;
+      box-shadow: var(--shadow);
+    }
+    .hero::after {
+      content: "";
+      position: absolute;
+      inset: auto -120px -160px auto;
+      width: 520px;
+      height: 520px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(245,166,35,0.44), transparent 66%);
+    }
+    .hero-inner { position: relative; z-index: 1; padding: 72px 70px 42px; max-width: 860px; }
+    .eyebrow {
+      display: inline-flex;
+      gap: 10px;
+      align-items: center;
+      padding: 8px 13px;
+      border: 1px solid rgba(255,255,255,0.24);
+      border-radius: 999px;
+      background: rgba(255,255,255,0.12);
+      color: rgba(255,255,255,0.86);
+      font-size: 13px;
+      letter-spacing: 0.8px;
+    }
+    .hero h1 { margin: 22px 0 16px; font-size: clamp(34px, 5vw, 66px); line-height: 1.04; letter-spacing: -1.8px; }
+    .hero p { margin: 0; color: rgba(255,255,255,0.82); font-size: 18px; line-height: 1.75; max-width: 760px; }
+    .hero-actions { display: flex; gap: 14px; flex-wrap: wrap; margin-top: 34px; }
+    .btn {
+      border: 0;
+      border-radius: 999px;
+      padding: 12px 20px;
+      font-weight: 800;
+      transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+    }
+    .btn:hover { transform: translateY(-2px); }
+    .btn-primary { color: #1d1300; background: linear-gradient(135deg, #ffd782, var(--accent)); box-shadow: 0 18px 36px rgba(245,166,35,0.28); }
+    .btn-secondary { color: #fff; background: rgba(255,255,255,0.14); border: 1px solid rgba(255,255,255,0.22); }
+    .btn-blue { color: #fff; background: linear-gradient(135deg, var(--primary), #0b63c6); }
+    .btn-light { color: var(--primary); background: #fff; border: 1px solid var(--line); }
+    .btn-danger { color: #fff; background: var(--danger); }
+
+    .metric-strip {
+      position: relative;
+      z-index: 1;
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 14px;
+      padding: 0 70px 54px;
+    }
+    .hero-metric {
+      padding: 18px;
+      border-radius: 22px;
+      border: 1px solid rgba(255,255,255,0.2);
+      background: rgba(255,255,255,0.12);
+      backdrop-filter: blur(14px);
+    }
+    .hero-metric strong { display: block; font-size: 30px; margin-bottom: 6px; color: #fff; }
+    .hero-metric span { color: rgba(255,255,255,0.72); font-size: 13px; }
+
+    .section {
+      margin-top: 24px;
+      padding: 30px;
+      border: 1px solid rgba(219,228,239,0.9);
+      border-radius: var(--radius);
+      background: var(--card);
+      box-shadow: 0 18px 42px rgba(0, 38, 77, 0.08);
+      backdrop-filter: blur(18px);
+    }
+    .section-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 24px; margin-bottom: 22px; }
+    .section-kicker { margin: 0 0 6px; color: var(--accent); font-size: 12px; font-weight: 900; letter-spacing: 1.1px; text-transform: uppercase; }
+    h2 { margin: 0; color: #102033; font-size: 30px; line-height: 1.2; }
+    .section-desc { margin: 8px 0 0; color: var(--muted); line-height: 1.7; max-width: 760px; }
+
+    .grid-2 { display: grid; grid-template-columns: minmax(0, 0.95fr) minmax(0, 1.05fr); gap: 24px; }
+    .form-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+    .field { display: flex; flex-direction: column; gap: 7px; }
+    .field.full { grid-column: 1 / -1; }
+    label { color: #334155; font-size: 13px; font-weight: 700; }
+    input, select, textarea {
+      width: 100%;
+      border: 1px solid #d8e2ee;
+      border-radius: 15px;
+      padding: 12px 13px;
+      color: var(--text);
+      background: rgba(255,255,255,0.92);
+      outline: none;
+      transition: border 0.2s ease, box-shadow 0.2s ease;
+    }
+    input:focus, select:focus, textarea:focus { border-color: #4a90e2; box-shadow: 0 0 0 4px rgba(37,99,235,0.12); }
+    textarea { min-height: 92px; resize: vertical; }
+
+    .info-card {
+      padding: 22px;
+      border-radius: 22px;
+      background: linear-gradient(145deg, #fff, #f6f9fd);
+      border: 1px solid #e2eaf4;
+    }
+    .profile-tags { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 14px; }
+    .tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 7px 10px;
+      border-radius: 999px;
+      color: #17446f;
+      background: #eaf2f8;
+      font-size: 12px;
+      font-weight: 800;
+    }
+    .tag.gold { color: #6f4300; background: var(--accent-soft); }
+    .tag.green { color: #116435; background: #dcfce7; }
+    .tag.red { color: #8a1f1f; background: #fee2e2; }
+    .tag.gray { color: #4b5563; background: #f0f2f5; }
+
+    .recommend-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 18px; }
+    .recommend-card {
+      position: relative;
+      overflow: hidden;
+      padding: 22px;
+      border-radius: 24px;
+      border: 1px solid #e1e9f3;
+      background: #fff;
+      box-shadow: 0 14px 35px rgba(0, 38, 77, 0.07);
+      transition: transform 0.22s ease, box-shadow 0.22s ease;
+    }
+    .recommend-card:hover { transform: translateY(-4px); box-shadow: 0 22px 46px rgba(0, 38, 77, 0.13); }
+    .recommend-card.primary { color: #fff; background: linear-gradient(145deg, var(--primary-dark), var(--primary) 58%, #0b8aa0); }
+    .recommend-card.primary .muted, .recommend-card.primary .booth-row, .recommend-card.primary li { color: rgba(255,255,255,0.82); }
+    .recommend-card.primary .booth-row { background: rgba(255,255,255,0.1); border-color: rgba(255,255,255,0.16); }
+    .plan-title { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 12px; }
+    .plan-title h3 { margin: 0; font-size: 21px; }
+    .plan-badge { padding: 6px 9px; border-radius: 999px; background: var(--accent); color: #231500; font-size: 12px; font-weight: 900; }
+    .booth-row {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 10px;
+      align-items: center;
+      padding: 11px 0;
+      border-bottom: 1px dashed #dbe4ef;
+      color: #334155;
+    }
+    .booth-row button { padding: 7px 10px; border: 0; border-radius: 999px; color: var(--primary); background: #eaf2f8; font-weight: 800; }
+    .price { font-weight: 900; color: var(--accent); }
+    .muted { color: var(--muted); font-size: 13px; line-height: 1.65; }
+
+    .map-layout { display: grid; grid-template-columns: 260px minmax(0, 1fr) 300px; gap: 22px; align-items: start; }
+    .floor-tabs { display: flex; flex-wrap: wrap; gap: 10px; margin: 0 0 16px; }
+    .floor-tab {
+      border: 1px solid #d8e4f1;
+      border-radius: 999px;
+      padding: 9px 14px;
+      color: #17446f;
+      background: #fff;
+      font-weight: 800;
+      box-shadow: 0 8px 18px rgba(0,38,77,0.06);
+    }
+    .floor-tab.active { color: #fff; border-color: var(--primary); background: linear-gradient(135deg, var(--primary), #0b63c6); }
+    .side-panel { border-radius: 22px; border: 1px solid #e2eaf4; background: #fff; padding: 18px; }
+    .side-panel h3 { margin: 0 0 14px; font-size: 18px; }
+    .legend { display: grid; gap: 9px; margin-top: 16px; }
+    .legend-item { display: flex; align-items: center; gap: 9px; font-size: 13px; color: #4b5563; }
+    .dot { width: 13px; height: 13px; border-radius: 4px; display: inline-block; }
+
+    .svg-wrap {
+      position: relative;
+      overflow: auto;
+      min-height: 760px;
+      border-radius: 26px;
+      border: 1px solid #d7e2ee;
+      background:
+        linear-gradient(90deg, rgba(0,59,122,0.055) 1px, transparent 1px),
+        linear-gradient(0deg, rgba(0,59,122,0.055) 1px, transparent 1px),
+        linear-gradient(135deg, #ffffff, #f7fbff);
+      background-size: 34px 34px, 34px 34px, auto;
+    }
+    .map-toolbar {
+      position: sticky;
+      top: 0;
+      z-index: 3;
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 12px;
+      background: rgba(255,255,255,0.9);
+      backdrop-filter: blur(10px);
+      border-bottom: 1px solid #e3ebf5;
+    }
+    #boothMap { width: 100%; min-width: 1680px; height: 980px; display: block; }
+
+    .booth { cursor: pointer; rx: 5; transition: 0.18s ease; stroke-width: 1.4; }
+    .booth:hover { filter: drop-shadow(0 0 10px rgba(37,99,235,0.45)); transform: translateY(-1px); }
+    .booth.recommended { stroke: #2563eb; stroke-width: 3; filter: drop-shadow(0 0 7px rgba(37,99,235,0.42)); }
+    .booth-label { pointer-events: none; font-size: 10px; fill: #0f172a; font-weight: 900; }
+    .area-label { font-size: 13px; fill: #335; font-weight: 900; opacity: 0.78; }
+
+    .detail-row { display: flex; justify-content: space-between; gap: 12px; padding: 9px 0; border-bottom: 1px dashed #e0e8f2; font-size: 14px; }
+    .detail-row span:first-child { color: var(--muted); }
+    .detail-row strong { text-align: right; }
+
+    .admin-workspace { padding: 30px 0 70px; }
+    .admin-shell {
+      margin-top: 24px;
+      padding: 28px;
+      border: 1px solid #dce7f3;
+      border-radius: 26px;
+      background: linear-gradient(180deg, #f8fbff 0%, #f3f7fb 100%);
+      box-shadow: 0 18px 55px rgba(0, 38, 77, 0.1);
+    }
+    .admin-panel {
+      padding: 28px;
+      border-radius: 24px;
+      background: #fff;
+      border: 1px solid #dce7f3;
+      box-shadow: 0 14px 36px rgba(16, 32, 51, 0.06);
+    }
+    .admin-panel + .admin-panel { margin-top: 18px; }
+    .admin-panel-head { display: flex; align-items: center; justify-content: space-between; gap: 18px; margin-bottom: 20px; }
+    .admin-panel h2 { margin: 0; color: #102033; font-size: 30px; }
+    .admin-panel h3 { margin: 0; color: #102033; font-size: 20px; }
+    .admin-panel .section-desc, .admin-panel .muted { color: #7a8797; }
+    .admin-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; }
+    .admin-card { padding: 22px; border-radius: 22px; background: #fff; border: 1px solid #dfe9f4; box-shadow: 0 12px 30px rgba(16,32,51,0.05); }
+    .admin-card h3 { margin: 0 0 18px; }
+    .admin-card table th { color: #334155; background: #f4f8fc; }
+    .admin-card table td, .admin-card table th { border-color: #e6eef7; }
+    .admin-wide { grid-column: 1 / -1; }
+    .pricing-grid { display: grid; grid-template-columns: 1.1fr 0.9fr; gap: 20px; }
+    .trace-list { display: grid; gap: 12px; }
+    .trace-item { display: grid; grid-template-columns: 160px 1fr 90px; gap: 12px; align-items: center; }
+    .bar { height: 11px; border-radius: 999px; background: #e8eef6; overflow: hidden; }
+    .bar i { display: block; height: 100%; border-radius: inherit; background: linear-gradient(90deg, #004f9f, #00a6b4); }
+    .final-price {
+      padding: 24px;
+      border-radius: 24px;
+      color: #fff;
+      background: linear-gradient(145deg, #003b7a, #006aa8);
+      border: 1px solid #d7e5f3;
+    }
+    .final-price strong { display: block; margin: 12px 0; font-size: 38px; color: var(--accent); }
+
+
+    .quote-wrap {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 280px;
+      gap: 20px;
+    }
+    .quote-paper {
+      padding: 30px;
+      border-radius: 22px;
+      background: #fff;
+      border: 1px solid #dce6f0;
+      box-shadow: 0 14px 35px rgba(0,38,77,0.08);
+    }
+    .quote-head { display: flex; justify-content: space-between; gap: 18px; border-bottom: 3px solid var(--primary); padding-bottom: 16px; margin-bottom: 18px; }
+    .quote-head h3 { margin: 0; font-size: 24px; color: var(--primary); }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { padding: 11px 10px; border-bottom: 1px solid #e5edf5; text-align: left; font-size: 14px; }
+    th { color: #334155; background: #f4f8fc; }
+
+    .kpi-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; }
+    .kpi-card { padding: 22px; border-radius: 20px; background: #fbfdff; border: 1px solid #dfe9f4; }
+    .kpi-card strong { display: block; margin-top: 10px; font-size: 32px; line-height: 1; color: #004f9f; letter-spacing: -0.8px; }
+    .chart-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; margin-top: 16px; }
+    .chart-card { padding: 22px; border-radius: 22px; background: #fff; border: 1px solid #dfe9f4; }
+    .chart-card h3 { margin: 0 0 18px; color: #1f2933; }
+    .mini-bar { display: grid; grid-template-columns: 80px 1fr 54px; gap: 12px; align-items: center; margin: 13px 0; color: #526173; font-size: 13px; }
+    .rank-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 10px 0; border-bottom: 1px dashed #dce7f3; color: #7a8797; font-size: 14px; }
+    .rank-row strong { color: #1f2933; }
+
+    .config-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
+    .config-box { padding: 18px; border-radius: 18px; background: #fbfdff; border: 1px solid #dfe9f4; }
+    input[type="range"] { padding: 0; accent-color: var(--primary); }
+
+    .empty-state { padding: 24px; border-radius: 20px; background: #f7fbff; border: 1px dashed #b9cce2; color: var(--muted); text-align: center; }
+    .actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 18px; }
+
+    @media (max-width: 1180px) {
+      .grid-2, .map-layout, .pricing-grid, .quote-wrap, .admin-grid { grid-template-columns: 1fr; }
+      .admin-wide { grid-column: auto; }
+      .recommend-grid, .kpi-grid, .chart-grid, .config-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+
+      .top-nav { align-items: flex-start; flex-direction: column; }
+    }
+    @media (max-width: 760px) {
+      .page { padding: 0 14px 40px; }
+      .hero-inner, .metric-strip { padding-left: 22px; padding-right: 22px; }
+      .metric-strip, .recommend-grid, .kpi-grid, .chart-grid, .config-grid, .form-grid, .admin-grid { grid-template-columns: 1fr; }
+
+      .section { padding: 20px; }
+      .section-head { align-items: flex-start; flex-direction: column; }
+      .nav-links { justify-content: flex-start; }
+    }
+
+    @media print {
+      body { background: #fff; }
+      .top-nav, .hero, #requirement, #recommend, #map, #admin-view, .quote-actions, .section-head .demo-badge { display: none !important; }
+
+      .page { max-width: none; padding: 0; }
+      .section { box-shadow: none; border: 0; padding: 0; margin: 0; }
+      .quote-wrap { display: block; }
+      .quote-paper { box-shadow: none; border: 0; padding: 0; }
+    }
+  </style>
+</head>
+<body>
+  <header class="top-nav" data-activeview="customer">
+    <a class="brand" href="#overview" data-view="customer" aria-label="返回首页概览">
+      <img src="data:image/png;base64,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" alt="万耀企龙GLOBUS" class="brand-logo-img">
+          <span class="brand-zh">万耀企龙</span>
+        </span>
+        <span class="brand-sub">events &middot; We make business happen.</span>
+      </span>
+    </a>
+    <nav class="nav-links" aria-label="页面导航">
+      <span class="view-switch">
+        <button class="active-nav" type="button" data-view="customer">客户前台</button>
+        <button type="button" data-view="admin">运营后台</button>
+      </span>
+      <span class="nav-sep"></span>
+      <a class="nav-customer-link" href="#overview" data-view="customer">首页</a>
+      <a class="nav-customer-link" href="#requirement" data-view="customer">客户需求</a>
+      <a class="nav-customer-link" href="#recommend" data-view="customer">AI推荐</a>
+      <a class="nav-customer-link" href="#map" data-view="customer">场馆地图</a>
+      <a class="nav-customer-link" href="#quote" data-view="customer">报价单</a>
+    </nav>
+  </header>
+
+  <main class="page">
+    <div id="customer-view" class="app-view active-view">
+    <section id="overview" class="hero">
+      <div class="hero-inner">
+        <span class="eyebrow">AI BOOTH RECOMMENDATION · DYNAMIC PRICING</span>
+        <h1>展位智能推荐与动态定价</h1>
+        <p>共创无限商机。面向参展企业与销售顾问，快速完成客户需求录入、AI 展位匹配、动态报价、场馆地图选位与报价单输出。</p>
+        <div class="hero-actions">
+          <a class="btn btn-primary" href="#requirement">开始录入客户需求</a>
+          <a class="btn btn-secondary" href="#map">查看场馆地图</a>
+        </div>
+      </div>
+      <div class="metric-strip">
+        <div class="hero-metric"><strong>160</strong><span>S/A/B/C 四级展位</span></div>
+        <div class="hero-metric"><strong>8000㎡</strong><span>上海国际博览中心 N3 馆</span></div>
+        <div class="hero-metric"><strong>3档</strong><span>最优适配 / 高端升级 / 性价比</span></div>
+        <div class="hero-metric"><strong>24h</strong><span>锁价保护与报价有效期</span></div>
+      </div>
+    </section>
+
+    <section id="requirement" class="section">
+      <div class="section-head">
+        <div>
+          <p class="section-kicker">Customer Requirement</p>
+          <h2>客户需求录入</h2>
+          <p class="section-desc">录入客户行业、预算、面积、参展目的和特殊需求，系统会生成客户画像并用于展位匹配与报价方案。</p>
+        </div>
+        <span class="demo-badge">销售代录 / 客户自填</span>
+      </div>
+      <div class="grid-2">
+        <form id="customerForm" class="info-card">
+          <div class="form-grid">
+            <div class="field"><label for="companyName">企业名称</label><input id="companyName" name="companyName" value="上海启曜新能源科技有限公司" /></div>
+            <div class="field"><label for="industry">所属行业</label><select id="industry" name="industry"><option>新能源</option><option>高端制造</option><option>商贸</option><option>供应链</option><option>文创</option><option>小微企业</option><option>消费品</option></select></div>
+            <div class="field"><label for="companySize">企业规模</label><select id="companySize" name="companySize"><option value="1000人以上">1000人以上</option><option value="300-999人">300-999人</option><option value="100-299人">100-299人</option><option value="50-99人">50-99人</option><option value="50人以下">50人以下</option></select></div>
+
+            <div class="field"><label for="purpose">参展目的</label><select id="purpose" name="purpose"><option>品牌曝光</option><option>招商洽谈</option><option>产品展示</option><option>基础参展</option></select></div>
+            <div class="field"><label for="budgetMin">预算下限（元）</label><input id="budgetMin" name="budgetMin" type="number" value="18000" /></div>
+            <div class="field"><label for="budgetMax">预算上限（元）</label><input id="budgetMax" name="budgetMax" type="number" value="52000" /></div>
+            <div class="field"><label for="areaDemand">面积需求</label><select id="areaDemand" name="areaDemand"><option value="36">36㎡ 特装</option><option value="18">18㎡ 标准特装</option><option value="9">9㎡ 标准展位</option></select></div>
+            <div class="field"><label for="schedule">参展档期</label><select id="schedule" name="schedule"><option>开幕前20天</option><option>开幕前45天</option><option>开幕前7天</option><option>早鸟期</option></select></div>
+            <div class="field"><label for="isFirstTime">是否首次参展</label><select id="isFirstTime" name="isFirstTime"><option value="false">否，历史复购客户</option><option value="true">是，首次参展</option></select></div>
+            <div class="field"><label for="historyPreference">历史展位偏好</label><select id="historyPreference" name="historyPreference"><option>主通道</option><option>入口附近</option><option>中央展示区</option><option>高性价比后排</option><option>无偏好</option></select></div>
+            <div class="field full"><label for="specialNeeds">特殊需求</label><textarea id="specialNeeds" name="specialNeeds">希望靠近主通道，便于新品发布和客户接待。</textarea></div>
+          </div>
+          <div class="actions">
+            <button class="btn btn-light" type="button" id="fillSampleBtn">填充样例客户</button>
+            <button class="btn btn-primary" type="submit">生成 AI 推荐</button>
+          </div>
+        </form>
+        <aside class="info-card">
+          <p class="section-kicker">AI Profile</p>
+          <h3 style="margin:0 0 10px;font-size:22px;">客户画像输出</h3>
+          <p class="muted">画像会根据预算、行业、目的、历史参展记录自动更新，后续用于展位匹配和价格权益判断。</p>
+          <div id="profileBox" class="profile-tags"></div>
+          <div style="margin-top:22px;" class="detail-row"><span>推荐策略</span><strong id="strategyText">优先 S/A 级核心展位</strong></div>
+          <div class="detail-row"><span>预算匹配</span><strong id="budgetText">18,000 - 52,000 元</strong></div>
+          <div class="detail-row"><span>匹配说明</span><strong>智能规则匹配</strong></div>
+
+        </aside>
+      </div>
+    </section>
+
+    <section id="recommend" class="section">
+      <div class="section-head">
+        <div>
+          <p class="section-kicker">AI Recommendation</p>
+          <h2>AI 三档推荐方案</h2>
+          <p class="section-desc">每档推荐 3-5 个展位，展示匹配原因、实时价格和方案定位。主推方案会同步高亮到地图。</p>
+        </div>
+        <button class="btn btn-blue" id="recalcBtn" type="button">重新计算推荐</button>
+      </div>
+      <div id="recommendations" class="recommend-grid"></div>
+    </section>
+
+    <section id="map" class="section">
+      <div class="section-head">
+        <div>
+          <p class="section-kicker">Venue Map</p>
+          <h2>上海国际博览中心 N3 馆平面图</h2>
+          <p class="section-desc">内置 160 个展位，支持按等级、状态、面积和价格筛选，点击展位查看详情与报价信息。</p>
+
+        </div>
+        <span class="demo-badge">绿色空置 · 蓝色推荐 · 黄色锁定 · 灰色已售 · 红色热门</span>
+      </div>
+      <div class="map-layout">
+        <aside class="side-panel">
+          <h3>筛选条件</h3>
+          <div class="field"><label for="filterGrade">展位等级</label><select id="filterGrade"><option value="all">全部等级</option><option>S</option><option>A</option><option>B</option><option>C</option></select></div>
+          <div class="field"><label for="filterStatus">展位状态</label><select id="filterStatus"><option value="all">全部状态</option><option value="available">空置可订</option><option value="recommended">AI推荐</option><option value="locked">锁定</option><option value="sold">已售</option><option value="hot">热门溢价</option></select></div>
+          <div class="field"><label for="filterArea">面积</label><select id="filterArea"><option value="all">全部面积</option><option value="36">36㎡</option><option value="18">18㎡</option><option value="9">9㎡</option></select></div>
+          <div class="field"><label for="maxPrice">最高报价：<span id="maxPriceText">60000</span> 元</label><input id="maxPrice" type="range" min="8000" max="70000" value="60000" step="1000" /></div>
+          <div class="floor-tabs" aria-label="楼层切换">
+            <button class="floor-tab active" type="button" data-floor="N3-1F">一层展位</button>
+            <button class="floor-tab" type="button" data-floor="N3-2F">二层展位</button>
+          </div>
+          <div class="legend">
+            <span class="legend-item"><i class="dot" style="background:#22c55e"></i>空置可订</span>
+            <span class="legend-item"><i class="dot" style="background:#2563eb"></i>AI推荐</span>
+            <span class="legend-item"><i class="dot" style="background:#facc15"></i>锁定保护</span>
+            <span class="legend-item"><i class="dot" style="background:#9ca3af"></i>已售展位</span>
+            <span class="legend-item"><i class="dot" style="background:#ef4444"></i>热门溢价</span>
+          </div>
+        </aside>
+        <div class="svg-wrap">
+          <div class="map-toolbar"><strong id="floorTitle">N3 一层 · 展馆入口 · 主通道 · 中央展示区</strong><span class="muted" id="mapCount">0 个展位</span></div>
+          <svg id="boothMap" viewBox="0 0 1680 980" role="img" aria-label="上海国际博览中心 N3 馆展位地图"></svg>
+
+        </div>
+        <aside class="side-panel">
+          <h3>展位详情</h3>
+          <div id="boothDetail" class="empty-state">点击地图中的展位，查看编号、价格、适配行业和历史成交记录。</div>
+        </aside>
+      </div>
+    </section>
+
+    <section id="quote" class="section">
+      <div class="section-head">
+        <div>
+          <p class="section-kicker">Quotation</p>
+          <h2>智能报价单</h2>
+          <p class="section-desc">报价单基于当前选中方案生成，可直接打印或通过浏览器保存为 PDF。</p>
+        </div>
+      </div>
+      <div class="quote-wrap">
+        <div id="quotePaper" class="quote-paper"></div>
+        <aside class="side-panel quote-actions">
+          <h3>报价操作</h3>
+          <p class="muted">建议先选择主推方案中的展位，再打印报价单。报价有效期为 24 小时。</p>
+
+          <div class="actions">
+            <button class="btn btn-primary" type="button" id="printBtn">打印 / 保存 PDF</button>
+            <button class="btn btn-light" type="button" id="lockBtn">锁定当前展位</button>
+          </div>
+        </aside>
+      </div>
+    </section>
+    </div>
+
+    <div id="admin-view" class="app-view admin-workspace">
+    <section id="admin" class="admin-shell">
+      <div class="admin-panel">
+        <div class="admin-panel-head">
+          <div>
+            <p class="section-kicker">Operation Console</p>
+            <h2>后台管理</h2>
+            <p class="section-desc">内部运营工作台。价格策略、运营数据、模型参数、展位状态、客户线索和报价审核在后台独立查看，不与客户前台混排。</p>
+          </div>
+          <button class="btn btn-light" type="button" data-view="customer">返回客户前台</button>
+        </div>
+      </div>
+
+      <div class="admin-panel">
+        <div class="admin-panel-head">
+          <div>
+            <p class="section-kicker">Analytics</p>
+            <h2>运营数据看板</h2>
+            <p class="section-desc">展示展位空置率、推荐成交率、溢价收益、展位销售结构和热门/滞销展位。</p>
+          </div>
+        </div>
+        <div id="kpis" class="kpi-grid"></div>
+        <div id="charts" class="chart-grid"></div>
+      </div>
+
+      <div class="admin-panel">
+        <div class="admin-panel-head">
+          <div>
+            <p class="section-kicker">Model Config</p>
+            <h2>模型参数配置演示</h2>
+            <p class="section-desc">调整推荐权重和价格保护边界后，可重新计算推荐与报价。该模块用于展示后台策略配置能力。</p>
+          </div>
+          <button class="btn btn-blue" type="button" id="applyConfigBtn">应用配置并重新计算</button>
+        </div>
+        <div class="config-grid">
+          <div class="config-box"><label>位置因子权重 <span id="wPositionText">40%</span></label><input id="wPosition" type="range" min="20" max="60" value="40" /></div>
+          <div class="config-box"><label>面积因子权重 <span id="wAreaText">25%</span></label><input id="wArea" type="range" min="10" max="40" value="25" /></div>
+          <div class="config-box"><label>流量因子权重 <span id="wTrafficText">20%</span></label><input id="wTraffic" type="range" min="10" max="40" value="20" /></div>
+          <div class="config-box"><label>配套因子权重 <span id="wFacilityText">15%</span></label><input id="wFacility" type="range" min="5" max="30" value="15" /></div>
+          <div class="config-box"><label>最高溢价上限</label><input id="maxPremium" type="number" min="1.1" max="1.5" step="0.05" value="1.5" /></div>
+          <div class="config-box"><label>最低折扣下限</label><input id="minDiscount" type="number" min="0.7" max="0.95" step="0.05" value="0.7" /></div>
+        </div>
+      </div>
+
+      <div class="admin-grid">
+        <div class="admin-card admin-wide">
+          <h3>价格策略中心</h3>
+          <div class="pricing-grid">
+            <div><div id="pricingTrace" class="trace-list"></div></div>
+            <div id="finalPriceBox" class="final-price"></div>
+          </div>
+        </div>
+        <div class="admin-card">
+          <h3>展位状态管理</h3>
+          <div id="boothStatusTable"></div>
+        </div>
+        <div class="admin-card">
+          <h3>客户线索管理</h3>
+          <div id="leadTable"></div>
+        </div>
+        <div class="admin-card admin-wide">
+          <h3>报价审核记录</h3>
+          <div id="auditTable"></div>
+        </div>
+      </div>
+    </section>
+    </div>
+
+  </main>
+
+  <script>
+    const state = {
+      booths: [],
+      customer: null,
+      profile: null,
+      recommendations: [],
+      selectedBoothId: null,
+      selectedPlan: "best",
+      recommendedIds: new Set(),
+      config: {
+        weights: { position: 40, area: 25, traffic: 20, facility: 15 },
+        maxPremium: 1.5,
+        minDiscount: 0.7
+      },
+      admin: {
+        leadRecords: [],
+        quoteAuditLogs: []
+      },
+      ui: {
+        activeView: "customer",
+        activeFloor: "N3-1F"
+      }
+
+    };
+
+    const basePrices = { S: 38000, A: 22000, B: 12800, C: 9800 };
+    const gradeArea = { S: 36, A: 18, B: 9, C: 9 };
+    const statusText = { available: "空置可订", recommended: "AI推荐", locked: "锁定保护", sold: "已售", hot: "热门溢价" };
+    const statusColor = { available: "#22c55e", recommended: "#2563eb", locked: "#facc15", sold: "#9ca3af", hot: "#ef4444" };
+    const gradeValueFactor = { S: 1.34, A: 1.16, B: 1.0, C: 0.86 };
+
+    function currency(value) {
+      return "¥" + Math.round(value).toLocaleString("zh-CN");
+    }
+
+    function generateBooths() {
+      const booths = [];
+      const make = (floor, grade, count, startX, startY, cols, cellW, cellH, gapX, gapY, prefix, positionType, industries) => {
+        for (let i = 0; i < count; i++) {
+          const col = i % cols;
+          const row = Math.floor(i / cols);
+          const statusSeed = (i * 7 + grade.charCodeAt(0) + floor.charCodeAt(3)) % 17;
+          const status = statusSeed === 0 ? "sold" : statusSeed === 1 ? "locked" : statusSeed <= 3 ? "hot" : "available";
+          booths.push({
+            id: `${floor}-${grade}-${i + 1}`,
+            floor,
+            code: `${prefix}${String(i + 1).padStart(2, "0")}`,
+            grade,
+            area: gradeArea[grade],
+            basePrice: basePrices[grade],
+            status,
+            x: startX + col * (cellW + gapX),
+            y: startY + row * (cellH + gapY),
+            width: cellW,
+            height: cellH,
+            positionType,
+            traffic: Math.min(100, 96 - row * 5 + (grade === "S" ? 8 : grade === "A" ? 4 : 0)),
+            facility: 64 + ((i * 13) % 32),
+            suitableIndustries: industries,
+            history: `${2023 + (i % 3)}年同级展位成交${currency(basePrices[grade] * (0.92 + (i % 6) * 0.04))}`
+          });
+        }
+      };
+
+      make("N3-1F", "S", 12, 300, 128, 6, 70, 44, 78, 58, "S", "一层入口/中央核心", ["新能源", "高端制造", "消费品"]);
+      make("N3-1F", "A", 24, 190, 315, 8, 58, 36, 72, 56, "A", "一层主通道两侧", ["商贸", "供应链", "新能源", "高端制造"]);
+      make("N3-1F", "B", 44, 100, 555, 11, 48, 31, 66, 48, "B", "一层次通道标准区", ["商贸", "供应链", "文创", "消费品"]);
+      make("N3-1F", "C", 16, 1220, 180, 2, 58, 34, 92, 66, "C", "一层侧边基础展位区", ["文创", "小微企业", "消费品"]);
+
+      make("N3-2F", "A", 12, 260, 150, 4, 66, 40, 112, 72, "A", "二层连廊展示区", ["新能源", "高端制造", "商贸"]);
+      make("N3-2F", "B", 36, 130, 380, 9, 52, 34, 82, 56, "B", "二层标准展示区", ["商贸", "供应链", "文创", "消费品"]);
+      make("N3-2F", "C", 16, 1120, 210, 2, 60, 36, 102, 76, "C", "二层后排基础区", ["文创", "小微企业", "消费品"]);
+
+      return booths;
+    }
+
+    function getCustomer() {
+      const form = document.getElementById("customerForm");
+      const data = new FormData(form);
+      return {
+        companyName: data.get("companyName") || "未命名企业",
+        industry: data.get("industry"),
+        companySize: data.get("companySize"),
+        purpose: data.get("purpose"),
+        budgetMin: Number(data.get("budgetMin") || 0),
+        budgetMax: Number(data.get("budgetMax") || 0),
+        areaDemand: Number(data.get("areaDemand") || 9),
+        schedule: data.get("schedule"),
+        isFirstTime: data.get("isFirstTime") === "true",
+        historyPreference: data.get("historyPreference"),
+        specialNeeds: data.get("specialNeeds") || ""
+      };
+    }
+
+    function buildCustomerProfile(customer) {
+      const budgetMid = (customer.budgetMin + customer.budgetMax) / 2;
+      const budgetLevel = budgetMid >= 35000 ? "高端" : budgetMid >= 16000 ? "中端" : "性价比";
+      const demandType = customer.purpose === "品牌曝光" ? "品牌展示" : customer.purpose === "招商洽谈" ? "招商引流" : customer.purpose === "产品展示" ? "产品展示" : "基础参展";
+      const customerLevel = !customer.isFirstTime && ["1000人以上", "300-999人"].includes(customer.companySize) ? "核心客户" : customer.isFirstTime ? "新客户" : "普通客户";
+
+      let preferredGrades = ["B", "C"];
+      if (["新能源", "高端制造"].includes(customer.industry) || customer.purpose === "品牌曝光") preferredGrades = ["S", "A"];
+      if (["商贸", "供应链"].includes(customer.industry) || customer.historyPreference === "主通道") preferredGrades = ["A", "B"];
+      if (["文创", "小微企业"].includes(customer.industry)) preferredGrades = ["B", "C"];
+      return { budgetLevel, demandType, customerLevel, preferredGrades, budgetMid };
+    }
+
+    function scoreBooth(booth, customer, profile) {
+      const w = state.config.weights;
+      const totalWeight = w.position + w.area + w.traffic + w.facility;
+      const positionScore = booth.grade === "S" ? 100 : booth.grade === "A" ? 86 : booth.grade === "B" ? 70 : 55;
+      const areaScore = Math.max(45, 100 - Math.abs(booth.area - customer.areaDemand) * 4);
+      const trafficScore = booth.traffic;
+      const facilityScore = booth.facility;
+      let score = (positionScore * w.position + areaScore * w.area + trafficScore * w.traffic + facilityScore * w.facility) / totalWeight;
+      if (profile.preferredGrades.includes(booth.grade)) score += 13;
+      if (booth.suitableIndustries.includes(customer.industry)) score += 10;
+      if (booth.status === "sold") score -= 70;
+      if (booth.status === "locked") score -= 30;
+      if (booth.status === "hot" && profile.budgetLevel === "高端") score += 6;
+      return Math.max(0, Math.min(100, score));
+    }
+
+    function demandFactor(customer, booth) {
+      let factor = 1;
+      if (customer.schedule === "开幕前20天") factor += booth.status === "hot" || ["S", "A"].includes(booth.grade) ? 0.1 : 0.04;
+      if (customer.schedule === "开幕前7天") factor += booth.grade === "C" ? -0.15 : 0.03;
+      if (customer.schedule === "开幕前45天") factor += 0.02;
+      if (customer.schedule === "早鸟期") factor -= 0.08;
+      return factor;
+    }
+
+    function customerFactor(profile) {
+      if (profile.customerLevel === "核心客户") return 0.94;
+      if (profile.customerLevel === "普通客户") return 0.97;
+      return 1;
+    }
+
+    function timeFactor(customer) {
+      if (customer.schedule === "早鸟期") return 0.95;
+      if (customer.schedule === "开幕前7天") return 0.93;
+      if (customer.schedule === "开幕前20天") return 1.04;
+      return 1;
+    }
+
+    function calculateDynamicPrice(booth, customer, profile) {
+      const base = booth.basePrice;
+      const valueFactor = gradeValueFactor[booth.grade];
+      const supplyFactor = demandFactor(customer, booth);
+      const clientFactor = customerFactor(profile);
+      const tFactor = timeFactor(customer);
+      let raw = base * valueFactor * supplyFactor * clientFactor * tFactor;
+      const max = base * Number(state.config.maxPremium);
+      const min = base * Number(state.config.minDiscount);
+      const limits = [];
+      if (raw > max) { raw = max; limits.push("触发最高溢价保护"); }
+      if (raw < min) { raw = min; limits.push("触发最低折扣保护"); }
+      if (booth.status === "locked") limits.push("锁定展位享 24 小时价格保护");
+      return { basePrice: base, boothValueFactor: valueFactor, demandFactor: supplyFactor, customerFactor: clientFactor, timeFactor: tFactor, finalPrice: Math.round(raw), limitsApplied: limits };
+    }
+
+    function recommendationReason(plan, booth, customer, profile, price) {
+      const reasons = [];
+      reasons.push(`${booth.grade}级${booth.area}㎡展位适配${profile.demandType}`);
+      if (booth.suitableIndustries.includes(customer.industry)) reasons.push(`历史数据中${customer.industry}客户偏好该区域`);
+      if (plan === "upgrade") reasons.push("位置价值更高，适合品牌曝光和重点客户接待");
+      if (plan === "budget") reasons.push("控制预算，兼顾基础展示与成本效率");
+      if (price.finalPrice <= customer.budgetMax) reasons.push("报价处于客户预算范围内");
+      return reasons;
+    }
+
+    function generateRecommendations() {
+      const customer = state.customer;
+      const profile = state.profile;
+      const candidates = state.booths
+        .filter(b => b.status !== "sold" && b.status !== "locked")
+        .map(b => ({ booth: b, score: scoreBooth(b, customer, profile), price: calculateDynamicPrice(b, customer, profile) }));
+
+      const sortByScore = arr => arr.sort((a, b) => b.score - a.score);
+      const inBudget = c => c.price.finalPrice >= customer.budgetMin * 0.75 && c.price.finalPrice <= customer.budgetMax;
+      const upgrade = c => ["S", "A"].includes(c.booth.grade) && c.price.finalPrice <= customer.budgetMax * 1.35;
+      const budget = c => ["B", "C"].includes(c.booth.grade) && c.price.finalPrice <= customer.budgetMax;
+      const bestItems = sortByScore(candidates.filter(inBudget)).slice(0, 4);
+      const upgradeItems = sortByScore(candidates.filter(upgrade)).slice(0, 4);
+      const budgetItems = sortByScore(candidates.filter(budget)).slice(0, 4);
+      const plans = [
+        { id: "best", title: "最优适配方案", badge: "主推", desc: "预算匹配、行业适配和展位价值综合最优。", items: bestItems },
+        { id: "upgrade", title: "高端升级方案", badge: "品牌曝光", desc: "更靠近入口或主通道，适合新品发布与重点招商。", items: upgradeItems },
+        { id: "budget", title: "性价比备选方案", badge: "控成本", desc: "在预算内控制成本，适合基础参展和首次试水。", items: budgetItems }
+      ];
+      state.recommendedIds = new Set(bestItems.map(i => i.booth.id));
+      plans.forEach(plan => plan.items.forEach(item => item.reasons = recommendationReason(plan.id, item.booth, customer, profile, item.price)));
+      return plans;
+    }
+
+    function renderProfile() {
+      const p = state.profile;
+      document.getElementById("profileBox").innerHTML = `
+        <span class="tag gold">预算档位：${p.budgetLevel}</span>
+        <span class="tag">需求类型：${p.demandType}</span>
+        <span class="tag green">客户等级：${p.customerLevel}</span>
+        <span class="tag">偏好等级：${p.preferredGrades.join(" / ")}</span>`;
+      document.getElementById("strategyText").textContent = `优先 ${p.preferredGrades.join("/")} 级展位`;
+      document.getElementById("budgetText").textContent = `${currency(state.customer.budgetMin)} - ${currency(state.customer.budgetMax)}`;
+    }
+
+    function renderRecommendations() {
+      const box = document.getElementById("recommendations");
+      box.innerHTML = state.recommendations.map(plan => `
+        <article class="recommend-card ${plan.id === "best" ? "primary" : ""}">
+          <div class="plan-title"><h3>${plan.title}</h3><span class="plan-badge">${plan.badge}</span></div>
+          <p class="muted">${plan.desc}</p>
+          <div>${plan.items.map(item => `
+            <div class="booth-row">
+              <div><strong>${item.booth.code}</strong> · ${item.booth.grade}级 · ${item.booth.area}㎡<br><span class="muted">${item.booth.positionType} · 匹配度 ${Math.round(item.score)}分</span></div>
+              <div><div class="price">${currency(item.price.finalPrice)}</div><button type="button" onclick="selectBooth('${item.booth.id}', '${plan.id}')">查看</button></div>
+            </div>`).join("")}</div>
+          <ul class="muted">${(plan.items[0]?.reasons || ["请先生成推荐"]).map(r => `<li>${r}</li>`).join("")}</ul>
+        </article>`).join("");
+    }
+
+    function renderMap() {
+      const grade = document.getElementById("filterGrade").value;
+      const status = document.getElementById("filterStatus").value;
+      const area = document.getElementById("filterArea").value;
+      const maxPrice = Number(document.getElementById("maxPrice").value);
+      document.getElementById("maxPriceText").textContent = maxPrice;
+      const svg = document.getElementById("boothMap");
+      const visible = [];
+      const floorBooths = state.booths.filter(booth => booth.floor === state.ui.activeFloor);
+      const boothMarkup = floorBooths.map(booth => {
+        const price = calculateDynamicPrice(booth, state.customer, state.profile).finalPrice;
+        const isRecommended = state.recommendedIds.has(booth.id);
+        const visualStatus = isRecommended ? "recommended" : booth.status;
+        const match = (grade === "all" || booth.grade === grade) && (status === "all" || visualStatus === status) && (area === "all" || String(booth.area) === area) && price <= maxPrice;
+        if (match) visible.push(booth);
+        const opacity = match ? 1 : 0.12;
+        return `<g><rect class="booth ${isRecommended ? "recommended" : ""}" x="${booth.x}" y="${booth.y}" width="${booth.width}" height="${booth.height}" fill="${statusColor[visualStatus]}" stroke="#ffffff" opacity="${opacity}" onclick="selectBooth('${booth.id}', '${isRecommended ? "best" : state.selectedPlan}')"></rect><text class="booth-label" x="${booth.x + 7}" y="${booth.y + 20}" opacity="${opacity}">${booth.code}</text></g>`;
+      }).join("");
+      const isSecondFloor = state.ui.activeFloor === "N3-2F";
+      document.getElementById("floorTitle").textContent = isSecondFloor ? "N3 二层 · 连廊展示区 · 标准展位区" : "N3 一层 · 展馆入口 · 主通道 · 中央展示区";
+      svg.innerHTML = isSecondFloor ? `
+        <rect x="46" y="46" width="1588" height="878" rx="34" fill="none" stroke="#b8c9dc" stroke-width="2" />
+        <rect x="620" y="64" width="260" height="62" rx="20" fill="#003b7a" opacity="0.9"/><text x="686" y="102" fill="#fff" font-size="18" font-weight="800">二层连廊入口</text>
+        <rect x="250" y="245" width="780" height="120" rx="26" fill="#2563eb" opacity="0.07"/><text class="area-label" x="530" y="232">连廊展示区</text>
+        <rect x="88" y="355" width="1070" height="430" rx="30" fill="#22c55e" opacity="0.045"/><text class="area-label" x="128" y="825">二层标准展示区</text>
+        <rect x="1060" y="155" width="430" height="440" rx="30" fill="#ef4444" opacity="0.05"/><text class="area-label" x="1158" y="142">二层基础展位区</text>
+        ${boothMarkup}
+        <rect x="1190" y="675" width="240" height="98" rx="22" fill="#eaf2f8" stroke="#b8c9dc"/><text x="1242" y="714" fill="#003b7a" font-size="15" font-weight="800">二层服务台</text><text x="1236" y="742" fill="#6b7280" font-size="12">洽谈室 / 媒体区</text>` : `
+        <rect x="46" y="46" width="1588" height="878" rx="34" fill="none" stroke="#b8c9dc" stroke-width="2" />
+        <rect x="690" y="58" width="250" height="62" rx="20" fill="#003b7a" opacity="0.92"/><text x="758" y="96" fill="#fff" font-size="18" font-weight="800">入口迎宾区</text>
+        <rect x="760" y="145" width="150" height="704" fill="#f5a623" opacity="0.1"/><text class="area-label" x="800" y="884">主通道</text>
+        <rect x="160" y="265" width="1030" height="150" rx="26" fill="#2563eb" opacity="0.07"/><text class="area-label" x="548" y="250">中央展示区 / 主通道两侧</text>
+        <rect x="1138" y="128" width="420" height="510" rx="30" fill="#ef4444" opacity="0.052"/><text class="area-label" x="1220" y="116">侧边标准与基础展位区</text>
+        <rect x="72" y="520" width="1128" height="340" rx="30" fill="#22c55e" opacity="0.045"/><text class="area-label" x="118" y="895">后排标准展区</text>
+        ${boothMarkup}
+        <rect x="1280" y="690" width="240" height="98" rx="22" fill="#eaf2f8" stroke="#b8c9dc"/><text x="1332" y="730" fill="#003b7a" font-size="15" font-weight="800">配套服务区</text><text x="1320" y="758" fill="#6b7280" font-size="12">咨询台 / 媒体区</text>`;
+
+      document.getElementById("mapCount").textContent = `${visible.length} / ${floorBooths.length} 个展位`;
+    }
+
+    function selectBooth(id, planId = state.selectedPlan) {
+      state.selectedBoothId = id;
+      state.selectedPlan = planId;
+      renderBoothDetail();
+      renderPricingTrace();
+      renderQuote();
+      switchView("customer", "quote");
+
+    }
+
+    function selectedBooth() {
+      return state.booths.find(b => b.id === state.selectedBoothId) || state.recommendations[0]?.items[0]?.booth || state.booths[0];
+    }
+
+    function renderBoothDetail() {
+      const booth = selectedBooth();
+      const price = calculateDynamicPrice(booth, state.customer, state.profile);
+      document.getElementById("boothDetail").innerHTML = `
+        <div class="detail-row"><span>展位编号</span><strong>${booth.code}</strong></div>
+        <div class="detail-row"><span>等级 / 面积</span><strong>${booth.grade}级 / ${booth.area}㎡</strong></div>
+        <div class="detail-row"><span>状态</span><strong>${state.recommendedIds.has(booth.id) ? "AI推荐" : statusText[booth.status]}</strong></div>
+        <div class="detail-row"><span>位置</span><strong>${booth.positionType}</strong></div>
+        <div class="detail-row"><span>实时价格</span><strong class="price">${currency(price.finalPrice)}</strong></div>
+        <div class="detail-row"><span>适配行业</span><strong>${booth.suitableIndustries.join("、")}</strong></div>
+        <div class="detail-row"><span>历史记录</span><strong>${booth.history}</strong></div>
+        <div class="actions"><button class="btn btn-blue" type="button" onclick="lockSelectedBooth()">锁定展位</button><button class="btn btn-light" type="button" onclick="renderQuote(); location.hash='quote';">加入报价单</button></div>`;
+    }
+
+    function renderPricingTrace() {
+      const booth = selectedBooth();
+      const trace = calculateDynamicPrice(booth, state.customer, state.profile);
+      const items = [
+        ["基础价", "展位等级标准基准价", trace.basePrice, 70],
+        ["展位价值系数", `${booth.grade}级位置与面积价值`, trace.boothValueFactor.toFixed(2), trace.boothValueFactor / 1.5 * 100],
+        ["档期供需系数", `${state.customer.schedule}供需热度`, trace.demandFactor.toFixed(2), trace.demandFactor / 1.3 * 100],
+        ["客户权益系数", `${state.profile.customerLevel}权益`, trace.customerFactor.toFixed(2), trace.customerFactor * 100],
+        ["时间浮动系数", "早鸟/临期/热度策略", trace.timeFactor.toFixed(2), trace.timeFactor * 92]
+      ];
+      document.getElementById("pricingTrace").innerHTML = items.map(item => `
+        <div class="trace-item"><strong>${item[0]}</strong><div><div class="muted">${item[1]}</div><div class="bar"><i style="width:${Math.min(100, item[3])}%"></i></div></div><strong>${typeof item[2] === "number" ? currency(item[2]) : item[2]}</strong></div>`).join("") +
+        `<div class="tag ${trace.limitsApplied.length ? "red" : "green"}">${trace.limitsApplied.length ? trace.limitsApplied.join("；") : "未触发价格边界，报价在合理区间"}</div>`;
+      document.querySelectorAll("#pricingTrace .trace-item").forEach((row, index) => {
+        const value = items[index][2];
+        row.querySelector("strong:last-child").textContent = index === 0 ? currency(value) : String(value);
+      });
+      document.getElementById("finalPriceBox").innerHTML = `<span>当前展位最终报价</span><strong>${currency(trace.finalPrice)}</strong><p>${booth.code} · ${booth.grade}级 · ${booth.area}㎡ · ${booth.positionType}</p><p class="muted" style="color:rgba(255,255,255,0.76)">内部公式：基础价 × 展位价值系数 × 档期供需系数 × 客户权益系数 × 时间浮动系数。</p>`;
+
+
+    }
+
+    function renderQuote() {
+      const booth = selectedBooth();
+      const trace = calculateDynamicPrice(booth, state.customer, state.profile);
+      const validUntil = new Date(Date.now() + 24 * 3600 * 1000).toLocaleString("zh-CN", { hour12: false });
+      document.getElementById("quotePaper").innerHTML = `
+        <div class="quote-head"><div><h3>万耀企龙展位推荐报价单</h3><p class="muted">GLOBUS Events · We make business happen.</p></div><div><span class="tag gold">报价有效期24小时</span></div></div>
+        <div class="detail-row"><span>客户企业</span><strong>${state.customer.companyName}</strong></div>
+        <div class="detail-row"><span>行业 / 目的</span><strong>${state.customer.industry} / ${state.customer.purpose}</strong></div>
+        <div class="detail-row"><span>预算范围</span><strong>${currency(state.customer.budgetMin)} - ${currency(state.customer.budgetMax)}</strong></div>
+        <table><thead><tr><th>展位</th><th>等级</th><th>面积</th><th>位置</th><th>报价</th></tr></thead><tbody><tr><td>${booth.code}</td><td>${booth.grade}级</td><td>${booth.area}㎡</td><td>${booth.positionType}</td><td><strong>${currency(trace.finalPrice)}</strong></td></tr></tbody></table>
+        <h4>推荐理由</h4><p>该展位匹配客户“${state.profile.demandType}”需求，适配行业包含 ${booth.suitableIndustries.join("、")}，位置与面积适合当前参展目标。</p>
+        <h4>服务说明</h4><p>报价包含展位锁定、销售顾问对接、展前基础服务协调和现场位置确认。最终合同条款以双方正式确认为准。</p>
+        <div class="detail-row"><span>报价有效期至</span><strong>${validUntil}</strong></div>
+        <div class="detail-row"><span>联系信息</span><strong>万耀企龙展会顾问 · sales@globusevents.com</strong></div>
+        <p class="muted">注：本报价单用于客户沟通展示，最终价格与服务内容以正式合同为准。</p>`;
+
+    }
+
+    function renderDashboard() {
+      const total = state.booths.length;
+      const available = state.booths.filter(b => b.status === "available").length;
+      const sold = state.booths.filter(b => b.status === "sold").length;
+      const avgPremium = state.booths.reduce((sum, b) => sum + Math.max(0, calculateDynamicPrice(b, state.customer, state.profile).finalPrice - b.basePrice), 0);
+
+      document.getElementById("kpis").innerHTML = `
+        <div class="kpi-card"><span class="muted">展位空置率</span><strong>${Math.round(available / total * 100)}%</strong></div>
+        <div class="kpi-card"><span class="muted">AI推荐成交率</span><strong>36%</strong></div>
+        <div class="kpi-card"><span class="muted">动态定价溢价收益</span><strong>${currency(avgPremium)}</strong></div>
+        <div class="kpi-card"><span class="muted">已售展位</span><strong>${sold}</strong></div>`;
+      const gradeStats = ["S", "A", "B", "C"].map(g => ({ name: `${g}级`, value: state.booths.filter(b => b.grade === g).length }));
+      const hot = [...state.booths].sort((a, b) => b.traffic - a.traffic).slice(0, 6);
+      const slow = [...state.booths].sort((a, b) => a.traffic - b.traffic).slice(0, 6);
+      document.getElementById("charts").innerHTML = `
+        <div class="chart-card"><h3>各等级展位占比</h3>${gradeStats.map(s => `<div class="mini-bar"><span>${s.name}</span><div class="bar"><i style="width:${s.value / total * 100 * 3}%"></i></div><strong>${s.value}</strong></div>`).join("")}</div>
+        <div class="chart-card"><h3>客户预算分布</h3>${[["10k以下",18],["10-20k",32],["20-40k",41],["40k以上",9]].map(s => `<div class="mini-bar"><span>${s[0]}</span><div class="bar"><i style="width:${s[1]}%"></i></div><strong>${s[1]}%</strong></div>`).join("")}</div>
+        <div class="chart-card"><h3>热门展位 TOP6</h3>${hot.map((b, i) => `<div class="rank-row"><span>${i + 1}. ${b.code}</span><strong>${b.traffic} 热度</strong></div>`).join("")}</div>
+        <div class="chart-card"><h3>滞销风险 TOP6</h3>${slow.map((b, i) => `<div class="rank-row"><span>${i + 1}. ${b.code}</span><strong>${b.traffic} 热度</strong></div>`).join("")}</div>`;
+    }
+
+    function renderAdminManagement() {
+      const counts = ["S", "A", "B", "C"].map(grade => {
+        const items = state.booths.filter(b => b.grade === grade);
+        const available = items.filter(b => b.status === "available").length;
+        const locked = items.filter(b => b.status === "locked").length;
+        const sold = items.filter(b => b.status === "sold").length;
+        return { grade, total: items.length, available, locked, sold };
+      });
+      document.getElementById("boothStatusTable").innerHTML = `
+        <table><thead><tr><th>等级</th><th>总数</th><th>可订</th><th>锁定</th><th>已售</th></tr></thead><tbody>
+        ${counts.map(row => `<tr><td>${row.grade}级</td><td>${row.total}</td><td>${row.available}</td><td>${row.locked}</td><td>${row.sold}</td></tr>`).join("")}
+        </tbody></table>`;
+
+      state.admin.leadRecords = [
+        { company: state.customer.companyName, need: state.profile.demandType, budget: `${currency(state.customer.budgetMin)}-${currency(state.customer.budgetMax)}`, status: "重点跟进" },
+        { company: "杭州澜芯智能装备有限公司", need: "产品展示", budget: "¥20,000-¥45,000", status: "方案沟通" },
+        { company: "苏州云栖供应链管理有限公司", need: "招商引流", budget: "¥12,000-¥28,000", status: "待回访" }
+      ];
+      document.getElementById("leadTable").innerHTML = `
+        <table><thead><tr><th>客户</th><th>需求</th><th>预算</th><th>状态</th></tr></thead><tbody>
+        ${state.admin.leadRecords.map(row => `<tr><td>${row.company}</td><td>${row.need}</td><td>${row.budget}</td><td>${row.status}</td></tr>`).join("")}
+        </tbody></table>`;
+
+      const booth = selectedBooth();
+      const trace = calculateDynamicPrice(booth, state.customer, state.profile);
+      state.admin.quoteAuditLogs = [
+        { item: "客户报价单", booth: booth.code, price: currency(trace.finalPrice), result: "待销售经理确认" },
+        { item: "价格边界", booth: booth.grade + "级", price: trace.limitsApplied.length ? trace.limitsApplied.join("；") : "未触发", result: "系统通过" },
+        { item: "展位锁定", booth: booth.code, price: statusText[booth.status], result: booth.status === "locked" ? "已锁定" : "可提交" }
+      ];
+      document.getElementById("auditTable").innerHTML = `
+        <table><thead><tr><th>审核项</th><th>对象</th><th>内容</th><th>结果</th></tr></thead><tbody>
+        ${state.admin.quoteAuditLogs.map(row => `<tr><td>${row.item}</td><td>${row.booth}</td><td>${row.price}</td><td>${row.result}</td></tr>`).join("")}
+        </tbody></table>`;
+    }
+
+    function lockSelectedBooth() {
+
+      const booth = selectedBooth();
+      booth.status = "locked";
+      state.recommendedIds.delete(booth.id);
+      renderAll(false);
+      alert(`${booth.code} 已锁定，享 24 小时价格保护。`);
+
+    }
+
+    function applyConfigFromInputs() {
+      ["Position", "Area", "Traffic", "Facility"].forEach(name => {
+        const key = name.toLowerCase();
+        const value = Number(document.getElementById(`w${name}`).value);
+        state.config.weights[key] = value;
+        document.getElementById(`w${name}Text`).textContent = `${value}%`;
+      });
+      state.config.maxPremium = Number(document.getElementById("maxPremium").value);
+      state.config.minDiscount = Number(document.getElementById("minDiscount").value);
+    }
+
+    function fillSample() {
+      document.getElementById("companyName").value = "上海启曜新能源科技有限公司";
+      document.getElementById("industry").value = "新能源";
+      document.getElementById("companySize").value = "1000人以上";
+      document.getElementById("purpose").value = "品牌曝光";
+      document.getElementById("budgetMin").value = "18000";
+      document.getElementById("budgetMax").value = "52000";
+      document.getElementById("areaDemand").value = "36";
+      document.getElementById("schedule").value = "开幕前20天";
+      document.getElementById("isFirstTime").value = "false";
+      document.getElementById("historyPreference").value = "主通道";
+      document.getElementById("specialNeeds").value = "希望靠近主通道，便于新品发布和客户接待。";
+      renderAll(true);
+    }
+
+    function switchView(viewName, targetId) {
+      state.ui.activeView = viewName;
+      document.getElementById("customer-view").classList.toggle("active-view", viewName === "customer");
+      document.getElementById("admin-view").classList.toggle("active-view", viewName === "admin");
+      const topNav = document.querySelector('.top-nav');
+      if (topNav) topNav.dataset.activeview = viewName;
+      document.querySelectorAll("[data-view]").forEach(el => {
+        const isSwitcher = el.tagName === "BUTTON" && el.closest(".view-switch");
+        if (isSwitcher) el.classList.toggle("active-nav", el.dataset.view === viewName);
+      });
+      if (targetId) {
+        requestAnimationFrame(() => document.getElementById(targetId)?.scrollIntoView({ behavior: "smooth", block: "start" }));
+      } else {
+        requestAnimationFrame(() => window.scrollTo({ top: 0, behavior: "smooth" }));
+      }
+    }
+
+    function switchFloor(floorId) {
+      state.ui.activeFloor = floorId;
+      document.querySelectorAll(".floor-tab").forEach(btn => btn.classList.toggle("active", btn.dataset.floor === floorId));
+      renderMap();
+    }
+
+    function renderAll(regenerateRecommendations = true) {
+      state.customer = getCustomer();
+      state.profile = buildCustomerProfile(state.customer);
+      if (regenerateRecommendations) {
+        state.recommendations = generateRecommendations();
+        state.selectedBoothId = state.recommendations[0]?.items[0]?.booth.id || state.booths[0].id;
+        state.selectedPlan = "best";
+      }
+      renderProfile();
+      renderRecommendations();
+      renderMap();
+      renderBoothDetail();
+      renderPricingTrace();
+      renderQuote();
+      renderDashboard();
+      renderAdminManagement();
+
+    }
+
+    document.getElementById("customerForm").addEventListener("submit", event => { event.preventDefault(); renderAll(true); switchView("customer", "recommend"); });
+    document.getElementById("fillSampleBtn").addEventListener("click", fillSample);
+    document.getElementById("recalcBtn").addEventListener("click", () => renderAll(true));
+    document.getElementById("applyConfigBtn").addEventListener("click", () => { applyConfigFromInputs(); renderAll(true); });
+    document.getElementById("printBtn").addEventListener("click", () => window.print());
+    document.getElementById("lockBtn").addEventListener("click", lockSelectedBooth);
+    ["filterGrade", "filterStatus", "filterArea", "maxPrice"].forEach(id => document.getElementById(id).addEventListener("input", renderMap));
+    ["wPosition", "wArea", "wTraffic", "wFacility"].forEach(id => document.getElementById(id).addEventListener("input", applyConfigFromInputs));
+    document.querySelectorAll("[data-view]").forEach(el => el.addEventListener("click", event => {
+      const targetView = el.dataset.view;
+      if (!targetView) return;
+      const href = el.getAttribute("href");
+      if (href && href.startsWith("#")) event.preventDefault();
+      switchView(targetView, href && href.startsWith("#") ? href.slice(1) : undefined);
+    }));
+    document.querySelectorAll(".floor-tab").forEach(btn => btn.addEventListener("click", () => switchFloor(btn.dataset.floor)));
+
+    state.booths = generateBooths();
+    renderAll(true);
+  </script>
+</body>
+</html>

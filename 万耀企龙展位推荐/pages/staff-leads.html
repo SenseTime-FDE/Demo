@@ -1,0 +1,1080 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>客户线索管理 · 运营管理中心 · 万耀企龙</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Noto+Sans+SC:wght@300;400;500;600;700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<style>
+*, *::before, *::after {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+:root {
+    --navy: #0B2A4A;
+    --navy-dark: #071D35;
+    --navy-deep: #041221;
+    --gold: #C9A84C;
+    --gold-light: #E0C36A;
+    --gold-dark: #A88B3A;
+    --cyan: #00A3E0;
+    --cyan-light: #33B8E8;
+    --cyan-dark: #0089BF;
+    --white: #FFFFFF;
+    --gray-50: #F8F9FA;
+    --gray-100: #F0F2F5;
+    --gray-200: #E4E7EB;
+    --gray-300: #D1D5DB;
+    --gray-400: #9CA3AF;
+    --gray-500: #6B7280;
+    --gray-600: #4B5563;
+    --gray-700: #374151;
+    --gray-800: #1F2937;
+    --green: #10B981;
+    --green-light: #D1FAE5;
+    --red: #EF4444;
+    --orange: #F59E0B;
+    --purple: #8B5CF6;
+    --sidebar-width: 220px;
+    --navbar-height: 64px;
+}
+
+html { scroll-behavior: smooth; }
+
+body {
+    font-family: 'Noto Sans SC', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    color: var(--gray-800);
+    background: var(--gray-50);
+    line-height: 1.6;
+    min-height: 100vh;
+}
+
+/* ============ NAVBAR (dark) ============ */
+.navbar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 32px;
+    height: var(--navbar-height);
+    background: var(--navy-dark);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+}
+
+.nav-left {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.hamburger {
+    display: none;
+    width: 36px;
+    height: 36px;
+    border: none;
+    background: none;
+    cursor: pointer;
+    border-radius: 8px;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    color: rgba(255,255,255,0.7);
+    transition: all 0.2s;
+}
+.hamburger:hover { background: rgba(255,255,255,0.08); }
+
+.nav-brand {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    text-decoration: none;
+}
+
+.nav-logo {
+    width: 40px;
+    height: 40px;
+    background: linear-gradient(135deg, var(--gold), var(--gold-light));
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 800;
+    font-size: 18px;
+    color: var(--navy-dark);
+    letter-spacing: -1px;
+    flex-shrink: 0;
+}
+
+.nav-title-text {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--white);
+    letter-spacing: 0.5px;
+    white-space: nowrap;
+}
+
+.nav-right {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.nav-user-info {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.nav-user-role {
+    font-size: 13px;
+    color: rgba(255,255,255,0.55);
+    font-weight: 400;
+}
+
+.nav-user-name {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--white);
+}
+
+.nav-avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--gold), var(--gold-dark));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--white);
+    flex-shrink: 0;
+}
+
+/* ============ SIDEBAR (dark) ============ */
+.sidebar {
+    position: fixed;
+    top: var(--navbar-height);
+    left: 0;
+    bottom: 0;
+    width: var(--sidebar-width);
+    background: var(--navy-dark);
+    z-index: 900;
+    overflow-y: auto;
+    padding: 16px 0;
+    transition: transform 0.3s ease;
+}
+
+.sidebar-nav {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.sidebar-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 20px;
+    font-size: 14px;
+    font-weight: 500;
+    color: rgba(255,255,255,0.6);
+    text-decoration: none;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border-left: 3px solid transparent;
+    position: relative;
+}
+
+.sidebar-item:hover {
+    background: rgba(255,255,255,0.05);
+    color: var(--white);
+}
+
+.sidebar-item.active {
+    background: rgba(0, 163, 224, 0.1);
+    color: var(--cyan-light);
+    border-left-color: var(--cyan);
+    font-weight: 600;
+}
+
+.sidebar-item .icon {
+    width: 20px;
+    text-align: center;
+    font-size: 16px;
+    flex-shrink: 0;
+}
+
+.sidebar-divider {
+    height: 1px;
+    background: rgba(255,255,255,0.08);
+    margin: 8px 16px;
+}
+
+.sidebar-section-label {
+    padding: 16px 20px 8px;
+    font-size: 11px;
+    font-weight: 600;
+    color: rgba(255,255,255,0.3);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+/* ============ MAIN CONTENT ============ */
+.main-content {
+    margin-left: var(--sidebar-width);
+    margin-top: var(--navbar-height);
+    padding: 32px 40px;
+    min-height: calc(100vh - var(--navbar-height));
+}
+
+.page-header {
+    margin-bottom: 28px;
+}
+
+.page-title {
+    font-size: 26px;
+    font-weight: 700;
+    color: var(--gray-800);
+    margin-bottom: 6px;
+}
+
+.page-subtitle {
+    font-size: 14px;
+    color: var(--gray-500);
+}
+
+/* ============ FILTER BAR ============ */
+.filter-bar {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+    background: var(--white);
+    border-radius: 12px;
+    padding: 16px 20px;
+    margin-bottom: 24px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+}
+
+.filter-group {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.filter-label {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--gray-500);
+    white-space: nowrap;
+}
+
+.filter-select,
+.filter-input {
+    padding: 8px 12px;
+    border: 1px solid var(--gray-200);
+    border-radius: 8px;
+    font-size: 13px;
+    font-family: inherit;
+    color: var(--gray-700);
+    background: var(--white);
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    min-width: 120px;
+}
+
+.filter-select:focus,
+.filter-input:focus {
+    border-color: var(--cyan);
+    box-shadow: 0 0 0 3px rgba(0, 163, 224, 0.1);
+}
+
+.filter-input {
+    min-width: 160px;
+}
+
+.filter-btn-reset {
+    padding: 8px 16px;
+    border: 1px solid var(--gray-200);
+    border-radius: 8px;
+    font-size: 13px;
+    font-family: inherit;
+    font-weight: 500;
+    color: var(--gray-600);
+    background: var(--white);
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap;
+}
+
+.filter-btn-reset:hover {
+    background: var(--gray-50);
+    border-color: var(--gray-300);
+}
+
+/* ============ TABLE CARD ============ */
+.table-card {
+    background: var(--white);
+    border-radius: 16px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+    overflow: hidden;
+}
+
+.table-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px 24px;
+    border-bottom: 1px solid var(--gray-100);
+}
+
+.table-toolbar-left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.table-toolbar-title {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--gray-800);
+}
+
+.table-count-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2px 10px;
+    border-radius: 20px;
+    background: rgba(0, 163, 224, 0.08);
+    color: var(--cyan);
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.table-toolbar-right {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.btn-icon {
+    width: 34px;
+    height: 34px;
+    border: 1px solid var(--gray-200);
+    border-radius: 8px;
+    background: var(--white);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    color: var(--gray-500);
+    transition: all 0.2s;
+}
+
+.btn-icon:hover {
+    background: var(--gray-50);
+    border-color: var(--gray-300);
+    color: var(--gray-700);
+}
+
+.btn-export {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 16px;
+    border: 1px solid var(--gray-200);
+    border-radius: 8px;
+    background: var(--white);
+    cursor: pointer;
+    font-size: 13px;
+    font-family: inherit;
+    font-weight: 500;
+    color: var(--gray-600);
+    transition: all 0.2s;
+}
+
+.btn-export:hover {
+    background: var(--gray-50);
+    border-color: var(--gray-300);
+    color: var(--gray-700);
+}
+
+/* ============ DATA TABLE ============ */
+.data-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.data-table thead {
+    background: var(--gray-50);
+}
+
+.data-table th {
+    padding: 14px 20px;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--gray-500);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    text-align: left;
+    border-bottom: 1px solid var(--gray-200);
+    white-space: nowrap;
+}
+
+.data-table td {
+    padding: 16px 20px;
+    font-size: 14px;
+    color: var(--gray-700);
+    border-bottom: 1px solid var(--gray-100);
+    vertical-align: middle;
+}
+
+.data-table tbody tr {
+    transition: background 0.2s;
+}
+
+.data-table tbody tr:hover {
+    background: rgba(0, 163, 224, 0.02);
+}
+
+.data-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+/* Status Badge */
+.status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.status-badge .dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+.status-new {
+    background: rgba(245, 158, 11, 0.1);
+    color: #B45309;
+}
+.status-new .dot { background: #F59E0B; }
+
+.status-negotiating {
+    background: rgba(0, 163, 224, 0.08);
+    color: #0369A1;
+}
+.status-negotiating .dot { background: var(--cyan); }
+
+.status-quoted {
+    background: rgba(139, 92, 246, 0.08);
+    color: #6D28D9;
+}
+.status-quoted .dot { background: var(--purple); }
+
+.status-booked {
+    background: rgba(16, 185, 129, 0.08);
+    color: #047857;
+}
+.status-booked .dot { background: var(--green); }
+
+/* Action Buttons */
+.action-btns {
+    display: flex;
+    gap: 6px;
+}
+
+.btn-action {
+    padding: 6px 14px;
+    border: none;
+    border-radius: 6px;
+    font-size: 12px;
+    font-family: inherit;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn-view {
+    background: rgba(0, 163, 224, 0.08);
+    color: var(--cyan);
+}
+.btn-view:hover {
+    background: rgba(0, 163, 224, 0.15);
+}
+
+.btn-follow {
+    background: rgba(201, 168, 76, 0.1);
+    color: var(--gold-dark);
+}
+.btn-follow:hover {
+    background: rgba(201, 168, 76, 0.2);
+}
+
+/* Customer name link style */
+.customer-name {
+    font-weight: 600;
+    color: var(--gray-800);
+}
+
+.contact-info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.contact-name {
+    font-weight: 500;
+    color: var(--gray-700);
+}
+
+.contact-title {
+    font-size: 12px;
+    color: var(--gray-400);
+}
+
+/* Budget text */
+.budget-text {
+    font-weight: 500;
+    color: var(--gray-700);
+}
+
+/* Date text */
+.date-text {
+    color: var(--gray-500);
+    font-size: 13px;
+}
+
+/* Industry tag */
+.industry-tag {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 500;
+    background: var(--gray-100);
+    color: var(--gray-600);
+}
+
+/* ============ PAGINATION ============ */
+.table-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 24px;
+    border-top: 1px solid var(--gray-100);
+}
+
+.pagination-info {
+    font-size: 13px;
+    color: var(--gray-500);
+}
+
+.pagination {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.page-btn {
+    min-width: 34px;
+    height: 34px;
+    border: 1px solid var(--gray-200);
+    border-radius: 8px;
+    background: var(--white);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    font-family: inherit;
+    font-weight: 500;
+    color: var(--gray-600);
+    transition: all 0.2s;
+    padding: 0 8px;
+}
+
+.page-btn:hover {
+    background: var(--gray-50);
+    border-color: var(--gray-300);
+}
+
+.page-btn.active {
+    background: var(--cyan);
+    border-color: var(--cyan);
+    color: var(--white);
+}
+
+.page-btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+/* ============ FOOTER ============ */
+.page-footer {
+    text-align: center;
+    padding: 24px 0 8px;
+    border-top: 1px solid var(--gray-200);
+    font-size: 12px;
+    color: var(--gray-400);
+    margin-top: 32px;
+}
+
+/* ============ SIDEBAR OVERLAY (mobile) ============ */
+.sidebar-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.3);
+    z-index: 899;
+}
+
+/* ============ RESPONSIVE ============ */
+@media (max-width: 1200px) {
+    .filter-bar { gap: 10px; }
+    .filter-select, .filter-input { min-width: 100px; }
+}
+
+@media (max-width: 1024px) {
+    .main-content { padding: 24px 24px; }
+}
+
+@media (max-width: 768px) {
+    .hamburger { display: flex; }
+
+    .sidebar {
+        transform: translateX(-100%);
+    }
+
+    .sidebar.open {
+        transform: translateX(0);
+    }
+
+    .sidebar-overlay.open {
+        display: block;
+    }
+
+    .main-content {
+        margin-left: 0;
+        padding: 20px 16px;
+    }
+
+    .navbar { padding: 0 16px; }
+    .nav-title-text { font-size: 13px; }
+    .nav-user-role { display: none; }
+
+    .filter-bar {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 10px;
+        padding: 14px 16px;
+    }
+
+    .filter-group {
+        flex-wrap: wrap;
+    }
+
+    .filter-select,
+    .filter-input {
+        flex: 1;
+        min-width: 0;
+    }
+
+    .filter-btn-reset {
+        width: 100%;
+        text-align: center;
+    }
+
+    .table-toolbar {
+        flex-direction: column;
+        gap: 12px;
+        align-items: flex-start;
+        padding: 16px 16px;
+    }
+
+    .table-toolbar-right {
+        width: 100%;
+        justify-content: flex-end;
+    }
+
+    /* Make table horizontally scrollable on mobile */
+    .table-responsive {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .data-table th,
+    .data-table td {
+        padding: 12px 14px;
+        white-space: nowrap;
+    }
+
+    .table-footer {
+        flex-direction: column;
+        gap: 12px;
+        align-items: center;
+        padding: 16px;
+    }
+
+    .page-title { font-size: 22px; }
+}
+
+@media (max-width: 480px) {
+    .main-content { padding: 16px 12px; }
+    .nav-user-name { display: none; }
+}
+</style>
+</head>
+<body>
+
+<!-- ============ NAVBAR ============ -->
+<nav class="navbar">
+    <div class="nav-left">
+        <button class="hamburger" id="hamburgerBtn" aria-label="菜单">
+            <i class="fas fa-bars"></i>
+        </button>
+        <a class="nav-brand" href="#">
+            <div class="nav-logo">GE</div>
+            <span class="nav-title-text">GLOBUS EVENTS · 运营管理中心</span>
+        </a>
+    </div>
+    <div class="nav-right">
+        <div class="nav-user-info">
+            <span class="nav-user-role">管理员</span>
+            <span class="nav-user-name">张三</span>
+        </div>
+        <div class="nav-avatar">张</div>
+    </div>
+</nav>
+
+<!-- ============ SIDEBAR OVERLAY ============ -->
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+<!-- ============ SIDEBAR ============ -->
+<aside class="sidebar" id="sidebar">
+    <ul class="sidebar-nav">
+        <li>
+            <a class="sidebar-item" href="#">
+                <span class="icon"><i class="fas fa-chart-line"></i></span>
+                运营概览
+            </a>
+        </li>
+        <li>
+            <a class="sidebar-item active" href="#">
+                <span class="icon"><i class="fas fa-users"></i></span>
+                客户线索管理
+            </a>
+        </li>
+        <li>
+            <a class="sidebar-item" href="#">
+                <span class="icon"><i class="fas fa-file-invoice"></i></span>
+                报价管理
+            </a>
+        </li>
+        <li>
+            <a class="sidebar-item" href="#">
+                <span class="icon"><i class="fas fa-calendar-check"></i></span>
+                预约管理
+            </a>
+        </li>
+        <li>
+            <a class="sidebar-item" href="#">
+                <span class="icon"><i class="fas fa-map"></i></span>
+                展位管理
+            </a>
+        </li>
+        <li>
+            <a class="sidebar-item" href="#">
+                <span class="icon"><i class="fas fa-tags"></i></span>
+                价格策略
+            </a>
+        </li>
+    </ul>
+    <div class="sidebar-divider"></div>
+    <ul class="sidebar-nav">
+        <li>
+            <a class="sidebar-item" href="#" style="font-size:13px;color:rgba(255,255,255,0.35);">
+                <span class="icon"><i class="fas fa-sign-out-alt"></i></span>
+                退出登录
+            </a>
+        </li>
+    </ul>
+</aside>
+
+<!-- ============ MAIN CONTENT ============ -->
+<main class="main-content">
+
+    <!-- Page Header -->
+    <div class="page-header">
+        <h1 class="page-title">&#128101; 客户线索管理</h1>
+        <p class="page-subtitle">查看和管理所有客户提交的参展意向与线索信息</p>
+    </div>
+
+    <!-- Filter Bar -->
+    <div class="filter-bar">
+        <div class="filter-group">
+            <span class="filter-label"><i class="fas fa-industry" style="margin-right:4px;"></i>行业</span>
+            <select class="filter-select">
+                <option value="">全部行业</option>
+                <option value="信息技术">信息技术</option>
+                <option value="医疗健康">医疗健康</option>
+                <option value="新能源">新能源</option>
+                <option value="智能制造">智能制造</option>
+                <option value="消费品">消费品</option>
+                <option value="金融">金融</option>
+                <option value="教育">教育</option>
+            </select>
+        </div>
+        <div class="filter-group">
+            <span class="filter-label"><i class="fas fa-flag" style="margin-right:4px;"></i>状态</span>
+            <select class="filter-select">
+                <option value="">全部状态</option>
+                <option value="new">新线索</option>
+                <option value="negotiating">洽谈中</option>
+                <option value="quoted">已报价</option>
+                <option value="booked">已预约</option>
+            </select>
+        </div>
+        <div class="filter-group">
+            <span class="filter-label"><i class="fas fa-calendar" style="margin-right:4px;"></i>日期</span>
+            <input type="date" class="filter-input" value="2026-06-01">
+            <span style="color:var(--gray-400);font-size:13px;">至</span>
+            <input type="date" class="filter-input" value="2026-06-21">
+        </div>
+        <div class="filter-group" style="flex:1;min-width:160px;">
+            <span class="filter-label"><i class="fas fa-search" style="margin-right:4px;"></i>搜索</span>
+            <input type="text" class="filter-input" placeholder="客户名称、联系人..." style="width:100%;">
+        </div>
+        <button class="filter-btn-reset"><i class="fas fa-undo-alt" style="margin-right:4px;"></i>重置</button>
+    </div>
+
+    <!-- Table Card -->
+    <div class="table-card">
+        <div class="table-toolbar">
+            <div class="table-toolbar-left">
+                <span class="table-toolbar-title"><i class="fas fa-list" style="margin-right:8px;color:var(--cyan);"></i>线索列表</span>
+                <span class="table-count-badge">共 5 条</span>
+            </div>
+            <div class="table-toolbar-right">
+                <button class="btn-icon" title="刷新"><i class="fas fa-rotate"></i></button>
+                <button class="btn-export"><i class="fas fa-download"></i>导出</button>
+            </div>
+        </div>
+
+        <div class="table-responsive">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>客户名称</th>
+                        <th>所属行业</th>
+                        <th>预算范围</th>
+                        <th>提交日期</th>
+                        <th>状态</th>
+                        <th>联系人</th>
+                        <th>操作</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Row 1 -->
+                    <tr>
+                        <td><span class="customer-name">上海数码科技有限公司</span></td>
+                        <td><span class="industry-tag">信息技术</span></td>
+                        <td><span class="budget-text">15-25万</span></td>
+                        <td><span class="date-text">2026-06-18</span></td>
+                        <td>
+                            <span class="status-badge status-new">
+                                <span class="dot"></span>
+                                新线索
+                            </span>
+                        </td>
+                        <td>
+                            <div class="contact-info">
+                                <span class="contact-name">李经理</span>
+                                <span class="contact-title">市场部</span>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="action-btns">
+                                <button class="btn-action btn-view"><i class="fas fa-eye" style="margin-right:3px;"></i>查看</button>
+                                <button class="btn-action btn-follow"><i class="fas fa-handshake" style="margin-right:3px;"></i>跟进</button>
+                            </div>
+                        </td>
+                    </tr>
+                    <!-- Row 2 -->
+                    <tr>
+                        <td><span class="customer-name">北京创新医疗集团</span></td>
+                        <td><span class="industry-tag">医疗健康</span></td>
+                        <td><span class="budget-text">25-40万</span></td>
+                        <td><span class="date-text">2026-06-17</span></td>
+                        <td>
+                            <span class="status-badge status-negotiating">
+                                <span class="dot"></span>
+                                洽谈中
+                            </span>
+                        </td>
+                        <td>
+                            <div class="contact-info">
+                                <span class="contact-name">王总监</span>
+                                <span class="contact-title">采购部</span>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="action-btns">
+                                <button class="btn-action btn-view"><i class="fas fa-eye" style="margin-right:3px;"></i>查看</button>
+                                <button class="btn-action btn-follow"><i class="fas fa-handshake" style="margin-right:3px;"></i>跟进</button>
+                            </div>
+                        </td>
+                    </tr>
+                    <!-- Row 3 -->
+                    <tr>
+                        <td><span class="customer-name">深圳绿色能源股份</span></td>
+                        <td><span class="industry-tag">新能源</span></td>
+                        <td><span class="budget-text">10-20万</span></td>
+                        <td><span class="date-text">2026-06-16</span></td>
+                        <td>
+                            <span class="status-badge status-quoted">
+                                <span class="dot"></span>
+                                已报价
+                            </span>
+                        </td>
+                        <td>
+                            <div class="contact-info">
+                                <span class="contact-name">赵总</span>
+                                <span class="contact-title">总经理</span>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="action-btns">
+                                <button class="btn-action btn-view"><i class="fas fa-eye" style="margin-right:3px;"></i>查看</button>
+                                <button class="btn-action btn-follow"><i class="fas fa-handshake" style="margin-right:3px;"></i>跟进</button>
+                            </div>
+                        </td>
+                    </tr>
+                    <!-- Row 4 -->
+                    <tr>
+                        <td><span class="customer-name">杭州智造科技公司</span></td>
+                        <td><span class="industry-tag">智能制造</span></td>
+                        <td><span class="budget-text">20-35万</span></td>
+                        <td><span class="date-text">2026-06-15</span></td>
+                        <td>
+                            <span class="status-badge status-new">
+                                <span class="dot"></span>
+                                新线索
+                            </span>
+                        </td>
+                        <td>
+                            <div class="contact-info">
+                                <span class="contact-name">陈经理</span>
+                                <span class="contact-title">项目部</span>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="action-btns">
+                                <button class="btn-action btn-view"><i class="fas fa-eye" style="margin-right:3px;"></i>查看</button>
+                                <button class="btn-action btn-follow"><i class="fas fa-handshake" style="margin-right:3px;"></i>跟进</button>
+                            </div>
+                        </td>
+                    </tr>
+                    <!-- Row 5 -->
+                    <tr>
+                        <td><span class="customer-name">广州时尚品牌集团</span></td>
+                        <td><span class="industry-tag">消费品</span></td>
+                        <td><span class="budget-text">30-50万</span></td>
+                        <td><span class="date-text">2026-06-14</span></td>
+                        <td>
+                            <span class="status-badge status-booked">
+                                <span class="dot"></span>
+                                已预约
+                            </span>
+                        </td>
+                        <td>
+                            <div class="contact-info">
+                                <span class="contact-name">刘董</span>
+                                <span class="contact-title">董事长</span>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="action-btns">
+                                <button class="btn-action btn-view"><i class="fas fa-eye" style="margin-right:3px;"></i>查看</button>
+                                <button class="btn-action btn-follow"><i class="fas fa-handshake" style="margin-right:3px;"></i>跟进</button>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Pagination -->
+        <div class="table-footer">
+            <div class="pagination-info">显示第 1-5 条，共 5 条线索</div>
+            <div class="pagination">
+                <button class="page-btn" disabled><i class="fas fa-chevron-left"></i></button>
+                <button class="page-btn active">1</button>
+                <button class="page-btn" disabled><i class="fas fa-chevron-right"></i></button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="page-footer">
+        &copy; 2026 Globus Events &middot; 万耀企龙 &middot; 展位AI智能推荐与动态定价系统 V1.1 &nbsp;|&nbsp; 本系统数据仅供演示用途
+    </div>
+
+</main>
+
+<script>
+// Hamburger menu toggle
+const hamburger = document.getElementById('hamburgerBtn');
+const sidebar = document.getElementById('sidebar');
+const overlay = document.getElementById('sidebarOverlay');
+
+function toggleSidebar() {
+    sidebar.classList.toggle('open');
+    overlay.classList.toggle('open');
+}
+
+hamburger.addEventListener('click', toggleSidebar);
+overlay.addEventListener('click', toggleSidebar);
+
+// Close sidebar on window resize back to desktop
+window.addEventListener('resize', () => {
+    if (window.innerWidth > 768) {
+        sidebar.classList.remove('open');
+        overlay.classList.remove('open');
+    }
+});
+
+// Sidebar item click — close sidebar on mobile
+document.querySelectorAll('.sidebar-item').forEach(item => {
+    item.addEventListener('click', function(e) {
+        document.querySelectorAll('.sidebar-item').forEach(i => i.classList.remove('active'));
+        this.classList.add('active');
+
+        if (window.innerWidth <= 768) {
+            setTimeout(() => {
+                sidebar.classList.remove('open');
+                overlay.classList.remove('open');
+            }, 150);
+        }
+    });
+});
+</script>
+
+</body>
+</html>

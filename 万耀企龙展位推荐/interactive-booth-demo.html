@@ -1,0 +1,1162 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>AI 展位规划与动态定价 Demo</title>
+  <style>
+    :root {
+      --bg: #f5f0e8;
+      --paper: rgba(255, 252, 245, .86);
+      --paper-strong: #fffaf0;
+      --ink: #17201a;
+      --muted: #6b6358;
+      --line: rgba(36, 48, 40, .16);
+      --line-strong: rgba(36, 48, 40, .28);
+      --green: #235c48;
+      --teal: #167f7a;
+      --blue: #315ddc;
+      --purple: #7446d8;
+      --orange: #df6b2f;
+      --red: #c94136;
+      --gold: #b9892d;
+      --cream: #fff7df;
+      --dark: #101813;
+      --shadow: 0 24px 70px rgba(26, 38, 31, .18);
+      --soft-shadow: 0 12px 34px rgba(26, 38, 31, .10);
+      --radius-xl: 26px;
+      --radius-lg: 18px;
+      --radius-md: 12px;
+      --font: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", "Microsoft YaHei", sans-serif;
+      --mono: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      color: var(--ink);
+      font-family: var(--font);
+      background:
+        radial-gradient(circle at 8% 8%, rgba(223, 107, 47, .22), transparent 28rem),
+        radial-gradient(circle at 90% 8%, rgba(22, 127, 122, .18), transparent 30rem),
+        radial-gradient(circle at 58% 95%, rgba(49, 93, 220, .12), transparent 34rem),
+        linear-gradient(135deg, #fbf3df 0%, #ece1c8 48%, #f8efe2 100%);
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      z-index: -1;
+      pointer-events: none;
+      background-image:
+        linear-gradient(rgba(23,32,26,.045) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(23,32,26,.045) 1px, transparent 1px);
+      background-size: 32px 32px;
+      mask-image: linear-gradient(to bottom, black, transparent 78%);
+    }
+
+    button, select, input, textarea { font: inherit; }
+    button { cursor: pointer; border: 0; }
+    .shell { width: min(1480px, calc(100% - 28px)); margin: 0 auto; padding: 16px 0 36px; }
+
+    .topbar {
+      position: sticky;
+      top: 12px;
+      z-index: 20;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 18px;
+      padding: 12px 14px;
+      border: 1px solid rgba(255,255,255,.58);
+      border-radius: 999px;
+      background: rgba(255, 250, 240, .78);
+      backdrop-filter: blur(18px);
+      box-shadow: var(--soft-shadow);
+    }
+
+    .brand { display: flex; align-items: center; gap: 12px; min-width: 300px; }
+    .brand-mark {
+      width: 38px;
+      height: 38px;
+      display: grid;
+      place-items: center;
+      border-radius: 14px;
+      color: #fff;
+      background: linear-gradient(135deg, var(--green), var(--teal));
+      box-shadow: 0 14px 28px rgba(35, 92, 72, .28);
+      font-weight: 900;
+    }
+    .brand-title { font-weight: 850; letter-spacing: -.04em; }
+    .brand-subtitle { color: var(--muted); font-size: 12px; margin-top: 1px; }
+    .top-actions { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; justify-content: flex-end; }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      padding: 8px 11px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      color: var(--muted);
+      background: rgba(255,255,255,.52);
+      font-size: 12px;
+      white-space: nowrap;
+    }
+    .pill strong { color: var(--ink); }
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      min-height: 38px;
+      padding: 9px 14px;
+      border-radius: 999px;
+      color: #fff;
+      background: var(--dark);
+      box-shadow: 0 12px 24px rgba(16, 24, 19, .18);
+      transition: transform .18s ease, box-shadow .18s ease, background .18s ease;
+    }
+    .btn:hover { transform: translateY(-1px); box-shadow: 0 16px 30px rgba(16, 24, 19, .24); }
+    .btn.secondary { color: var(--ink); background: rgba(255,255,255,.72); border: 1px solid var(--line); box-shadow: none; }
+    .btn.small { min-height: 32px; padding: 7px 10px; font-size: 12px; }
+
+    .hero {
+      margin: 18px 0;
+      display: grid;
+      grid-template-columns: minmax(0, 1.35fr) minmax(320px, .65fr);
+      gap: 18px;
+    }
+    .hero-card, .stat-card, .panel, .map-card, .assistant-card {
+      border: 1px solid rgba(255,255,255,.56);
+      border-radius: var(--radius-xl);
+      background: var(--paper);
+      box-shadow: var(--soft-shadow);
+      backdrop-filter: blur(16px);
+    }
+    .hero-card { padding: 28px; overflow: hidden; position: relative; }
+    .hero-card::after {
+      content: "";
+      position: absolute;
+      inset: auto -10% -42% 45%;
+      height: 270px;
+      border-radius: 999px;
+      background: radial-gradient(circle, rgba(22,127,122,.22), transparent 66%);
+      pointer-events: none;
+    }
+    h1 { margin: 0; max-width: 860px; font-size: clamp(32px, 5vw, 64px); line-height: .98; letter-spacing: -.07em; }
+    .lead { margin: 18px 0 0; max-width: 780px; color: #4d574f; font-size: 17px; line-height: 1.75; }
+    .hero-tags { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 22px; }
+    .hero-tag { padding: 8px 11px; border-radius: 999px; background: rgba(35,92,72,.10); color: var(--green); font-size: 12px; font-weight: 750; }
+
+    .stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .stat-card { padding: 18px; }
+    .stat-label { color: var(--muted); font-size: 12px; }
+    .stat-value { margin-top: 6px; font-size: 28px; line-height: 1; font-weight: 900; letter-spacing: -.05em; }
+    .stat-note { margin-top: 8px; color: var(--muted); font-size: 12px; }
+
+    .workspace {
+      display: grid;
+      grid-template-columns: 330px minmax(0, 1fr) 380px;
+      gap: 16px;
+      align-items: stretch;
+    }
+
+    .panel { padding: 16px; }
+    .panel.sticky { position: sticky; top: 86px; }
+    .panel-title { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 14px; }
+    .panel-title h2, .map-title h2, .assistant-title h2 { margin: 0; font-size: 16px; letter-spacing: -.03em; }
+    .panel-title p, .map-title p, .assistant-title p { margin: 4px 0 0; color: var(--muted); font-size: 12px; }
+    .group { padding: 14px 0; border-top: 1px solid var(--line); }
+    .group:first-of-type { border-top: 0; padding-top: 0; }
+    label { display: block; margin-bottom: 6px; color: #3a443d; font-size: 12px; font-weight: 800; }
+    select, input, textarea {
+      width: 100%;
+      border: 1px solid var(--line);
+      border-radius: 13px;
+      background: rgba(255,255,255,.72);
+      color: var(--ink);
+      padding: 10px 11px;
+      outline: none;
+      transition: border-color .18s ease, box-shadow .18s ease, background .18s ease;
+    }
+    select:focus, input:focus, textarea:focus { border-color: rgba(22,127,122,.55); box-shadow: 0 0 0 4px rgba(22,127,122,.12); background: #fff; }
+    .field { margin-bottom: 11px; }
+    .two { display: grid; grid-template-columns: 1fr 1fr; gap: 9px; }
+    .segmented { display: grid; gap: 8px; }
+    .chip-row { display: flex; flex-wrap: wrap; gap: 7px; }
+    .chip {
+      padding: 7px 9px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: rgba(255,255,255,.52);
+      color: var(--muted);
+      font-size: 12px;
+      transition: .18s ease;
+    }
+    .chip.active, .chip:hover { color: #fff; background: var(--green); border-color: var(--green); }
+
+    .map-card { overflow: hidden; display: flex; flex-direction: column; min-height: 100%; }
+    .map-title { display: flex; align-items: flex-start; justify-content: space-between; gap: 14px; padding: 16px 18px; border-bottom: 1px solid var(--line); }
+    .map-wrap { position: relative; background: radial-gradient(circle at 14% 10%, rgba(223,107,47,.10), transparent 24%), linear-gradient(180deg, rgba(255,255,255,.62), rgba(255,247,223,.74)); padding: 8px 10px 0; }
+    svg { width: 100%; height: auto; max-height: 500px; display: block; }
+    .legend { display: flex; flex-wrap: wrap; gap: 7px; padding: 8px 12px 11px; border-top: 1px solid rgba(36,48,40,.10); background: rgba(255,250,240,.62); }
+    .legend-item { display: inline-flex; align-items: center; gap: 6px; padding: 7px 9px; border-radius: 999px; background: rgba(255,255,255,.78); border: 1px solid rgba(36,48,40,.12); box-shadow: 0 6px 14px rgba(26,38,31,.05); font-size: 12px; color: var(--muted); }
+    .dot { width: 9px; height: 9px; border-radius: 99px; display: inline-block; }
+
+    .venue-floor { fill: rgba(255,255,255,.54); stroke: rgba(35,92,72,.30); stroke-width: 2; }
+    .restricted { fill: rgba(201,65,54,.12); stroke: rgba(201,65,54,.25); stroke-dasharray: 7 5; }
+    .aisle { stroke: rgba(22,127,122,.34); stroke-width: 34; stroke-linecap: round; }
+    .aisle-line { stroke: rgba(22,127,122,.9); stroke-width: 2; stroke-dasharray: 6 8; }
+    .facility { fill: rgba(49,93,220,.13); stroke: rgba(49,93,220,.42); stroke-width: 2; }
+    .facility-text { font-size: 13px; fill: #28427b; font-weight: 800; }
+    .entrance { fill: var(--orange); }
+    .booth { stroke: rgba(23,32,26,.48); stroke-width: 1; rx: 6; transition: opacity .15s ease, stroke-width .15s ease, filter .15s ease, transform .15s ease; cursor: pointer; }
+    .booth:hover { opacity: .92; stroke-width: 2.2; filter: drop-shadow(0 8px 14px rgba(20,30,24,.18)); }
+    .booth.selected { stroke: #111813; stroke-width: 3.2; filter: drop-shadow(0 12px 18px rgba(16,24,19,.22)); }
+    .booth.recommended { stroke: #ff6b2b; stroke-width: 4.2; filter: drop-shadow(0 0 16px rgba(223,107,47,.78)); }
+    .booth.sold { opacity: .35; cursor: not-allowed; }
+    .booth-label { fill: #121a15; font-size: 10px; font-weight: 900; pointer-events: none; }
+    .rec-halo { fill: rgba(255,107,43,.16); stroke: rgba(255,255,255,.88); stroke-width: 1.5; filter: drop-shadow(0 0 13px rgba(223,107,47,.62)); pointer-events: none; }
+    .rec-pin { fill: url(#recPinGradient); stroke: #fffaf0; stroke-width: 2; filter: drop-shadow(0 5px 10px rgba(223,107,47,.42)); pointer-events: none; }
+    .rec-pin-text { fill: #fff; font-size: 13px; font-weight: 950; text-anchor: middle; dominant-baseline: central; pointer-events: none; }
+    .heat { opacity: .26; filter: blur(.2px); }
+
+    .cards { display: grid; grid-template-columns: 1fr; gap: 10px; padding: 12px 14px 14px; border-top: 1px solid var(--line); background: linear-gradient(180deg, rgba(255,250,240,.42), rgba(255,255,255,.18)); align-items: stretch; }
+    .recommend-card {
+      position: relative;
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      align-items: start;
+      gap: 10px 14px;
+      overflow: hidden;
+      border: 1px solid rgba(36,48,40,.13);
+      border-radius: 20px;
+      background:
+        linear-gradient(135deg, rgba(255,255,255,.88), rgba(255,247,223,.64)),
+        radial-gradient(circle at 100% 0%, rgba(223,107,47,.13), transparent 34%);
+      padding: 13px 14px;
+      box-shadow: 0 10px 26px rgba(26,38,31,.07);
+      transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease, background .18s ease;
+    }
+    .recommend-card::before { content: ""; position: absolute; inset: 0 auto 0 0; width: 4px; background: linear-gradient(180deg, var(--orange), var(--gold)); opacity: .62; }
+    .recommend-card:hover { transform: translateY(-1px); box-shadow: 0 18px 36px rgba(26,38,31,.13); border-color: rgba(35,92,72,.28); }
+    .recommend-card.active { border-color: rgba(223,107,47,.72); box-shadow: 0 18px 40px rgba(223,107,47,.18); background: linear-gradient(135deg, rgba(255,251,244,.96), rgba(255,239,216,.78)); }
+    .card-kicker { display: flex; align-items: center; justify-content: space-between; gap: 8px; color: var(--muted); font-size: 12px; }
+    .rec-index { display: inline-flex; align-items: center; gap: 6px; padding: 5px 8px 5px 5px; border-radius: 999px; background: rgba(223,107,47,.11); color: #9c4c20; font-weight: 900; }
+    .rec-index i { width: 22px; height: 22px; display: inline-grid; place-items: center; border-radius: 999px; color: #fff; background: linear-gradient(135deg, var(--orange), var(--gold)); font-style: normal; box-shadow: 0 6px 12px rgba(223,107,47,.24); }
+    .card-title { margin-top: 8px; font-size: 19px; font-weight: 950; letter-spacing: -.045em; }
+    .price { padding-top: 4px; font-size: 25px; font-weight: 950; letter-spacing: -.055em; color: var(--green); text-align: right; white-space: nowrap; }
+    .metrics { grid-column: 1 / -1; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; margin: 0; }
+    .metric { padding: 9px 10px; border-radius: 14px; background: rgba(35,92,72,.075); border: 1px solid rgba(35,92,72,.08); }
+    .metric b { display: block; font-size: 16px; line-height: 1.1; }
+    .metric span { color: var(--muted); font-size: 11px; }
+    .reasons { grid-column: 1 / -1; margin: -1px 0 0; padding: 10px 12px 10px 28px; border-radius: 14px; background: rgba(255,255,255,.52); color: #48524b; font-size: 12px; line-height: 1.48; }
+
+    .detail { display: grid; gap: 12px; }
+    .detail-card { border: 1px solid var(--line); border-radius: 18px; background: rgba(255,255,255,.60); padding: 14px; }
+    .detail-head { display: flex; justify-content: space-between; gap: 12px; align-items: flex-start; }
+    .detail-id { font-size: 26px; font-weight: 950; letter-spacing: -.06em; }
+    .badge { display: inline-flex; align-items: center; padding: 5px 8px; border-radius: 999px; font-size: 11px; font-weight: 850; background: rgba(22,127,122,.12); color: var(--teal); }
+    .badge.warn { background: rgba(223,107,47,.13); color: #9c4c20; }
+    .badge.dark { background: rgba(16,24,19,.10); color: var(--dark); }
+    .detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 12px; }
+    .kv { padding: 10px; border-radius: 12px; background: rgba(255,247,223,.72); border: 1px solid rgba(185,137,45,.18); }
+    .kv span { display: block; color: var(--muted); font-size: 11px; }
+    .kv strong { display: block; margin-top: 4px; font-size: 14px; }
+    .factor { display: grid; grid-template-columns: 92px 1fr 48px; gap: 8px; align-items: center; margin: 8px 0; font-size: 12px; }
+    .bar { height: 8px; border-radius: 999px; background: rgba(23,32,26,.10); overflow: hidden; }
+    .bar > i { display: block; height: 100%; border-radius: 999px; background: linear-gradient(90deg, var(--teal), var(--orange)); }
+    .explain { color: #48524b; line-height: 1.7; font-size: 13px; }
+
+    .assistant-card { margin-top: 16px; overflow: hidden; }
+    .assistant-title { display: flex; justify-content: space-between; gap: 12px; padding: 16px 18px; border-bottom: 1px solid var(--line); }
+    .assistant-body { display: grid; grid-template-columns: minmax(0, .8fr) minmax(0, 1.2fr); gap: 16px; padding: 16px; }
+    .quick { display: flex; flex-wrap: wrap; gap: 7px; margin: 10px 0; }
+    .chat-box { min-height: 220px; max-height: 420px; overflow: auto; border: 1px solid var(--line); border-radius: 18px; background: rgba(255,255,255,.55); padding: 12px; }
+    .msg { margin: 0 0 10px; padding: 11px 13px; border-radius: 15px; line-height: 1.68; font-size: 13px; white-space: normal; }
+    .msg.user { margin-left: 40px; background: rgba(49,93,220,.10); }
+    .msg.ai { margin-right: 18px; background: linear-gradient(135deg, rgba(35,92,72,.10), rgba(255,247,223,.58)); border: 1px solid rgba(35,92,72,.10); }
+    .msg h3 { margin: 10px 0 6px; font-size: 15px; line-height: 1.35; letter-spacing: -.02em; }
+    .msg h3:first-child { margin-top: 0; }
+    .msg p { margin: 6px 0; }
+    .msg ul, .msg ol { margin: 6px 0 8px; padding-left: 20px; }
+    .msg li { margin: 4px 0; }
+    .msg blockquote { margin: 8px 0; padding: 8px 10px; border-left: 3px solid var(--orange); border-radius: 10px; background: rgba(255,255,255,.58); color: #3f4b43; }
+    .msg code { padding: 1px 4px; border-radius: 5px; background: rgba(16,24,19,.08); font-family: var(--mono); font-size: 12px; }
+    .msg hr { border: 0; border-top: 1px solid var(--line); margin: 10px 0; }
+    .assistant-controls { display: flex; gap: 8px; margin-top: 10px; }
+    .assistant-controls textarea { min-height: 54px; resize: vertical; }
+    .api-settings { display: grid; grid-template-columns: 1.1fr .8fr .7fr auto; gap: 8px; margin-top: 10px; }
+    .api-settings input { padding: 8px 10px; font-size: 12px; }
+
+    .toast {
+      position: fixed;
+      right: 18px;
+      bottom: 18px;
+      z-index: 50;
+      min-width: 280px;
+      max-width: 420px;
+      padding: 14px 16px;
+      border-radius: 18px;
+      color: #fff;
+      background: rgba(16,24,19,.92);
+      box-shadow: var(--shadow);
+      transform: translateY(20px);
+      opacity: 0;
+      pointer-events: none;
+      transition: .2s ease;
+      line-height: 1.55;
+    }
+    .toast.show { transform: translateY(0); opacity: 1; }
+
+    @media (max-width: 1180px) {
+      .workspace { grid-template-columns: 310px minmax(0, 1fr); }
+      .right-col { grid-column: 1 / -1; }
+      .panel.sticky { position: static; }
+    }
+    @media (max-width: 820px) {
+      .topbar, .hero, .workspace, .assistant-body, .api-settings { grid-template-columns: 1fr; }
+      .topbar { border-radius: 24px; align-items: flex-start; flex-direction: column; }
+      .brand { min-width: auto; }
+      .cards { grid-template-columns: 1fr; }
+      .recommend-card { grid-template-columns: 1fr; }
+      .price { text-align: left; }
+      .metrics { grid-template-columns: 1fr; }
+      .stat-grid { grid-template-columns: 1fr 1fr; }
+      h1 { font-size: 38px; }
+    }
+  </style>
+</head>
+<body>
+  <main class="shell">
+    <header class="topbar">
+      <div class="brand">
+        <div class="brand-mark">AI</div>
+        <div>
+          <div class="brand-title">AI 展位规划与动态定价 Demo</div>
+          <div class="brand-subtitle">预设场馆图 · 模拟展位生成 · 动态定价 · LLM 推荐助手</div>
+        </div>
+      </div>
+      <div class="top-actions">
+        <span class="pill"><strong>数据边界</strong> 全部展位/价格/热力为模拟</span>
+        <button class="btn secondary small" id="copyBriefBtn">复制演示话术</button>
+        <button class="btn small" id="regenerateTopBtn">重新生成布局</button>
+      </div>
+    </header>
+
+    <section class="hero">
+      <div class="hero-card">
+        <h1>把场馆平面图变成可解释的展位定价与销售推荐。</h1>
+        <p class="lead">选择场馆、行业和展区策略后，系统会在预设平面图上生成模拟展位分布，并根据位置、人流、行业热度、竞品邻近、历史售卖速度和库存紧张度计算动态价格。销售再输入展商需求，即可获得高曝光、最佳匹配和性价比三套推荐方案。</p>
+        <div class="hero-tags">
+          <span class="hero-tag">真实业务：导入/预设真实场馆图</span>
+          <span class="hero-tag">Demo 阶段：使用假场馆与模拟数据</span>
+          <span class="hero-tag">LLM 负责解释与销售话术</span>
+          <span class="hero-tag">规则引擎负责可控定价</span>
+        </div>
+      </div>
+      <div class="stat-grid">
+        <div class="stat-card"><div class="stat-label">当前场馆</div><div class="stat-value" id="statVenue">-</div><div class="stat-note">可切换预设平面结构</div></div>
+        <div class="stat-card"><div class="stat-label">模拟展位</div><div class="stat-value" id="statBooths">0</div><div class="stat-note">按当前策略生成</div></div>
+        <div class="stat-card"><div class="stat-label">均价</div><div class="stat-value" id="statAvg">¥0</div><div class="stat-note">动态建议价</div></div>
+        <div class="stat-card"><div class="stat-label">热区溢价</div><div class="stat-value" id="statPremium">0%</div><div class="stat-note">相对基础价均值</div></div>
+      </div>
+    </section>
+
+    <section class="workspace">
+      <aside class="panel sticky">
+        <div class="panel-title">
+          <div><h2>控制台</h2><p>选择场馆、行业、规划策略和模拟业务变量。</p></div>
+        </div>
+
+        <div class="group">
+          <div class="field"><label for="venueSelect">场馆</label><select id="venueSelect"></select></div>
+          <div class="field"><label for="industrySelect">会展行业</label><select id="industrySelect"></select></div>
+          <div class="field"><label for="strategySelect">展区规划策略</label><select id="strategySelect"></select></div>
+          <button class="btn" style="width:100%" id="generateBtn">生成展位布局</button>
+        </div>
+
+        <div class="group">
+          <div class="panel-title" style="margin-bottom:8px"><div><h2>历史与竞争模拟</h2><p>用于影响热区和动态定价。</p></div></div>
+          <div class="two">
+            <div class="field"><label for="competitionSelect">竞品密度</label><select id="competitionSelect"><option value="low">低</option><option value="medium" selected>中</option><option value="high">高</option></select></div>
+            <div class="field"><label for="historySelect">历史售卖</label><select id="historySelect"><option value="slow">慢</option><option value="medium" selected>中</option><option value="fast">快</option></select></div>
+          </div>
+          <div class="two">
+            <div class="field"><label for="heatSelect">观众热力</label><select id="heatSelect"><option value="even">均匀</option><option value="entrance" selected>主入口集中</option><option value="aisle">主通道集中</option><option value="event">活动区集中</option></select></div>
+            <div class="field"><label for="inventorySelect">库存紧张</label><select id="inventorySelect"><option value="loose">充足</option><option value="normal" selected>正常</option><option value="tight">紧张</option></select></div>
+          </div>
+          <div class="field"><label for="anchorSelect">头部品牌数量</label><select id="anchorSelect"><option value="few">少</option><option value="medium" selected>中</option><option value="many">多</option></select></div>
+        </div>
+
+        <div class="group">
+          <div class="panel-title" style="margin-bottom:8px"><div><h2>展商需求</h2><p>推荐结果会基于这里变化。</p></div></div>
+          <div class="chip-row" id="presetChips"></div>
+          <div class="field"><label for="exhibitorName">展商名称</label><input id="exhibitorName" /></div>
+          <div class="two">
+            <div class="field"><label for="exhibitorType">展商类型</label><select id="exhibitorType"><option>头部品牌</option><option>新锐品牌</option><option>供应链企业</option><option>海外品牌</option></select></div>
+            <div class="field"><label for="categorySelect">所属品类</label><select id="categorySelect"></select></div>
+          </div>
+          <div class="two">
+            <div class="field"><label for="budgetSelect">预算</label><select id="budgetSelect"><option value="100000">5-10 万</option><option value="200000" selected>10-20 万</option><option value="500000">20-50 万</option><option value="900000">50 万以上</option></select></div>
+            <div class="field"><label for="areaSelect">期望面积</label><select id="areaSelect"><option value="9">9㎡</option><option value="18">18㎡</option><option value="36" selected>36㎡</option><option value="72">72㎡</option><option value="100">100㎡以上</option></select></div>
+          </div>
+          <div class="field"><label for="goalSelect">参展目标</label><select id="goalSelect"><option>品牌曝光</option><option selected>渠道招商</option><option>新品发布</option><option>B 端采购</option></select></div>
+          <div class="field"><label for="rivalSelect">竞品邻近偏好</label><select id="rivalSelect"><option>介意竞品邻近</option><option selected>不介意</option><option>希望靠近同类展商</option></select></div>
+          <button class="btn" style="width:100%" id="recommendBtn">为该展商推荐展位</button>
+        </div>
+      </aside>
+
+      <section class="map-card">
+        <div class="map-title">
+          <div><h2>预设场馆平面图与模拟展位</h2><p id="mapSubtitle">点击任一展位查看动态定价构成。</p></div>
+          <div class="top-actions"><span class="badge dark" id="currentStrategyBadge">-</span><span class="badge warn">非真实场馆图</span></div>
+        </div>
+        <div class="map-wrap">
+          <svg id="venueSvg" viewBox="0 0 1200 720" role="img" aria-label="模拟场馆平面图"></svg>
+          <div class="legend" id="legend"></div>
+        </div>
+        <div class="cards" id="recommendCards"></div>
+      </section>
+
+      <aside class="right-col panel sticky">
+        <div class="panel-title"><div><h2>展位详情与定价解释</h2><p>价格由规则引擎计算，LLM 只做解释和销售辅助。</p></div></div>
+        <div class="detail" id="detailPanel"></div>
+      </aside>
+    </section>
+
+    <section class="assistant-card">
+      <div class="assistant-title">
+        <div><h2>LLM 展位推荐助手</h2><p>可配置 OpenAI-compatible 接口；未配置时使用本地兜底话术，保证演示不中断。</p></div>
+        <span class="badge" id="assistantStatus">模板兜底模式</span>
+      </div>
+      <div class="assistant-body">
+        <div>
+          <div class="field"><label>快捷问题</label><div class="quick" id="quickQuestions"></div></div>
+          <div class="api-settings">
+            <input id="apiEndpoint" placeholder="API Endpoint，可填 https://api.senseaudio.cn 或完整 /v1/chat/completions" value="https://api.senseaudio.cn" />
+            <input id="apiKey" placeholder="API Key，可留空走模板" type="password" />
+            <input id="apiModel" placeholder="Model" value="senseaudio-s2-lite" />
+            <button class="btn secondary small" id="saveApiBtn">保存</button>
+          </div>
+          <p class="explain" style="margin:10px 0 0">安全提示：静态 HTML 中填写 Key 只适合本地演示，正式产品应走后端代理。</p>
+        </div>
+        <div>
+          <div class="chat-box" id="chatBox"></div>
+          <div class="assistant-controls">
+            <textarea id="assistantInput" placeholder="例如：如果客户觉得这个展位太贵，销售该怎么解释？"></textarea>
+            <button class="btn" id="askBtn">提问</button>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <div class="toast" id="toast"></div>
+
+  <script>
+    const CNY = new Intl.NumberFormat('zh-CN', { style: 'currency', currency: 'CNY', maximumFractionDigits: 0 });
+
+    const venues = [
+      {
+        id: 'venue_a', name: '国际会展中心 A 馆', city: '上海', cityCost: 1.22, shape: 'rect', width: 1200, height: 720,
+        floor: { x: 52, y: 54, w: 1096, h: 612 },
+        entrances: [{ x: 76, y: 360, label: '主入口' }],
+        aisles: [{ x1: 90, y1: 360, x2: 1110, y2: 360 }, { x1: 620, y1: 90, x2: 620, y2: 635 }],
+        facilities: [{ x: 920, y: 130, w: 150, h: 72, type: '论坛区' }, { x: 940, y: 550, w: 150, h: 70, type: '餐饮区' }],
+        restricted: []
+      },
+      {
+        id: 'venue_b', name: '科技博览中心 B 馆', city: '武汉', cityCost: 0.92, shape: 'l', width: 1200, height: 720,
+        floorPath: 'M70 70 H760 V250 H1125 V655 H70 Z',
+        entrances: [{ x: 90, y: 620, label: '主入口' }, { x: 1120, y: 380, label: '东入口' }],
+        aisles: [{ x1: 100, y1: 610, x2: 720, y2: 330 }, { x1: 720, y1: 330, x2: 1100, y2: 380 }],
+        facilities: [{ x: 825, y: 500, w: 180, h: 78, type: '发布区' }, { x: 390, y: 105, w: 150, h: 66, type: '洽谈区' }],
+        restricted: [{ x: 780, y: 82, w: 320, h: 135, label: '设备区' }]
+      },
+      {
+        id: 'venue_c', name: '城市展览中心 C 馆', city: '成都', cityCost: 1.02, shape: 'multi', width: 1200, height: 720,
+        floor: { x: 60, y: 70, w: 1080, h: 580 },
+        entrances: [{ x: 90, y: 120, label: '北入口' }, { x: 90, y: 610, label: '南入口' }, { x: 1120, y: 360, label: 'VIP' }],
+        aisles: [{ x1: 100, y1: 120, x2: 1110, y2: 360 }, { x1: 100, y1: 610, x2: 1110, y2: 360 }, { x1: 330, y1: 110, x2: 330, y2: 620 }],
+        facilities: [{ x: 500, y: 290, w: 190, h: 90, type: '中心活动区' }, { x: 830, y: 110, w: 160, h: 72, type: '媒体区' }],
+        restricted: []
+      }
+    ];
+
+    const industries = [
+      { id: 'pet', name: '宠物行业展', zones: ['宠物食品', '宠物用品', '医疗健康', '智能设备', '供应链'], hot: ['宠物食品', '宠物用品'], colors: ['#f2b84b','#64b574','#5fb4d9','#9f80e7','#a88b67'], base: 3200, audience: '经销商、宠物店、消费者、品牌方' },
+      { id: 'food', name: '餐饮加盟展', zones: ['餐饮品牌', '食材供应', '厨房设备', '饮品甜品', '加盟服务'], hot: ['餐饮品牌','饮品甜品'], colors: ['#e8794f','#deb14a','#5cae8b','#75aed8','#a77ce8'], base: 2800, audience: '加盟商、餐饮老板、酒店采购、供应链买家' },
+      { id: 'building', name: '建材家居展', zones: ['地材', '门窗', '卫浴', '定制家居', '智能家居'], hot: ['定制家居','智能家居'], colors: ['#b18a5c','#6f9b75','#5da0a8','#d79b4c','#7f82d8'], base: 2600, audience: '工程商、设计师、经销商、地产采购' },
+      { id: 'ai', name: '人工智能展', zones: ['大模型', '机器人', '智能硬件', '行业应用', '投资服务'], hot: ['大模型','机器人'], colors: ['#496de2','#39a7a1','#8c63d9','#de8d3f','#64748b'], base: 3600, audience: '企业客户、投资机构、开发者、渠道伙伴' }
+    ];
+
+    const strategies = [
+      { id: 'category', name: '按品类分区' },
+      { id: 'main_aisle', name: '主通道优先' },
+      { id: 'anchor', name: '头部品牌带动' },
+      { id: 'balanced', name: '性价比均衡' }
+    ];
+
+    const presets = [
+      { id: 'leader', label: '头部品牌', name: '宠鲜粮头部品牌', type: '头部品牌', category: '宠物食品', budget: 900000, area: 72, goal: '品牌曝光', rival: '不介意' },
+      { id: 'growth', label: '新锐品牌', name: '灵感爪智能用品', type: '新锐品牌', category: '智能设备', budget: 200000, area: 36, goal: '渠道招商', rival: '希望靠近同类展商' },
+      { id: 'supply', label: '供应链', name: '宠食包装供应链企业', type: '供应链企业', category: '供应链', budget: 100000, area: 18, goal: 'B 端采购', rival: '介意竞品邻近' }
+    ];
+
+    const state = {
+      venue: venues[0], industry: industries[0], strategy: strategies[1], booths: [], selected: null, recommendations: [], activeRecommendation: null
+    };
+
+    const $ = (id) => document.getElementById(id);
+    const svg = $('venueSvg');
+
+    function init() {
+      fillSelect($('venueSelect'), venues, 'name');
+      fillSelect($('industrySelect'), industries, 'name');
+      fillSelect($('strategySelect'), strategies, 'name');
+      renderPresetChips();
+      syncCategoryOptions();
+      loadApiSettings();
+      bindEvents();
+      applyPreset('growth');
+      generateAndRender();
+      renderAssistantIntro();
+      renderQuickQuestions();
+    }
+
+    function fillSelect(el, items, key) {
+      el.innerHTML = items.map(item => `<option value="${item.id}">${item[key]}</option>`).join('');
+    }
+
+    function bindEvents() {
+      $('venueSelect').addEventListener('change', () => { state.venue = venues.find(v => v.id === $('venueSelect').value); generateAndRender(); });
+      $('industrySelect').addEventListener('change', () => { state.industry = industries.find(i => i.id === $('industrySelect').value); syncCategoryOptions(); generateAndRender(); });
+      $('strategySelect').addEventListener('change', () => { state.strategy = strategies.find(s => s.id === $('strategySelect').value); generateAndRender(); });
+      ['competitionSelect','historySelect','heatSelect','inventorySelect','anchorSelect'].forEach(id => $(id).addEventListener('change', refreshMarketAndRecommendations));
+      ['exhibitorName','exhibitorType','categorySelect','budgetSelect','areaSelect','goalSelect','rivalSelect'].forEach(id => $(id).addEventListener('change', refreshRecommendations));
+      $('generateBtn').addEventListener('click', generateAndRender);
+      $('regenerateTopBtn').addEventListener('click', generateAndRender);
+      $('recommendBtn').addEventListener('click', () => { recommend(); toast('已基于当前展商需求生成 3 套模拟推荐方案。'); });
+      $('copyBriefBtn').addEventListener('click', copyBrief);
+      $('askBtn').addEventListener('click', askAssistant);
+      $('saveApiBtn').addEventListener('click', saveApiSettings);
+    }
+
+    function syncCategoryOptions() {
+      const old = $('categorySelect').value;
+      $('categorySelect').innerHTML = state.industry.zones.map(z => `<option>${z}</option>`).join('');
+      if (state.industry.zones.includes(old)) $('categorySelect').value = old;
+    }
+
+    function renderPresetChips() {
+      $('presetChips').innerHTML = presets.map(p => `<button class="chip" data-preset="${p.id}">${p.label}</button>`).join('');
+      $('presetChips').querySelectorAll('button').forEach(btn => btn.addEventListener('click', () => applyPreset(btn.dataset.preset)));
+    }
+
+    function applyPreset(id) {
+      const p = presets.find(x => x.id === id);
+      $('exhibitorName').value = p.name;
+      $('exhibitorType').value = p.type;
+      const category = state.industry.zones.includes(p.category) ? p.category : state.industry.zones[0];
+      $('categorySelect').value = category;
+      $('budgetSelect').value = String(p.budget);
+      $('areaSelect').value = String(p.area);
+      $('goalSelect').value = p.goal;
+      $('rivalSelect').value = p.rival;
+      document.querySelectorAll('[data-preset]').forEach(b => b.classList.toggle('active', b.dataset.preset === id));
+      recommend();
+    }
+
+    function getSim() {
+      return {
+        competition: $('competitionSelect').value,
+        history: $('historySelect').value,
+        heat: $('heatSelect').value,
+        inventory: $('inventorySelect').value,
+        anchors: $('anchorSelect').value
+      };
+    }
+
+    function generateAndRender() {
+      state.booths = generateBooths(state.venue, state.industry, state.strategy, getSim());
+      state.selected = state.booths.find(b => b.status === 'available') || state.booths[0];
+      renderMap();
+      recommend(false);
+      renderStats();
+      renderDetail();
+      $('currentStrategyBadge').textContent = state.strategy.name;
+      $('mapSubtitle').textContent = `${state.venue.name} · ${state.industry.name} · ${state.strategy.name}`;
+    }
+
+    function refreshRecommendations() {
+      recommend(false);
+      renderDetail();
+      renderMap();
+    }
+
+    function refreshMarketAndRecommendations() {
+      const sim = getSim();
+      state.booths = state.booths.map(booth => refreshBoothMarket(booth, state.venue, state.industry, sim));
+      if (state.selected) state.selected = state.booths.find(b => b.id === state.selected.id) || state.selected;
+      recommend(false);
+      renderStats();
+      renderDetail();
+      renderMap();
+    }
+
+    function refreshBoothMarket(booth, venue, industry, sim) {
+      const positionScore = calcPositionScore(venue, booth.x, booth.y, sim);
+      const trafficScore = clamp(Math.round(positionScore + heatBonus(venue, booth.x, booth.y, sim) + Math.random() * 8 - 3), 25, 99);
+      const historyScore = historyScoreFor(sim, positionScore);
+      const competitionScore = competitionScoreFor(sim, state.strategy, booth.zone, industry);
+      const locationGrade = grade(positionScore);
+      const refreshed = { ...booth, locationGrade, trafficScore, historyScore, competitionScore };
+      Object.assign(refreshed, calculatePrice(refreshed, industry, sim, venue));
+      return refreshed;
+    }
+
+    function generateBooths(venue, industry, strategy, sim) {
+      const booths = [];
+      const floor = venue.floor || { x: 70, y: 70, w: 1055, h: 585 };
+      let xStart = floor.x + 52, yStart = floor.y + 70;
+      let maxX = floor.x + floor.w - 92, maxY = floor.y + floor.h - 80;
+      let idNum = 1;
+      const rows = venue.shape === 'l' ? 6 : 7;
+      const cols = venue.shape === 'multi' ? 10 : 11;
+      const cellW = Math.floor((maxX - xStart) / cols);
+      const cellH = Math.floor((maxY - yStart) / rows);
+      for (let r = 0; r < rows; r++) {
+        for (let c = 0; c < cols; c++) {
+          if (venue.shape === 'l' && r < 2 && c > 6) continue;
+          if (Math.random() < 0.025) continue;
+          const zoneIndex = zoneForCell(r, c, rows, cols, strategy, industry);
+          const sizeRoll = Math.random();
+          let targetArea = sizeRoll > .88 ? 72 : sizeRoll > .58 ? 36 : sizeRoll > .24 ? 18 : 9;
+          if (strategy.id === 'anchor' && isNearFacility(venue, xStart + c * cellW, yStart + r * cellH)) targetArea = Math.max(targetArea, 36);
+          const x = xStart + c * cellW + (Math.random() * 4 - 2);
+          const y = yStart + r * cellH + (Math.random() * 4 - 2);
+          const booth = buildFittingBooth(targetArea, booths, venue, industry, strategy, sim, zoneIndex, x, y, cellW, cellH, maxX, maxY, idNum);
+          if (!booth) continue;
+          booths.push(booth);
+          idNum++;
+        }
+      }
+
+      const fillStepX = cellW * .52;
+      const fillStepY = cellH * .52;
+      for (let y = yStart + cellH * .18; y < maxY && booths.length < 125; y += fillStepY) {
+        for (let x = xStart + cellW * .18; x < maxX && booths.length < 125; x += fillStepX) {
+          if (Math.random() < 0.18) continue;
+          const c = clamp(Math.floor((x - xStart) / cellW), 0, cols - 1);
+          const r = clamp(Math.floor((y - yStart) / cellH), 0, rows - 1);
+          if (venue.shape === 'l' && r < 2 && c > 6) continue;
+          const zoneIndex = zoneForCell(r, c, rows, cols, strategy, industry);
+          const targetArea = Math.random() > .64 ? 18 : 9;
+          const booth = buildFittingBooth(targetArea, booths, venue, industry, strategy, sim, zoneIndex, x, y, cellW, cellH, maxX, maxY, idNum);
+          if (!booth) continue;
+          booths.push(booth);
+          idNum++;
+        }
+      }
+      return booths.slice(0, 125);
+    }
+
+    function buildFittingBooth(targetArea, booths, venue, industry, strategy, sim, zoneIndex, x, y, cellW, cellH, maxX, maxY, idNum) {
+      const area = chooseFittingArea(targetArea, booths, venue, x, y, cellW, cellH, maxX, maxY);
+      if (!area) return null;
+      const zone = industry.zones[zoneIndex];
+      const { w, h } = boothDimensions(area, cellW, cellH);
+      const positionScore = calcPositionScore(venue, x, y, sim);
+      const trafficScore = clamp(Math.round(positionScore + heatBonus(venue, x, y, sim) + Math.random() * 12 - 4), 25, 99);
+      const historyScore = historyScoreFor(sim, positionScore);
+      const competitionScore = competitionScoreFor(sim, strategy, zone, industry);
+      const type = boothType(area, positionScore);
+      const locationGrade = grade(positionScore);
+      const status = Math.random() < (sim.inventory === 'tight' ? .20 : sim.inventory === 'loose' ? .07 : .12) ? 'sold' : 'available';
+      const booth = { id: `${venue.id.split('_')[1].toUpperCase()}-${String(idNum).padStart(3,'0')}`, x, y, w, h, area, zone, zoneIndex, type, locationGrade, trafficScore, historyScore, competitionScore, status };
+      Object.assign(booth, calculatePrice(booth, industry, sim, venue));
+      return booth;
+    }
+
+    function chooseFittingArea(targetArea, booths, venue, x, y, cellW, cellH, maxX, maxY) {
+      const areas = [72, 36, 18, 9].filter(area => area <= targetArea);
+      for (const area of areas) {
+        const { w, h } = boothDimensions(area, cellW, cellH);
+        if (x + w > maxX || y + h > maxY) continue;
+        if (intersectsVenueLayout(venue, x, y, w, h)) continue;
+        if (intersectsBooth(booths, x, y, w, h)) continue;
+        return area;
+      }
+      return null;
+    }
+
+    function boothDimensions(area, cellW, cellH) {
+      const baseVisualArea = cellW * cellH * .36;
+      const visualArea = baseVisualArea * (area / 9);
+      const aspect = area >= 72 ? 2.2 : area >= 36 ? 1.35 : area >= 18 ? 1.8 : 1.2;
+      return {
+        w: Math.sqrt(visualArea * aspect),
+        h: Math.sqrt(visualArea / aspect)
+      };
+    }
+
+    function zoneForCell(r, c, rows, cols, strategy, industry) {
+      if (strategy.id === 'category') return Math.min(industry.zones.length - 1, Math.floor(c / Math.ceil(cols / industry.zones.length)));
+      if (strategy.id === 'main_aisle') return Math.min(industry.zones.length - 1, Math.floor(r / Math.ceil(rows / industry.zones.length)));
+      if (strategy.id === 'anchor') return (r + c) % industry.zones.length;
+      return Math.floor(Math.random() * industry.zones.length);
+    }
+
+    function calcPositionScore(venue, x, y, sim) {
+      const entranceMin = Math.min(...venue.entrances.map(e => dist(x, y, e.x, e.y)));
+      const aisleMin = Math.min(...venue.aisles.map(a => pointLineDistance(x, y, a.x1, a.y1, a.x2, a.y2)));
+      const facilityMin = Math.min(...venue.facilities.map(f => dist(x, y, f.x + f.w / 2, f.y + f.h / 2)));
+      let score = 100 - entranceMin / 11 - aisleMin / 3.8 - facilityMin / 18;
+      if (sim.heat === 'entrance') score += Math.max(0, 18 - entranceMin / 22);
+      if (sim.heat === 'aisle') score += Math.max(0, 18 - aisleMin / 4);
+      if (sim.heat === 'event') score += Math.max(0, 18 - facilityMin / 18);
+      return clamp(Math.round(score), 20, 98);
+    }
+
+    function heatBonus(venue, x, y, sim) {
+      if (sim.anchors === 'many' && isNearFacility(venue, x, y)) return 10;
+      if (sim.anchors === 'few') return -2;
+      return 3;
+    }
+
+    function historyScoreFor(sim, positionScore) {
+      const base = sim.history === 'fast' ? 82 : sim.history === 'slow' ? 52 : 68;
+      return clamp(Math.round(base + positionScore * .18 + Math.random() * 10 - 4), 20, 99);
+    }
+
+    function competitionScoreFor(sim, strategy, zone, industry) {
+      let base = sim.competition === 'high' ? 82 : sim.competition === 'low' ? 40 : 62;
+      if (industry.hot.includes(zone)) base += 8;
+      if (strategy.id === 'category') base += 7;
+      return clamp(Math.round(base + Math.random() * 12 - 6), 15, 99);
+    }
+
+    function boothType(area, pos) {
+      if (area >= 72) return '岛型展位';
+      if (area >= 36 && pos > 78) return '双开口展位';
+      if (area >= 18 && pos > 62) return '角位';
+      return '标准展位';
+    }
+
+    function grade(score) { return score > 88 ? 'S' : score > 74 ? 'A' : score > 56 ? 'B' : 'C'; }
+
+    function calculatePrice(booth, industry, sim, venue = state.venue) {
+      const typeFactor = booth.type.includes('岛型') ? 1.45 : booth.type.includes('双开口') ? 1.22 : booth.type.includes('角位') ? 1.12 : 1;
+      const cityCost = venue.cityCost || 1;
+      const baseUnitPrice = Math.round(industry.base * cityCost);
+      const base = booth.area * baseUnitPrice * typeFactor;
+      const position = { S: 1.24, A: 1.14, B: 1.0, C: .88 }[booth.locationGrade];
+      const industryHeat = industry.hot.includes(booth.zone) ? 1.10 : 1.0;
+      const traffic = booth.trafficScore > 85 ? 1.12 : booth.trafficScore > 70 ? 1.05 : booth.trafficScore < 45 ? .92 : 1;
+      const history = sim.history === 'fast' ? 1.10 : sim.history === 'slow' ? .96 : 1.02;
+      const competition = sim.competition === 'high' ? (booth.competitionScore > 75 ? 1.06 : .98) : sim.competition === 'low' ? .98 : 1.02;
+      const inventory = sim.inventory === 'tight' ? 1.12 : sim.inventory === 'loose' ? .96 : 1.02;
+      const anchor = sim.anchors === 'many' && booth.trafficScore > 80 ? 1.08 : sim.anchors === 'few' ? .98 : 1.02;
+      const dynamic = Math.round(base * position * industryHeat * traffic * history * competition * inventory * anchor / 1000) * 1000;
+      return {
+        basePrice: Math.round(base / 1000) * 1000,
+        dynamicPrice: dynamic,
+        baseParts: { industryUnit: industry.base, city: venue.city || '模拟城市', cityCost, baseUnitPrice, typeFactor },
+        factors: { position, industryHeat, traffic, history, competition, inventory, anchor }
+      };
+    }
+
+    function renderMap() {
+      const venue = state.venue;
+      svg.setAttribute('viewBox', `0 0 ${venue.width} ${venue.height}`);
+      const floorMarkup = venue.floorPath
+        ? `<path class="venue-floor" d="${venue.floorPath}"/>`
+        : `<rect class="venue-floor" x="${venue.floor.x}" y="${venue.floor.y}" width="${venue.floor.w}" height="${venue.floor.h}" rx="28"/>`;
+      const heatMarkup = renderHeat();
+      const restrictedMarkup = (venue.restricted || []).map(r => `<g><rect class="restricted" x="${r.x}" y="${r.y}" width="${r.w}" height="${r.h}" rx="16"/><text x="${r.x+18}" y="${r.y+38}" class="facility-text">${r.label}</text></g>`).join('');
+      const aisleMarkup = venue.aisles.map(a => `<line class="aisle" x1="${a.x1}" y1="${a.y1}" x2="${a.x2}" y2="${a.y2}"/><line class="aisle-line" x1="${a.x1}" y1="${a.y1}" x2="${a.x2}" y2="${a.y2}"/>`).join('');
+      const facilityMarkup = venue.facilities.map(f => `<g><rect class="facility" x="${f.x}" y="${f.y}" width="${f.w}" height="${f.h}" rx="18"/><text x="${f.x+16}" y="${f.y+42}" class="facility-text">${f.type}</text></g>`).join('');
+      const entranceMarkup = venue.entrances.map(e => `<g><circle class="entrance" cx="${e.x}" cy="${e.y}" r="12"/><text x="${e.x+16}" y="${e.y+5}" class="facility-text">${e.label}</text></g>`).join('');
+      const markerDefs = `<defs><linearGradient id="recPinGradient" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#ff7a35"/><stop offset="100%" stop-color="#b9892d"/></linearGradient></defs>`;
+      const boothMarkup = state.booths.map(b => {
+        const color = b.status === 'sold' ? '#9ca3af' : state.industry.colors[b.zoneIndex % state.industry.colors.length];
+        const recIndex = state.recommendations.findIndex(r => r.id === b.id);
+        const cls = ['booth', b.status === 'sold' ? 'sold' : '', state.selected?.id === b.id ? 'selected' : '', recIndex >= 0 ? 'recommended' : ''].filter(Boolean).join(' ');
+        const pin = recIndex >= 0 ? `<circle class="rec-halo" cx="${b.x + b.w - 8}" cy="${b.y + 8}" r="18"/><circle class="rec-pin" cx="${b.x + b.w - 8}" cy="${b.y + 8}" r="12"/><text class="rec-pin-text" x="${b.x + b.w - 8}" y="${b.y + 8}">${recIndex + 1}</text>` : '';
+        return `<g data-booth="${b.id}"><rect class="${cls}" x="${b.x.toFixed(1)}" y="${b.y.toFixed(1)}" width="${b.w.toFixed(1)}" height="${b.h.toFixed(1)}" fill="${color}"/><text class="booth-label" x="${b.x+6}" y="${b.y+15}">${b.id}</text>${pin}</g>`;
+      }).join('');
+      svg.innerHTML = `${markerDefs}${heatMarkup}${floorMarkup}${aisleMarkup}${restrictedMarkup}${facilityMarkup}${entranceMarkup}${boothMarkup}`;
+      svg.querySelectorAll('[data-booth]').forEach(g => g.addEventListener('click', () => selectBooth(g.dataset.booth)));
+      renderLegend();
+    }
+
+    function renderHeat() {
+      const sim = getSim();
+      const venue = state.venue;
+      const points = [];
+      if (sim.heat === 'entrance') points.push(...venue.entrances.map(e => [e.x, e.y, 155, '#df6b2f']));
+      if (sim.heat === 'aisle') points.push(...venue.aisles.map(a => [(a.x1+a.x2)/2, (a.y1+a.y2)/2, 190, '#167f7a']));
+      if (sim.heat === 'event') points.push(...venue.facilities.map(f => [f.x+f.w/2, f.y+f.h/2, 165, '#315ddc']));
+      if (sim.heat === 'even') points.push([360,260,180,'#167f7a'], [820,440,180,'#df6b2f']);
+      return points.map((p,i) => `<radialGradient id="heat${i}"><stop offset="0%" stop-color="${p[3]}" stop-opacity=".65"/><stop offset="70%" stop-color="${p[3]}" stop-opacity=".10"/><stop offset="100%" stop-color="${p[3]}" stop-opacity="0"/></radialGradient><circle class="heat" cx="${p[0]}" cy="${p[1]}" r="${p[2]}" fill="url(#heat${i})"/>`).join('');
+    }
+
+    function renderLegend() {
+      $('legend').innerHTML = state.industry.zones.map((z,i) => `<span class="legend-item"><i class="dot" style="background:${state.industry.colors[i]}"></i>${z}</span>`).join('') + `<span class="legend-item"><i class="dot" style="background:#df6b2f"></i>入口/热区</span><span class="legend-item"><i class="dot" style="background:#9ca3af"></i>已售</span>`;
+    }
+
+    function selectBooth(id) {
+      const booth = state.booths.find(b => b.id === id);
+      if (!booth) return;
+      state.selected = booth;
+      state.activeRecommendation = state.recommendations.findIndex(r => r.id === id);
+      renderMap();
+      renderDetail();
+      renderRecommendations();
+    }
+
+    function getProfile() {
+      return {
+        name: $('exhibitorName').value || '未命名展商',
+        type: $('exhibitorType').value,
+        category: $('categorySelect').value,
+        budget: Number($('budgetSelect').value),
+        area: Number($('areaSelect').value),
+        goal: $('goalSelect').value,
+        rival: $('rivalSelect').value
+      };
+    }
+
+    function recommend(showToast = true) {
+      const profile = getProfile();
+      const candidates = state.booths.filter(b => b.status === 'available').map(b => ({ ...b, matchScore: scoreBooth(b, profile) }));
+      const highExposure = candidates.slice().sort((a,b) => (b.trafficScore + b.dynamicPrice/10000) - (a.trafficScore + a.dynamicPrice/10000))[0];
+      const bestMatch = candidates.slice().sort((a,b) => b.matchScore - a.matchScore)[0];
+      const value = candidates.filter(b => b.dynamicPrice <= profile.budget * 1.12).sort((a,b) => (b.matchScore / Math.max(1,b.dynamicPrice)) - (a.matchScore / Math.max(1,a.dynamicPrice)))[0] || candidates.slice().sort((a,b) => a.dynamicPrice - b.dynamicPrice)[0];
+      const picked = uniqueById([highExposure, bestMatch, value]).slice(0,3);
+      while (picked.length < 3) {
+        const next = candidates.sort((a,b) => b.matchScore - a.matchScore).find(c => !picked.some(p => p.id === c.id));
+        if (!next) break;
+        picked.push(next);
+      }
+      const labels = ['高曝光方案', '最佳匹配方案', '性价比方案'];
+      state.recommendations = picked.map((b,i) => ({ ...b, planLabel: labels[i] || '备选方案' }));
+      state.selected = state.recommendations[1] || state.recommendations[0] || state.selected;
+      state.activeRecommendation = state.recommendations.findIndex(r => r.id === state.selected?.id);
+      renderRecommendations();
+      renderMap();
+      renderDetail();
+      if (showToast) toast('已生成推荐：高曝光、最佳匹配、性价比三个方案。');
+    }
+
+    function scoreBooth(b, p) {
+      let score = 0;
+      score += (b.zone === p.category ? 28 : state.industry.hot.includes(b.zone) ? 16 : 8);
+      score += Math.max(0, 22 - Math.abs(b.area - p.area) / Math.max(p.area,1) * 22);
+      score += b.dynamicPrice <= p.budget ? 18 : Math.max(0, 18 - (b.dynamicPrice - p.budget) / p.budget * 35);
+      score += b.trafficScore * (p.goal === '品牌曝光' || p.goal === '新品发布' ? .18 : .10);
+      score += b.historyScore * .10;
+      score += b.competitionScore * (p.rival === '希望靠近同类展商' ? .10 : p.rival === '介意竞品邻近' ? -.06 : .03);
+      if (p.type === '头部品牌' && b.area >= 72) score += 10;
+      if (p.type === '供应链企业' && b.zone.includes('供应链')) score += 10;
+      return clamp(Math.round(score), 1, 100);
+    }
+
+    function renderRecommendations() {
+      if (!state.recommendations.length) { $('recommendCards').innerHTML = ''; return; }
+      $('recommendCards').innerHTML = state.recommendations.map((b,i) => `
+        <article class="recommend-card ${state.selected?.id === b.id ? 'active' : ''}" data-rec="${b.id}">
+          <div>
+            <div class="card-kicker"><span class="rec-index"><i>${i + 1}</i> 图中推荐 · ${b.planLabel}</span><span class="badge">${b.matchScore || scoreBooth(b,getProfile())}/100</span></div>
+            <div class="card-title">${b.id} · ${b.zone}</div>
+          </div>
+          <div class="metrics"><div class="metric"><b>${b.area}㎡</b><span>${b.type}</span></div><div class="metric"><b>${b.trafficScore}</b><span>人流指数</span></div><div class="metric"><b>${b.locationGrade}</b><span>位置等级</span></div></div>
+          <div class="price">${CNY.format(b.dynamicPrice)}</div>
+          <ul class="reasons">${makeReasons(b, getProfile()).slice(0,2).map(r => `<li>${r}</li>`).join('')}</ul>
+        </article>`).join('');
+      $('recommendCards').querySelectorAll('[data-rec]').forEach(card => card.addEventListener('click', () => selectBooth(card.dataset.rec)));
+    }
+
+    function renderDetail() {
+      const b = state.selected;
+      if (!b) { $('detailPanel').innerHTML = '<div class="detail-card">请先生成展位布局。</div>'; return; }
+      const premium = Math.round((b.dynamicPrice / b.basePrice - 1) * 100);
+      $('detailPanel').innerHTML = `
+        <div class="detail-card">
+          <div class="detail-head"><div><div class="detail-id">${b.id}</div><div style="color:var(--muted);font-size:13px">${b.zone} · ${b.type}</div></div><span class="badge ${b.status === 'sold' ? 'warn' : ''}">${b.status === 'sold' ? '已售模拟' : '可售模拟'}</span></div>
+          <div class="detail-grid">
+            <div class="kv"><span>面积</span><strong>${b.area}㎡</strong></div>
+            <div class="kv"><span>位置等级</span><strong>${b.locationGrade}</strong></div>
+            <div class="kv"><span>基础价</span><strong>${CNY.format(b.basePrice)}</strong></div>
+            <div class="kv"><span>动态建议价</span><strong>${CNY.format(b.dynamicPrice)} (${premium >= 0 ? '+' : ''}${premium}%)</strong></div>
+          </div>
+        </div>
+        <div class="detail-card">
+          <div class="panel-title" style="margin-bottom:6px"><div><h2>基础价构成</h2><p>基础价已纳入举办城市成本差异。</p></div></div>
+          <div class="detail-grid">
+            <div class="kv"><span>举办城市</span><strong>${b.baseParts.city}</strong></div>
+            <div class="kv"><span>行业基准单价</span><strong>${CNY.format(b.baseParts.industryUnit)}/㎡</strong></div>
+            <div class="kv"><span>城市成本系数</span><strong>${b.baseParts.cityCost.toFixed(2)}x</strong></div>
+            <div class="kv"><span>城市后单价</span><strong>${CNY.format(b.baseParts.baseUnitPrice)}/㎡</strong></div>
+            <div class="kv"><span>展位类型系数</span><strong>${b.baseParts.typeFactor.toFixed(2)}x</strong></div>
+            <div class="kv"><span>基础价公式</span><strong>${b.area}㎡ × ${CNY.format(b.baseParts.baseUnitPrice)}/㎡ × ${b.baseParts.typeFactor.toFixed(2)}x</strong></div>
+          </div>
+        </div>
+        <div class="detail-card">
+          <div class="panel-title" style="margin-bottom:6px"><div><h2>价格系数</h2><p>由规则引擎计算，可解释、可复现。</p></div></div>
+          ${factorRow('位置', b.factors.position)}
+          ${factorRow('行业热度', b.factors.industryHeat)}
+          ${factorRow('人流热力', b.factors.traffic)}
+          ${factorRow('历史售卖', b.factors.history)}
+          ${factorRow('竞品/头部', b.factors.competition * b.factors.anchor)}
+          ${factorRow('库存紧张', b.factors.inventory)}
+        </div>
+        <div class="detail-card"><div class="panel-title" style="margin-bottom:6px"><div><h2>自然语言解释</h2><p>本段可由 LLM 增强，也可模板兜底。</p></div></div><p class="explain">${boothExplanation(b)}</p></div>
+        <div class="detail-card"><div class="panel-title" style="margin-bottom:6px"><div><h2>风险提示</h2></div></div><p class="explain">${riskText(b, getProfile())}</p></div>
+      `;
+    }
+
+    function factorRow(label, value) {
+      const pct = clamp((value - .85) / .45 * 100, 5, 100);
+      return `<div class="factor"><span>${label}</span><div class="bar"><i style="width:${pct}%"></i></div><strong>${value.toFixed(2)}x</strong></div>`;
+    }
+
+    function boothExplanation(b) {
+      return `${b.id} 位于「${b.zone}」展区，面积 ${b.area}㎡，类型为${b.type}。它的位置等级为 ${b.locationGrade}，人流指数 ${b.trafficScore}，历史售卖热度 ${b.historyScore}。动态建议价从基础价 ${CNY.format(b.basePrice)} 调整到 ${CNY.format(b.dynamicPrice)}，主要受位置、人流、行业热度、历史售卖和库存模拟因素影响。当前价格仅用于 Demo 演示，不代表真实报价。`;
+    }
+
+    function riskText(b, p) {
+      const risks = [];
+      if (b.dynamicPrice > p.budget) risks.push('该方案可能超过当前预算，适合强调曝光价值，或搭配权益包解释溢价。');
+      if (b.competitionScore > 78 && p.rival === '介意竞品邻近') risks.push('周边同类展商密度较高，若客户介意竞品邻近，建议选择替代展位。');
+      if (b.trafficScore > 86) risks.push('高人流区域需要预留足够接待和排队空间，避免展台拥堵。');
+      if (!risks.length) risks.push('该展位风险较低，但仍需结合真实展馆图、消防通道和主办方销售策略复核。');
+      return risks.join(' ');
+    }
+
+    function renderStats() {
+      const avg = avgOf(state.booths.map(b => b.dynamicPrice));
+      const avgBase = avgOf(state.booths.map(b => b.basePrice));
+      $('statVenue').textContent = state.venue.name.replace('国际会展中心 ', '').replace('科技博览中心 ', '').replace('城市展览中心 ', '');
+      $('statBooths').textContent = state.booths.length;
+      $('statAvg').textContent = CNY.format(avg);
+      $('statPremium').textContent = `${Math.round((avg / avgBase - 1) * 100)}%`;
+    }
+
+    function renderAssistantIntro() {
+      addMsg('ai', '我是展位推荐助手。你可以问我“为什么这个展位更贵”“客户嫌贵怎么解释”“竞品在旁边是风险还是机会”等问题。未配置真实 LLM 接口时，我会使用本地模板兜底。');
+    }
+
+    function renderQuickQuestions() {
+      const qs = ['为什么这个展位价格更高？', '如果客户觉得贵，销售该怎么解释？', '预算 10-20 万时推荐哪个展位？', '竞品在旁边是风险还是机会？', '主办方如何处理冷区展位？'];
+      $('quickQuestions').innerHTML = qs.map(q => `<button class="chip" data-q="${q}">${q}</button>`).join('');
+      $('quickQuestions').querySelectorAll('[data-q]').forEach(btn => btn.addEventListener('click', () => { $('assistantInput').value = btn.dataset.q; askAssistant(); }));
+    }
+
+    async function askAssistant() {
+      const question = $('assistantInput').value.trim();
+      if (!question) return;
+      addMsg('user', question);
+      $('assistantInput').value = '';
+      const cfg = getApiSettings();
+      if (cfg.endpoint && cfg.key) {
+        $('assistantStatus').textContent = '真实 LLM 接入中';
+        try {
+          const answer = await callLLM(cfg, question);
+          addMsg('ai', answer);
+          $('assistantStatus').textContent = '真实 LLM 已接入';
+          return;
+        } catch (err) {
+          addMsg('ai', `真实 LLM 调用失败，已切换本地兜底：${err.message}\n\n${fallbackAnswer(question)}`);
+          $('assistantStatus').textContent = '模板兜底模式';
+          return;
+        }
+      }
+      addMsg('ai', fallbackAnswer(question));
+    }
+
+    async function callLLM(cfg, question) {
+      const context = buildAssistantContext();
+      const endpoint = normalizeChatEndpoint(cfg.endpoint);
+      const res = await fetch(endpoint, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${cfg.key}` },
+        body: JSON.stringify({
+          model: cfg.model || 'senseaudio-s2-lite',
+          messages: [
+            { role: 'system', content: '你是会展展位规划与销售推荐助手。只能基于用户提供的 Demo 模拟数据解释，不承诺真实成交或真实报价。请用简洁中文 Markdown 回答：最多 3 个小标题，每段不超过 3 行，优先使用短列表；不要直接暴露 JSON 字段名或内部变量名，要转成销售能理解的业务语言。' },
+            { role: 'user', content: `当前上下文：${JSON.stringify(context, null, 2)}\n\n用户问题：${question}` }
+          ],
+          temperature: 0.4
+        })
+      });
+      if (!res.ok) throw new Error(`HTTP ${res.status} (${endpoint})`);
+      const data = await res.json();
+      return data.choices?.[0]?.message?.content || 'LLM 未返回有效内容。';
+    }
+
+    function normalizeChatEndpoint(endpoint) {
+      const clean = endpoint.trim().replace(/\/+$/, '');
+      if (/\/chat\/completions$/.test(clean)) return clean;
+      if (/\/v1$/.test(clean)) return `${clean}/chat/completions`;
+      return `${clean}/v1/chat/completions`;
+    }
+
+    function buildAssistantContext() {
+      return {
+        data_notice: '当前数据为 Demo 模拟数据，不能作为真实报价或真实经营结论。',
+        venue: state.venue.name,
+        industry: state.industry.name,
+        strategy: state.strategy.name,
+        simulation: getSim(),
+        exhibitor: getProfile(),
+        selected_booth: state.selected,
+        recommended_booths: state.recommendations.map(b => ({ id: b.id, plan: b.planLabel, zone: b.zone, area: b.area, type: b.type, price: b.dynamicPrice, score: b.matchScore, traffic: b.trafficScore }))
+      };
+    }
+
+    function fallbackAnswer(q) {
+      const b = state.selected;
+      const p = getProfile();
+      if (!b) return '请先生成展位布局并选择一个展位。';
+      if (q.includes('贵') || q.includes('价格')) {
+        return `可以这样解释：${b.id} 的价格高，主要不是因为面积本身，而是因为它位于 ${b.zone} 的 ${b.locationGrade} 级位置，人流指数达到 ${b.trafficScore}，并且当前行业热度与库存模拟条件推高了稀缺性。对 ${p.name} 这类以「${p.goal}」为目标的展商，它提供的是更高曝光和更强目标客群触达。若客户预算压力较大，可以同步给出性价比方案作为替代。`;
+      }
+      if (q.includes('竞品')) {
+        return `竞品邻近既可能是机会，也可能是风险。若展商希望进入同品类买家集中动线，靠近竞品可以共享专业观众流量；但如果品牌差异化不足，可能被头部竞品压制。当前 ${b.id} 的竞品密度评分为 ${b.competitionScore}，建议结合客户的品牌强弱和展台吸引力判断。`;
+      }
+      if (q.includes('冷区')) {
+        return '冷区展位不宜简单降价处理，更适合打包论坛露出、采购商邀约、媒体采访、导视广告或组合展位权益。这样能把“位置劣势”转化成“综合权益包”，避免破坏整体价格体系。';
+      }
+      return `基于当前模拟数据，我建议优先关注推荐列表中的「最佳匹配方案」。它综合考虑了 ${p.name} 的预算、面积、目标和竞品偏好。当前选中展位 ${b.id} 的动态建议价为 ${CNY.format(b.dynamicPrice)}，适合用于演示“位置、人流、历史售卖和库存如何共同影响价格”。`;
+    }
+
+    function addMsg(role, content) {
+      const div = document.createElement('div');
+      div.className = `msg ${role}`;
+      div.innerHTML = role === 'ai' ? renderMarkdown(content) : escapeHtml(content).replace(/\n/g, '<br>');
+      $('chatBox').appendChild(div);
+      $('chatBox').scrollTop = $('chatBox').scrollHeight;
+    }
+
+    function renderMarkdown(text) {
+      const lines = escapeHtml(text).split('\n');
+      const html = [];
+      let listOpen = false;
+      const closeList = () => { if (listOpen) { html.push('</ul>'); listOpen = false; } };
+      for (const raw of lines) {
+        let line = raw.trim();
+        if (!line) { closeList(); continue; }
+        line = line.replace(/`([^`]+)`/g, '<code>$1</code>').replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+        if (/^---+$/.test(line)) { closeList(); html.push('<hr>'); continue; }
+        if (/^#{1,3}\s+/.test(line)) { closeList(); html.push(`<h3>${line.replace(/^#{1,3}\s+/, '')}</h3>`); continue; }
+        if (/^&gt;\s?/.test(line)) { closeList(); html.push(`<blockquote>${line.replace(/^&gt;\s?/, '')}</blockquote>`); continue; }
+        if (/^(\*|-|\d+\.)\s+/.test(line)) {
+          if (!listOpen) { html.push('<ul>'); listOpen = true; }
+          html.push(`<li>${line.replace(/^(\*|-|\d+\.)\s+/, '')}</li>`);
+          continue;
+        }
+        closeList();
+        html.push(`<p>${line}</p>`);
+      }
+      closeList();
+      return html.join('');
+    }
+
+    function escapeHtml(text) {
+      return String(text).replace(/[&<>"']/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[ch]));
+    }
+
+    function saveApiSettings() {
+      const cfg = getApiSettings();
+      localStorage.setItem('booth_demo_api', JSON.stringify(cfg));
+      $('assistantStatus').textContent = cfg.endpoint && cfg.key ? '真实 LLM 已配置' : '模板兜底模式';
+      toast('LLM 接口配置已保存到本地浏览器。');
+    }
+
+    function loadApiSettings() {
+      try {
+        const cfg = JSON.parse(localStorage.getItem('booth_demo_api') || '{}');
+        $('apiEndpoint').value = cfg.endpoint || 'https://api.senseaudio.cn';
+        $('apiKey').value = cfg.key || '';
+        $('apiModel').value = cfg.model || 'senseaudio-s2-lite';
+        $('assistantStatus').textContent = cfg.endpoint && cfg.key ? '真实 LLM 已配置' : '模板兜底模式';
+      } catch {}
+    }
+
+    function getApiSettings() { return { endpoint: $('apiEndpoint').value.trim(), key: $('apiKey').value.trim(), model: $('apiModel').value.trim() }; }
+
+    function copyBrief() {
+      const text = '这个 Demo 模拟会展主办方的展位规划和销售推荐流程：选择场馆、行业和分区策略后，系统在预设平面图上生成模拟展位，并根据位置、人流、行业热度、竞品邻近、历史售卖和库存紧张度计算动态价格。随后销售输入展商预算和参展目标，系统推荐高曝光、最佳匹配和性价比三个方案，LLM 助手负责解释推荐原因和生成销售话术。当前全部展位、价格和热力均为模拟数据，正式落地可接入真实场馆图、历史成交、CRM 和观众数据。';
+      navigator.clipboard?.writeText(text);
+      toast('演示话术已复制。');
+    }
+
+    function makeReasons(b, p) {
+      const reasons = [];
+      reasons.push(`${b.zone} 与展商品类「${p.category}」${b.zone === p.category ? '高度匹配' : '存在可解释关联'}。`);
+      if (b.trafficScore > 82) reasons.push(`人流指数 ${b.trafficScore}，适合强调曝光和获客。`);
+      else reasons.push(`人流适中，适合控制预算并做精准沟通。`);
+      if (b.dynamicPrice <= p.budget) reasons.push('动态建议价落在当前预算范围内，销售阻力较低。');
+      else reasons.push('价格高于预算，需要用位置和人流价值解释溢价。');
+      if (b.competitionScore > 74) reasons.push('周边同类展商密集，可共享专业买家动线。');
+      return reasons;
+    }
+
+    function toast(text) {
+      $('toast').textContent = text;
+      $('toast').classList.add('show');
+      clearTimeout(window.__toastTimer);
+      window.__toastTimer = setTimeout(() => $('toast').classList.remove('show'), 2600);
+    }
+
+    function dist(x1,y1,x2,y2) { return Math.hypot(x1-x2, y1-y2); }
+    function pointLineDistance(px, py, x1, y1, x2, y2) {
+      const A = px - x1, B = py - y1, C = x2 - x1, D = y2 - y1;
+      const dot = A * C + B * D, lenSq = C * C + D * D;
+      const param = lenSq ? clamp(dot / lenSq, 0, 1) : -1;
+      return dist(px, py, x1 + param * C, y1 + param * D);
+    }
+    function clamp(n, min, max) { return Math.max(min, Math.min(max, n)); }
+    function avgOf(arr) { return Math.round(arr.reduce((a,b) => a+b, 0) / Math.max(1, arr.length)); }
+    function uniqueById(arr) { return arr.filter(Boolean).filter((item, idx, all) => all.findIndex(x => x.id === item.id) === idx); }
+    function isNearFacility(venue, x, y) { return venue.facilities.some(f => dist(x, y, f.x + f.w/2, f.y + f.h/2) < 160); }
+    function intersectsVenueLayout(venue, x, y, w, h) {
+      const layoutGap = 10;
+      const rects = [...(venue.restricted || []), ...(venue.facilities || [])];
+      if (rects.some(r => rectIntersects(x, y, w, h, r.x - layoutGap, r.y - layoutGap, r.w + layoutGap * 2, r.h + layoutGap * 2))) return true;
+      if ((venue.entrances || []).some(e => rectIntersectsCircle(x, y, w, h, e.x, e.y, 42))) return true;
+      return (venue.aisles || []).some(a => rectIntersectsLine(x, y, w, h, a.x1, a.y1, a.x2, a.y2, 26));
+    }
+    function rectIntersects(ax, ay, aw, ah, bx, by, bw, bh) { return !(ax + aw < bx || ax > bx + bw || ay + ah < by || ay > by + bh); }
+    function rectIntersectsCircle(x, y, w, h, cx, cy, radius) {
+      const nearestX = clamp(cx, x, x + w);
+      const nearestY = clamp(cy, y, y + h);
+      return dist(nearestX, nearestY, cx, cy) < radius;
+    }
+    function rectIntersectsLine(x, y, w, h, x1, y1, x2, y2, gap) {
+      if (pointInsideRect(x1, y1, x, y, w, h) || pointInsideRect(x2, y2, x, y, w, h)) return true;
+      const corners = [[x,y], [x+w,y], [x,y+h], [x+w,y+h], [x+w/2,y+h/2]];
+      if (corners.some(([px, py]) => pointLineDistance(px, py, x1, y1, x2, y2) < gap)) return true;
+      const edges = [[x,y,x+w,y], [x+w,y,x+w,y+h], [x+w,y+h,x,y+h], [x,y+h,x,y]];
+      return edges.some(e => lineSegmentsIntersect(x1, y1, x2, y2, e[0], e[1], e[2], e[3]));
+    }
+    function pointInsideRect(px, py, x, y, w, h) { return px >= x && px <= x + w && py >= y && py <= y + h; }
+    function lineSegmentsIntersect(ax, ay, bx, by, cx, cy, dx, dy) {
+      const ccw = (px, py, qx, qy, rx, ry) => (ry - py) * (qx - px) > (qy - py) * (rx - px);
+      return ccw(ax, ay, cx, cy, dx, dy) !== ccw(bx, by, cx, cy, dx, dy) && ccw(ax, ay, bx, by, cx, cy) !== ccw(ax, ay, bx, by, dx, dy);
+    }
+    function intersectsBooth(booths, x, y, w, h) {
+      const gap = 5;
+      return booths.some(b => !(x + w + gap < b.x || x > b.x + b.w + gap || y + h + gap < b.y || y > b.y + b.h + gap));
+    }
+
+    init();
+  </script>
+</body>
+</html>
