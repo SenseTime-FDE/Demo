@@ -67,9 +67,9 @@ const PROJECTS = [
   },
   {
     cat: "hr", badge: "人力 HR", title: "HR 招聘 Agent",
-    desc: "面向招聘全流程的智能助手。访问密码：ai2026",
+    desc: "面向招聘全流程的智能助手，体验商汤招聘 AI Agent。",
     tags: ["Agent", "招聘"],
-    url: "https://dashing-narwhal-d1b201.netlify.app/social",
+    url: "https://dashing-narwhal-d1b201.netlify.app/",
     hue: 0, live: true,
   },
   // —— 微信小程序：扫码体验（把二维码图片放进 images/ 文件夹）——
