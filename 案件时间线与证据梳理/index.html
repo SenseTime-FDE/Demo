@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<!-- saved from url=(0062)file:///tmp/openclaw/%E6%A1%88%E4%BB%B6%E6%A2%B3%E7%90%86.html -->
+<html lang="zh-CN"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>案件时间线与证据梳理</title>
+  <script src="./案件时间线与证据梳理_files/saved_resource"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            navy: '#0f1f3d',
+            ink: '#16305c',
+            gold: '#b8924a',
+            page: '#eef1f5'
+          },
+          boxShadow: {
+            soft: '0 14px 40px rgba(15,31,61,0.10)'
+          },
+          keyframes: {
+            fadeUp: {
+              '0%': { opacity: 0, transform: 'translateY(14px)' },
+              '100%': { opacity: 1, transform: 'translateY(0)' }
+            }
+          },
+          animation: {
+            fadeUp: 'fadeUp .55s ease-out both'
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    body { background: #eef1f5; color: #1f2937; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif; }
+    .serif { font-family: "Songti SC", SimSun, Georgia, serif; }
+    .pattern { background-image: radial-gradient(circle at 12% 18%, rgba(184,146,74,.22), transparent 28%), linear-gradient(135deg, #0f1f3d 0%, #16305c 58%, #0b172d 100%); }
+    details > summary { list-style: none; }
+    details > summary::-webkit-details-marker { display: none; }
+    .timeline-line::before { content: ""; position: absolute; left: 1.25rem; top: .5rem; bottom: .5rem; width: 2px; background: linear-gradient(#b8924a, rgba(184,146,74,.25)); }
+    .evidence-row.hidden-row { display: none; }
+    @media (max-width: 768px) { .timeline-line::before { left: .75rem; } }
+  </style>
+<style>*, ::before, ::after{--tw-border-spacing-x:0;--tw-border-spacing-y:0;--tw-translate-x:0;--tw-translate-y:0;--tw-rotate:0;--tw-skew-x:0;--tw-skew-y:0;--tw-scale-x:1;--tw-scale-y:1;--tw-pan-x: ;--tw-pan-y: ;--tw-pinch-zoom: ;--tw-scroll-snap-strictness:proximity;--tw-gradient-from-position: ;--tw-gradient-via-position: ;--tw-gradient-to-position: ;--tw-ordinal: ;--tw-slashed-zero: ;--tw-numeric-figure: ;--tw-numeric-spacing: ;--tw-numeric-fraction: ;--tw-ring-inset: ;--tw-ring-offset-width:0px;--tw-ring-offset-color:#fff;--tw-ring-color:rgb(59 130 246 / 0.5);--tw-ring-offset-shadow:0 0 #0000;--tw-ring-shadow:0 0 #0000;--tw-shadow:0 0 #0000;--tw-shadow-colored:0 0 #0000;--tw-blur: ;--tw-brightness: ;--tw-contrast: ;--tw-grayscale: ;--tw-hue-rotate: ;--tw-invert: ;--tw-saturate: ;--tw-sepia: ;--tw-drop-shadow: ;--tw-backdrop-blur: ;--tw-backdrop-brightness: ;--tw-backdrop-contrast: ;--tw-backdrop-grayscale: ;--tw-backdrop-hue-rotate: ;--tw-backdrop-invert: ;--tw-backdrop-opacity: ;--tw-backdrop-saturate: ;--tw-backdrop-sepia: ;--tw-contain-size: ;--tw-contain-layout: ;--tw-contain-paint: ;--tw-contain-style: }::backdrop{--tw-border-spacing-x:0;--tw-border-spacing-y:0;--tw-translate-x:0;--tw-translate-y:0;--tw-rotate:0;--tw-skew-x:0;--tw-skew-y:0;--tw-scale-x:1;--tw-scale-y:1;--tw-pan-x: ;--tw-pan-y: ;--tw-pinch-zoom: ;--tw-scroll-snap-strictness:proximity;--tw-gradient-from-position: ;--tw-gradient-via-position: ;--tw-gradient-to-position: ;--tw-ordinal: ;--tw-slashed-zero: ;--tw-numeric-figure: ;--tw-numeric-spacing: ;--tw-numeric-fraction: ;--tw-ring-inset: ;--tw-ring-offset-width:0px;--tw-ring-offset-color:#fff;--tw-ring-color:rgb(59 130 246 / 0.5);--tw-ring-offset-shadow:0 0 #0000;--tw-ring-shadow:0 0 #0000;--tw-shadow:0 0 #0000;--tw-shadow-colored:0 0 #0000;--tw-blur: ;--tw-brightness: ;--tw-contrast: ;--tw-grayscale: ;--tw-hue-rotate: ;--tw-invert: ;--tw-saturate: ;--tw-sepia: ;--tw-drop-shadow: ;--tw-backdrop-blur: ;--tw-backdrop-brightness: ;--tw-backdrop-contrast: ;--tw-backdrop-grayscale: ;--tw-backdrop-hue-rotate: ;--tw-backdrop-invert: ;--tw-backdrop-opacity: ;--tw-backdrop-saturate: ;--tw-backdrop-sepia: ;--tw-contain-size: ;--tw-contain-layout: ;--tw-contain-paint: ;--tw-contain-style: }/* ! tailwindcss v3.4.17 | MIT License | https://tailwindcss.com */*,::after,::before{box-sizing:border-box;border-width:0;border-style:solid;border-color:#e5e7eb}::after,::before{--tw-content:''}:host,html{line-height:1.5;-webkit-text-size-adjust:100%;-moz-tab-size:4;tab-size:4;font-family:ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";font-feature-settings:normal;font-variation-settings:normal;-webkit-tap-highlight-color:transparent}body{margin:0;line-height:inherit}hr{height:0;color:inherit;border-top-width:1px}abbr:where([title]){-webkit-text-decoration:underline dotted;text-decoration:underline dotted}h1,h2,h3,h4,h5,h6{font-size:inherit;font-weight:inherit}a{color:inherit;text-decoration:inherit}b,strong{font-weight:bolder}code,kbd,pre,samp{font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;font-feature-settings:normal;font-variation-settings:normal;font-size:1em}small{font-size:80%}sub,sup{font-size:75%;line-height:0;position:relative;vertical-align:baseline}sub{bottom:-.25em}sup{top:-.5em}table{text-indent:0;border-color:inherit;border-collapse:collapse}button,input,optgroup,select,textarea{font-family:inherit;font-feature-settings:inherit;font-variation-settings:inherit;font-size:100%;font-weight:inherit;line-height:inherit;letter-spacing:inherit;color:inherit;margin:0;padding:0}button,select{text-transform:none}button,input:where([type=button]),input:where([type=reset]),input:where([type=submit]){-webkit-appearance:button;background-color:transparent;background-image:none}:-moz-focusring{outline:auto}:-moz-ui-invalid{box-shadow:none}progress{vertical-align:baseline}::-webkit-inner-spin-button,::-webkit-outer-spin-button{height:auto}[type=search]{-webkit-appearance:textfield;outline-offset:-2px}::-webkit-search-decoration{-webkit-appearance:none}::-webkit-file-upload-button{-webkit-appearance:button;font:inherit}summary{display:list-item}blockquote,dd,dl,figure,h1,h2,h3,h4,h5,h6,hr,p,pre{margin:0}fieldset{margin:0;padding:0}legend{padding:0}menu,ol,ul{list-style:none;margin:0;padding:0}dialog{padding:0}textarea{resize:vertical}input::placeholder,textarea::placeholder{opacity:1;color:#9ca3af}[role=button],button{cursor:pointer}:disabled{cursor:default}audio,canvas,embed,iframe,img,object,svg,video{display:block;vertical-align:middle}img,video{max-width:100%;height:auto}[hidden]:where(:not([hidden=until-found])){display:none}.absolute{position:absolute}.relative{position:relative}.left-2{left:0.5rem}.mx-auto{margin-left:auto;margin-right:auto}.mb-3{margin-bottom:0.75rem}.mb-4{margin-bottom:1rem}.mb-5{margin-bottom:1.25rem}.mb-6{margin-bottom:1.5rem}.mt-1{margin-top:0.25rem}.mt-10{margin-top:2.5rem}.mt-2{margin-top:0.5rem}.mt-3{margin-top:0.75rem}.mt-4{margin-top:1rem}.mt-5{margin-top:1.25rem}.mt-8{margin-top:2rem}.inline-block{display:inline-block}.flex{display:flex}.inline-flex{display:inline-flex}.grid{display:grid}.h-6{height:1.5rem}.w-6{width:1.5rem}.w-full{width:100%}.min-w-\[900px\]{min-width:900px}.max-w-4xl{max-width:56rem}.max-w-7xl{max-width:80rem}.border-separate{border-collapse:separate}.border-spacing-y-2{--tw-border-spacing-y:0.5rem;border-spacing:var(--tw-border-spacing-x) var(--tw-border-spacing-y)}@keyframes fadeUp{0%{opacity:0;transform:translateY(14px)}100%{opacity:1;transform:translateY(0)}}.animate-fadeUp{animation:fadeUp .55s ease-out both}.cursor-pointer{cursor:pointer}.flex-col{flex-direction:column}.flex-wrap{flex-wrap:wrap}.items-center{align-items:center}.gap-2{gap:0.5rem}.gap-3{gap:0.75rem}.gap-4{gap:1rem}.gap-6{gap:1.5rem}.space-y-4 > :not([hidden]) ~ :not([hidden]){--tw-space-y-reverse:0;margin-top:calc(1rem * calc(1 - var(--tw-space-y-reverse)));margin-bottom:calc(1rem * var(--tw-space-y-reverse))}.space-y-5 > :not([hidden]) ~ :not([hidden]){--tw-space-y-reverse:0;margin-top:calc(1.25rem * calc(1 - var(--tw-space-y-reverse)));margin-bottom:calc(1.25rem * var(--tw-space-y-reverse))}.overflow-x-auto{overflow-x:auto}.rounded{border-radius:0.25rem}.rounded-2xl{border-radius:1rem}.rounded-full{border-radius:9999px}.rounded-xl{border-radius:0.75rem}.rounded-l-xl{border-top-left-radius:0.75rem;border-bottom-left-radius:0.75rem}.rounded-r-xl{border-top-right-radius:0.75rem;border-bottom-right-radius:0.75rem}.border{border-width:1px}.border-2{border-width:2px}.border-4{border-width:4px}.border-l-4{border-left-width:4px}.border-amber-200{--tw-border-opacity:1;border-color:rgb(253 230 138 / var(--tw-border-opacity, 1))}.border-emerald-200{--tw-border-opacity:1;border-color:rgb(167 243 208 / var(--tw-border-opacity, 1))}.border-gold{--tw-border-opacity:1;border-color:rgb(184 146 74 / var(--tw-border-opacity, 1))}.border-gold\/40{border-color:rgb(184 146 74 / 0.4)}.border-rose-200{--tw-border-opacity:1;border-color:rgb(254 205 211 / var(--tw-border-opacity, 1))}.border-rose-500{--tw-border-opacity:1;border-color:rgb(244 63 94 / var(--tw-border-opacity, 1))}.border-slate-200{--tw-border-opacity:1;border-color:rgb(226 232 240 / var(--tw-border-opacity, 1))}.border-white{--tw-border-opacity:1;border-color:rgb(255 255 255 / var(--tw-border-opacity, 1))}.bg-amber-100{--tw-bg-opacity:1;background-color:rgb(254 243 199 / var(--tw-bg-opacity, 1))}.bg-amber-50{--tw-bg-opacity:1;background-color:rgb(255 251 235 / var(--tw-bg-opacity, 1))}.bg-emerald-100{--tw-bg-opacity:1;background-color:rgb(209 250 229 / var(--tw-bg-opacity, 1))}.bg-emerald-50{--tw-bg-opacity:1;background-color:rgb(236 253 245 / var(--tw-bg-opacity, 1))}.bg-gold{--tw-bg-opacity:1;background-color:rgb(184 146 74 / var(--tw-bg-opacity, 1))}.bg-navy{--tw-bg-opacity:1;background-color:rgb(15 31 61 / var(--tw-bg-opacity, 1))}.bg-orange-100{--tw-bg-opacity:1;background-color:rgb(255 237 213 / var(--tw-bg-opacity, 1))}.bg-rose-100{--tw-bg-opacity:1;background-color:rgb(255 228 230 / var(--tw-bg-opacity, 1))}.bg-rose-50{--tw-bg-opacity:1;background-color:rgb(255 241 242 / var(--tw-bg-opacity, 1))}.bg-slate-200{--tw-bg-opacity:1;background-color:rgb(226 232 240 / var(--tw-bg-opacity, 1))}.bg-slate-50{--tw-bg-opacity:1;background-color:rgb(248 250 252 / var(--tw-bg-opacity, 1))}.bg-slate-900{--tw-bg-opacity:1;background-color:rgb(15 23 42 / var(--tw-bg-opacity, 1))}.bg-white{--tw-bg-opacity:1;background-color:rgb(255 255 255 / var(--tw-bg-opacity, 1))}.bg-white\/10{background-color:rgb(255 255 255 / 0.1)}.p-4{padding:1rem}.p-5{padding:1.25rem}.p-6{padding:1.5rem}.px-2{padding-left:0.5rem;padding-right:0.5rem}.px-3{padding-left:0.75rem;padding-right:0.75rem}.px-4{padding-left:1rem;padding-right:1rem}.px-5{padding-left:1.25rem;padding-right:1.25rem}.py-1{padding-top:0.25rem;padding-bottom:0.25rem}.py-10{padding-top:2.5rem;padding-bottom:2.5rem}.py-2{padding-top:0.5rem;padding-bottom:0.5rem}.py-3{padding-top:0.75rem;padding-bottom:0.75rem}.py-8{padding-top:2rem;padding-bottom:2rem}.pl-12{padding-left:3rem}.text-left{text-align:left}.text-center{text-align:center}.text-2xl{font-size:1.5rem;line-height:2rem}.text-3xl{font-size:1.875rem;line-height:2.25rem}.text-base{font-size:1rem;line-height:1.5rem}.text-lg{font-size:1.125rem;line-height:1.75rem}.text-sm{font-size:0.875rem;line-height:1.25rem}.text-xl{font-size:1.25rem;line-height:1.75rem}.text-xs{font-size:0.75rem;line-height:1rem}.font-bold{font-weight:700}.font-semibold{font-weight:600}.leading-6{line-height:1.5rem}.leading-7{line-height:1.75rem}.leading-8{line-height:2rem}.tracking-wide{letter-spacing:0.025em}.tracking-widest{letter-spacing:0.1em}.text-amber-700{--tw-text-opacity:1;color:rgb(180 83 9 / var(--tw-text-opacity, 1))}.text-amber-800{--tw-text-opacity:1;color:rgb(146 64 14 / var(--tw-text-opacity, 1))}.text-emerald-700{--tw-text-opacity:1;color:rgb(4 120 87 / var(--tw-text-opacity, 1))}.text-emerald-800{--tw-text-opacity:1;color:rgb(6 95 70 / var(--tw-text-opacity, 1))}.text-emerald-900{--tw-text-opacity:1;color:rgb(6 78 59 / var(--tw-text-opacity, 1))}.text-gold{--tw-text-opacity:1;color:rgb(184 146 74 / var(--tw-text-opacity, 1))}.text-navy{--tw-text-opacity:1;color:rgb(15 31 61 / var(--tw-text-opacity, 1))}.text-orange-800{--tw-text-opacity:1;color:rgb(154 52 18 / var(--tw-text-opacity, 1))}.text-rose-700{--tw-text-opacity:1;color:rgb(190 18 60 / var(--tw-text-opacity, 1))}.text-rose-800{--tw-text-opacity:1;color:rgb(159 18 57 / var(--tw-text-opacity, 1))}.text-rose-900{--tw-text-opacity:1;color:rgb(136 19 55 / var(--tw-text-opacity, 1))}.text-slate-200{--tw-text-opacity:1;color:rgb(226 232 240 / var(--tw-text-opacity, 1))}.text-slate-300{--tw-text-opacity:1;color:rgb(203 213 225 / var(--tw-text-opacity, 1))}.text-slate-500{--tw-text-opacity:1;color:rgb(100 116 139 / var(--tw-text-opacity, 1))}.text-slate-700{--tw-text-opacity:1;color:rgb(51 65 85 / var(--tw-text-opacity, 1))}.text-white{--tw-text-opacity:1;color:rgb(255 255 255 / var(--tw-text-opacity, 1))}.shadow{--tw-shadow:0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);--tw-shadow-colored:0 1px 3px 0 var(--tw-shadow-color), 0 1px 2px -1px var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)}.shadow-soft{--tw-shadow:0 14px 40px rgba(15,31,61,0.10);--tw-shadow-colored:0 14px 40px var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)}@media (min-width: 640px){.sm\:grid-cols-2{grid-template-columns:repeat(2, minmax(0, 1fr))}}@media (min-width: 768px){.md\:left-8{left:2rem}.md\:col-span-2{grid-column:span 2 / span 2}.md\:grid-cols-2{grid-template-columns:repeat(2, minmax(0, 1fr))}.md\:grid-cols-3{grid-template-columns:repeat(3, minmax(0, 1fr))}.md\:flex-row{flex-direction:row}.md\:items-end{align-items:flex-end}.md\:items-center{align-items:center}.md\:justify-between{justify-content:space-between}.md\:py-12{padding-top:3rem;padding-bottom:3rem}.md\:py-14{padding-top:3.5rem;padding-bottom:3.5rem}.md\:pl-16{padding-left:4rem}.md\:text-5xl{font-size:3rem;line-height:1}.md\:text-lg{font-size:1.125rem;line-height:1.75rem}}@media (min-width: 1024px){.lg\:grid-cols-2{grid-template-columns:repeat(2, minmax(0, 1fr))}.lg\:grid-cols-4{grid-template-columns:repeat(4, minmax(0, 1fr))}}</style></head>
+<body>
+  <header class="pattern text-white">
+    <div class="mx-auto max-w-7xl px-5 py-10 md:py-14">
+      <div class="mb-4 inline-flex rounded-full border border-gold/40 bg-white/10 px-4 py-1 text-sm tracking-wide text-gold">AI 辅助 · 由律师核实定稿</div>
+      <h1 class="serif text-3xl font-bold md:text-5xl">案件时间线与证据梳理</h1>
+      <p class="mt-4 max-w-4xl text-base leading-8 text-slate-200 md:text-lg">买卖合同 / 建材采购货款纠纷；我方：华盛建材；对方：宏远装饰；主张欠付货款暂按 230 万元梳理。</p>
+      <p class="mt-3 text-sm text-slate-300">定位：诉讼准备阶段案件梳理底稿，供律师快速建立案件全貌，最终以证据原件和律师核实意见为准。</p>
+    </div>
+  </header>
+
+  <main class="mx-auto max-w-7xl px-5 py-8 md:py-12">
+    <section class="grid gap-6 md:grid-cols-2">
+      <div class="animate-fadeUp rounded-2xl bg-white p-6 shadow-soft">
+        <div class="mb-3 flex items-center gap-2 text-gold"><span>▣</span><span class="text-sm font-semibold tracking-widest">案件概述</span></div>
+        <h2 class="serif text-2xl font-bold text-navy">一句话概述</h2>
+        <p class="mt-4 leading-8">华盛建材依据采购合同向宏远装饰分批供应建材，双方按实际供货量结算；宏远装饰已支付 50 万元，华盛建材主张尚欠 230 万元，并持有还款承诺书、银行流水、送货单及催款记录等证据，拟提起买卖合同货款诉讼。</p>
+        <div class="mt-5 rounded-xl border-l-4 border-gold bg-amber-50 p-4 text-sm leading-7 text-slate-700">核心判断：本案胜诉关键在于证明合同关系、实际供货数量及金额、对方确认欠款或未及时提出质量异议；无签字送货单和未盖章对账单是主要证据风险点。</div>
+      </div>
+      <div class="animate-fadeUp rounded-2xl bg-white p-6 shadow-soft" style="animation-delay:.08s">
+        <div class="mb-3 flex items-center gap-2 text-gold"><span>◎</span><span class="text-sm font-semibold tracking-widest">当事人关系</span></div>
+        <h2 class="serif text-2xl font-bold text-navy">主体与诉讼位置</h2>
+        <div class="mt-5 grid gap-4 sm:grid-cols-2">
+          <div class="rounded-xl border border-emerald-200 bg-emerald-50 p-4">
+            <p class="text-sm text-emerald-700">我方 / 拟原告</p>
+            <p class="mt-2 text-xl font-bold text-emerald-900">华盛建材</p>
+            <p class="mt-2 text-sm leading-6 text-slate-700">建材供应方，主张支付剩余货款及可能产生的违约责任、利息损失等。</p>
+          </div>
+          <div class="rounded-xl border border-rose-200 bg-rose-50 p-4">
+            <p class="text-sm text-rose-700">对方 / 拟被告</p>
+            <p class="mt-2 text-xl font-bold text-rose-900">宏远装饰</p>
+            <p class="mt-2 text-sm leading-6 text-slate-700">采购方，已支付 50 万元，后出具还款承诺书，但曾口头提及部分货物质量问题。</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <div class="animate-fadeUp rounded-2xl bg-white p-5 shadow-soft"><p class="text-sm text-slate-500">标的金额</p><p class="mt-2 text-3xl font-bold text-navy">230 万</p><p class="mt-1 text-xs text-slate-500">暂按欠付货款</p></div>
+      <div class="animate-fadeUp rounded-2xl bg-white p-5 shadow-soft"><p class="text-sm text-slate-500">关键事件节点</p><p class="mt-2 text-3xl font-bold text-navy">8</p><p class="mt-1 text-xs text-slate-500">含合同、供货、付款、催款等</p></div>
+      <div class="animate-fadeUp rounded-2xl bg-white p-5 shadow-soft"><p class="text-sm text-slate-500">证据项数</p><p class="mt-2 text-3xl font-bold text-navy">7</p><p class="mt-1 text-xs text-slate-500">按现有材料类别统计</p></div>
+      <div class="animate-fadeUp rounded-2xl bg-white p-5 shadow-soft"><p class="text-sm text-slate-500">证据缺口</p><p class="mt-2 text-3xl font-bold text-rose-700">4</p><p class="mt-1 text-xs text-slate-500">送货签收、对账盖章、质量抗辩、主体信息</p></div>
+    </section>
+
+    <section class="mt-10 rounded-2xl bg-white p-6 shadow-soft">
+      <div class="mb-6 flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
+        <div>
+          <p class="text-sm font-semibold tracking-widest text-gold">CORE TIMELINE</p>
+          <h2 class="serif mt-1 text-3xl font-bold text-navy">交互时间线</h2>
+        </div>
+        <p class="text-sm text-slate-500">点击每个节点展开证据与法律意义；关键确认债务节点已默认展开。</p>
+      </div>
+      <div class="timeline-line relative space-y-5 pl-12 md:pl-16">
+        <details class="group rounded-2xl border border-slate-200 bg-slate-50 p-5" open="">
+          <summary class="cursor-pointer"><div class="absolute left-2 mt-1 h-6 w-6 rounded-full border-4 border-white bg-gold shadow md:left-8"></div><div class="flex flex-col gap-2 md:flex-row md:items-center md:justify-between"><h3 class="text-lg font-bold text-navy">2023-03-15 左右｜签订采购合同</h3><span class="rounded-full bg-amber-100 px-3 py-1 text-xs font-semibold text-amber-800">时间需以合同原件核实</span></div></summary>
+          <div class="mt-4 grid gap-4 md:grid-cols-3"><p class="leading-7 md:col-span-2">华盛建材与宏远装饰签订采购合同，约定华盛建材供应建材，价格按实际供货量结算。</p><div class="rounded-xl bg-white p-4 text-sm"><p class="font-semibold text-navy">对应证据</p><p class="mt-2">采购合同</p><span class="mt-3 inline-block rounded bg-emerald-100 px-2 py-1 text-xs font-bold text-emerald-700">证明力：强</span></div></div>
+        </details>
+        <details class="group rounded-2xl border border-slate-200 bg-slate-50 p-5">
+          <summary class="cursor-pointer"><div class="absolute left-2 mt-1 h-6 w-6 rounded-full border-4 border-white bg-gold shadow md:left-8"></div><div class="flex flex-col gap-2 md:flex-row md:items-center md:justify-between"><h3 class="text-lg font-bold text-navy">2023-04 至 2023-08｜分五批陆续供货</h3><span class="rounded-full bg-orange-100 px-3 py-1 text-xs font-semibold text-orange-800">部分签收存在风险</span></div></summary>
+          <div class="mt-4 grid gap-4 md:grid-cols-3"><p class="leading-7 md:col-span-2">华盛建材分五批向宏远装饰交付建材，每批原则上有送货单；但部分送货单未取得对方仓库人员签字，仅有口头接收情况。</p><div class="rounded-xl bg-white p-4 text-sm"><p class="font-semibold text-navy">对应证据</p><p class="mt-2">五批送货单、司机/仓库交接线索</p><span class="mt-3 inline-block rounded bg-amber-100 px-2 py-1 text-xs font-bold text-amber-700">证明力：中</span></div></div>
+        </details>
+        <details class="group rounded-2xl border border-slate-200 bg-slate-50 p-5">
+          <summary class="cursor-pointer"><div class="absolute left-2 mt-1 h-6 w-6 rounded-full border-4 border-white bg-gold shadow md:left-8"></div><div class="flex flex-col gap-2 md:flex-row md:items-center md:justify-between"><h3 class="text-lg font-bold text-navy">2023-06｜宏远装饰支付 50 万元</h3><span class="rounded-full bg-emerald-100 px-3 py-1 text-xs font-semibold text-emerald-800">付款性质较清楚</span></div></summary>
+          <div class="mt-4 grid gap-4 md:grid-cols-3"><p class="leading-7 md:col-span-2">宏远装饰向华盛建材转账 50 万元，银行流水备注为“建材货款”，可证明双方交易关系、付款事实及部分债务履行。</p><div class="rounded-xl bg-white p-4 text-sm"><p class="font-semibold text-navy">对应证据</p><p class="mt-2">银行流水、转账备注</p><span class="mt-3 inline-block rounded bg-emerald-100 px-2 py-1 text-xs font-bold text-emerald-700">证明力：强</span></div></div>
+        </details>
+        <details class="group rounded-2xl border border-slate-200 bg-slate-50 p-5">
+          <summary class="cursor-pointer"><div class="absolute left-2 mt-1 h-6 w-6 rounded-full border-4 border-white bg-gold shadow md:left-8"></div><div class="flex flex-col gap-2 md:flex-row md:items-center md:justify-between"><h3 class="text-lg font-bold text-navy">2023-09-10 左右｜货物基本交齐并形成 280 万结算口径</h3><span class="rounded-full bg-amber-100 px-3 py-1 text-xs font-semibold text-amber-800">对账未盖章</span></div></summary>
+          <div class="mt-4 grid gap-4 md:grid-cols-3"><p class="leading-7 md:col-span-2">我方核算供货总金额为 280 万元，扣除已付款 50 万元后，主张剩余货款 230 万元。对账单由我方制作，但对方尚未盖章确认。</p><div class="rounded-xl bg-white p-4 text-sm"><p class="font-semibold text-navy">对应证据</p><p class="mt-2">对账单、送货单汇总、合同计价约定</p><span class="mt-3 inline-block rounded bg-amber-100 px-2 py-1 text-xs font-bold text-amber-700">证明力：中</span></div></div>
+        </details>
+        <details class="group rounded-2xl border border-slate-200 bg-slate-50 p-5">
+          <summary class="cursor-pointer"><div class="absolute left-2 mt-1 h-6 w-6 rounded-full border-4 border-white bg-gold shadow md:left-8"></div><div class="flex flex-col gap-2 md:flex-row md:items-center md:justify-between"><h3 class="text-lg font-bold text-navy">2023-10 起｜持续微信、电话催款</h3><span class="rounded-full bg-emerald-100 px-3 py-1 text-xs font-semibold text-emerald-800">有利于证明催告</span></div></summary>
+          <div class="mt-4 grid gap-4 md:grid-cols-3"><p class="leading-7 md:col-span-2">我方多次通过微信和电话催款，对方老板以“下游工程款没到位”“再等等”等理由拖延，未明确以质量问题拒付。</p><div class="rounded-xl bg-white p-4 text-sm"><p class="font-semibold text-navy">对应证据</p><p class="mt-2">微信聊天记录、通话记录线索</p><span class="mt-3 inline-block rounded bg-emerald-100 px-2 py-1 text-xs font-bold text-emerald-700">证明力：强/中</span></div></div>
+        </details>
+        <details class="group rounded-2xl border-2 border-gold bg-amber-50 p-5" open="">
+          <summary class="cursor-pointer"><div class="absolute left-2 mt-1 h-6 w-6 rounded-full border-4 border-white bg-gold shadow md:left-8"></div><div class="flex flex-col gap-2 md:flex-row md:items-center md:justify-between"><h3 class="text-lg font-bold text-navy">2023-11 底｜宏远装饰出具还款承诺书</h3><span class="rounded-full bg-emerald-100 px-3 py-1 text-xs font-semibold text-emerald-800">关键债务确认</span></div></summary>
+          <div class="mt-4 grid gap-4 md:grid-cols-3"><p class="leading-7 md:col-span-2">对方书面承诺于 2024 年 1 月之前付清欠款。该文件如有对方盖章或法定代表人/授权人员签字，将成为证明债权金额及履行期限的重要证据。</p><div class="rounded-xl bg-white p-4 text-sm"><p class="font-semibold text-navy">对应证据</p><p class="mt-2">还款承诺书</p><span class="mt-3 inline-block rounded bg-emerald-100 px-2 py-1 text-xs font-bold text-emerald-700">证明力：强</span></div></div>
+        </details>
+        <details class="group rounded-2xl border border-slate-200 bg-slate-50 p-5">
+          <summary class="cursor-pointer"><div class="absolute left-2 mt-1 h-6 w-6 rounded-full border-4 border-white bg-gold shadow md:left-8"></div><div class="flex flex-col gap-2 md:flex-row md:items-center md:justify-between"><h3 class="text-lg font-bold text-navy">2024-01｜承诺付款期限届满但未付款</h3><span class="rounded-full bg-rose-100 px-3 py-1 text-xs font-semibold text-rose-800">违约节点</span></div></summary>
+          <div class="mt-4 grid gap-4 md:grid-cols-3"><p class="leading-7 md:col-span-2">约定付款期限届满后，对方未按还款承诺履行付款义务，构成起诉主张货款、逾期付款损失的重要时间节点。</p><div class="rounded-xl bg-white p-4 text-sm"><p class="font-semibold text-navy">对应证据</p><p class="mt-2">还款承诺书、后续催款记录</p><span class="mt-3 inline-block rounded bg-emerald-100 px-2 py-1 text-xs font-bold text-emerald-700">证明力：强</span></div></div>
+        </details>
+        <details class="group rounded-2xl border border-slate-200 bg-slate-50 p-5">
+          <summary class="cursor-pointer"><div class="absolute left-2 mt-1 h-6 w-6 rounded-full border-4 border-white bg-gold shadow md:left-8"></div><div class="flex flex-col gap-2 md:flex-row md:items-center md:justify-between"><h3 class="text-lg font-bold text-navy">2024-02-10｜律师函寄送并签收</h3><span class="rounded-full bg-emerald-100 px-3 py-1 text-xs font-semibold text-emerald-800">正式催告</span></div></summary>
+          <div class="mt-4 grid gap-4 md:grid-cols-3"><p class="leading-7 md:col-span-2">我方律师向宏远装饰发出律师函并通过 EMS 寄送，已有签收记录，可证明诉前催告及对方收到主张。</p><div class="rounded-xl bg-white p-4 text-sm"><p class="font-semibold text-navy">对应证据</p><p class="mt-2">律师函、EMS 单据、签收回执</p><span class="mt-3 inline-block rounded bg-emerald-100 px-2 py-1 text-xs font-bold text-emerald-700">证明力：强</span></div></div>
+        </details>
+      </div>
+    </section>
+
+    <section class="mt-10 rounded-2xl bg-white p-6 shadow-soft">
+      <div class="mb-5 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+        <div>
+          <p class="text-sm font-semibold tracking-widest text-gold">EVIDENCE MATRIX</p>
+          <h2 class="serif mt-1 text-3xl font-bold text-navy">证据矩阵表格</h2>
+        </div>
+        <div class="flex flex-wrap gap-2">
+          <button class="filter-btn rounded-full bg-navy px-4 py-2 text-sm text-white" data-filter="all">全部</button>
+          <button class="filter-btn rounded-full bg-slate-200 px-4 py-2 text-sm text-navy" data-filter="ours">我方证据</button>
+          <button class="filter-btn rounded-full bg-slate-200 px-4 py-2 text-sm text-navy" data-filter="gap">仅看缺口</button>
+        </div>
+      </div>
+      <div class="overflow-x-auto">
+        <table class="w-full min-w-[900px] border-separate border-spacing-y-2 text-left text-sm">
+          <thead><tr class="text-slate-500"><th class="px-4 py-2">证据名称</th><th class="px-4 py-2">证明对象</th><th class="px-4 py-2">证据类型</th><th class="px-4 py-2">归属</th><th class="px-4 py-2">证明力</th><th class="px-4 py-2">缺口提示</th></tr></thead>
+          <tbody>
+            <tr class="evidence-row bg-slate-50" data-owner="ours" data-gap="no"><td class="rounded-l-xl px-4 py-3 font-semibold text-navy">采购合同</td><td class="px-4 py-3">合同关系、供货及结算方式</td><td class="px-4 py-3">书证</td><td class="px-4 py-3"><span class="rounded bg-emerald-100 px-2 py-1 text-emerald-700">我方</span></td><td class="px-4 py-3"><span class="rounded bg-emerald-100 px-2 py-1 font-bold text-emerald-700">强</span></td><td class="rounded-r-xl px-4 py-3">需核实签章主体、签署日期、付款条款、违约责任条款。</td></tr>
+            <tr class="evidence-row bg-slate-50" data-owner="ours" data-gap="yes"><td class="rounded-l-xl px-4 py-3 font-semibold text-navy">五批送货单</td><td class="px-4 py-3">实际供货、交付数量、交付时间</td><td class="px-4 py-3">书证/业务凭证</td><td class="px-4 py-3"><span class="rounded bg-emerald-100 px-2 py-1 text-emerald-700">我方</span></td><td class="px-4 py-3"><span class="rounded bg-amber-100 px-2 py-1 font-bold text-amber-700">中</span></td><td class="rounded-r-xl px-4 py-3">部分未签字，需补强司机证言、物流记录、仓库监控、微信确认等。</td></tr>
+            <tr class="evidence-row bg-slate-50" data-owner="ours" data-gap="yes"><td class="rounded-l-xl px-4 py-3 font-semibold text-navy">对账单</td><td class="px-4 py-3">总货款 280 万、已付 50 万、欠付 230 万</td><td class="px-4 py-3">书证/结算材料</td><td class="px-4 py-3"><span class="rounded bg-emerald-100 px-2 py-1 text-emerald-700">我方</span></td><td class="px-4 py-3"><span class="rounded bg-amber-100 px-2 py-1 font-bold text-amber-700">中</span></td><td class="rounded-r-xl px-4 py-3">对方未盖章，需结合还款承诺书、聊天记录、送货单综合证明。</td></tr>
+            <tr class="evidence-row bg-slate-50" data-owner="ours" data-gap="no"><td class="rounded-l-xl px-4 py-3 font-semibold text-navy">还款承诺书</td><td class="px-4 py-3">对方确认债务及承诺 2024 年 1 月前付清</td><td class="px-4 py-3">书证</td><td class="px-4 py-3"><span class="rounded bg-emerald-100 px-2 py-1 text-emerald-700">我方</span></td><td class="px-4 py-3"><span class="rounded bg-emerald-100 px-2 py-1 font-bold text-emerald-700">强</span></td><td class="rounded-r-xl px-4 py-3">需核实签字人身份、授权、是否盖章、金额表述是否明确。</td></tr>
+            <tr class="evidence-row bg-slate-50" data-owner="ours" data-gap="no"><td class="rounded-l-xl px-4 py-3 font-semibold text-navy">银行流水</td><td class="px-4 py-3">对方已付款 50 万及付款性质为建材货款</td><td class="px-4 py-3">电子数据/金融凭证</td><td class="px-4 py-3"><span class="rounded bg-emerald-100 px-2 py-1 text-emerald-700">我方</span></td><td class="px-4 py-3"><span class="rounded bg-emerald-100 px-2 py-1 font-bold text-emerald-700">强</span></td><td class="rounded-r-xl px-4 py-3">建议调取完整流水并保留银行盖章版本或电子回单。</td></tr>
+            <tr class="evidence-row bg-slate-50" data-owner="ours" data-gap="no"><td class="rounded-l-xl px-4 py-3 font-semibold text-navy">催款微信记录</td><td class="px-4 py-3">我方催收、对方拖延付款、未正式质量异议</td><td class="px-4 py-3">电子数据</td><td class="px-4 py-3"><span class="rounded bg-emerald-100 px-2 py-1 text-emerald-700">我方</span></td><td class="px-4 py-3"><span class="rounded bg-emerald-100 px-2 py-1 font-bold text-emerald-700">强/中</span></td><td class="rounded-r-xl px-4 py-3">需保全原始载体、账号身份、完整上下文，必要时做电子数据存证。</td></tr>
+            <tr class="evidence-row bg-slate-50" data-owner="ours" data-gap="no"><td class="rounded-l-xl px-4 py-3 font-semibold text-navy">律师函及 EMS 签收回执</td><td class="px-4 py-3">诉前正式催告、对方收悉</td><td class="px-4 py-3">书证/邮寄凭证</td><td class="px-4 py-3"><span class="rounded bg-emerald-100 px-2 py-1 text-emerald-700">我方</span></td><td class="px-4 py-3"><span class="rounded bg-emerald-100 px-2 py-1 font-bold text-emerald-700">强</span></td><td class="rounded-r-xl px-4 py-3">需对应收件地址、收件主体和律师函正文内容。</td></tr>
+            <tr class="evidence-row bg-slate-50" data-owner="opposite" data-gap="yes"><td class="rounded-l-xl px-4 py-3 font-semibold text-navy">质量问题口头说法</td><td class="px-4 py-3">可能构成对方抗辩方向</td><td class="px-4 py-3">口头陈述线索</td><td class="px-4 py-3"><span class="rounded bg-rose-100 px-2 py-1 text-rose-700">对方</span></td><td class="px-4 py-3"><span class="rounded bg-rose-100 px-2 py-1 font-bold text-rose-700">弱</span></td><td class="rounded-r-xl px-4 py-3">目前未见书面异议、检测报告、退换货记录；需准备反驳。</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="mt-10 grid gap-6 lg:grid-cols-2">
+      <div class="rounded-2xl bg-white p-6 shadow-soft">
+        <p class="text-sm font-semibold tracking-widest text-gold">ISSUES</p>
+        <h2 class="serif mt-1 text-3xl font-bold text-navy">争议焦点初判</h2>
+        <div class="mt-5 space-y-4">
+          <div class="rounded-xl bg-slate-50 p-4"><p class="font-bold text-navy">1. 是否存在有效买卖合同关系</p><p class="mt-2 leading-7 text-slate-700">采购合同、付款备注、送货单和催款记录可共同证明，风险相对较低。</p></div>
+          <div class="rounded-xl bg-slate-50 p-4"><p class="font-bold text-navy">2. 实际供货金额是否达到 280 万元</p><p class="mt-2 leading-7 text-slate-700">对账单未盖章、部分送货单未签字，是金额认定的核心争议。</p></div>
+          <div class="rounded-xl bg-slate-50 p-4"><p class="font-bold text-navy">3. 欠款 230 万元是否已经被对方确认</p><p class="mt-2 leading-7 text-slate-700">还款承诺书是关键，如金额明确且签署主体有效，对我方非常有利。</p></div>
+          <div class="rounded-xl bg-slate-50 p-4"><p class="font-bold text-navy">4. 对方能否以质量问题抗辩付款</p><p class="mt-2 leading-7 text-slate-700">目前仅为口头提及，未见书面异议或检测材料；但起诉前仍需整理验收、使用、未退货等反驳证据。</p></div>
+        </div>
+      </div>
+      <div class="rounded-2xl bg-white p-6 shadow-soft">
+        <p class="text-sm font-semibold tracking-widest text-gold">GAPS</p>
+        <h2 class="serif mt-1 text-3xl font-bold text-navy">证据缺口 · 补强建议</h2>
+        <div class="mt-5 space-y-4">
+          <div class="rounded-xl border-l-4 border-rose-500 bg-rose-50 p-4"><p class="font-bold text-rose-900">部分送货单未签字</p><p class="mt-2 leading-7 text-slate-700">补充司机证言、派车单、物流轨迹、入库照片、微信通知、仓库联系人确认等。</p></div>
+          <div class="rounded-xl border-l-4 border-rose-500 bg-rose-50 p-4"><p class="font-bold text-rose-900">对账单未获对方盖章</p><p class="mt-2 leading-7 text-slate-700">尝试再次发送对账确认函；若对方不回，可保留发送记录，并用还款承诺书及付款记录补强。</p></div>
+          <div class="rounded-xl border-l-4 border-rose-500 bg-rose-50 p-4"><p class="font-bold text-rose-900">质量问题抗辩预案不足</p><p class="mt-2 leading-7 text-slate-700">整理对方收货后未及时书面异议、未退货、继续使用、后续承诺付款等事实。</p></div>
+          <div class="rounded-xl border-l-4 border-rose-500 bg-rose-50 p-4"><p class="font-bold text-rose-900">利息/违约责任依据需核实</p><p class="mt-2 leading-7 text-slate-700">检查合同是否约定逾期付款违约金；无约定时，逾期付款损失计算口径需律师核实。</p></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="mt-10 rounded-2xl border border-amber-200 bg-amber-50 p-6 shadow-soft">
+      <p class="text-sm font-semibold tracking-widest text-amber-700">TO BE CONFIRMED</p>
+      <h2 class="serif mt-1 text-3xl font-bold text-navy">待确认事项清单</h2>
+      <div class="mt-5 grid gap-3 md:grid-cols-2">
+        <label class="flex gap-3 rounded-xl bg-white p-4"><input type="checkbox" class="mt-1"><span>采购合同原件签署日期是否确为 2023-03-15，双方签章是否完整。</span></label>
+        <label class="flex gap-3 rounded-xl bg-white p-4"><input type="checkbox" class="mt-1"><span>五批送货单中哪些有签字，哪些未签字；每批金额、数量、品类明细。</span></label>
+        <label class="flex gap-3 rounded-xl bg-white p-4"><input type="checkbox" class="mt-1"><span>还款承诺书是否载明欠款金额 230 万元，签署人为谁，是否有公司盖章或授权。</span></label>
+        <label class="flex gap-3 rounded-xl bg-white p-4"><input type="checkbox" class="mt-1"><span>宏远装饰曾提到质量问题的具体时间、内容、聊天记录上下文。</span></label>
+        <label class="flex gap-3 rounded-xl bg-white p-4"><input type="checkbox" class="mt-1"><span>合同是否约定付款期限、逾期违约金、管辖法院、争议解决条款。</span></label>
+        <label class="flex gap-3 rounded-xl bg-white p-4"><input type="checkbox" class="mt-1"><span>宏远装饰工商信息、法定代表人、经营状态、财产线索及是否需要诉前/诉中保全。</span></label>
+      </div>
+    </section>
+
+    <section class="mt-10 rounded-2xl bg-navy p-6 text-white shadow-soft">
+      <h2 class="serif text-2xl font-bold">初步诉讼判断</h2>
+      <p class="mt-4 leading-8 text-slate-200">从现有口述材料看，我方具备起诉基础，核心请求可暂按欠付货款 230 万元并结合合同约定或法律规定主张逾期付款损失。胜诉把握主要取决于还款承诺书的有效性、送货交付链条是否完整、对方质量抗辩是否能被压制。若还款承诺书金额明确且签章/授权无重大瑕疵，案件整体对我方较有利；但最终可追回金额还受证据认定、对方偿付能力、财产保全情况影响。</p>
+      <p class="mt-3 text-sm text-gold">涉及具体法律依据、诉讼请求金额、利息计算和管辖法院均标注为：需律师核实。</p>
+    </section>
+  </main>
+
+  <footer class="mt-8 bg-slate-900 px-5 py-8 text-center text-sm leading-7 text-slate-300">
+    <p>本页面为 AI 辅助生成的案件梳理底稿，用于帮助律师快速建立案件全貌。</p>
+    <p>所涉事实需以证据原件、完整聊天记录、银行凭证及工商信息为准；法律依据、诉讼策略和最终结论需由执业律师核实定稿，不构成正式法律意见。</p>
+  </footer>
+
+  <script>
+    const buttons = document.querySelectorAll('.filter-btn');
+    const rows = document.querySelectorAll('.evidence-row');
+    buttons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        buttons.forEach(b => { b.classList.remove('bg-navy', 'text-white'); b.classList.add('bg-slate-200', 'text-navy'); });
+        btn.classList.add('bg-navy', 'text-white');
+        btn.classList.remove('bg-slate-200', 'text-navy');
+        const filter = btn.dataset.filter;
+        rows.forEach(row => {
+          const show = filter === 'all' || (filter === 'ours' && row.dataset.owner === 'ours') || (filter === 'gap' && row.dataset.gap === 'yes');
+          row.classList.toggle('hidden-row', !show);
+        });
+      });
+    });
+  </script>
+
+
+</body></html>
