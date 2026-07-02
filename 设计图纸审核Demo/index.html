@@ -1,0 +1,224 @@
+<!DOCTYPE html><html lang="zh"><head><meta charset="utf-8">
+<title>工程图标准符合性自检报告 — NW-10472</title>
+<style>
+ *{box-sizing:border-box}
+ body{font-family:-apple-system,'PingFang SC','Microsoft YaHei',Helvetica,Arial,sans-serif;color:#1a1a1a;margin:0;background:#f5f6f8}
+ .wrap{max-width:1180px;margin:0 auto;padding:28px 28px 60px}
+ .head{display:flex;justify-content:space-between;align-items:flex-end;border-bottom:3px solid #1a1a1a;padding-bottom:14px}
+ .head h1{font-size:24px;margin:0 0 4px}
+ .head .sub{color:#666;font-size:13px}
+ .head .meta{text-align:right;font-size:13px;color:#444;line-height:1.7}
+ .head .meta b{color:#111}
+ .kpis{display:flex;gap:14px;margin:22px 0}
+ .kpi{flex:1;background:#fff;border:1px solid #e3e6ea;border-radius:10px;padding:16px 18px}
+ .kpi .n{font-size:30px;font-weight:800;line-height:1}
+ .kpi .l{font-size:12px;color:#666;margin-top:8px}
+ .banner{background:#eef9f0;border:1px solid #b7e0c0;border-radius:10px;padding:14px 18px;font-size:13.5px;color:#1f6b32;margin-bottom:6px}
+ .banner b{color:#14532d}
+ .scope{background:#fff;border:1px solid #e3e6ea;border-left:4px solid #f08c00;border-radius:8px;padding:14px 18px;font-size:13px;color:#444;margin:18px 0;line-height:1.7}
+ .scope b{color:#111}
+ figure{margin:22px 0;background:#fff;border:1px solid #e3e6ea;border-radius:10px;padding:14px}
+ figure img{width:100%;display:block;border:1px solid #eee;border-radius:4px}
+ figure figcaption{font-size:12px;color:#777;margin-top:8px;text-align:center}
+ table{width:100%;border-collapse:collapse;background:#fff;border:1px solid #e3e6ea;border-radius:10px;overflow:hidden;font-size:13px}
+ th,td{padding:9px 11px;text-align:left;border-bottom:1px solid #eef0f2;vertical-align:top}
+ th{background:#1a1a1a;color:#fff;font-size:12px;letter-spacing:.3px}
+ td.num{font-weight:700;color:#555;text-align:center;width:34px}
+ td.mono,.mono{font-family:ui-monospace,Menlo,Consolas,monospace}
+ td.small,.small{font-size:12px;color:#555}
+ .pill{color:#fff;font-size:11px;font-weight:700;padding:2px 9px;border-radius:20px;white-space:nowrap}
+ tr:hover td{background:#fafbfc}
+ .foot{margin-top:26px;font-size:12px;color:#888;border-top:1px solid #e3e6ea;padding-top:14px;line-height:1.7}
+</style></head><body><div class="wrap">
+
+ <div class="head">
+   <div>
+     <h1>工程图标准符合性自检报告</h1>
+     <div class="sub">AI Drawing Standard-Compliance Self-Check · 自动初审 / 人工复核前置筛查</div>
+   </div>
+   <div class="meta">
+     图号 <b>NW-10472</b> &nbsp; 版本 <b>D</b><br>
+     零件 <b>BRACKET WELDMENT(支架焊接件)</b><br>
+     检查 <b>2026-06-24</b> &nbsp; 检查方 <b>AI 符合性引擎</b>
+   </div>
+ </div>
+
+ <div class="kpis">
+   <div class="kpi"><div class="n">17</div><div class="l">不符合项合计</div></div>
+   <div class="kpi"><div class="n" style="color:#e02424">9</div><div class="l">严重 Critical</div></div>
+   <div class="kpi"><div class="n" style="color:#f08c00">6</div><div class="l">重要 Major</div></div>
+   <div class="kpi"><div class="n" style="color:#868e96">2</div><div class="l">轻微 Minor</div></div>
+   <div class="kpi"><div class="n" style="color:#1f6b32">~10<span style="font-size:16px">min</span></div><div class="l">耗时(人工约 1.5–2 小时)</div></div>
+ </div>
+
+ <div class="banner">
+   <b>盲测验证:</b>本图预埋 16 处缺陷,由 4 个互不知情的 AI 评审 agent 盲检 + 对抗式逐条复核。
+   范围内召回 <b>15/15(100%)</b>;<b>0 误报</b>(2 条越界候选项被复核环节正确拒绝);
+   另发现 <b>4 处</b>未刻意预埋的真实缺陷。
+ </div>
+
+ <figure>
+   <img src="drawing_annotated.png" alt="AI 标注图纸">
+   <figcaption>图 1 — AI 在原图上逐项标注的不符合项(红=严重 / 橙=重要 / 灰=轻微),编号与下表对应。</figcaption>
+ </figure>
+
+ <table>
+   <thead><tr>
+     <th>#</th><th>级别</th><th>规则</th><th>依据标准</th><th>维度</th><th>位置</th><th>不符合项描述</th>
+   </tr></thead>
+   <tbody><tr>
+      <td class="num">1</td>
+      <td><span class="pill" style="background:#e02424">严重</span></td>
+      <td class="mono">MAT-01</td>
+      <td class="mono small">ASME Y14.100</td>
+      <td>标题栏</td>
+      <td class="small">标题栏 / 材料栏</td>
+      <td>材料栏完全空白——既无材料规范也无牌号/状态。</td>
+    </tr><tr>
+      <td class="num">2</td>
+      <td><span class="pill" style="background:#e02424">严重</span></td>
+      <td class="mono">REV-07</td>
+      <td class="mono small">ASME Y14.100</td>
+      <td>版本</td>
+      <td class="small">标题栏 REV vs 版本表</td>
+      <td>标题栏版本为 D,而版本表最新行为 C——当前版本与版本记录不一致。</td>
+    </tr><tr>
+      <td class="num">3</td>
+      <td><span class="pill" style="background:#e02424">严重</span></td>
+      <td class="mono">TOL-01 · GN-03</td>
+      <td class="mono small">ASME Y14.5-2018</td>
+      <td>公差</td>
+      <td class="small">注释栏 / 标题栏</td>
+      <td>全图无总(默认)公差注释(无 UOS 块、无 ISO 2768 等级),而图面存在未注公差尺寸。</td>
+    </tr><tr>
+      <td class="num">4</td>
+      <td><span class="pill" style="background:#e02424">严重</span></td>
+      <td class="mono">GDT-01 · GDT-04</td>
+      <td class="mono small">ASME Y14.5-2018</td>
+      <td>形位公差</td>
+      <td class="small">前视图 中心孔下方 FCF</td>
+      <td>形位公差框首格(特征符号格)为空;且框内引用基准 A/B/C,但全图仅有基准 A 的基准符号,B、C 为孤立引用。</td>
+    </tr><tr>
+      <td class="num">5</td>
+      <td><span class="pill" style="background:#e02424">严重</span></td>
+      <td class="mono">LC-05</td>
+      <td class="mono small">ASME Y14.2</td>
+      <td>图线与字体</td>
+      <td class="small">前视图 下方尺寸链</td>
+      <td>两处尺寸文字重叠打印(“80 ±0.1” 与 “63.5”),字符叠加不可读。</td>
+    </tr><tr>
+      <td class="num">6</td>
+      <td><span class="pill" style="background:#e02424">严重</span></td>
+      <td class="mono">WS-01 · WS-04</td>
+      <td class="mono small">AWS A2.4</td>
+      <td>焊接符号</td>
+      <td class="small">SECTION A-A 接头处</td>
+      <td>焊接符号仅有一个角焊三角形,无基准线、无指引箭头连到接头,亦无规范位置的焊脚尺寸。</td>
+    </tr><tr>
+      <td class="num">7</td>
+      <td><span class="pill" style="background:#e02424">严重</span></td>
+      <td class="mono">VP-03</td>
+      <td class="mono small">GB/T 4458</td>
+      <td>视图与投影</td>
+      <td class="small">前视图 vs 剖视标题</td>
+      <td>存在 “SECTION A-A” 剖视,但母视图上无 A-A 剖切线/箭头/字母标注——剖视引用孤立。</td>
+    </tr><tr>
+      <td class="num">8</td>
+      <td><span class="pill" style="background:#e02424">严重</span></td>
+      <td class="mono">VP-01</td>
+      <td class="mono small">ASME Y14.3</td>
+      <td>视图与投影</td>
+      <td class="small">标题栏附近</td>
+      <td>全图无第一/第三角投影法符号,也无 “THIRD ANGLE PROJECTION” 文字——投影约定未定义。</td>
+    </tr><tr>
+      <td class="num">9</td>
+      <td><span class="pill" style="background:#e02424">严重</span></td>
+      <td class="mono">BOM-02</td>
+      <td class="mono small">ASME Y14.34</td>
+      <td>明细表与序号</td>
+      <td class="small">前视图 序号 7</td>
+      <td>序号气球 7 在明细表中无对应行(明细表仅 1–6 行)——孤立序号。</td>
+    </tr><tr>
+      <td class="num">10</td>
+      <td><span class="pill" style="background:#f08c00">重要</span></td>
+      <td class="mono">TB-08</td>
+      <td class="mono small">GB/T 10609.1</td>
+      <td>标题栏</td>
+      <td class="small">标题栏 责任栏 APPR. 行</td>
+      <td>审批(APPR.)姓名与日期空白(制图、校对已填)。</td>
+    </tr><tr>
+      <td class="num">11</td>
+      <td><span class="pill" style="background:#f08c00">重要</span></td>
+      <td class="mono">REV-03</td>
+      <td class="mono small">ASME Y14.35</td>
+      <td>版本</td>
+      <td class="small">版本表 REV 列</td>
+      <td>版本序列跳号——表中 A 后直接到 C,缺少 B 行。</td>
+    </tr><tr>
+      <td class="num">12</td>
+      <td><span class="pill" style="background:#f08c00">重要</span></td>
+      <td class="mono">REV-02</td>
+      <td class="mono small">ASME Y14.35</td>
+      <td>版本</td>
+      <td class="small">版本表 表头</td>
+      <td>版本表缺少“批准/BY”列(现仅 REV/DESCRIPTION/ECN/DATE)。</td>
+    </tr><tr>
+      <td class="num">13</td>
+      <td><span class="pill" style="background:#f08c00">重要</span></td>
+      <td class="mono">TOL-04</td>
+      <td class="mono small">ASME Y14.5-2018</td>
+      <td>公差</td>
+      <td class="small">前视图 总长 “120 +0.2/”</td>
+      <td>正负公差格式错误——上偏差 +0.2 后斜杠下无下偏差值,缺失下限。</td>
+    </tr><tr>
+      <td class="num">14</td>
+      <td><span class="pill" style="background:#f08c00">重要</span></td>
+      <td class="mono">SF-04</td>
+      <td class="mono small">ISO 1302</td>
+      <td>表面粗糙度</td>
+      <td class="small">前视图 顶面 粗糙度符号</td>
+      <td>粗糙度值为裸数字 “1.6”,缺参数代号(Ra/Rz)。</td>
+    </tr><tr>
+      <td class="num">15</td>
+      <td><span class="pill" style="background:#f08c00">重要</span></td>
+      <td class="mono">SF-01</td>
+      <td class="mono small">ISO 1302</td>
+      <td>表面粗糙度</td>
+      <td class="small">注释栏 / 标题栏</td>
+      <td>全图无总表面粗糙度注释或带“其余”括号的总符号,仅一处局部符号,其余表面粗糙度未定义。</td>
+    </tr><tr>
+      <td class="num">16</td>
+      <td><span class="pill" style="background:#868e96">轻微</span></td>
+      <td class="mono">GN-08</td>
+      <td class="mono small">ASME Y14.100</td>
+      <td>注释</td>
+      <td class="small">注释栏 第 3 条</td>
+      <td>注释语言混用——英文注释中夹一条中文(“所有未注明的圆角…”)。</td>
+    </tr><tr>
+      <td class="num">17</td>
+      <td><span class="pill" style="background:#868e96">轻微</span></td>
+      <td class="mono">BOM-07</td>
+      <td class="mono small">ASME Y14.100</td>
+      <td>明细表与序号</td>
+      <td class="small">前视图 右下孔</td>
+      <td>气球 5 与 7 拥挤、指引落在同一区域,序号—零件对应关系不清。</td>
+    </tr></tbody>
+ </table>
+
+ <div class="scope">
+   <b>检查范围(诚实边界):</b>本引擎做的是<b>存在性 / 格式 / 可读性 / 图面一致性</b>筛查——
+   缺失或占位的标题栏与注释字段、缺失或残缺的版本表、缺失的总公差/单位/投影法/标准引用注释、
+   残缺的正负公差与极限、形位公差框/焊接符号/粗糙度符号/明细表的格式完整性、
+   孤立的交叉引用(基准字母、剖视标号、序号—明细表对应)、跳号/不一致的编号、文字重叠或不可读。<br>
+   <b>明确不做:</b>不判定任何尺寸数值是否<b>正确</b>、不验证几何有效性、不做公差叠加/MMC 计算、
+   不判断视图是否足以完整定义零件、不核对图面是否与 CAD 模型一致——
+   这些需 CAD 内核 / 测量 / 设计意图,交由人工或 CAD 工具,<b>不在本筛查承诺范围内</b>。
+ </div>
+
+ <div class="foot">
+   本报告为 POC 演示件,零件与图号为合成示例(非真实客户数据)。规则清单覆盖 11 个制图维度、108 条可判定规则,
+   依据 ASME Y14.x / ISO / GB/T 等公开标准编制。引擎定位为人工检图前的<b>自动初审</b>,用于在评审会前消化机械性/文书性不符合项,
+   不替代工程检图签署。
+ </div>
+
+</div></body></html>
