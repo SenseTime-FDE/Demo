@@ -102,6 +102,26 @@ const PROJECTS = [
     url: "https://sensetime-fde.github.io/Demo/%E8%AE%BE%E8%AE%A1%E5%9B%BE%E7%BA%B8%E5%AE%A1%E6%A0%B8Demo",
     hue: 160, live: true,
   },
+  {
+    "cat": "industry",
+    "badge": "工业 Industry",
+    "title": "水务需求分析报告",
+    "desc": "面向供水营销管理系统，实现项目度量监控、功能流程拆解、需求文档智能质检一体化分析工作台。",
+    "tags": ["Agent", "需求分析", "水务行业"],
+    "url": "https://sensetime-fde.github.io/Demo/%E6%B0%B4%E5%8A%A1%E9%9C%80%E6%B1%82%E5%88%86%E6%9E%90_%E5%88%86%E6%9E%90%E6%8A%A5%E5%91%8A/",
+    "hue": 160,
+    "live": true
+  },
+  {
+    "cat": "industry",
+    "badge": "工业 Industry",
+    "title": "水务需求沟通系统原型",
+    "desc": "供水营销管理系统前端交互原型，支持账号登录、业务参数可视化调参，用于需求阶段客户直观预览系统页面效果。",
+    "tags": ["Agent", "需求原型", "水务行业"],
+    "url": "https://sensetime-fde.github.io/Demo/%E6%B0%B4%E5%8A%A1%E9%9C%80%E6%B1%82%E5%88%86%E6%9E%90_%E7%B3%BB%E7%BB%9F%E5%8E%9F%E5%9E%8B/",
+    "hue": 160,
+    "live": true
+  },
   // —— 微信小程序：扫码体验（把二维码图片放进 images/ 文件夹）——
   {
     cat: "sales", type: "qr", badge: "销售 Sales", title: "工作管理效率小助手",
