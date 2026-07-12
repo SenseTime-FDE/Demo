@@ -1,0 +1,1796 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>供水营销管理系统 · 需求沟通原型</title>
+<style>
+:root{
+  --bg:#f9f9f7; --card:#fcfcfb; --line:rgba(11,11,11,0.10); --line2:rgba(11,11,11,0.16);
+  --ink:#1e1e1c; --mut:#6d6d67; --blue:#1c5cab; --blue-d:#153f72; --blue-bg:#eef3fa;
+  --ok:#0ca30c; --warn:#fab219; --over:#ec835a; --bad:#d03b3b;
+  --sh:0 1px 3px rgba(11,11,11,.05),0 4px 14px rgba(11,11,11,.05);
+}
+*{box-sizing:border-box} html,body{height:100%}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:system-ui,-apple-system,"PingFang SC","Segoe UI",sans-serif;font-size:14px;line-height:1.55;}
+button,input,select,textarea{font:inherit;color:inherit}
+input,select,textarea{background:#fff;border:1px solid var(--line2);border-radius:7px;padding:7px 10px;outline:none;}
+input:focus,select:focus,textarea:focus{border-color:var(--blue);box-shadow:0 0 0 2px rgba(28,92,171,.15)}
+h1,h2,h3,h4{margin:0;font-weight:600}
+/* ============ 顶部工具栏 ============ */
+#toolbar{position:fixed;top:0;left:0;right:0;height:56px;z-index:900;display:flex;align-items:center;gap:10px;
+  padding:0 14px;background:var(--card);border-bottom:1px solid var(--line);}
+#toolbar .brand{display:flex;align-items:center;gap:8px;font-weight:700;font-size:15px;white-space:nowrap}
+#toolbar .brand small{font-weight:400;color:var(--mut);font-size:12px}
+.seg{display:flex;background:#efefec;border:1px solid var(--line);border-radius:9px;padding:2px;gap:2px}
+.seg button{border:0;background:transparent;border-radius:7px;padding:5px 12px;cursor:pointer;color:var(--mut);white-space:nowrap}
+.seg button.on{background:#fff;color:var(--blue);font-weight:600;box-shadow:0 1px 3px rgba(11,11,11,.12)}
+.tchip{border:1px solid var(--line2);background:#fff;border-radius:9px;padding:6px 12px;cursor:pointer;white-space:nowrap;color:var(--mut)}
+.tchip.on{border-color:var(--blue);color:var(--blue);background:var(--blue-bg);font-weight:600}
+.tchip .cnt{display:inline-block;min-width:18px;padding:0 4px;border-radius:9px;background:var(--bad);color:#fff;font-size:11px;text-align:center;margin-left:4px}
+#toolbar .sp{flex:1}
+/* ============ 舞台与设备壳 ============ */
+#stage{position:absolute;top:56px;left:0;right:0;bottom:0;overflow:auto;}
+#stage.center{display:block;overflow:hidden}
+#frame-desktop{min-width:1280px;height:100%;}
+.devwrap{position:absolute;left:50%;top:50%;}
+.tab-shell{width:1072px;height:816px;background:#15181d;border-radius:28px;padding:24px;box-shadow:0 22px 70px rgba(0,0,0,.28);}
+.tab-screen{width:1024px;height:768px;background:var(--bg);border-radius:10px;overflow:hidden;display:flex;flex-direction:column;position:relative}
+.mb-shell{width:412px;height:866px;background:#15181d;border-radius:54px;padding:11px;box-shadow:0 22px 70px rgba(0,0,0,.28);position:relative}
+.mb-screen{width:390px;height:844px;border-radius:44px;overflow:hidden;background:var(--bg);display:flex;flex-direction:column;position:relative}
+.mb-notch{position:absolute;top:24px;left:50%;transform:translateX(-50%);width:120px;height:32px;background:#15181d;border-radius:18px;z-index:60}
+.mb-status{height:58px;flex:none;display:flex;align-items:flex-end;justify-content:space-between;padding:0 30px 6px;font-size:13px;font-weight:600}
+/* ============ 通用组件 ============ */
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;box-shadow:var(--sh)}
+.card .chd{display:flex;align-items:center;gap:8px;padding:12px 16px;border-bottom:1px solid var(--line);font-weight:600}
+.card .cbd{padding:14px 16px}
+.btn{border:1px solid var(--line2);background:#fff;border-radius:8px;padding:7px 14px;cursor:pointer;white-space:nowrap}
+.btn:hover{border-color:var(--blue);color:var(--blue)}
+.btn-pri{background:var(--blue);border-color:var(--blue);color:#fff}
+.btn-pri:hover{background:var(--blue-d);color:#fff}
+.btn-ok{background:var(--ok);border-color:var(--ok);color:#fff}.btn-ok:hover{color:#fff;filter:brightness(.92)}
+.btn-bad{background:var(--bad);border-color:var(--bad);color:#fff}.btn-bad:hover{color:#fff;filter:brightness(.92)}
+.btn-ghost{background:transparent;border-color:transparent;color:var(--blue)}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.btn-lg{padding:14px 26px;font-size:17px;border-radius:12px;font-weight:600}
+.btn-sm{padding:3px 9px;font-size:12px;border-radius:6px}
+.tbl{width:100%;border-collapse:collapse;font-size:13.5px}
+.tbl th{background:#f2f2ee;text-align:left;padding:8px 10px;font-weight:600;color:#4c4c47;border-bottom:1px solid var(--line2);white-space:nowrap}
+.tbl td{padding:8px 10px;border-bottom:1px solid var(--line);vertical-align:middle}
+.tbl tr:hover td{background:rgba(28,92,171,.045)}
+.tbl .num{text-align:right;font-variant-numeric:tabular-nums}
+.chip{display:inline-block;padding:1px 9px;border-radius:20px;font-size:12px;border:1px solid transparent;white-space:nowrap}
+.st-ok{color:var(--ok);background:rgba(12,163,12,.09);border-color:rgba(12,163,12,.25)}
+.st-warn{color:#9a6a00;background:rgba(250,178,25,.14);border-color:rgba(250,178,25,.45)}
+.st-over{color:#b34a24;background:rgba(236,131,90,.13);border-color:rgba(236,131,90,.4)}
+.st-bad{color:var(--bad);background:rgba(208,59,59,.09);border-color:rgba(208,59,59,.3)}
+.st-mut{color:var(--mut);background:rgba(11,11,11,.05);border-color:var(--line)}
+.st-blue{color:var(--blue);background:var(--blue-bg);border-color:rgba(28,92,171,.3)}
+.badge-todo{display:inline-flex;align-items:center;gap:5px;background:rgba(250,178,25,.15);border:1px solid rgba(250,178,25,.55);
+  color:#8a5d00;border-radius:8px;padding:3px 10px;font-size:12.5px;font-weight:600}
+.mut{color:var(--mut)}.small{font-size:12px}.b{font-weight:600}
+.money{font-variant-numeric:tabular-nums}
+.flexr{display:flex;align-items:center;gap:10px}.flexw{display:flex;flex-wrap:wrap;gap:12px}
+.toolrow{display:flex;align-items:center;gap:10px;margin-bottom:12px;flex-wrap:wrap}
+.subtabs{display:flex;gap:4px;border-bottom:2px solid var(--line);margin-bottom:14px;flex-wrap:wrap}
+.subtabs button{border:0;background:transparent;padding:8px 14px;cursor:pointer;color:var(--mut);border-bottom:2px solid transparent;margin-bottom:-2px;position:relative}
+.subtabs button.on{color:var(--blue);font-weight:600;border-bottom-color:var(--blue)}
+.formrow{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+.formrow label{width:110px;flex:none;text-align:right;color:#4c4c47}
+.formrow input[type=text],.formrow input[type=number],.formrow select,.formrow textarea{flex:1}
+.switch{position:relative;width:44px;height:24px;border-radius:12px;background:#d4d4cf;cursor:pointer;transition:.15s;flex:none}
+.switch::after{content:'';position:absolute;top:2px;left:2px;width:20px;height:20px;border-radius:50%;background:#fff;transition:.15s;box-shadow:0 1px 3px rgba(0,0,0,.25)}
+.switch.on{background:var(--ok)}.switch.on::after{left:22px}
+.kpi{flex:1;min-width:150px;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px 16px;box-shadow:var(--sh)}
+.kpi .kv{font-size:23px;font-weight:700;font-variant-numeric:tabular-nums;margin-top:2px}
+.kpi .kl{color:var(--mut);font-size:12.5px}
+.kpi .kd{font-size:12px;margin-top:3px}
+/* ============ 桌面端 ============ */
+.dt-shell{display:flex;height:100%;background:var(--bg)}
+.dt-nav{width:212px;flex:none;background:linear-gradient(180deg,#123a69 0%,#1c5cab 130%);color:#cfdff2;display:flex;flex-direction:column;}
+.dt-logo{display:flex;align-items:center;gap:9px;padding:16px 16px 14px;color:#fff;font-weight:700;font-size:15px;border-bottom:1px solid rgba(255,255,255,.14)}
+.dt-menu{flex:1;overflow:auto;padding:8px 0}
+.dt-menu .grp{padding:10px 18px 4px;font-size:11px;color:rgba(255,255,255,.45);letter-spacing:2px}
+.dt-menu a{display:flex;align-items:center;gap:9px;padding:9px 18px;color:#cfdff2;text-decoration:none;cursor:pointer;font-size:13.5px}
+.dt-menu a:hover{background:rgba(255,255,255,.08);color:#fff}
+.dt-menu a.on{background:rgba(255,255,255,.16);color:#fff;font-weight:600;border-right:3px solid #fab219}
+.dt-menu .ic{width:18px;text-align:center;flex:none;opacity:.9}
+.dt-user{padding:12px 16px;border-top:1px solid rgba(255,255,255,.14);font-size:12.5px;color:rgba(255,255,255,.75)}
+.dt-main{flex:1;display:flex;flex-direction:column;min-width:0}
+.dt-top{height:46px;flex:none;background:var(--card);border-bottom:1px solid var(--line);display:flex;align-items:center;padding:0 18px;gap:8px}
+.crumb{color:var(--mut);font-size:13px}.crumb b{color:var(--ink)}
+.dt-page{flex:1;overflow:auto;position:relative;padding:18px 20px 40px}
+/* 登录 */
+.login-wrap{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+  background:linear-gradient(150deg,#eaf1fa 0%,#f9f9f7 45%,#eef6ee 100%)}
+.login-card{width:400px;background:var(--card);border:1px solid var(--line);border-radius:16px;box-shadow:0 14px 50px rgba(18,58,105,.14);padding:34px 38px}
+.captcha{display:inline-flex;align-items:center;justify-content:center;width:96px;height:38px;background:#eef3fa;border:1px dashed rgba(28,92,171,.5);
+  border-radius:7px;font:700 19px/1 Georgia,serif;letter-spacing:5px;color:var(--blue);cursor:pointer;user-select:none;font-style:italic}
+/* 平板端 */
+.tb-page{flex:1;overflow:auto;position:relative;padding:18px 20px 20px}
+.tb-head{flex:none;height:56px;display:flex;align-items:center;gap:10px;padding:0 20px;background:var(--card);border-bottom:1px solid var(--line)}
+.tb-dock{flex:none;height:64px;background:var(--card);border-top:1px solid var(--line);display:flex;align-items:stretch;justify-content:space-around}
+.tb-dock button{border:0;background:transparent;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;color:var(--mut);width:120px;font-size:12px}
+.tb-dock button .di{font-size:21px;line-height:1}
+.tb-dock button.on{color:var(--blue);font-weight:600}
+.bigcard{background:var(--card);border:1px solid var(--line);border-radius:16px;box-shadow:var(--sh);padding:20px;cursor:pointer;transition:.12s;min-height:150px;display:flex;flex-direction:column;justify-content:space-between}
+.bigcard:hover{transform:translateY(-2px);box-shadow:0 8px 26px rgba(11,11,11,.12)}
+.bigcard .bi{font-size:26px}.bigcard .bn{font-size:17px;font-weight:700;margin-top:6px}
+.bigcard .bv{font-size:26px;font-weight:700;font-variant-numeric:tabular-nums}
+/* 移动端 */
+.mb-page{flex:1;overflow:auto;position:relative;padding:12px 14px 14px;-webkit-overflow-scrolling:touch}
+.mb-tabs{flex:none;height:74px;background:var(--card);border-top:1px solid var(--line);display:flex;padding-bottom:14px}
+.mb-tabs button{flex:1;border:0;background:transparent;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;color:var(--mut);font-size:11px}
+.mb-tabs button .di{font-size:22px;line-height:1.1}
+.mb-tabs button.on{color:var(--blue);font-weight:600}
+.mcard{background:var(--card);border:1px solid var(--line);border-radius:14px;box-shadow:var(--sh);padding:14px;margin-bottom:12px}
+.prog{height:8px;border-radius:4px;background:#e8e8e4;overflow:hidden}
+.prog i{display:block;height:100%;border-radius:4px;background:var(--blue)}
+.kpad{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:10px}
+.kpad button{border:1px solid var(--line);background:#fff;border-radius:10px;padding:12px 0;font-size:20px;font-weight:600;cursor:pointer}
+.kpad button:active{background:var(--blue-bg)}
+.photo-box{border:1.5px dashed var(--line2);border-radius:10px;height:74px;display:flex;align-items:center;justify-content:center;color:var(--mut);font-size:12.5px;gap:6px;margin-top:10px;cursor:pointer}
+/* ============ FR 标签模式 ============ */
+body.tag-mode [data-fr],body.tag-mode [data-frx]{position:relative;outline:1.5px dashed rgba(28,92,171,.5);outline-offset:2px;border-radius:4px}
+body.tag-mode [data-fr]::after{content:attr(data-fr);position:absolute;top:-9px;right:-4px;z-index:45;
+  background:var(--blue);color:#fff;font-size:10px;line-height:1;padding:3px 6px;border-radius:8px;font-weight:600;pointer-events:none;box-shadow:0 1px 4px rgba(0,0,0,.3)}
+body.tag-mode [data-frx]{outline-color:rgba(250,178,25,.8)}
+body.tag-mode [data-frx]::after{content:'待补·' attr(data-frx);position:absolute;top:-9px;right:-4px;z-index:45;
+  background:var(--warn);color:#5c3d00;font-size:10px;line-height:1;padding:3px 6px;border-radius:8px;font-weight:700;pointer-events:none;box-shadow:0 1px 4px rgba(0,0,0,.3)}
+#fr-pop{position:fixed;z-index:1200;max-width:360px;background:#fff;border:1px solid var(--line2);border-radius:12px;box-shadow:0 12px 44px rgba(11,11,11,.22);padding:13px 15px;display:none;font-size:13px}
+#fr-pop .fp-id{font-weight:700;color:var(--blue)}
+#fr-pop .fp-desc{margin-top:7px;color:#3c3c38;max-height:190px;overflow:auto;line-height:1.6}
+/* ============ 批注 ============ */
+body.note-mode #stage{cursor:crosshair}
+body.note-mode #stage::after{content:'💬 批注模式：点击界面任意位置放置批注';position:fixed;top:64px;left:50%;transform:translateX(-50%);
+  background:rgba(30,30,28,.86);color:#fff;font-size:12.5px;padding:5px 14px;border-radius:16px;z-index:800;pointer-events:none}
+.pin{position:absolute;width:23px;height:23px;border-radius:50% 50% 50% 4px;color:#fff;font-size:11.5px;font-weight:700;
+  display:flex;align-items:center;justify-content:center;transform:translate(-50%,-100%) rotate(0deg);z-index:70;cursor:pointer;
+  box-shadow:0 2px 7px rgba(0,0,0,.35);border:2px solid #fff}
+.pin.t-需调整{background:var(--over)}.pin.t-有疑问{background:var(--warn);color:#5c3d00}
+.pin.t-新需求{background:var(--blue)}.pin.t-确认OK{background:var(--ok)}
+.pin.done{opacity:.45}
+#pin-tip{position:fixed;z-index:1200;max-width:320px;background:#26261f;color:#f4f4ef;border-radius:10px;padding:10px 13px;font-size:12.5px;display:none;box-shadow:0 10px 34px rgba(0,0,0,.35);line-height:1.55}
+/* ============ 抽屉 ============ */
+.drawer{position:fixed;top:56px;bottom:0;right:-390px;width:380px;background:var(--card);border-left:1px solid var(--line);
+  box-shadow:-10px 0 34px rgba(11,11,11,.10);z-index:850;transition:right .22s ease;display:flex;flex-direction:column}
+.drawer.open{right:0}
+.drawer .dhd{padding:13px 16px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:8px;font-weight:700}
+.drawer .dbd{flex:1;overflow:auto;padding:14px 16px}
+.pflash{margin-left:auto;font-size:12px;color:var(--ok);font-weight:600;opacity:0;transition:opacity .25s}
+.pflash.show{opacity:1}
+.pfield{margin-bottom:13px}
+.pfield label{display:flex;justify-content:space-between;font-size:12.5px;color:#4c4c47;margin-bottom:4px}
+.pfield input{width:100%}
+.note-item{border:1px solid var(--line);border-radius:10px;padding:10px 12px;margin-bottom:10px;background:#fff}
+.note-item .nh{display:flex;align-items:center;gap:7px;margin-bottom:5px;flex-wrap:wrap}
+.note-item .nno{width:20px;height:20px;border-radius:50%;color:#fff;font-size:11px;display:inline-flex;align-items:center;justify-content:center;font-weight:700;flex:none}
+/* ============ 弹窗 / 提示 ============ */
+#modal-mask{position:fixed;inset:0;background:rgba(20,20,18,.42);z-index:1000;display:none;align-items:center;justify-content:center}
+#modal-mask.open{display:flex}
+#modal-box{width:520px;max-width:94vw;max-height:86vh;overflow:auto;background:var(--card);border-radius:14px;box-shadow:0 24px 80px rgba(0,0,0,.3)}
+#modal-box .mh{padding:14px 18px;border-bottom:1px solid var(--line);font-weight:700;display:flex;align-items:center}
+#modal-box .mb{padding:18px}
+#modal-box .mf{padding:12px 18px;border-top:1px solid var(--line);display:flex;justify-content:flex-end;gap:10px}
+#toast-wrap{position:fixed;bottom:30px;left:50%;transform:translateX(-50%);z-index:1300;display:flex;flex-direction:column;gap:8px;align-items:center}
+.toast{background:#26261f;color:#f4f4ef;padding:9px 18px;border-radius:22px;font-size:13.5px;box-shadow:0 8px 30px rgba(0,0,0,.3);animation:tin .2s ease}
+.toast.tk{background:var(--ok)}.toast.tb{background:var(--bad)}.toast.tw{background:#8a5d00}
+@keyframes tin{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+/* 票据预览 */
+.receipt{border:1.5px solid var(--blue);border-radius:8px;padding:16px 18px;background:#fdfefe;font-size:13px;position:relative}
+.receipt::before{content:'收讫';position:absolute;right:22px;top:34px;color:rgba(208,59,59,.55);border:2.5px solid rgba(208,59,59,.55);
+  border-radius:50%;width:64px;height:64px;display:flex;align-items:center;justify-content:center;font-size:19px;font-weight:700;transform:rotate(-18deg)}
+.receipt h4{text-align:center;color:var(--blue);letter-spacing:4px;margin-bottom:4px}
+.receipt .rline{display:flex;justify-content:space-between;padding:3px 0;border-bottom:1px dashed rgba(11,11,11,.14)}
+/* 票据格式画布 */
+.tk-canvas{position:relative;width:100%;height:280px;border:1.5px solid var(--blue);border-radius:8px;background:
+  repeating-linear-gradient(0deg,transparent,transparent 27px,rgba(28,92,171,.06) 28px);overflow:hidden}
+.tk-item{position:absolute;border:1px dashed rgba(28,92,171,.55);background:rgba(238,243,250,.85);color:var(--blue-d);
+  font-size:11.5px;padding:2px 8px;border-radius:5px;white-space:nowrap}
+.dropzone{border:2px dashed var(--line2);border-radius:12px;padding:34px;text-align:center;color:var(--mut);cursor:pointer;background:#fff;transition:.15s}
+.dropzone:hover,.dropzone.hov{border-color:var(--blue);color:var(--blue);background:var(--blue-bg)}
+.loglist{background:#191c22;color:#b9e3b9;border-radius:10px;padding:12px 14px;font:12px/1.7 ui-monospace,Menlo,monospace;max-height:220px;overflow:auto}
+.loglist .lw{color:#fad27a}.loglist .le{color:#f5a3a3}
+::-webkit-scrollbar{width:9px;height:9px}::-webkit-scrollbar-thumb{background:rgba(11,11,11,.18);border-radius:5px}
+::-webkit-scrollbar-track{background:transparent}
+</style>
+</head>
+<body>
+<div id="toolbar">
+  <div class="brand">
+    <svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.5C12 2.5 5 10 5 15a7 7 0 0 0 14 0c0-5-7-12.5-7-12.5z" fill="#1c5cab"/><path d="M9 15.5a3 3 0 0 0 3 3" stroke="#fff" stroke-width="1.6" fill="none" stroke-linecap="round"/></svg>
+    供水营销管理系统 <small>· 需求沟通原型</small>
+  </div>
+  <div class="seg" id="devseg">
+    <button data-dev="desktop" class="on" onclick="A.setDevice('desktop')">🖥 桌面</button>
+    <button data-dev="tablet" onclick="A.setDevice('tablet')">▭ 平板</button>
+    <button data-dev="mobile" onclick="A.setDevice('mobile')">📱 移动</button>
+  </div>
+  <div class="sp"></div>
+  <button class="tchip" id="btn-tag" onclick="A.toggleTag()">🏷 需求标签</button>
+  <button class="tchip" id="btn-note" onclick="A.toggleNote()">💬 批注模式</button>
+  <button class="tchip" id="btn-params" onclick="A.togglePanel('params')">⚙ 业务参数</button>
+  <button class="tchip" id="btn-panel" onclick="A.togglePanel('notes')">📋 批注面板<span class="cnt" id="note-cnt" style="display:none">0</span></button>
+  <button class="tchip" onclick="A.exportNotes()">⬇ 导出批注JSON</button>
+</div>
+
+<div id="stage">
+  <div id="frame-desktop"></div>
+  <div id="frame-tablet" class="devwrap" style="display:none">
+    <div class="tab-shell"><div class="tab-screen" id="tb-screen"></div></div>
+  </div>
+  <div id="frame-mobile" class="devwrap" style="display:none">
+    <div class="mb-shell"><div class="mb-notch"></div><div class="mb-screen" id="mb-screen"></div></div>
+  </div>
+</div>
+
+<div class="drawer" id="drawer-params">
+  <div class="dhd">⚙ 业务参数（演示调参）<span class="pflash" id="pflash">✔ 参数已生效</span>
+    <button class="btn btn-sm" style="margin-left:8px" onclick="A.togglePanel('params')">✕</button></div>
+  <div class="dbd" id="params-body"></div>
+</div>
+
+<div class="drawer" id="drawer-notes">
+  <div class="dhd">📋 批注面板<span style="margin-left:auto"></span>
+    <button class="btn btn-sm" onclick="A.exportNotes()">⬇ 导出</button>
+    <button class="btn btn-sm" onclick="A.togglePanel('notes')">✕</button></div>
+  <div class="dbd" id="notes-body"></div>
+</div>
+
+<div id="fr-pop"></div>
+<div id="pin-tip"></div>
+<div id="modal-mask"><div id="modal-box"></div></div>
+<div id="toast-wrap"></div>
+
+<script>
+const APP_DATA={"system":"供水营销管理系统","priorityMap":{"1":"P1 高（核心必备）","2":"P2 中高","5":"P3 一般"},"modules":[{"id":"M1","name":"档案基础数据","srsRef":"4.1","functions":[{"id":"FR-1.1","name":"用户状态","priority":1,"srsRef":"4.1.1","refinedDesc":"维护用水户生命周期状态字典。管理对象为用户状态代码表，字段应含：状态编码（唯一、创建后不可改）、状态名称（如正常、报停、暂停、违章、销户）、是否抄表标志、是否计费标志、是否允许缴费标志、启用/停用标志、排序号、备注。规则：状态被客户档案引用后禁止删除、只能停用；『是否抄表』决定抄表计划是否为该状态用户生成抄表任务；『是否允许缴费』供公众缴费平台配置（4.3.4限制用户状态）引用，拦截不允许状态用户的线上缴费；『是否计费』决定开账时是否生成水费账单。"},{"id":"FR-1.2","name":"用户分类","priority":5,"srsRef":"4.1.2","refinedDesc":"维护用户性质分类字典，用于统计与政策口径管理。字段应含：分类编码（唯一）、分类名称（如居民、非居民、单位、趸售、特困减免户）、上级分类（支持树形）、启用/停用标志、备注。规则：分类被客户档案引用后禁止删除；用户分类可作为水价方案、报表统计、优惠适用范围的筛选维度；与行业分类（FR-1.4）职责区分：用户分类描述『用户性质』，行业分类描述『用水性质』。"},{"id":"FR-1.3","name":"抄表周期","priority":1,"srsRef":"4.1.3","refinedDesc":"维护抄表周期字典，驱动抄表计划的生成节奏。字段应含：周期编码、周期名称（如月抄、双月抄、季抄）、间隔月数、每期例抄日（日历日或工作日偏移）、启用/停用标志、备注。规则：周期挂接在表册上（一个表册一个周期），『抄表周期只能以表册为单位修改』即不允许对单户改周期，改周期须整册调整；被表册引用的周期禁止删除；周期+例抄日决定表册到期日，系统按到期日自动生成本期抄表计划任务。"},{"id":"FR-1.4","name":"行业分类","priority":5,"srsRef":"4.1.4","refinedDesc":"维护用水性质的行业分类字典，支持大类-小类两级结构（SRS操作序列提到『行类大小分类』）。字段应含：大类编码/名称（商业、工业、居民、特种等）、小类编码/名称、所属大类、启用/停用标志、备注。规则：行业分类挂接客户档案，用于用水性质统计报表与特种行业水价（如洗车、洗浴等特种用水执行特种水价）；被档案引用的分类禁止删除；特种行业类别应可被水价方案引用。"},{"id":"FR-1.5","name":"优惠类型","priority":1,"srsRef":"4.1.5","refinedDesc":"维护水费优惠政策字典。字段应含：优惠编码、优惠名称（如低保户减免、军烈属优惠、特困减免）、优惠方式（比例折扣/每期定额金额减免/每期定量水量减免）、优惠值、适用收费类型（水费/污水费）、适用用户分类、生效日期、失效日期、启用/停用标志、审批依据备注。规则：优惠类型在档案管理的水价信息处挂接到具体用户；算费开账时按优惠方式参与账单金额计算（先算原价再按优惠冲减，账单需保留优惠前后金额明细）；被档案引用的优惠禁止删除；过期优惠自动停止参与算费。"}]},{"id":"M2","name":"抄表基础模块","srsRef":"4.2","functions":[{"id":"FR-2.1","name":"抄表员管理","priority":1,"srsRef":"4.2.1","refinedDesc":"维护抄表员基础档案并与表册、掌上机、登录账号关联。字段应含：抄表员编号（唯一，可由系统自动生成）、姓名、所属营业所/抄表区域、联系电话、在职状态（在职/离职/停用）、关联系统登录账号、绑定掌上机设备号、备注。规则：一名抄表员可负责多个表册，一个表册同一时间只归属一名抄表员；有在管表册的抄表员不允许直接删除，须先将表册移交他人；离职/停用抄表员不再出现在表册分配与抄表任务下发范围内。"},{"id":"FR-2.2","name":"表册管理","priority":1,"srsRef":"4.2.2","refinedDesc":"维护表册（按抄表路线组织的用户集合，抄表与批量销账的基本单位）。字段应含：表册编号（唯一）、表册名称、所属区域/营业所、责任抄表员、抄表周期（引用FR-1.3）、例抄日、册内户数（系统统计）、表册状态（启用/停用/待移交）、备注。规则：抄表周期只能以表册为单位修改（3.3约束在此落地）；新立户用户必须归入某表册后才能进入抄表计划；用户可在表册间调拨（换册）并保留调拨记录；表册到期时系统按其周期与例抄日自动生成本期抄表计划；批量销账（FR-4.2）以表册号为查询入口。"},{"id":"FR-2.3","name":"表册顺序调整","priority":1,"srsRef":"4.2.3","refinedDesc":"调整表册内各户号的抄表顺序号，使抄表路线与实地行走路线一致。管理对象为表册-用户关系中的『册内抄表顺序号』字段。规则：顺序号在同一表册内唯一、连续（或允许留空隙由系统重排）；支持单户改号、上移/下移、拖拽排序、区间批量重排四种方式；调整后手工抄表界面（FR-7.1）与掌上机下载任务按新顺序展示；新入册用户默认排在册尾；调整操作留痕（操作人、时间、前后顺序）。"}]},{"id":"M3","name":"收费数据基础","srsRef":"4.3","functions":[{"id":"FR-3.1","name":"收费类型","priority":1,"srsRef":"4.3.1","refinedDesc":"维护费用科目字典。字段应含：收费类型编码（唯一）、收费类型名称（如水费、污水处理费、垃圾费、违约金/滞纳金、工程款、预存款）、是否允许线上渠道缴纳、销账冲抵优先顺序、对应票据类型（引用FR-5.1）、是否参与滞纳金计算、启用/停用标志。规则：账单按收费类型分项记账与开票；公众缴费平台配置（FR-3.4）可按收费类型限制线上可缴项目；销账时按冲抵优先顺序依次核销多项费用；被账单或渠道配置引用的类型禁止删除。"},{"id":"FR-3.2","name":"收费网点","priority":5,"srsRef":"4.3.2","refinedDesc":"维护线下收费网点（营业厅）档案。字段应含：网点编码（唯一）、网点名称、所属区域/分公司、地址、负责人、联系电话、营业时间、支持业务（收费/开票/预存/退费）、启用/停用标志。规则：柜员收费流水必须归属某网点，作为网点日结、长短款核对与收入统计的口径；网点停用后不再受理新流水但历史流水可查；ATM收费机（FR-3.3）挂接在网点之下。"},{"id":"FR-3.3","name":"Atm收费机","priority":5,"srsRef":"4.3.3","refinedDesc":"维护线下ATM自助缴费机设备档案。字段应含：设备编号（唯一）、设备名称、所属收费网点/安装位置、终端标识/IP、支持缴费方式（现金/银行卡/扫码）、是否支持打印票据、设备状态（在线/离线/停用/维修）、投产日期。规则：自助机缴费流水按设备编号归集，参与渠道对账与网点日结；设备停用后终端登录被拒绝；设备状态变化留日志供运维排查。"},{"id":"FR-3.4","name":"公众缴费平台","priority":1,"srsRef":"4.3.4","refinedDesc":"维护微信、支付宝、公众号等线上公众缴费通道（pps平台）配置。字段应含：通道编码、通道名称（微信支付/支付宝/公众号/小程序）、商户号、AppID、支付密钥（加密存储）、回调地址、允许缴纳的收费类型集合（引用FR-3.1）、允许缴费的用户状态集合（引用FR-1.1）、单笔限额、日累计限额、启用/停用标志。规则：用户状态不在允许集合内（如已销户）时线上查询/缴费被拦截；收费类型不在允许集合内的费项不展示或标记不可线上缴；通道停用立即停止受理新支付但已发起订单继续完成回调处理；配置变更留审计日志。"}]},{"id":"M4","name":"柜台收费业务","srsRef":"4.4","functions":[{"id":"FR-4.1","name":"单户销账","priority":1,"srsRef":"4.4.1","refinedDesc":"柜台按单户受理水费缴纳。柜员按户号（精确）或户名/地址（模糊）查询用户欠费账单列表，列表展示每期账单的账期、用水量、水费、污水费、其他费项、滞纳金（按销账当日重算）、合计与用户预存余额。柜员勾选一条或多条账单（须按账期先后连续勾选，不允许跳期销账），录入实收金额与付款方式（现金/扫码/银行卡），系统按收费类型冲抵顺序核销，支持预存余额抵扣，生成收费流水（含网点、柜员、付款方式），销账后账单状态置为已缴并可打印票据。冲正/作废当日流水需授权并生成红冲记录。"},{"id":"FR-4.2","name":"批量销账","priority":2,"srsRef":"4.4.2","refinedDesc":"面向单位代扣、整册托收等场景，按表册号（也应支持单位编号/文件导入）批量查询多户欠费并一次性销账。柜员输入表册号，系统列出册内全部欠费户及各户欠费合计，支持全选/反选/按条件过滤（欠费期数、金额区间），确认批量应收总额后一次收款，系统逐户逐单执行销账，生成一张批量收费汇总流水与逐户明细流水。逐户处理相互独立：单户失败（如该户账单已被其他渠道缴纳）不影响其他户，失败户列入错误清单并给出原因，成功户正常销账。"},{"id":"FR-4.3","name":"预收费","priority":2,"srsRef":"4.4.3","refinedDesc":"管理用户预存账户：预存缴费（充值）与取款（退还余额）。按户号/户名/地址查询用户，展示预存账户当前余额与预存流水（存入/开账自动抵扣/柜台抵扣/取款）。预存充值：录入充值金额与付款方式，系统增加余额并生成预存流水与收据。取款：校验可退余额，超过阈值或销户退款需主管授权，生成退款流水。规则：开账后是否自动用预存余额抵扣新账单由系统参数或单户标志控制；预存余额不足抵扣时账单余额挂欠费；预存流水与收费流水统一纳入网点日结与财务对账。"}]},{"id":"M5","name":"票据基础信息","srsRef":"4.5","functions":[{"id":"FR-5.1","name":"票据类型","priority":1,"srsRef":"4.5.1","refinedDesc":"维护开票类型字典。字段应含：票据类型编码（唯一）、票据类型名称（普通发票、增值税发票、污水费发票、水费收据、预存收据等，对应3.2『打印普通发票、增值税发票、污水费发票及其他各种水费结算凭证』）、票据介质（纸质/电子）、税率、税收分类编码、是否需要纳税人信息、启用/停用标志。规则：收费类型（FR-3.1）与票据类型建立映射，销账后按映射确定默认开票类型；票据类型下可配置多个票据格式（FR-5.2）；被票据格式或开票记录引用的类型禁止删除。"},{"id":"FR-5.2","name":"票据格式","priority":1,"srsRef":"4.5.2","refinedDesc":"按票据类型配置打印格式模板。字段应含：格式编码、格式名称、所属票据类型（引用FR-5.1）、纸张规格（宽×高mm）、打印方式（针式套打/激光/热敏）、打印要素及坐标（户号、户名、地址、账期、水量、各费项金额、金额大写、合计、收费员、收费日期、二维码等要素的X/Y坐标与字体）、打印份数、套打偏移量、启用/停用标志、版本号。规则：一个票据类型可维护多个格式版本，同一时间仅一个启用（新版启用旧版自动停用）；柜台打票（FR-4.1/4.3联动）按票据类型取当前启用格式渲染；格式支持打印预览与测试打印。"}]},{"id":"M6","name":"水表基础数据","srsRef":"4.6","functions":[{"id":"FR-6.1","name":"水表类型","priority":1,"srsRef":"4.6.1","refinedDesc":"维护水表类型字典。字段应含：类型编码（唯一）、类型名称（远传表、水平旋翼、垂直旋翼、流量计等）、是否远传标志、计量方式（机械/电子/超声）、启用/禁用标志、备注。规则：『是否远传』决定该类型水表的抄表数据可否走远传/抄表机导入通道（FR-7.3），非远传表只能手工或表格录入；被水表档案引用的类型禁止删除，只能禁用；禁用类型不可在新装表时选择。"},{"id":"FR-6.2","name":"水表口径","priority":1,"srsRef":"4.6.2","refinedDesc":"维护水表口径规格字典。字段应含：口径编码、口径规格（DN15/DN20/DN25/DN40/DN50/DN100等）、最大读数（表位量程，如99999，用于翻表过零水量计算）、换表读数（累计行度达到该值触发换表建议）、换表周期（使用年限，年，驱动周期换表计划）、启用/停用标志。规则：抄表算量时若本期行至小于上期行至且判定为翻表，按『最大读数-上期行至+本期行至』修正水量；表务周期换表计划按『装表日期+换表周期』或『累计行度≥换表读数』两条件筛选到期表；被水表档案引用的口径禁止删除。"},{"id":"FR-6.3","name":"水表参数","priority":1,"srsRef":"4.6.3","refinedDesc":"按口径维护水表计量与检定参数。字段应含：所属口径（引用FR-6.2）、参数项编码/名称、参数值、计量单位，典型参数项包括：公称流量Q3、最小流量Q1、分界流量Q2、始动流量、计量等级、首检有效期、周检周期（年）、检定依据规程、压力等级。规则：一个口径下可维护多条参数记录（参数项-参数值键值结构）；参数供水表检定/周检计划与表务台账引用；参数修改留版本记录以便追溯历史检定依据。"},{"id":"FR-6.4","name":"水表厂家","priority":5,"srsRef":"4.6.4","refinedDesc":"维护水表生产厂家档案。字段应含：厂家编码（唯一）、厂家名称、统一社会信用代码、联系人、联系电话、地址、供货范围（口径/类型）、资质有效期、启用/禁用标志、备注。规则：水表档案（表身号入库）须挂接厂家，用于质量追溯与到货验收统计；被水表档案引用的厂家禁止删除，只允许禁用；禁用厂家不可在新表入库时选择。"}]},{"id":"M7","name":"抄表计划","srsRef":"4.7","functions":[{"id":"FR-7.1","name":"手工抄表录入","priority":1,"srsRef":"4.7.1","refinedDesc":"柜面/内勤逐户录入抄表读数。按表册顺序（FR-2.3）或户号定位用户，界面展示：上期行至、上期抄表日期、近6期平均水量、换表信息（换表日期、旧表止度、新表起度——影响本期水量拼接）、总分表信息（总表/分表关系——影响总分差水量分摊）、备忘信息（如门禁、狗、表位变更等抄表提示）。录入本期行至后系统自动计算本期水量=本期行至-上期行至，遇换表按『旧表止度-上期行至+本期行至-新表起度』拼接，遇翻表按口径最大读数（FR-6.2）修正。录入即时校验：负行度（本期<上期且非换表/翻表）、水量为0、水量超近6期均量N倍（N可配置）时标记异常并要求选择异常原因（估抄/复核待办）。抄完当前户，界面下方即时显示按水价试算的账单信息（水量、金额）。"},{"id":"FR-7.2","name":"表格录入","priority":5,"srsRef":"4.7.2","refinedDesc":"通过Excel模板批量导入抄表数据。系统提供标准模板下载（列：户号、表身号、本期行至、抄表日期、备注），内勤填报后上传，系统逐行解析校验：户号存在性、户号在本期计划内、表身号与档案一致、本期行至为数字、同批次/同账期重复行、负行度与超均量异常。校验全部通过（或按『部分通过』策略）后写入抄表记录，异常行不入库并生成错误清单（行号+原因）供下载修正后重新上传。导入结果给出统计：总行数、成功、失败、异常待复核。"},{"id":"FR-7.3","name":"抄表数据导入","priority":1,"srsRef":"4.7.3","refinedDesc":"将抄表机（掌上机）采集数据文件或远传表自动采集数据导入系统。抄表机路径：抄表员外勤抄表后回传数据文件，选择表册与文件上传，系统按设备号+表册匹配任务，解析每户读数、抄表时间、现场照片/坐标（如有）。远传路径：按远传表集抄平台的数据接口/文件定时拉取读数。两路数据统一进入校验流水线：户表匹配、负行度、零水量、超均量、估抄标记识别，合格数据写入抄表记录并计算水量，异常数据进入异常待复核队列。导入结果统计成功/失败/异常户数，支持按表册查看导入明细与未回传户（漏抄）清单。"}]},{"id":"M8","name":"外部接口","srsRef":"5.2","functions":[{"id":"FR-8.1","name":"按户号查询缴费单","priority":1,"srsRef":"5.2.1","refinedDesc":"供银行/第三方渠道按户号实时查询用户欠费缴费单的HTTP接口。平台校验bankentityno（银行实体编号，由平台分配，如GH=工商银行）合法性后，按accno（户号，水表唯一编号）查询用户档案与全部未缴账单，汇总返回：户名、地址、欠费笔数billcount、欠费总额billamount、应收金额rcvblamount、已收金额rcvedamount、滞纳金latefee（按查询当日计算）、预存余额prepayamount，并生成本次查询的平台欠费查询流水号pyqbillid——该流水号是后续销账接口（FR-8.2）锁定账单快照的关键，用于解决跨天滞纳金变化与新增欠费导致的销账失败问题。金额单位统一为分（与销账接口口径一致）。"},{"id":"FR-8.2","name":"缴费单销账","priority":1,"srsRef":"5.2.2","refinedDesc":"银行完成收款后调用的销账接口。核心规则：(1) bankno（银行进账流水号）作为缴费、冲正、对账的唯一凭证，不能重复——平台以其做幂等控制，重复请求返回原销账结果而不重复记账；(2) pyqbillid（平台欠费查询流水号）新开发银行端程序必须提供，提供后平台按查询时点的账单金额快照锁定销账，解决『跨天滞纳金变化导致销账不成功』和『用户新增欠费导致销账不成功』两个棘手问题；提供pyqbillid时accno可不传；(3) payamount（用户实际缴费金额，分）须与billamount（欠费查询时返回的应缴金额，分）比对，不一致则拒绝销账要求重新查询。销账成功后平台核销对应账单、生成平台销账流水pychargeid返回银行，流水记录paydate（银行账务日期yyyyMMdd）与opername（银行操作员）备对账。"},{"id":"FR-8.3","name":"对账","priority":1,"srsRef":"5.2.3","refinedDesc":"银行日终生成代收对账文件并上传至约定目录后，调用本接口通知平台取文件对账。入参：bankentityno（银行实体编号）、filedate（对账文件日期yyyyMMdd）、filepath（对账文件存放相对路径，如/upload/20160829）、filetype（文件类型，DSDZ=代收对账文本）、extend（预留扩展）。平台收到通知后：校验渠道合法与文件可读，异步解析对账文件，按bankno将文件内每笔代收记录与平台渠道销账流水（FR-8.2）逐笔勾对，产出对账结果：平账、长款（银行有平台无）、短款（平台有银行无）、金额不符四类，差错记录进入差错处理队列（补账/冲正/人工处理），生成日对账报告供财务复核，对账平衡后确认资金划转入账。"}]}],"expansion":[{"module":"帐务管理","reason":"3.1功能清单提及、3.2总体功能描述『每笔费用可由财务进行处理』，但3.3清单与第4章均未详述；算费开账是抄表到收费链路的中枢，缺失将导致账单来源无定义。"},{"module":"掌上机抄表管理","reason":"3.1提及且3.2抄表管理描述『提供抄表机抄表』，但第4章仅有导入侧（4.7.3），任务下载、外勤采集、回传的闭环未详述。"},{"module":"银行划帐","reason":"3.1提及、3.2收费管理描述『通过银行托收…实时代收、代扣』，但第4章无对应功能，5.2仅覆盖银行实时代收接口，批量托收划扣未定义。"},{"module":"系统报表","reason":"3.1提及但全文无任何报表定义；3.2抄表管理提到『水量异常的抄表数据报表监控』亦无落地功能。"},{"module":"系统管理","reason":"3.1提及未详述；6.3安全性要求（身份鉴别、口令策略、登录失败处理、角色权限、审计）均需系统管理功能承载，否则安全需求无实现载体。"},{"module":"档案管理（业务办理部分）","reason":"3.2详述了立户、销户、过户、改表、缴费方式变更、银行信息变更及档案变更跟踪，但第4章仅覆盖档案『基础数据』字典，立户等核心业务流程未给出场景描述表。"},{"module":"水表管理（表务全生命周期）","reason":"3.2表务管理详述了入库检验、表身号录入、出库、周期更换、拆表换表、故障、检定与周检，但第4章仅覆盖水表『基础数据』字典，表务台账流程未详述。"}]};
+'use strict';
+/* ==================== 工具 ==================== */
+const $=(s,r)=>(r||document).querySelector(s);
+const $$=(s,r)=>Array.from((r||document).querySelectorAll(s));
+function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+function fmt(n){return (Math.round((+n||0)*100)/100).toLocaleString('zh-CN',{minimumFractionDigits:2,maximumFractionDigits:2});}
+function r2(n){return Math.round((+n||0)*100)/100;}
+const TODAY='2026-07-09';
+function nowClock(){const d=new Date();return ('0'+d.getHours()).slice(-2)+':'+('0'+d.getMinutes()).slice(-2)+':'+('0'+d.getSeconds()).slice(-2);}
+function toast(msg,cls){const w=$('#toast-wrap');const t=document.createElement('div');t.className='toast '+(cls||'');t.textContent=msg;w.appendChild(t);setTimeout(()=>{t.style.opacity='0';t.style.transition='opacity .3s';setTimeout(()=>t.remove(),320);},2400);}
+function cnMoney(n){
+  n=Math.round(Math.abs(+n||0)*100)/100;
+  const fraction=['角','分'],digit=['零','壹','贰','叁','肆','伍','陆','柒','捌','玖'],unit=[['元','万','亿'],['','拾','佰','仟']];
+  let s='';
+  for(let i=0;i<fraction.length;i++){s+=(digit[Math.floor(n*10*Math.pow(10,i))%10]+fraction[i]).replace(/零./,'');}
+  s=s||'整';n=Math.floor(n);
+  for(let i=0;i<unit[0].length&&n>0;i++){let p='';
+    for(let j=0;j<unit[1].length&&n>0;j++){p=digit[n%10]+unit[1][j]+p;n=Math.floor(n/10);}
+    s=p.replace(/(零.)*零$/,'').replace(/^$/,'零')+unit[0][i]+s;}
+  return s.replace(/(零.)*零元/,'元').replace(/(零.)+/g,'零').replace(/^整$/,'零元整');
+}
+/* ==================== FR 索引 ==================== */
+const FR_INDEX={};
+APP_DATA.modules.forEach(m=>m.functions.forEach(f=>{FR_INDEX[f.id]=Object.assign({moduleName:m.name,moduleId:m.id},f);}));
+const EXP_INDEX={};
+APP_DATA.expansion.forEach(e=>{EXP_INDEX[e.module]=e;});
+function prioLabel(p){return APP_DATA.priorityMap[String(p)]||('P'+p);}
+function prioChip(p){return p==1?'<span class="chip st-bad">'+esc(prioLabel(p))+'</span>':p==2?'<span class="chip st-over">'+esc(prioLabel(p))+'</span>':'<span class="chip st-mut">'+esc(prioLabel(p))+'</span>';}
+/* ==================== 全局状态 ==================== */
+const LS_KEY='shuiwu_proto_v1';
+const state={
+  device:'desktop',
+  page:{desktop:'login',tablet:'home',mobile:'tasks'},
+  tabs:{},
+  tagMode:false,noteMode:false,
+  params:{t1p:2.80,t1q:15,t2p:3.90,t2q:22,t3p:5.60,sw:1.40,late:0.5,bonus:5},
+  captcha:'7A4K',
+  sel:{
+    counterUser:null,counterBills:[],counterPaid:'',counterResults:null,
+    prepayUser:null,prepayAmt:'',prepayResults:null,
+    batchBook:'B001',batchTicks:{},
+    mrBook:'B001',mrFocus:null,
+    orderBook:'B001',
+    excelParsed:false,machineFile:'',machineLog:[],
+    reviewId:null,reviewFilter:'all',
+    tbPayTab:'single',tbPayUser:null,tbPayResults:null,
+    mbBook:null,mbUser:null,mbInput:'',mbReason:'',
+  },
+  noteFilter:{device:'all',type:'all',status:'all'},
+  notes:[],noteSeq:0,
+  tbScale:1,mbScale:1,
+};
+/* ==================== 业务数据（三端共享 state） ==================== */
+const db={};
+db.dicts={
+  ustatus:[
+    {code:'ZC',name:'正常',read:true,bill:true,pay:true,on:true,refs:14,rmk:'正常在用户'},
+    {code:'BT',name:'报停',read:false,bill:false,pay:true,on:true,refs:1,rmk:'用户申请暂停用水'},
+    {code:'ZT',name:'暂停',read:false,bill:false,pay:true,on:true,refs:1,rmk:'欠费或整改暂停'},
+    {code:'WZ',name:'违章用水',read:true,bill:true,pay:false,on:true,refs:1,rmk:'违章处理期间禁线上缴费'},
+    {code:'XH',name:'销户',read:false,bill:false,pay:false,on:true,refs:1,rmk:'终止供用水关系'},
+  ],
+  ucat:[
+    {code:'JM',name:'居民生活用水',price:'阶梯水价',on:true,rmk:'按户阶梯'},
+    {code:'XZ',name:'行政事业用水',price:'2.80 元/m³',on:true,rmk:''},
+    {code:'GS',name:'工商企业用水',price:'3.90 元/m³',on:true,rmk:''},
+    {code:'TZ',name:'特种行业用水',price:'5.60 元/m³',on:true,rmk:'洗浴/餐饮等'},
+    {code:'LS',name:'临时用水',price:'4.50 元/m³',on:true,rmk:'建筑施工等'},
+  ],
+  cycle:[
+    {code:'M1',name:'每月一抄',days:30,on:true,rmk:'默认周期'},
+    {code:'M2',name:'双月一抄',days:60,on:true,rmk:'部分老旧片区'},
+    {code:'Q1',name:'季度一抄',days:90,on:true,rmk:'大用户协议'},
+  ],
+  industry:[
+    {code:'CY',name:'餐饮业',on:true,rmk:''},
+    {code:'XY',name:'洗浴业',on:true,rmk:'特种水价'},
+    {code:'JZ',name:'建筑施工',on:true,rmk:'临时用水'},
+    {code:'XX',name:'学校',on:true,rmk:''},
+    {code:'YL',name:'医院',on:true,rmk:''},
+  ],
+  disc:[
+    {code:'DB',name:'低保户减免',mode:'水费9折',on:true,rmk:'凭低保证年审'},
+    {code:'JL',name:'军烈属优惠',mode:'免收污水费',on:true,rmk:''},
+    {code:'FL',name:'福利机构优惠',mode:'水费8折',on:true,rmk:'养老院/福利院'},
+  ],
+  feetype:[
+    {code:'SF',name:'水费',calc:'水量×水价（阶梯）',on:true,rmk:'主费项'},
+    {code:'WS',name:'污水处理费',calc:'水量×污水单价',on:true,rmk:'随水费征收'},
+    {code:'WY',name:'违约金',calc:'欠费×日率‰×逾期天数',on:true,rmk:'自缴费期满次日起算'},
+    {code:'GL',name:'开户工料费',calc:'按口径一次性',on:true,rmk:''},
+    {code:'HB',name:'换表工料费',calc:'按口径一次性',on:true,rmk:''},
+  ],
+  outlet:[
+    {code:'WD01',name:'营业厅收费处',addr:'建设中路66号',on:true,rmk:'主营业厅'},
+    {code:'WD02',name:'城南分理处',addr:'文昌街12号',on:true,rmk:''},
+    {code:'WD03',name:'城东便民服务点',addr:'南湖东园社区',on:true,rmk:'仅收现金'},
+  ],
+  atm:[
+    {code:'ATM-001',name:'营业大厅自助缴费机',addr:'营业厅一楼',st:'在线',on:true,rmk:''},
+    {code:'ATM-002',name:'城南分理处自助机',addr:'城南分理处',st:'离线',on:true,rmk:'例行维护中'},
+  ],
+  tickettype:[
+    {code:'FP01',name:'水费电子发票',lian:'1联',tax:true,on:true,rmk:'税控开具'},
+    {code:'SJ01',name:'水费收据',lian:'2联',tax:false,on:true,rmk:'柜台现金'},
+    {code:'YS01',name:'预收款收据',lian:'2联',tax:false,on:true,rmk:'预存充值'},
+  ],
+  mtype:[
+    {code:'JX',name:'机械式冷水表',rmk:'存量主力表型',on:true},
+    {code:'IC',name:'IC卡预付费水表',rmk:'先购水后用水',on:true},
+    {code:'GD',name:'远传光电直读表',rmk:'支持远程抄表',on:true},
+    {code:'CS',name:'超声波水表',rmk:'大口径贸易结算',on:true},
+  ],
+  mcaliber:[
+    {code:'DN15',name:'DN15',flow:'2.5 m³/h',use:'居民户表',on:true},
+    {code:'DN20',name:'DN20',flow:'4.0 m³/h',use:'居民/小商户',on:true},
+    {code:'DN25',name:'DN25',flow:'6.3 m³/h',use:'小型单位',on:true},
+    {code:'DN40',name:'DN40',flow:'16 m³/h',use:'宾馆/洗涤',on:true},
+    {code:'DN50',name:'DN50',flow:'25 m³/h',use:'工商/学校',on:true},
+  ],
+  mparam:[
+    {code:'ZJ',name:'周检年限',val:'居民6年 / 贸易结算2年',on:true},
+    {code:'WC',name:'允许误差',val:'±2%（低区±5%）',on:true},
+    {code:'SD',name:'始动流量',val:'≤0.008 m³/h（DN15）',on:true},
+    {code:'YL',name:'公称压力',val:'1.0 MPa',on:true},
+  ],
+  mmaker:[
+    {code:'CJ01',name:'宁波水表股份有限公司',tel:'0574-8735xxxx',on:true},
+    {code:'CJ02',name:'三川智慧科技股份有限公司',tel:'0790-6765xxxx',on:true},
+    {code:'CJ03',name:'汇中仪表股份有限公司',tel:'0315-7583xxxx',on:true},
+  ],
+  reader:[
+    {code:'Y2021056',name:'张伟',tel:'139****2211',books:'B001',on:true},
+    {code:'Y2019033',name:'李秀兰',tel:'137****0568',books:'B002',on:true},
+    {code:'Y2022108',name:'王强',tel:'136****7743',books:'B003',on:true},
+  ],
+};
+db.users=[
+  {no:'30012001',name:'王建国',addr:'城东街道南湖东园11栋3单元502',cat:'居民生活用水',dn:'DN15',status:'正常',book:'B001',prev:1268,avg:12,balance:35.60},
+  {no:'30012002',name:'李秀兰',addr:'城东街道南湖东园11栋3单元503',cat:'居民生活用水',dn:'DN15',status:'正常',book:'B001',prev:863,avg:9,balance:0},
+  {no:'30012003',name:'张德海',addr:'城东街道望江路27号院2栋101',cat:'居民生活用水',dn:'DN15',status:'正常',book:'B001',prev:1547,avg:14,balance:0},
+  {no:'30012004',name:'陈雅芳',addr:'城东街道望江路27号院2栋102',cat:'居民生活用水',dn:'DN15',status:'正常',book:'B001',prev:692,avg:8,balance:120.00},
+  {no:'30012005',name:'刘志强',addr:'城东街道望江路31号自建房',cat:'居民生活用水',dn:'DN20',status:'报停',book:'B001',prev:2210,avg:0,balance:0},
+  {no:'30012006',name:'赵桂香',addr:'城东街道南湖东园12栋1单元201',cat:'居民生活用水',dn:'DN15',status:'正常',book:'B001',prev:431,avg:6,balance:0},
+  {no:'30012007',name:'孙立军',addr:'城东街道南湖东园12栋1单元202',cat:'居民生活用水',dn:'DN15',status:'违章用水',book:'B001',prev:1105,avg:11,balance:0},
+  {no:'30022001',name:'城东阳光幼儿园',addr:'城东街道育才巷6号',cat:'行政事业用水',dn:'DN25',status:'正常',book:'B002',prev:3865,avg:86,balance:0},
+  {no:'30022002',name:'恒瑞商务宾馆',addr:'城东街道建设中路88号',cat:'工商企业用水',dn:'DN40',status:'正常',book:'B002',prev:12480,avg:320,balance:0},
+  {no:'30022003',name:'老码头餐饮有限公司',addr:'城东街道滨河路19号',cat:'特种行业用水',dn:'DN25',status:'正常',book:'B002',prev:5230,avg:145,balance:0},
+  {no:'30022004',name:'城东农贸市场管理处',addr:'城东街道集贤街2号',cat:'工商企业用水',dn:'DN50',status:'正常',book:'B002',prev:21870,avg:560,balance:2000.00},
+  {no:'30022005',name:'蓝天洗涤中心',addr:'城东街道建设中路102号',cat:'特种行业用水',dn:'DN40',status:'暂停',book:'B002',prev:8642,avg:0,balance:0},
+  {no:'30032001',name:'周敏',addr:'城南街道翠竹苑3栋2单元601',cat:'居民生活用水',dn:'DN15',status:'正常',book:'B003',prev:754,avg:10,balance:58.20},
+  {no:'30032002',name:'吴国庆',addr:'城南街道翠竹苑3栋2单元602',cat:'居民生活用水',dn:'DN15',status:'正常',book:'B003',prev:1322,avg:13,balance:0},
+  {no:'30032003',name:'郑春梅',addr:'城南街道翠竹苑5栋1单元302',cat:'居民生活用水',dn:'DN15',status:'正常',book:'B003',prev:968,avg:9,balance:0},
+  {no:'30032004',name:'冯建平',addr:'城南街道站前路14号',cat:'居民生活用水',dn:'DN20',status:'正常',book:'B003',prev:1755,avg:16,balance:0},
+  {no:'30032005',name:'市第二实验小学',addr:'城南街道文昌街33号',cat:'行政事业用水',dn:'DN50',status:'正常',book:'B003',prev:15320,avg:410,balance:0},
+  {no:'30032006',name:'何丽华',addr:'城南街道翠竹苑6栋3单元101',cat:'居民生活用水',dn:'DN15',status:'销户',book:'B003',prev:640,avg:0,balance:0},
+];
+db.books=[
+  {code:'B001',name:'东城一区册（居民）',reader:'张伟',cycle:'每月一抄',total:120,done:45},
+  {code:'B002',name:'东城二区册（工商）',reader:'李秀兰',cycle:'每月一抄',total:86,done:60},
+  {code:'B003',name:'南城三区册（居民）',reader:'王强',cycle:'每月一抄',total:132,done:0},
+];
+db.orders={};
+db.books.forEach(b=>{db.orders[b.code]=db.users.filter(u=>u.book===b.code).map(u=>u.no);});
+/* 欠费账单：金额按业务参数实时计算（vol=水量, days=逾期天数） */
+db.bills=[
+  {id:'BL01',userNo:'30012003',period:'2026-04',vol:18,days:62,paid:false},
+  {id:'BL02',userNo:'30012003',period:'2026-05',vol:16,days:32,paid:false},
+  {id:'BL03',userNo:'30012006',period:'2026-05',vol:7,days:32,paid:false},
+  {id:'BL04',userNo:'30012007',period:'2026-03',vol:15,days:93,paid:false},
+  {id:'BL05',userNo:'30012007',period:'2026-04',vol:13,days:62,paid:false},
+  {id:'BL06',userNo:'30012007',period:'2026-05',vol:14,days:32,paid:false},
+  {id:'BL07',userNo:'30022002',period:'2026-05',vol:338,days:32,paid:false},
+  {id:'BL08',userNo:'30022003',period:'2026-04',vol:152,days:62,paid:false},
+  {id:'BL09',userNo:'30022003',period:'2026-05',vol:139,days:32,paid:false},
+  {id:'BL10',userNo:'30032002',period:'2026-05',vol:12,days:32,paid:false},
+];
+db.reviews=[
+  {id:'R1',userNo:'30012001',prev:1268,cur:1281,avg:12,src:'掌上机',time:'08:42',status:'待审核',reason:''},
+  {id:'R2',userNo:'30012002',prev:863,cur:871,avg:9,src:'掌上机',time:'08:47',status:'待审核',reason:''},
+  {id:'R3',userNo:'30012004',prev:692,cur:745,avg:8,src:'掌上机',time:'08:55',status:'待审核',reason:'疑似漏水'},
+  {id:'R4',userNo:'30022001',prev:3865,cur:3949,avg:86,src:'掌上机',time:'09:10',status:'待审核',reason:''},
+  {id:'R5',userNo:'30022003',prev:5230,cur:5219,avg:145,src:'掌上机',time:'09:18',status:'待审核',reason:'换表未登记'},
+  {id:'R6',userNo:'30022004',prev:21870,cur:22484,avg:560,src:'掌上机',time:'09:26',status:'已通过',reason:''},
+];
+let reviewSeq=6;
+db.payments=[
+  {time:'09:05',userNo:'30012006',name:'赵桂香',amt:31.86,channel:'柜台现金'},
+  {time:'09:41',userNo:'30022002',name:'恒瑞商务宾馆',amt:1893.20,channel:'微信'},
+  {time:'10:12',userNo:'30032002',name:'吴国庆',amt:63.60,channel:'支付宝'},
+  {time:'10:47',userNo:'30012004',name:'陈雅芳',amt:200.00,channel:'预存充值'},
+  {time:'11:20',userNo:'30022003',name:'老码头餐饮有限公司',amt:812.44,channel:'银行代收'},
+];
+db.prepayLogs=[
+  {time:'10:47',userNo:'30012004',name:'陈雅芳',amt:200.00,bonus:10.00,after:120.00},
+];
+db.bankLogs=[
+  {t:'09:02:11',api:'查询',bank:'工商银行',req:'户号30012003 缴费单查询',ms:182,st:'ok'},
+  {t:'09:02:19',api:'销账',bank:'工商银行',req:'30012003 2026-04期销账',ms:240,st:'ok'},
+  {t:'09:35:44',api:'查询',bank:'建设银行',req:'户号30022002 缴费单查询',ms:156,st:'ok'},
+  {t:'10:03:08',api:'销账',bank:'建设银行',req:'30022002 2026-05期销账',ms:3020,st:'timeout'},
+  {t:'10:03:40',api:'销账',bank:'建设银行',req:'30022002 2026-05期销账（重发）',ms:210,st:'ok'},
+  {t:'10:40:02',api:'查询',bank:'农业银行',req:'户号30099999 缴费单查询',ms:120,st:'fail'},
+  {t:'11:00:00',api:'对账',bank:'工商银行',req:'前日对账文件核对',ms:850,st:'ok'},
+  {t:'12:00:00',api:'对账',bank:'建设银行',req:'当日对账文件获取',ms:5210,st:'timeout'},
+];
+db.recon={name:'DZ20260709_ICBC.txt',st:'received',rows:126,amt:15208.44,diff:0};
+db.trend=[{m:'2月',ys:262,ss:239},{m:'3月',ys:271,ss:246},{m:'4月',ys:266,ss:238},{m:'5月',ys:280,ss:243},{m:'6月',ys:285,ss:251},{m:'7月',ys:286,ss:254}];
+db.manual={};      /* 手工抄表暂存 {book:{userNo:{cur,reason}}} */
+db.mobileDone={};  /* 移动端已抄 userNo:true */
+db.sync={pending:3,last:'09:32',ok:false};
+/* ==================== 计费引擎（业务参数驱动） ==================== */
+function calcBill(vol){
+  const p=state.params;vol=Math.max(0,+vol||0);
+  const q1=Math.min(vol,p.t1q),q2=Math.min(Math.max(vol-p.t1q,0),Math.max(p.t2q-p.t1q,0)),q3=Math.max(vol-p.t2q,0);
+  const w1=r2(q1*p.t1p),w2=r2(q2*p.t2p),w3=r2(q3*p.t3p);
+  const water=r2(w1+w2+w3),sew=r2(vol*p.sw);
+  return {vol,q1,q2,q3,w1,w2,w3,water,sew,total:r2(water+sew)};
+}
+function billMoney(bill){
+  const c=calcBill(bill.vol);
+  const late=r2(c.total*state.params.late/1000*bill.days);
+  return {water:c.water,sew:c.sew,late,total:r2(c.total+late)};
+}
+function userArrears(no){return db.bills.filter(b=>b.userNo===no&&!b.paid);}
+function arrearsTotal(no){return r2(userArrears(no).reduce((s,b)=>s+billMoney(b).total,0));}
+function userByNo(no){return db.users.find(u=>u.no===no);}
+function statusReadable(u){const s=db.dicts.ustatus.find(x=>x.name===u.status);return s?!!s.read:true;}
+function isAbnormal(vol,avg){return vol<0||(avg>0&&vol>avg*3);}
+function bookByCode(c){return db.books.find(b=>b.code===c);}
+/* 状态双通道标识 */
+function stChip(kind,txt){
+  const map={ok:['●','st-ok'],warn:['▲','st-warn'],over:['◆','st-over'],bad:['✕','st-bad'],mut:['○','st-mut'],blue:['◈','st-blue']};
+  const m=map[kind]||map.mut;return '<span class="chip '+m[1]+'">'+m[0]+' '+esc(txt)+'</span>';
+}
+function ustatusChip(name){
+  if(name==='正常')return stChip('ok','正常');
+  if(name==='报停'||name==='暂停')return stChip('warn',name);
+  if(name==='违章用水')return stChip('bad','违章用水');
+  if(name==='销户')return stChip('mut','销户');
+  return stChip('mut',name);
+}
+/* ==================== SVG 图表 ==================== */
+function svgBars(data,w,h){
+  w=w||560;h=h||190;const pad=30,bw=Math.floor((w-pad*2)/data.length/3);
+  const max=Math.max.apply(null,data.map(d=>Math.max(d.ys,d.ss)))*1.15;
+  let s='<svg viewBox="0 0 '+w+' '+h+'" width="100%" style="max-width:'+w+'px">';
+  s+='<line x1="'+pad+'" y1="'+(h-26)+'" x2="'+(w-8)+'" y2="'+(h-26)+'" stroke="rgba(11,11,11,.2)"/>';
+  data.forEach((d,i)=>{
+    const x=pad+i*((w-pad*2)/data.length)+10;
+    const h1=(d.ys/max)*(h-52),h2=(d.ss/max)*(h-52);
+    s+='<rect x="'+x+'" y="'+(h-26-h1)+'" width="'+bw+'" height="'+h1+'" rx="2" fill="#1c5cab" opacity=".85"/>';
+    s+='<rect x="'+(x+bw+4)+'" y="'+(h-26-h2)+'" width="'+bw+'" height="'+h2+'" rx="2" fill="#0ca30c" opacity=".8"/>';
+    s+='<text x="'+(x+bw)+'" y="'+(h-10)+'" font-size="11" fill="#6d6d67" text-anchor="middle">'+d.m+'</text>';
+    s+='<text x="'+(x+bw)+'" y="'+(h-30-Math.max(h1,h2))+'" font-size="10" fill="#6d6d67" text-anchor="middle">'+d.ys+'/'+d.ss+'</text>';
+  });
+  s+='<rect x="'+pad+'" y="6" width="10" height="10" fill="#1c5cab" rx="2"/><text x="'+(pad+14)+'" y="15" font-size="11" fill="#4c4c47">应收(万元)</text>';
+  s+='<rect x="'+(pad+92)+'" y="6" width="10" height="10" fill="#0ca30c" rx="2"/><text x="'+(pad+106)+'" y="15" font-size="11" fill="#4c4c47">实收(万元)</text>';
+  return s+'</svg>';
+}
+function svgHBar(rows,w){
+  w=w||520;const rh=30,h=rows.length*rh+8;const max=Math.max.apply(null,rows.map(r=>r.v))*1.15||1;
+  let s='<svg viewBox="0 0 '+w+' '+h+'" width="100%" style="max-width:'+w+'px">';
+  rows.forEach((r,i)=>{
+    const y=i*rh+6,bw=Math.max(3,(r.v/max)*(w-190));
+    s+='<text x="86" y="'+(y+14)+'" font-size="12" fill="#4c4c47" text-anchor="end">'+esc(r.l)+'</text>';
+    s+='<rect x="94" y="'+y+'" width="'+bw+'" height="18" rx="3" fill="'+r.c+'" opacity=".85"/>';
+    s+='<text x="'+(98+bw)+'" y="'+(y+14)+'" font-size="11.5" fill="#1e1e1c">'+esc(r.t)+'</text>';
+  });
+  return s+'</svg>';
+}
+function svgDonut(pct,color,size){
+  size=size||96;const r=(size-14)/2,c=2*Math.PI*r;
+  return '<svg viewBox="0 0 '+size+' '+size+'" width="'+size+'"><circle cx="'+size/2+'" cy="'+size/2+'" r="'+r+'" fill="none" stroke="rgba(11,11,11,.08)" stroke-width="11"/>'+
+    '<circle cx="'+size/2+'" cy="'+size/2+'" r="'+r+'" fill="none" stroke="'+color+'" stroke-width="11" stroke-linecap="round" stroke-dasharray="'+(c*pct/100)+' '+c+'" transform="rotate(-90 '+size/2+' '+size/2+')"/>'+
+    '<text x="'+size/2+'" y="'+(size/2+5)+'" text-anchor="middle" font-size="17" font-weight="700" fill="#1e1e1c">'+Math.round(pct)+'%</text></svg>';
+}
+/* ==================== 弹窗 / 面板 ==================== */
+function openModal(html){$('#modal-box').innerHTML=html;$('#modal-mask').classList.add('open');}
+function closeModal(){$('#modal-mask').classList.remove('open');}
+function modalShell(title,body,foot){
+  return '<div class="mh">'+title+'<span style="flex:1"></span><button class="btn btn-sm" onclick="A.closeModal()">✕</button></div>'+
+    '<div class="mb">'+body+'</div>'+(foot?'<div class="mf">'+foot+'</div>':'');
+}
+function confirmModal(title,msg,onOkJs){
+  openModal(modalShell(title,'<div style="padding:6px 2px">'+msg+'</div>',
+    '<button class="btn" onclick="A.closeModal()">取消</button><button class="btn btn-pri" onclick="'+onOkJs+'">确 定</button>'));
+}
+/* ==================== 全局动作对象 ==================== */
+const A={};
+A.closeModal=closeModal;
+/* 页签 */
+function getTab(page,def){const k=state.device+':'+page;if(!state.tabs[k])state.tabs[k]=def;return state.tabs[k];}
+A.setTab=(page,tab)=>{state.tabs[state.device+':'+page]=tab;renderStage();};
+function subtabs(page,defs){
+  const cur=getTab(page,defs[0][0]);
+  return '<div class="subtabs">'+defs.map(d=>{
+    const fr=d[2]?(' '+d[2]):'';
+    return '<button'+fr+' class="'+(cur===d[0]?'on':'')+'" onclick="A.setTab(\''+page+'\',\''+d[0]+'\')">'+d[1]+'</button>';
+  }).join('')+'</div>';
+}
+/* 路由 */
+A.go=(page)=>{state.page[state.device]=page;renderStage();};
+A.setDevice=(dev)=>{state.device=dev;render();};
+/* 登录 */
+A.refreshCaptcha=()=>{const cs='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';state.captcha=Array.from({length:4},()=>cs[Math.floor(Math.random()*cs.length)]).join('');renderStage();};
+A.login=()=>{state.page.desktop='dash';renderStage();toast('登录成功，欢迎回来（演示环境）','tk');};
+A.logout=()=>{state.page.desktop='login';renderStage();};
+
+/* ==================== 桌面端 ==================== */
+const NAV=[
+  ['grp','概览'],
+  ['dash','工作台','◧'],
+  ['grp','基础数据'],
+  ['archive','档案基础数据','▤'],
+  ['feebase','收费数据基础','⛁'],
+  ['ticket','票据管理','▦'],
+  ['meterbase','水表基础数据','◔'],
+  ['grp','抄表'],
+  ['meter','抄表管理','☷'],
+  ['plan','抄表计划','✎'],
+  ['grp','收费'],
+  ['counter','柜台收费','¥'],
+  ['grp','监控分析'],
+  ['report','系统报表','▥'],
+  ['iface','接口监控','⇄'],
+];
+const PAGE_TITLES={dash:'工作台',archive:'档案基础数据',meter:'抄表管理',plan:'抄表计划',counter:'柜台收费',feebase:'收费数据基础',ticket:'票据管理',meterbase:'水表基础数据',report:'系统报表',iface:'接口监控'};
+function renderDesktop(){
+  const root=$('#frame-desktop');const pg=state.page.desktop;
+  if(pg==='login'){
+    root.innerHTML='<div id="dt-page" style="position:relative;height:100%">'+dtLogin()+'</div>';
+  }else{
+    root.innerHTML='<div class="dt-shell">'+
+      '<aside class="dt-nav"><div class="dt-logo"><svg width="24" height="24" viewBox="0 0 24 24"><path d="M12 2.5C12 2.5 5 10 5 15a7 7 0 0 0 14 0c0-5-7-12.5-7-12.5z" fill="#fff" opacity=".92"/><path d="M9 15.5a3 3 0 0 0 3 3" stroke="#1c5cab" stroke-width="1.6" fill="none" stroke-linecap="round"/></svg>供水营销管理系统</div>'+
+      '<nav class="dt-menu">'+NAV.map(n=>n[0]==='grp'?'<div class="grp">'+n[1]+'</div>':
+        '<a class="'+(pg===n[0]?'on':'')+'" onclick="A.go(\''+n[0]+'\')"><span class="ic">'+n[2]+'</span>'+n[1]+'</a>').join('')+'</nav>'+
+      '<div class="dt-user">👤 营业管理员 · 马春霞<br><a style="color:#9fc3ec;cursor:pointer;padding:0" onclick="A.logout()">退出登录 ↩</a></div></aside>'+
+      '<div class="dt-main"><div class="dt-top"><span class="crumb">供水营销管理系统 / <b>'+(PAGE_TITLES[pg]||'')+'</b></span>'+
+      '<span style="flex:1"></span><span class="mut small">'+TODAY+' · 营业厅收费处</span></div>'+
+      '<div id="dt-page" class="dt-page">'+dtPage(pg)+'</div></div></div>';
+  }
+  renderPins();
+}
+function dtPage(pg){
+  switch(pg){
+    case 'dash':return dtDash();
+    case 'archive':return dtArchive();
+    case 'meter':return dtMeter();
+    case 'plan':return dtPlan();
+    case 'counter':return dtCounter();
+    case 'feebase':return dtFeebase();
+    case 'ticket':return dtTicket();
+    case 'meterbase':return dtMeterbase();
+    case 'report':return dtReport();
+    case 'iface':return dtIface();
+  }
+  return '';
+}
+/* ---------- 1 登录 ---------- */
+function dtLogin(){
+  return '<div class="login-wrap"><div class="login-card">'+
+  '<div style="text-align:center;margin-bottom:22px"><svg width="52" height="52" viewBox="0 0 24 24"><path d="M12 2.5C12 2.5 5 10 5 15a7 7 0 0 0 14 0c0-5-7-12.5-7-12.5z" fill="#1c5cab"/><path d="M9 15.5a3 3 0 0 0 3 3" stroke="#fff" stroke-width="1.6" fill="none" stroke-linecap="round"/></svg>'+
+  '<h2 style="margin-top:8px">供水营销管理系统</h2><div class="mut small" style="margin-top:4px">营业后台 · 通过浏览器（IP / 域名）访问</div></div>'+
+  '<div class="formrow"><label>账 号</label><input type="text" id="lg-user" placeholder="工号 / 用户名" value="MA0012"></div>'+
+  '<div class="formrow"><label>密 码</label><input type="password" id="lg-pass" placeholder="请输入密码" value="········"></div>'+
+  '<div class="formrow"><label>验证码</label><input type="text" style="width:110px;flex:none" placeholder="验证码">'+
+  '<span class="captcha" onclick="A.refreshCaptcha()" title="点击刷新">'+state.captcha+'</span></div>'+
+  '<button class="btn btn-pri" style="width:100%;padding:11px;font-size:15px;margin-top:8px" onclick="A.login()">登 录</button>'+
+  '<div class="mut small" style="text-align:center;margin-top:14px">演示原型 · 点击登录直接进入工作台</div>'+
+  '</div></div>';
+}
+/* ---------- 2 工作台 ---------- */
+function dtDash(){
+  const arrUsers=[...new Set(db.bills.filter(b=>!b.paid).map(b=>b.userNo))];
+  const arrSum=r2(db.bills.filter(b=>!b.paid).reduce((s,b)=>s+billMoney(b).total,0));
+  const done=db.books.reduce((s,b)=>s+b.done,0),total=db.books.reduce((s,b)=>s+b.total,0);
+  const abn=db.reviews.filter(r=>r.status==='待审核'&&isAbnormal(r.cur-r.prev,r.avg)).length;
+  const pend=db.reviews.filter(r=>r.status==='待审核').length;
+  const t=db.trend[db.trend.length-1];
+  const todos=[
+    ['warn','抄表数据待审核 '+pend+' 条（其中异常 '+abn+' 条）','A.go(\'plan\')'],
+    ['bad','欠费户 '+arrUsers.length+' 户，合计 ¥'+fmt(arrSum)+'，建议生成催缴任务','A.go(\'counter\')'],
+    ['warn','建设银行当日对账文件延迟，请关注接口监控','A.go(\'iface\')'],
+    ['blue','B003 南城三区册 7月抄表计划尚未开始','A.go(\'plan\')'],
+  ];
+  return '<div class="flexw" style="margin-bottom:16px">'+
+    kpi('本月应收(万元)',t.ys.toFixed(1),'blue','7月账期')+
+    kpi('本月实收(万元)',t.ss.toFixed(1),'ok','含线上渠道')+
+    kpi('回收率',(t.ss/t.ys*100).toFixed(1)+'%','ok','目标 ≥ 92%')+
+    kpi('欠费户数',arrUsers.length,'bad','欠费合计 ¥'+fmt(arrSum))+
+    kpi('今日抄表进度',done+' / '+total,'blue',Math.round(done/total*100)+'% 已完成')+
+    kpi('异常水量数',abn,'over','待人工确认')+
+  '</div>'+
+  '<div style="display:flex;gap:16px;align-items:flex-start;flex-wrap:wrap">'+
+  '<div class="card" style="flex:1.3;min-width:480px"><div class="chd">📊 近6月应收 / 实收（万元）</div><div class="cbd">'+svgBars(db.trend,600,200)+'</div></div>'+
+  '<div class="card" style="flex:1;min-width:360px"><div class="chd">📌 待办事项</div><div class="cbd" style="padding:6px 0">'+
+    todos.map(td=>'<div class="flexr" style="padding:9px 16px;border-bottom:1px solid var(--line);cursor:pointer" onclick="'+td[2]+'">'+stChip(td[0],td[0]==='bad'?'紧急':td[0]==='warn'?'关注':'提醒')+'<span style="flex:1">'+td[1]+'</span><span class="mut">›</span></div>').join('')+
+  '</div></div></div>';
+}
+function kpi(label,val,tone,desc){
+  const col={blue:'var(--blue)',ok:'var(--ok)',bad:'var(--bad)',over:'var(--over)',warn:'#9a6a00'}[tone]||'var(--ink)';
+  return '<div class="kpi"><div class="kl">'+label+'</div><div class="kv" style="color:'+col+'">'+val+'</div><div class="kd mut">'+desc+'</div></div>';
+}
+/* ---------- 3 档案基础数据（通用字典CRUD） ---------- */
+const DICT_DEFS={
+  ustatus:{title:'用户状态',fr:'FR-1.1',cols:[['code','状态编码'],['name','状态名称'],['read','是否抄表','bool'],['bill','是否计费','bool'],['pay','是否允许缴费','bool'],['refs','引用户数','ro'],['on','启用','bool'],['rmk','备注']]},
+  ucat:{title:'用户分类',fr:'FR-1.2',cols:[['code','分类编码'],['name','分类名称'],['price','适用水价'],['on','启用','bool'],['rmk','备注']]},
+  cycle:{title:'抄表周期',fr:'FR-1.3',cols:[['code','周期编码'],['name','周期名称'],['days','间隔天数','num'],['on','启用','bool'],['rmk','备注']]},
+  industry:{title:'行业分类',fr:'FR-1.4',cols:[['code','行业编码'],['name','行业名称'],['on','启用','bool'],['rmk','备注']]},
+  disc:{title:'优惠类型',fr:'FR-1.5',cols:[['code','优惠编码'],['name','优惠名称'],['mode','优惠方式'],['on','启用','bool'],['rmk','备注']]},
+  feetype:{title:'收费类型',fr:'FR-3.1',cols:[['code','类型编码'],['name','类型名称'],['calc','计算方式'],['on','启用','bool'],['rmk','备注']]},
+  outlet:{title:'收费网点',fr:'FR-3.2',cols:[['code','网点编码'],['name','网点名称'],['addr','地址'],['on','启用','bool'],['rmk','备注']]},
+  atm:{title:'ATM收费机',fr:'FR-3.3',cols:[['code','设备编号'],['name','设备名称'],['addr','安装位置'],['st','运行状态'],['on','启用','bool'],['rmk','备注']]},
+  tickettype:{title:'票据类型',fr:'FR-5.1',cols:[['code','类型编码'],['name','类型名称'],['lian','联次'],['tax','是否税控','bool'],['on','启用','bool'],['rmk','备注']]},
+  mtype:{title:'水表类型',fr:'FR-6.1',cols:[['code','类型编码'],['name','类型名称'],['rmk','说明'],['on','启用','bool']]},
+  mcaliber:{title:'水表口径',fr:'FR-6.2',cols:[['code','口径编码'],['name','口径'],['flow','常用流量'],['use','适用场景'],['on','启用','bool']]},
+  mparam:{title:'水表参数',fr:'FR-6.3',cols:[['code','参数编码'],['name','参数名称'],['val','参数值'],['on','启用','bool']]},
+  mmaker:{title:'水表厂家',fr:'FR-6.4',cols:[['code','厂家编码'],['name','厂家名称'],['tel','联系电话'],['on','启用','bool']]},
+  reader:{title:'抄表员',fr:'FR-2.1',cols:[['code','员工号'],['name','姓名'],['tel','联系电话'],['books','负责表册'],['on','在岗','bool']]},
+};
+function dictTable(key){
+  const d=DICT_DEFS[key],rows=db.dicts[key];
+  let h='<div class="toolrow"><span class="b">'+d.title+'列表</span><span class="mut small">共 '+rows.length+' 条</span><span style="flex:1"></span>'+
+    '<button class="btn btn-pri" onclick="A.dictNew(\''+key+'\')">＋ 新增</button></div>';
+  h+='<table class="tbl"><thead><tr>'+d.cols.map(c=>'<th>'+c[1]+'</th>').join('')+'<th style="width:120px">操作</th></tr></thead><tbody>';
+  rows.forEach((r,i)=>{
+    h+='<tr>'+d.cols.map(c=>{
+      const v=r[c[0]];
+      if(c[2]==='bool')return '<td>'+(v?'<span style="color:var(--ok)">✓ 是</span>':'<span class="mut">— 否</span>')+'</td>';
+      return '<td>'+esc(v==null?'':v)+'</td>';
+    }).join('')+
+    '<td><button class="btn btn-sm" onclick="A.dictEdit(\''+key+'\','+i+')">编辑</button> '+
+    '<button class="btn btn-sm" style="color:var(--bad)" onclick="A.dictDel(\''+key+'\','+i+')">删除</button></td></tr>';
+  });
+  return h+'</tbody></table>';
+}
+A.dictNew=(key)=>dictForm(key,-1);
+A.dictEdit=(key,i)=>dictForm(key,i);
+function dictForm(key,i){
+  const d=DICT_DEFS[key],r=i>=0?db.dicts[key][i]:{};
+  let body='';
+  d.cols.forEach(c=>{
+    if(c[2]==='ro')return;
+    if(c[2]==='bool'){
+      body+='<div class="formrow"><label>'+c[1]+'</label><input type="checkbox" id="df-'+c[0]+'" '+((i<0&&(c[0]==='on'))||r[c[0]]?'checked':'')+' style="width:18px;height:18px"></div>';
+    }else{
+      body+='<div class="formrow"><label>'+c[1]+'</label><input type="'+(c[2]==='num'?'number':'text')+'" id="df-'+c[0]+'" value="'+esc(r[c[0]]==null?'':r[c[0]])+'" '+(c[0]==='code'&&i>=0?'disabled title="编码创建后不可修改"':'')+'></div>';
+    }
+  });
+  openModal(modalShell((i<0?'新增':'编辑')+' · '+d.title,body,
+    '<button class="btn" onclick="A.closeModal()">取消</button><button class="btn btn-pri" onclick="A.dictSave(\''+key+'\','+i+')">保 存</button>'));
+}
+A.dictSave=(key,i)=>{
+  const d=DICT_DEFS[key],rows=db.dicts[key];
+  const r=i>=0?Object.assign({},rows[i]):{};
+  let bad=false;
+  d.cols.forEach(c=>{
+    if(c[2]==='ro')return;
+    const el=$('#df-'+c[0]);if(!el)return;
+    if(c[2]==='bool')r[c[0]]=el.checked;
+    else if(c[2]==='num')r[c[0]]=+el.value||0;
+    else r[c[0]]=el.value.trim();
+  });
+  if(!r.code||!r.name){toast('编码与名称为必填项','tb');return;}
+  const dup=rows.some((x,xi)=>xi!==i&&(x.code===r.code||x.name===r.name));
+  if(dup){toast('编码或名称重复，校验失败','tb');return;}
+  if(i<0){if(key==='ustatus')r.refs=0;rows.push(r);}else rows[i]=r;
+  closeModal();renderStage();toast((i<0?'新增':'修改')+'成功','tk');
+};
+A.dictDel=(key,i)=>{
+  const d=DICT_DEFS[key],r=db.dicts[key][i];
+  if(key==='ustatus'&&r.refs>0){toast('该状态已被 '+r.refs+' 户档案引用，禁止删除，请改用停用','tb');return;}
+  confirmModal('删除确认','确定删除 '+d.title+'「'+esc(r.name)+'」？删除后不可恢复。',
+    'A._dictDelDo(\''+key+'\','+i+')');
+};
+A._dictDelDo=(key,i)=>{db.dicts[key].splice(i,1);closeModal();renderStage();toast('已删除','tk');};
+function dtArchive(){
+  const tab=getTab('archive','ustatus');
+  const defs=[['ustatus','用户状态','data-fr="FR-1.1"'],['ucat','用户分类','data-fr="FR-1.2"'],['cycle','抄表周期','data-fr="FR-1.3"'],['industry','行业分类','data-fr="FR-1.4"'],['disc','优惠类型','data-fr="FR-1.5"']];
+  return '<div class="card"><div class="cbd">'+subtabs('archive',defs)+
+    '<div data-fr="'+DICT_DEFS[tab].fr+'">'+dictTable(tab)+'</div>'+
+    (tab==='ustatus'?'<div class="mut small" style="margin-top:10px">规则演示：被档案引用（引用户数&gt;0）的状态不可删除；「是否抄表=否」的状态用户不进入抄表任务（可在抄表计划页验证）。</div>':'')+
+  '</div></div>';
+}
+/* ---------- 4 抄表管理 ---------- */
+function dtMeter(){
+  const tab=getTab('meter','reader');
+  const defs=[['reader','抄表员管理','data-fr="FR-2.1"'],['book','表册管理','data-fr="FR-2.2"'],['order','表册顺序调整','data-fr="FR-2.3"']];
+  let body='';
+  if(tab==='reader')body='<div data-fr="FR-2.1">'+dictTable('reader')+'</div>';
+  else if(tab==='book'){
+    body='<div data-fr="FR-2.2"><div class="toolrow"><span class="b">表册列表</span><span style="flex:1"></span><button class="btn btn-pri" onclick="A.bookNew()">＋ 新增表册</button></div>'+
+    '<table class="tbl"><thead><tr><th>表册编号</th><th>表册名称</th><th>抄表员</th><th>抄表周期</th><th class="num">册内户数</th><th class="num">本期已抄</th><th>本期进度</th></tr></thead><tbody>'+
+    db.books.map(b=>{
+      const pct=Math.round(b.done/b.total*100);
+      return '<tr><td>'+b.code+'</td><td>'+esc(b.name)+'</td><td>'+esc(b.reader)+'</td><td>'+esc(b.cycle)+'</td><td class="num">'+b.total+'</td><td class="num">'+b.done+'</td>'+
+      '<td style="min-width:140px"><div class="flexr"><div class="prog" style="flex:1"><i style="width:'+pct+'%;background:'+(pct>=80?'var(--ok)':pct>=40?'var(--blue)':'var(--over)')+'"></i></div><span class="small mut">'+pct+'%</span></div></td></tr>';
+    }).join('')+'</tbody></table></div>';
+  }else{
+    const bk=state.sel.orderBook,order=db.orders[bk]||[];
+    body='<div data-fr="FR-2.3"><div class="toolrow"><label>选择表册：</label><select onchange="A.orderBook(this.value)">'+
+      db.books.map(b=>'<option value="'+b.code+'" '+(b.code===bk?'selected':'')+'>'+b.code+' '+esc(b.name)+'</option>').join('')+'</select>'+
+      '<span class="mut small">抄表顺序决定掌上机任务与手工录入的户排列，↑↓ 调整立即生效</span></div>'+
+      '<table class="tbl"><thead><tr><th style="width:70px">顺序号</th><th>户号</th><th>户名</th><th>地址</th><th style="width:120px">调整</th></tr></thead><tbody>'+
+      order.map((no,i)=>{const u=userByNo(no);return '<tr><td class="b">'+(i+1)+'</td><td>'+no+'</td><td>'+esc(u.name)+'</td><td class="mut">'+esc(u.addr)+'</td>'+
+        '<td><button class="btn btn-sm" '+(i===0?'disabled':'')+' onclick="A.orderMove(\''+bk+'\','+i+',-1)">↑ 上移</button> '+
+        '<button class="btn btn-sm" '+(i===order.length-1?'disabled':'')+' onclick="A.orderMove(\''+bk+'\','+i+',1)">↓ 下移</button></td></tr>';}).join('')+
+      '</tbody></table></div>';
+  }
+  return '<div class="card"><div class="cbd">'+subtabs('meter',defs)+body+'</div></div>';
+}
+A.orderBook=(v)=>{state.sel.orderBook=v;renderStage();};
+A.orderMove=(bk,i,d)=>{
+  const o=db.orders[bk];const j=i+d;if(j<0||j>=o.length)return;
+  const t=o[i];o[i]=o[j];o[j]=t;renderStage();
+};
+A.bookNew=()=>{
+  openModal(modalShell('新增表册',
+    '<div class="formrow"><label>表册编号</label><input type="text" id="bk-code" placeholder="如 B004"></div>'+
+    '<div class="formrow"><label>表册名称</label><input type="text" id="bk-name" placeholder="如 城西四区册"></div>'+
+    '<div class="formrow"><label>抄表员</label><select id="bk-reader">'+db.dicts.reader.map(r=>'<option>'+esc(r.name)+'</option>').join('')+'</select></div>'+
+    '<div class="formrow"><label>抄表周期</label><select id="bk-cycle">'+db.dicts.cycle.map(c=>'<option>'+esc(c.name)+'</option>').join('')+'</select></div>',
+    '<button class="btn" onclick="A.closeModal()">取消</button><button class="btn btn-pri" onclick="A.bookSave()">保 存</button>'));
+};
+A.bookSave=()=>{
+  const code=$('#bk-code').value.trim(),name=$('#bk-name').value.trim();
+  if(!code||!name){toast('编号与名称必填','tb');return;}
+  if(db.books.some(b=>b.code===code)){toast('表册编号重复','tb');return;}
+  db.books.push({code,name,reader:$('#bk-reader').value,cycle:$('#bk-cycle').value,total:0,done:0});
+  db.orders[code]=[];closeModal();renderStage();toast('表册已新增','tk');
+};
+/* ---------- 5 抄表计划 ---------- */
+function dtPlan(){
+  const tab=getTab('plan','manual');
+  const defs=[['manual','手工抄表录入','data-fr="FR-7.1"'],['excel','表格导入','data-fr="FR-7.2"'],['machine','抄表机导入','data-fr="FR-7.3"']];
+  let body='';
+  if(tab==='manual')body=planManual();
+  else if(tab==='excel')body=planExcel();
+  else body=planMachine();
+  return '<div class="card"><div class="cbd">'+subtabs('plan',defs)+body+'</div></div>';
+}
+function mrEntry(no){const bk=state.sel.mrBook;if(!db.manual[bk])db.manual[bk]={};if(!db.manual[bk][no])db.manual[bk][no]={cur:'',reason:''};return db.manual[bk][no];}
+function mrRowState(u){
+  const e=mrEntry(u.no);
+  if(e.cur==='')return {has:false};
+  const cur=+e.cur,vol=r2(cur-u.prev);
+  return {has:true,cur,vol,abn:isAbnormal(vol,u.avg)};
+}
+function planManual(){
+  const bk=state.sel.mrBook;
+  const users=(db.orders[bk]||[]).map(userByNo).filter(u=>u&&statusReadable(u));
+  const skipped=(db.orders[bk]||[]).map(userByNo).filter(u=>u&&!statusReadable(u));
+  let h='<div data-fr="FR-7.1"><div class="toolrow"><label>选择表册：</label><select onchange="A.mrBook(this.value)">'+
+    db.books.map(b=>'<option value="'+b.code+'" '+(b.code===bk?'selected':'')+'>'+b.code+' '+esc(b.name)+'</option>').join('')+'</select>'+
+    '<span class="mut small">水量 = 本期行止 − 上期行止；水量为负或超上期均值3倍判为异常，须选择异常原因</span>'+
+    '<span style="flex:1"></span><button class="btn btn-pri" onclick="A.mrSubmit()">提交抄表数据</button></div>';
+  if(skipped.length)h+='<div class="mut small" style="margin-bottom:8px">按「用户状态-是否抄表」规则已跳过：'+skipped.map(u=>esc(u.name)+'('+u.status+')').join('、')+'</div>';
+  h+='<table class="tbl" id="mr-tbl"><thead><tr><th>序号</th><th>户号</th><th>户名</th><th class="num">上期行止</th><th class="num">上期均值</th><th style="width:130px">本期行止</th><th class="num">水量(m³)</th><th>状态</th><th style="width:160px">异常原因</th></tr></thead><tbody>';
+  users.forEach((u,i)=>{
+    const rs=mrRowState(u),e=mrEntry(u.no);
+    h+='<tr data-no="'+u.no+'"><td>'+(i+1)+'</td><td>'+u.no+'</td><td>'+esc(u.name)+'</td><td class="num">'+u.prev+'</td><td class="num mut">'+u.avg+'</td>'+
+    '<td><input type="number" style="width:110px" value="'+esc(e.cur)+'" placeholder="本期读数" onfocus="A.mrFocus(\''+u.no+'\')" oninput="A.mrInput(\''+u.no+'\',this.value)"></td>'+
+    '<td class="num mr-vol">'+(rs.has?'<span style="color:'+(rs.abn?'var(--bad)':'var(--ink)')+';font-weight:600">'+rs.vol+'</span>':'—')+'</td>'+
+    '<td class="mr-st">'+(rs.has?(rs.abn?stChip('bad','⚠ 异常'):stChip('ok','正常')):'<span class="mut small">未录入</span>')+'</td>'+
+    '<td class="mr-rs">'+mrReasonCell(u.no,rs,e)+'</td></tr>';
+  });
+  h+='</tbody></table>';
+  h+='<div class="card" style="margin-top:14px;background:var(--blue-bg)"><div class="cbd" id="mr-preview">'+mrPreview()+'</div></div></div>';
+  return h;
+}
+function mrReasonCell(no,rs,e){
+  if(!rs.has||!rs.abn)return '<span class="mut">—</span>';
+  const opts=['','疑似漏水','换表未登记','表故障','空置房','估抄','倒装表'];
+  return '<select style="width:150px;border-color:'+(e.reason?'var(--line2)':'var(--bad)')+'" onchange="A.mrReason(\''+no+'\',this.value)">'+
+    opts.map(o=>'<option value="'+o+'" '+(e.reason===o?'selected':'')+'>'+(o||'请选择原因 *')+'</option>').join('')+'</select>';
+}
+function mrPreview(){
+  const no=state.sel.mrFocus;
+  if(!no)return '<span class="mut">💡 点击某户「本期行止」输入框并录入读数，此处实时预览该户账单（随业务参数联动）。</span>';
+  const u=userByNo(no);const rs=mrRowState(u);
+  if(!rs.has)return '<span class="mut">💡 '+esc(u.name)+'（'+no+'）尚未录入本期行止。</span>';
+  const c=calcBill(rs.vol);const p=state.params;
+  let h='<div class="b" style="margin-bottom:6px">🧾 账单实时预览 — '+esc(u.name)+'（'+no+'）　水量 '+rs.vol+' m³'+(rs.abn?'　<span class="chip st-bad">✕ 异常待确认，账单仅供参考</span>':'')+'</div>';
+  h+='<table class="tbl" style="background:#fff"><tr><th>费项</th><th>计算</th><th class="num">金额(元)</th></tr>';
+  h+='<tr><td>第一阶梯水费</td><td class="mut">'+c.q1+' m³ × '+p.t1p+' 元</td><td class="num">'+fmt(c.w1)+'</td></tr>';
+  if(c.q2>0)h+='<tr><td>第二阶梯水费</td><td class="mut">'+c.q2+' m³ × '+p.t2p+' 元</td><td class="num">'+fmt(c.w2)+'</td></tr>';
+  if(c.q3>0)h+='<tr><td>第三阶梯水费</td><td class="mut">'+c.q3+' m³ × '+p.t3p+' 元</td><td class="num">'+fmt(c.w3)+'</td></tr>';
+  h+='<tr><td>污水处理费</td><td class="mut">'+c.vol+' m³ × '+p.sw+' 元</td><td class="num">'+fmt(c.sew)+'</td></tr>';
+  h+='<tr><td class="b">合计</td><td></td><td class="num b" style="color:var(--blue);font-size:16px">¥ '+fmt(c.total)+'</td></tr></table>';
+  return h;
+}
+A.mrBook=(v)=>{state.sel.mrBook=v;state.sel.mrFocus=null;renderStage();};
+A.mrFocus=(no)=>{state.sel.mrFocus=no;const pv=$('#mr-preview');if(pv)pv.innerHTML=mrPreview();};
+A.mrInput=(no,val)=>{
+  const e=mrEntry(no);e.cur=val;state.sel.mrFocus=no;
+  const u=userByNo(no),rs=mrRowState(u);
+  const tr=$('#mr-tbl tr[data-no="'+no+'"]');
+  if(tr){
+    tr.querySelector('.mr-vol').innerHTML=rs.has?'<span style="color:'+(rs.abn?'var(--bad)':'var(--ink)')+';font-weight:600">'+rs.vol+'</span>':'—';
+    tr.querySelector('.mr-st').innerHTML=rs.has?(rs.abn?stChip('bad','⚠ 异常'):stChip('ok','正常')):'<span class="mut small">未录入</span>';
+    tr.querySelector('.mr-rs').innerHTML=mrReasonCell(no,rs,e);
+  }
+  const pv=$('#mr-preview');if(pv)pv.innerHTML=mrPreview();
+};
+A.mrReason=(no,v)=>{mrEntry(no).reason=v;const u=userByNo(no),rs=mrRowState(u);const tr=$('#mr-tbl tr[data-no="'+no+'"]');if(tr)tr.querySelector('.mr-rs').innerHTML=mrReasonCell(no,rs,mrEntry(no));};
+A.mrSubmit=()=>{
+  const bk=state.sel.mrBook,ent=db.manual[bk]||{};
+  const items=Object.keys(ent).filter(no=>ent[no].cur!=='');
+  if(!items.length){toast('尚未录入任何本期行止','tw');return;}
+  for(const no of items){
+    const u=userByNo(no),vol=r2(+ent[no].cur-u.prev);
+    if(isAbnormal(vol,u.avg)&&!ent[no].reason){toast('户 '+no+'（'+u.name+'）水量异常，必须选择异常原因后才能提交','tb');return;}
+  }
+  items.forEach(no=>{
+    const u=userByNo(no);reviewSeq++;
+    db.reviews.push({id:'R'+reviewSeq,userNo:no,prev:u.prev,cur:+ent[no].cur,avg:u.avg,src:'柜台录入',time:nowClock().slice(0,5),status:'待审核',reason:ent[no].reason||''});
+  });
+  const b=bookByCode(bk);b.done=Math.min(b.total,b.done+items.length);
+  db.manual[bk]={};state.sel.mrFocus=null;
+  renderStage();toast('已提交 '+items.length+' 条抄表数据，转入审核（可切换到平板端查看审核）','tk');
+};
+function planExcel(){
+  const parsed=state.sel.excelParsed;
+  let h='<div data-fr="FR-7.2"><div class="dropzone" ondragover="event.preventDefault();this.classList.add(\'hov\')" ondragleave="this.classList.remove(\'hov\')" ondrop="event.preventDefault();A.excelParse()" onclick="A.excelParse()">'+
+    '<div style="font-size:34px">📥</div><div class="b" style="margin:6px 0 2px">拖拽 Excel 抄表表格到此处，或点击选择文件</div>'+
+    '<div class="small">支持 .xlsx / .xls，模板列：户号、户名、本期行止（演示环境点击即模拟解析）</div></div>';
+  if(parsed){
+    const rows=[
+      ['30012001','王建国',1268,1281,13,''],['30012002','李秀兰',863,871,8,''],
+      ['30012003','张德海',1547,1602,55,'超均值3倍'],['30012004','陈雅芳',692,700,8,''],
+      ['30012006','赵桂香',431,436,5,''],['30012007','孙立军',1105,1096,-9,'水量为负'],
+    ];
+    h+='<div class="toolrow" style="margin-top:16px"><span class="b">解析结果</span>'+stChip('ok','成功 4 条')+stChip('bad','异常 2 条')+
+      '<span style="flex:1"></span><button class="btn" onclick="A.excelReset()">重新选择</button><button class="btn btn-pri" onclick="A.excelImport()">确认导入</button></div>'+
+      '<table class="tbl"><thead><tr><th>户号</th><th>户名</th><th class="num">上期行止</th><th class="num">本期行止</th><th class="num">水量</th><th>校验结果</th></tr></thead><tbody>'+
+      rows.map(r=>'<tr><td>'+r[0]+'</td><td>'+r[1]+'</td><td class="num">'+r[2]+'</td><td class="num">'+r[3]+'</td><td class="num" style="font-weight:600;color:'+(r[5]?'var(--bad)':'var(--ink)')+'">'+r[4]+'</td>'+
+        '<td>'+(r[5]?stChip('bad','⚠ '+r[5]):stChip('ok','通过'))+'</td></tr>').join('')+'</tbody></table>';
+  }
+  return h+'</div>';
+}
+A.excelParse=()=>{state.sel.excelParsed=true;renderStage();toast('已模拟解析 抄表表格_B001_202607.xlsx','tk');};
+A.excelReset=()=>{state.sel.excelParsed=false;renderStage();};
+A.excelImport=()=>{
+  ['30012003','30012007'].forEach(no=>{
+    const u=userByNo(no);reviewSeq++;
+    db.reviews.push({id:'R'+reviewSeq,userNo:no,prev:u.prev,cur:no==='30012003'?1602:1096,avg:u.avg,src:'表格导入',time:nowClock().slice(0,5),status:'待审核',reason:''});
+  });
+  state.sel.excelParsed=false;renderStage();
+  toast('已导入 6 条：4 条正常入库，2 条异常转人工审核','tk');
+};
+function planMachine(){
+  const logs=state.sel.machineLog;
+  return '<div data-fr="FR-7.3"><div class="toolrow">'+
+    '<button class="btn" onclick="A.machinePick()">📂 选择抄表机数据文件</button>'+
+    '<span class="'+(state.sel.machineFile?'b':'mut')+'">'+(state.sel.machineFile||'未选择文件（.dat / .txt）')+'</span>'+
+    '<span style="flex:1"></span><button class="btn btn-pri" '+(state.sel.machineFile?'':'disabled')+' onclick="A.machineImport()">开始导入</button></div>'+
+    '<div class="mut small" style="margin-bottom:10px">对接掌上抄表机：按约定报文格式解析抄表读数，异常记录自动标记并转审核（对应 SRS 4.7.3）。</div>'+
+    '<div class="loglist" id="mc-log">'+(logs.length?logs.join('<br>'):'<span style="opacity:.55">— 导入日志为空 —</span>')+'</div></div>';
+}
+A.machinePick=()=>{state.sel.machineFile='CB20260709_B002.dat（86 条记录）';renderStage();};
+A.machineImport=()=>{
+  const push=(s)=>{state.sel.machineLog.push(s);const el=$('#mc-log');if(el){el.innerHTML=state.sel.machineLog.join('<br>');el.scrollTop=el.scrollHeight;}};
+  state.sel.machineLog=[];
+  push('['+nowClock()+'] 连接抄表机数据文件 CB20260709_B002.dat …');
+  setTimeout(()=>push('['+nowClock()+'] 校验文件头通过，表册 B002，记录数 86'),350);
+  setTimeout(()=>push('['+nowClock()+'] 已解析 86 / 86 条读数'),800);
+  setTimeout(()=>push('['+nowClock()+'] <span class="lw">发现异常水量 3 条（负水量1条 / 超均值3倍2条），已标记转审核</span>'),1250);
+  setTimeout(()=>push('['+nowClock()+'] <span class="le">1 条户号不存在（30029999），已写入错误清单</span>'),1600);
+  setTimeout(()=>{push('['+nowClock()+'] 导入完成：入库 82，转审核 3，错误 1');toast('抄表机数据导入完成','tk');},2000);
+};
+
+/* ---------- 6 柜台收费 ---------- */
+function dtCounter(){
+  const tab=getTab('counter','single');
+  const defs=[['single','单户销账','data-fr="FR-4.1"'],['batch','批量销账','data-fr="FR-4.2"'],['prepay','预收费','data-fr="FR-4.3"']];
+  let body='';
+  if(tab==='single')body=ctSingle();
+  else if(tab==='batch')body=ctBatch();
+  else body=ctPrepay();
+  return '<div class="card"><div class="cbd">'+subtabs('counter',defs)+body+'</div></div>';
+}
+function searchUsers(q){
+  q=(q||'').trim();if(!q)return [];
+  return db.users.filter(u=>u.no.includes(q)||u.name.includes(q));
+}
+function userCard(u,extra){
+  return '<div class="card" style="margin-bottom:14px"><div class="cbd flexr" style="flex-wrap:wrap;gap:18px">'+
+    '<div><div class="mut small">户号</div><div class="b" style="font-size:16px">'+u.no+'</div></div>'+
+    '<div><div class="mut small">户名</div><div class="b" style="font-size:16px">'+esc(u.name)+'</div></div>'+
+    '<div style="max-width:280px"><div class="mut small">地址</div><div>'+esc(u.addr)+'</div></div>'+
+    '<div><div class="mut small">用水性质</div><div>'+esc(u.cat)+'</div></div>'+
+    '<div><div class="mut small">状态</div><div>'+ustatusChip(u.status)+'</div></div>'+
+    '<div><div class="mut small">预存余额</div><div class="b money" style="color:'+(u.balance>0?'var(--ok)':'var(--mut)')+'">¥ '+fmt(u.balance)+'</div></div>'+
+    (extra||'')+'</div></div>';
+}
+function ctSearchBox(act,ph){
+  return '<div class="toolrow"><input type="text" id="ct-q" placeholder="'+ph+'" style="width:300px" onkeydown="if(event.key===\'Enter\')A.'+act+'()">'+
+    '<button class="btn btn-pri" onclick="A.'+act+'()">🔍 查询</button></div>';
+}
+function pickList(list,pickAct){
+  return '<table class="tbl"><thead><tr><th>户号</th><th>户名</th><th>地址</th><th>状态</th><th class="num">欠费(元)</th><th></th></tr></thead><tbody>'+
+    list.map(u=>'<tr><td>'+u.no+'</td><td>'+esc(u.name)+'</td><td class="mut">'+esc(u.addr)+'</td><td>'+ustatusChip(u.status)+'</td>'+
+    '<td class="num" style="color:'+(arrearsTotal(u.no)>0?'var(--bad)':'var(--mut)')+'">'+fmt(arrearsTotal(u.no))+'</td>'+
+    '<td><button class="btn btn-sm btn-pri" onclick="A.'+pickAct+'(\''+u.no+'\')">选择</button></td></tr>').join('')+'</tbody></table>';
+}
+function ctSingle(){
+  let h='<div data-fr="FR-4.1">'+ctSearchBox('ctSearch','输入户号 / 户名，如 30012007 或 孙立军');
+  if(state.sel.counterResults)h+=state.sel.counterResults.length?pickList(state.sel.counterResults,'ctPick'):'<div class="mut" style="padding:16px">未查询到匹配用户</div>';
+  const u=state.sel.counterUser?userByNo(state.sel.counterUser):null;
+  if(u){
+    const bills=userArrears(u.no);
+    h+=userCard(u);
+    if(!bills.length){
+      h+='<div class="card"><div class="cbd" style="text-align:center;padding:26px">'+stChip('ok','该户无欠费账单')+'</div></div>';
+    }else{
+      const ticked=state.sel.counterBills;
+      h+='<table class="tbl"><thead><tr><th style="width:44px"><input type="checkbox" '+(ticked.length===bills.length?'checked':'')+' onchange="A.ctTickAll(this.checked)"></th><th>账期</th><th class="num">水量(m³)</th><th class="num">水费</th><th class="num">污水费</th><th class="num">违约金<span class="mut small">('+state.params.late+'‰/日)</span></th><th class="num">小计(元)</th><th class="num">逾期天数</th></tr></thead><tbody>'+
+      bills.map(b=>{const m=billMoney(b);return '<tr><td><input type="checkbox" '+(ticked.includes(b.id)?'checked':'')+' onchange="A.ctTick(\''+b.id+'\',this.checked)"></td>'+
+        '<td class="b">'+b.period+'</td><td class="num">'+b.vol+'</td><td class="num">'+fmt(m.water)+'</td><td class="num">'+fmt(m.sew)+'</td>'+
+        '<td class="num" style="color:var(--over)">'+fmt(m.late)+'</td><td class="num b">'+fmt(m.total)+'</td>'+
+        '<td class="num">'+(b.days>60?'<span style="color:var(--bad)">✕ '+b.days+'</span>':'<span style="color:var(--over)">◆ '+b.days+'</span>')+'</td></tr>';}).join('')+
+      '</tbody></table>';
+      const sum=r2(bills.filter(b=>ticked.includes(b.id)).reduce((s,b)=>s+billMoney(b).total,0));
+      const paid=+state.sel.counterPaid||0,change=r2(paid-sum);
+      h+='<div class="card" style="margin-top:14px;background:var(--blue-bg)"><div class="cbd flexr" style="flex-wrap:wrap;gap:20px">'+
+      '<div><div class="mut small">已勾选</div><div class="b" id="ct-n" style="font-size:17px">'+ticked.length+' 期</div></div>'+
+      '<div><div class="mut small">应收合计</div><div class="b money" id="ct-sum" style="font-size:22px;color:var(--blue)">¥ '+fmt(sum)+'</div></div>'+
+      '<div class="flexr"><label class="b">实收金额</label><input type="number" id="ct-paid" style="width:130px;font-size:16px" value="'+esc(state.sel.counterPaid)+'" oninput="A.ctPaid(this.value)"></div>'+
+      '<div><div class="mut small">找零</div><div class="b money" id="ct-chg" style="font-size:20px;color:'+(change>=0?'var(--ok)':'var(--bad)')+'">'+(paid?(change>=0?'¥ '+fmt(change):'差 ¥ '+fmt(-change)):'—')+'</div></div>'+
+      '<span style="flex:1"></span><button class="btn btn-pri btn-lg" id="ct-ok" '+(ticked.length&&paid>=sum&&sum>0?'':'disabled')+' onclick="A.ctConfirm()">确认收款</button></div></div>';
+    }
+  }
+  return h+'</div>';
+}
+A.ctSearch=()=>{const q=$('#ct-q').value;state.sel.counterResults=searchUsers(q);state.sel.counterUser=null;state.sel.counterBills=[];state.sel.counterPaid='';
+  if(state.sel.counterResults.length===1){state.sel.counterUser=state.sel.counterResults[0].no;state.sel.counterResults=null;state.sel.counterBills=userArrears(state.sel.counterUser).map(b=>b.id);}
+  renderStage();};
+A.ctPick=(no)=>{state.sel.counterUser=no;state.sel.counterResults=null;state.sel.counterBills=userArrears(no).map(b=>b.id);state.sel.counterPaid='';renderStage();};
+A.ctTick=(id,on)=>{const t=state.sel.counterBills;const i=t.indexOf(id);if(on&&i<0)t.push(id);if(!on&&i>=0)t.splice(i,1);renderStage();};
+A.ctTickAll=(on)=>{state.sel.counterBills=on?userArrears(state.sel.counterUser).map(b=>b.id):[];renderStage();};
+A.ctPaid=(v)=>{
+  state.sel.counterPaid=v;
+  const bills=userArrears(state.sel.counterUser),ticked=state.sel.counterBills;
+  const sum=r2(bills.filter(b=>ticked.includes(b.id)).reduce((s,b)=>s+billMoney(b).total,0));
+  const paid=+v||0,change=r2(paid-sum);
+  const chg=$('#ct-chg');if(chg){chg.style.color=change>=0?'var(--ok)':'var(--bad)';chg.textContent=paid?(change>=0?'¥ '+fmt(change):'差 ¥ '+fmt(-change)):'—';}
+  const ok=$('#ct-ok');if(ok)ok.disabled=!(ticked.length&&paid>=sum&&sum>0);
+};
+let receiptSeq=137;
+A.ctConfirm=()=>{
+  const u=userByNo(state.sel.counterUser);
+  const bills=userArrears(u.no).filter(b=>state.sel.counterBills.includes(b.id));
+  const sum=r2(bills.reduce((s,b)=>s+billMoney(b).total,0));
+  const paid=+state.sel.counterPaid||0;
+  bills.forEach(b=>{const m=billMoney(b);b.paid=true;b.paidAmt=m.total;b.payTime=TODAY;});
+  db.payments.push({time:nowClock().slice(0,5),userNo:u.no,name:u.name,amt:sum,channel:'柜台现金'});
+  receiptSeq++;const rno='SK20260709'+String(receiptSeq).padStart(4,'0');
+  state.sel.counterBills=[];state.sel.counterPaid='';
+  openModal(modalShell('✅ 销账成功',
+    '<div class="receipt"><h4>供水营销管理系统 · 水费收据</h4>'+
+    '<div style="text-align:center" class="mut small">票据号：'+rno+'　开票日期：'+TODAY+'</div><div style="height:10px"></div>'+
+    '<div class="rline"><span>户号 / 户名</span><span class="b">'+u.no+' / '+esc(u.name)+'</span></div>'+
+    '<div class="rline"><span>销账期次</span><span>'+bills.map(b=>b.period).join('、')+'（'+bills.length+'期）</span></div>'+
+    '<div class="rline"><span>实收金额</span><span class="b" style="color:var(--bad);font-size:16px">¥ '+fmt(sum)+'</span></div>'+
+    '<div class="rline"><span>金额大写</span><span class="b">'+cnMoney(sum)+'</span></div>'+
+    '<div class="rline"><span>实收 / 找零</span><span>¥ '+fmt(paid)+' / ¥ '+fmt(r2(paid-sum))+'</span></div>'+
+    '<div class="rline"><span>收费网点 / 操作员</span><span>营业厅收费处 / 马春霞</span></div></div>',
+    '<button class="btn" onclick="A.closeModal()">关闭</button><button class="btn btn-pri" onclick="A.closeModal();toast(\'已发送打印任务（演示）\',\'tk\')">🖨 打印票据</button>'));
+  renderStage();
+};
+function ctBatch(){
+  const bk=state.sel.batchBook;
+  const owe=(db.orders[bk]||[]).map(userByNo).filter(u=>u&&userArrears(u.no).length);
+  const ticks=state.sel.batchTicks;
+  const chosen=owe.filter(u=>ticks[u.no]!==false);
+  const sum=r2(chosen.reduce((s,u)=>s+arrearsTotal(u.no),0));
+  let h='<div data-fr="FR-4.2"><div class="toolrow"><label>按表册查询：</label><select onchange="A.btBook(this.value)">'+
+    db.books.map(b=>'<option value="'+b.code+'" '+(b.code===bk?'selected':'')+'>'+b.code+' '+esc(b.name)+'</option>').join('')+'</select>'+
+    '<span class="mut small">列出该表册全部欠费户，可整册批量销账（适用于代扣到账、集中托收场景）</span></div>';
+  if(!owe.length)return h+'<div class="mut" style="padding:20px">该表册当前无欠费户 ✓</div></div>';
+  h+='<table class="tbl"><thead><tr><th style="width:44px"><input type="checkbox" '+(chosen.length===owe.length?'checked':'')+' onchange="A.btAll(this.checked)"></th><th>户号</th><th>户名</th><th class="num">欠费期数</th><th class="num">欠费合计(元)</th><th>状态</th></tr></thead><tbody>'+
+    owe.map(u=>'<tr><td><input type="checkbox" '+(ticks[u.no]!==false?'checked':'')+' onchange="A.btTick(\''+u.no+'\',this.checked)"></td>'+
+    '<td>'+u.no+'</td><td>'+esc(u.name)+'</td><td class="num">'+userArrears(u.no).length+'</td>'+
+    '<td class="num b" style="color:var(--bad)">'+fmt(arrearsTotal(u.no))+'</td><td>'+ustatusChip(u.status)+'</td></tr>').join('')+'</tbody></table>';
+  h+='<div class="card" style="margin-top:14px;background:var(--blue-bg)"><div class="cbd flexr">'+
+    '<div>已选 <span class="b">'+chosen.length+'</span> 户　合计 <span class="b money" style="font-size:20px;color:var(--blue)">¥ '+fmt(sum)+'</span></div>'+
+    '<span style="flex:1"></span><button class="btn btn-pri btn-lg" '+(chosen.length?'':'disabled')+' onclick="A.btConfirm()">批量确认销账</button></div></div></div>';
+  return h;
+}
+A.btBook=(v)=>{state.sel.batchBook=v;state.sel.batchTicks={};renderStage();};
+A.btTick=(no,on)=>{state.sel.batchTicks[no]=on;renderStage();};
+A.btAll=(on)=>{const bk=state.sel.batchBook;(db.orders[bk]||[]).forEach(no=>{state.sel.batchTicks[no]=on;});renderStage();};
+A.btConfirm=()=>{
+  const bk=state.sel.batchBook;
+  const owe=(db.orders[bk]||[]).map(userByNo).filter(u=>u&&userArrears(u.no).length&&state.sel.batchTicks[u.no]!==false);
+  const sum=r2(owe.reduce((s,u)=>s+arrearsTotal(u.no),0));
+  confirmModal('批量销账确认','将对表册 '+bk+' 的 <b>'+owe.length+'</b> 户执行批量销账，合计 <b style="color:var(--bad)">¥ '+fmt(sum)+'</b>（含违约金）。确认执行？',
+    'A._btDo()');
+};
+A._btDo=()=>{
+  const bk=state.sel.batchBook;
+  const owe=(db.orders[bk]||[]).map(userByNo).filter(u=>u&&userArrears(u.no).length&&state.sel.batchTicks[u.no]!==false);
+  let n=0,sum=0;
+  owe.forEach(u=>{
+    const t=arrearsTotal(u.no);
+    userArrears(u.no).forEach(b=>{const m=billMoney(b);b.paid=true;b.paidAmt=m.total;b.payTime=TODAY;});
+    sum+=t;n++;
+    db.payments.push({time:nowClock().slice(0,5),userNo:u.no,name:u.name,amt:t,channel:'批量销账'});});
+  closeModal();state.sel.batchTicks={};renderStage();
+  toast('批量销账完成：'+n+' 户，合计 ¥'+fmt(r2(sum)),'tk');
+};
+function ctPrepay(){
+  let h='<div data-fr="FR-4.3">'+ctSearchBox('ppSearch','输入户号 / 户名进行预存充值');
+  if(state.sel.prepayResults)h+=state.sel.prepayResults.length?pickList(state.sel.prepayResults,'ppPick'):'<div class="mut" style="padding:16px">未查询到匹配用户</div>';
+  const u=state.sel.prepayUser?userByNo(state.sel.prepayUser):null;
+  if(u){
+    const amt=+state.sel.prepayAmt||0,bonus=r2(amt*state.params.bonus/100);
+    h+=userCard(u);
+    h+='<div class="card" style="background:var(--blue-bg)"><div class="cbd">'+
+    '<div class="flexr" style="flex-wrap:wrap;gap:16px"><label class="b">充值金额</label>'+
+    '<input type="number" id="pp-amt" style="width:140px;font-size:16px" value="'+esc(state.sel.prepayAmt)+'" oninput="A.ppAmt(this.value)">'+
+    [100,200,500].map(v=>'<button class="btn" onclick="A.ppAmt('+v+',true)">¥'+v+'</button>').join('')+
+    '<div>赠送（'+state.params.bonus+'%）：<span class="b money" id="pp-bonus" style="color:var(--ok)">¥ '+fmt(bonus)+'</span></div>'+
+    '<div>到账合计：<span class="b money" id="pp-total" style="font-size:19px;color:var(--blue)">¥ '+fmt(r2(amt+bonus))+'</span></div>'+
+    '<span style="flex:1"></span><button class="btn btn-pri btn-lg" id="pp-ok" '+(amt>0?'':'disabled')+' onclick="A.ppConfirm()">确认充值</button></div></div></div>';
+    const logs=db.prepayLogs.filter(l=>l.userNo===u.no);
+    if(logs.length)h+='<div class="card" style="margin-top:14px"><div class="chd">余额变动记录</div><div class="cbd" style="padding:0">'+
+      '<table class="tbl"><thead><tr><th>时间</th><th class="num">充值金额</th><th class="num">赠送</th><th class="num">变动后余额</th></tr></thead><tbody>'+
+      logs.map(l=>'<tr><td>'+l.time+'</td><td class="num">+'+fmt(l.amt)+'</td><td class="num" style="color:var(--ok)">+'+fmt(l.bonus)+'</td><td class="num b">¥ '+fmt(l.after)+'</td></tr>').join('')+
+      '</tbody></table></div></div>';
+  }
+  return h+'</div>';
+}
+A.ppSearch=()=>{const q=$('#ct-q').value;state.sel.prepayResults=searchUsers(q);state.sel.prepayUser=null;state.sel.prepayAmt='';
+  if(state.sel.prepayResults.length===1){state.sel.prepayUser=state.sel.prepayResults[0].no;state.sel.prepayResults=null;}
+  renderStage();};
+A.ppPick=(no)=>{state.sel.prepayUser=no;state.sel.prepayResults=null;state.sel.prepayAmt='';renderStage();};
+A.ppAmt=(v,rerender)=>{
+  state.sel.prepayAmt=String(v);
+  if(rerender){renderStage();return;}
+  const amt=+v||0,bonus=r2(amt*state.params.bonus/100);
+  const b=$('#pp-bonus'),t=$('#pp-total'),ok=$('#pp-ok');
+  if(b)b.textContent='¥ '+fmt(bonus);if(t)t.textContent='¥ '+fmt(r2(amt+bonus));if(ok)ok.disabled=!(amt>0);
+};
+A.ppConfirm=()=>{
+  const u=userByNo(state.sel.prepayUser);
+  const amt=+state.sel.prepayAmt||0,bonus=r2(amt*state.params.bonus/100);
+  u.balance=r2(u.balance+amt+bonus);
+  db.prepayLogs.push({time:nowClock().slice(0,5),userNo:u.no,name:u.name,amt,bonus,after:u.balance});
+  db.payments.push({time:nowClock().slice(0,5),userNo:u.no,name:u.name,amt,channel:'预存充值'});
+  state.sel.prepayAmt='';renderStage();
+  toast('充值成功：到账 ¥'+fmt(r2(amt+bonus))+'（含赠送 ¥'+fmt(bonus)+'），当前余额 ¥'+fmt(u.balance),'tk');
+};
+/* ---------- 7 收费数据基础 ---------- */
+db.platform={
+  wechat:{on:true,limitStatus:true,maxBills:10,maxAmt:5000},
+  alipay:{on:true,limitStatus:true,maxBills:10,maxAmt:5000},
+};
+function dtFeebase(){
+  const tab=getTab('feebase','feetype');
+  const defs=[['feetype','收费类型','data-fr="FR-3.1"'],['outlet','收费网点','data-fr="FR-3.2"'],['atm','ATM收费机','data-fr="FR-3.3"'],['platform','公众缴费平台','data-fr="FR-3.4"']];
+  let body='';
+  if(tab==='platform'){
+    body='<div data-fr="FR-3.4"><div class="mut small" style="margin-bottom:12px">配置微信 / 支付宝等公众缴费通道及限制条件；「限制用户状态」联动档案基础数据-用户状态的「是否允许缴费」标志（如违章用水户将被拦截）。</div>'+
+    '<div class="flexw">'+['wechat','alipay'].map(k=>{
+      const p=db.platform[k],nm=k==='wechat'?'微信缴费通道':'支付宝缴费通道',ic=k==='wechat'?'💬':'🅰';
+      return '<div class="card" style="flex:1;min-width:340px"><div class="chd">'+ic+' '+nm+'<span style="flex:1"></span>'+
+      (p.on?stChip('ok','已启用'):stChip('bad','已停用'))+'<span class="switch '+(p.on?'on':'')+'" onclick="A.pfToggle(\''+k+'\')"></span></div>'+
+      '<div class="cbd">'+
+      '<div class="formrow"><label style="width:150px">限制用户状态</label><input type="checkbox" style="width:18px;height:18px" '+(p.limitStatus?'checked':'')+' onchange="A.pfSet(\''+k+'\',\'limitStatus\',this.checked)"><span class="mut small">拦截「不允许缴费」状态用户</span></div>'+
+      '<div class="formrow"><label style="width:150px">单次最多缴费笔数</label><input type="number" style="width:90px;flex:none" value="'+p.maxBills+'" oninput="A.pfSet(\''+k+'\',\'maxBills\',+this.value)"><span class="mut small">笔</span></div>'+
+      '<div class="formrow"><label style="width:150px">单笔限额</label><input type="number" style="width:90px;flex:none" value="'+p.maxAmt+'" oninput="A.pfSet(\''+k+'\',\'maxAmt\',+this.value)"><span class="mut small">元</span></div>'+
+      '</div></div>';}).join('')+'</div></div>';
+  }else{
+    body='<div data-fr="'+DICT_DEFS[tab].fr+'">'+dictTable(tab)+'</div>';
+  }
+  return '<div class="card"><div class="cbd">'+subtabs('feebase',defs)+body+'</div></div>';
+}
+A.pfToggle=(k)=>{db.platform[k].on=!db.platform[k].on;renderStage();toast(db.platform[k].on?'通道已启用':'通道已停用','tk');};
+A.pfSet=(k,f,v)=>{db.platform[k][f]=v;};
+/* ---------- 8 票据管理 ---------- */
+db.tkItems=[
+  {name:'票据号',x:330,y:10,on:true},{name:'户号',x:14,y:44,on:true},{name:'户名',x:150,y:44,on:true},
+  {name:'地址',x:14,y:76,on:true},{name:'账期',x:14,y:110,on:true},{name:'金额(小写)',x:150,y:110,on:true},
+  {name:'金额大写',x:14,y:144,on:true},{name:'开票日期',x:14,y:212,on:true},{name:'操作员',x:150,y:212,on:true},
+  {name:'二维码',x:340,y:150,on:false},{name:'水量明细',x:14,y:178,on:false},
+];
+function dtTicket(){
+  const tab=getTab('ticket','tickettype');
+  const defs=[['tickettype','票据类型','data-fr="FR-5.1"'],['fmt','票据格式','data-fr="FR-5.2"']];
+  let body='';
+  if(tab==='tickettype')body='<div data-fr="FR-5.1">'+dictTable('tickettype')+'</div>';
+  else{
+    body='<div data-fr="FR-5.2"><div style="display:flex;gap:18px;flex-wrap:wrap">'+
+    '<div style="width:230px;flex:none"><div class="b" style="margin-bottom:8px">格式项（勾选启用）</div>'+
+    db.tkItems.map((it,i)=>'<label class="flexr" style="padding:5px 2px;cursor:pointer"><input type="checkbox" '+(it.on?'checked':'')+' onchange="A.tkToggle('+i+',this.checked)"><span>'+esc(it.name)+'</span><span style="flex:1"></span><span class="mut small">x:'+it.x+' y:'+it.y+'</span></label>').join('')+
+    '<div class="mut small" style="margin-top:10px">正式系统中支持拖拽定位与坐标微调，本原型以勾选示意排布。</div></div>'+
+    '<div style="flex:1;min-width:420px"><div class="b" style="margin-bottom:8px">票据版面示意（水费收据 · 240mm×127mm）</div>'+
+    '<div class="tk-canvas">'+
+    '<div style="position:absolute;top:8px;left:0;right:0;text-align:center;color:var(--blue);font-weight:700;letter-spacing:6px">水费收据</div>'+
+    db.tkItems.filter(it=>it.on).map(it=>'<div class="tk-item" style="left:'+it.x+'px;top:'+(it.y+28)+'px">'+esc(it.name)+'</div>').join('')+
+    '</div></div></div></div>';
+  }
+  return '<div class="card"><div class="cbd">'+subtabs('ticket',defs)+body+'</div></div>';
+}
+A.tkToggle=(i,on)=>{db.tkItems[i].on=on;renderStage();};
+/* ---------- 9 水表基础数据 ---------- */
+function dtMeterbase(){
+  const tab=getTab('meterbase','mtype');
+  const defs=[['mtype','水表类型','data-fr="FR-6.1"'],['mcaliber','水表口径','data-fr="FR-6.2"'],['mparam','水表参数','data-fr="FR-6.3"'],['mmaker','水表厂家','data-fr="FR-6.4"']];
+  return '<div class="card"><div class="cbd">'+subtabs('meterbase',defs)+
+    '<div data-fr="'+DICT_DEFS[tab].fr+'">'+dictTable(tab)+'</div></div></div>';
+}
+/* ---------- 10 系统报表（SRS未详述） ---------- */
+function dtReport(){
+  const agingBuckets=[
+    {l:'30天内',min:0,max:30,c:'#0ca30c'},
+    {l:'31-60天',min:31,max:60,c:'#fab219'},
+    {l:'61-90天',min:61,max:90,c:'#ec835a'},
+    {l:'90天以上',min:91,max:9999,c:'#d03b3b'},
+  ].map(bk=>{
+    const bs=db.bills.filter(b=>!b.paid&&b.days>=bk.min&&b.days<=bk.max);
+    const amt=r2(bs.reduce((s,b)=>s+billMoney(b).total,0));
+    return {l:bk.l,v:amt,c:bk.c,t:'¥'+fmt(amt)+' / '+bs.length+'笔',n:bs.length,amt};
+  });
+  const doneAll=db.books.reduce((s,b)=>s+b.done,0),totalAll=db.books.reduce((s,b)=>s+b.total,0);
+  return '<div class="toolrow"><span class="badge-todo" data-frx="系统报表">⚠ 本模块 SRS 未详述，界面为需求建议稿，待与业务部门确认补充需求</span></div>'+
+  '<div class="flexw">'+
+  '<div class="card" style="flex:1.2;min-width:480px"><div class="chd">📈 应收实收汇总（近6月）</div><div class="cbd">'+svgBars(db.trend,560,190)+
+  '<table class="tbl" style="margin-top:8px"><thead><tr><th>月份</th><th class="num">应收(万元)</th><th class="num">实收(万元)</th><th class="num">回收率</th></tr></thead><tbody>'+
+  db.trend.map(t=>'<tr><td>'+t.m+'</td><td class="num">'+t.ys.toFixed(1)+'</td><td class="num">'+t.ss.toFixed(1)+'</td><td class="num" style="color:'+(t.ss/t.ys>=0.9?'var(--ok)':'var(--over)')+'">'+(t.ss/t.ys*100).toFixed(1)+'%</td></tr>').join('')+
+  '</tbody></table></div></div>'+
+  '<div class="card" style="flex:1;min-width:420px"><div class="chd">⏳ 欠费账龄分析（实时·随违约金参数联动）</div><div class="cbd">'+
+  svgHBar(agingBuckets,500)+
+  '<table class="tbl" style="margin-top:8px"><thead><tr><th>账龄段</th><th class="num">笔数</th><th class="num">金额(元)</th><th>风险</th></tr></thead><tbody>'+
+  agingBuckets.map((b,i)=>'<tr><td>'+b.l+'</td><td class="num">'+b.n+'</td><td class="num">'+fmt(b.amt)+'</td><td>'+(i===0?stChip('ok','低'):i===1?stChip('warn','中'):i===2?stChip('over','高'):stChip('bad','严重'))+'</td></tr>').join('')+
+  '</tbody></table></div></div>'+
+  '<div class="card" style="flex:1;min-width:420px"><div class="chd">🎯 抄表完成率</div><div class="cbd">'+
+  '<div class="flexr" style="gap:22px">'+svgDonut(doneAll/totalAll*100,'#1c5cab',110)+
+  '<div class="mut small">本期合计 '+doneAll+' / '+totalAll+' 户<br>口径：已抄户数 ÷ 应抄户数<br>（应抄户按用户状态「是否抄表」过滤）</div></div>'+
+  '<table class="tbl" style="margin-top:10px"><thead><tr><th>表册</th><th>抄表员</th><th class="num">已抄/应抄</th><th class="num">完成率</th><th>状态</th></tr></thead><tbody>'+
+  db.books.map(b=>{const p=b.total?b.done/b.total*100:0;return '<tr><td>'+b.code+' '+esc(b.name)+'</td><td>'+esc(b.reader)+'</td><td class="num">'+b.done+'/'+b.total+'</td>'+
+    '<td class="num b">'+p.toFixed(0)+'%</td><td>'+(p>=80?stChip('ok','正常'):p>=30?stChip('warn','进行中'):stChip('over','滞后'))+'</td></tr>';}).join('')+
+  '</tbody></table></div></div></div>';
+}
+/* ---------- 11 接口监控 ---------- */
+function dtIface(){
+  const stMap={ok:['ok','成功'],timeout:['warn','超时'],fail:['bad','失败']};
+  const apis=[
+    {fr:'FR-8.1',name:'按户号查询缴费单',desc:'银行→营销系统 实时查询',logs:db.bankLogs.filter(l=>l.api==='查询')},
+    {fr:'FR-8.2',name:'缴费单销账',desc:'银行代收成功后实时销账',logs:db.bankLogs.filter(l=>l.api==='销账')},
+    {fr:'FR-8.3',name:'对账',desc:'日终对账文件核对',logs:db.bankLogs.filter(l=>l.api==='对账')},
+  ];
+  const rc=db.recon;
+  return '<div class="flexw" style="margin-bottom:16px">'+
+  apis.map(a=>{
+    const bad=a.logs.some(l=>l.st!=='ok');
+    return '<div class="card" style="flex:1;min-width:260px" data-fr="'+a.fr+'"><div class="cbd">'+
+    '<div class="flexr"><span class="b">'+a.name+'</span><span style="flex:1"></span>'+(bad?stChip('warn','有异常'):stChip('ok','正常'))+'</div>'+
+    '<div class="mut small" style="margin:4px 0 8px">'+a.desc+'</div>'+
+    '<div class="small">今日调用 <b>'+a.logs.length+'</b> 次 · 成功 <b style="color:var(--ok)">'+a.logs.filter(l=>l.st==='ok').length+'</b> · 异常 <b style="color:'+(bad?'var(--bad)':'var(--mut)')+'">'+a.logs.filter(l=>l.st!=='ok').length+'</b></div>'+
+    '</div></div>';}).join('')+
+  '<div class="card" style="flex:1.1;min-width:300px" data-fr="FR-8.3"><div class="cbd">'+
+  '<div class="flexr"><span class="b">📄 当日对账文件</span><span style="flex:1"></span>'+(rc.st==='checked'?stChip('ok','已核对'):stChip('warn','已接收 · 待核对'))+'</div>'+
+  '<div class="small" style="margin-top:6px">'+esc(rc.name)+'<br>共 <b>'+rc.rows+'</b> 笔 · 金额 <b>¥'+fmt(rc.amt)+'</b> · 差异 <b style="color:'+(rc.diff?'var(--bad)':'var(--ok)')+'">'+rc.diff+' 笔</b></div>'+
+  '<button class="btn btn-pri btn-sm" style="margin-top:8px" '+(rc.st==='checked'?'disabled':'')+' onclick="A.reconRun()">执行对账核对</button>'+
+  '</div></div></div>'+
+  '<div class="card"><div class="chd">🏦 银行代收接口调用记录（今日）</div><div class="cbd" style="padding:0">'+
+  '<table class="tbl"><thead><tr><th>时间</th><th>接口</th><th>银行</th><th>请求摘要</th><th class="num">耗时(ms)</th><th>状态</th></tr></thead><tbody>'+
+  db.bankLogs.slice().reverse().map(l=>{const m=stMap[l.st];
+    return '<tr><td class="money">'+l.t+'</td><td>'+l.api+'</td><td>'+l.bank+'</td><td class="mut">'+esc(l.req)+'</td>'+
+    '<td class="num" style="color:'+(l.ms>2000?'var(--over)':'var(--ink)')+'">'+l.ms+'</td><td>'+stChip(m[0],m[1])+'</td></tr>';}).join('')+
+  '</tbody></table></div></div>';
+}
+A.reconRun=()=>{
+  db.recon.st='checked';
+  db.bankLogs.push({t:nowClock(),api:'对账',bank:'工商银行',req:'DZ20260709_ICBC.txt 人工触发核对',ms:640,st:'ok'});
+  renderStage();toast('对账核对完成：126 笔全部平账，差异 0 笔','tk');
+};
+
+/* ==================== 平板端（值班经理 / 外勤审核） ==================== */
+function renderTablet(){
+  const scr=$('#tb-screen');const pg=state.page.tablet;
+  const titles={home:'值班工作台',review:'抄表数据审核',pay:'柜台收款（简化）',sum:'当日收费汇总'};
+  scr.innerHTML='<div class="tb-head"><svg width="22" height="22" viewBox="0 0 24 24"><path d="M12 2.5C12 2.5 5 10 5 15a7 7 0 0 0 14 0c0-5-7-12.5-7-12.5z" fill="#1c5cab"/></svg>'+
+    '<span class="b" style="font-size:16px">'+titles[pg]+'</span><span class="mut small">· 营业厅值班端</span>'+
+    '<span style="flex:1"></span><span class="mut small">'+TODAY+' · 值班经理 周立群</span></div>'+
+    '<div id="tb-page" class="tb-page">'+tbPage(pg)+'</div>'+
+    '<div class="tb-dock">'+[['home','◧','工作台'],['review','☑','抄表审核'],['pay','¥','收款'],['sum','▥','当日汇总']].map(d=>
+      '<button class="'+(pg===d[0]?'on':'')+'" onclick="A.go(\''+d[0]+'\')"><span class="di">'+d[1]+'</span>'+d[2]+'</button>').join('')+'</div>';
+  renderPins();
+}
+function tbPage(pg){
+  if(pg==='home')return tbHome();
+  if(pg==='review')return tbReview();
+  if(pg==='pay')return tbPay();
+  if(pg==='sum')return tbSum();
+  return '';
+}
+function tbHome(){
+  const pend=db.reviews.filter(r=>r.status==='待审核');
+  const abn=pend.filter(r=>isAbnormal(r.cur-r.prev,r.avg));
+  const paySum=r2(db.payments.reduce((s,p)=>s+p.amt,0));
+  const oweUsers=[...new Set(db.bills.filter(b=>!b.paid).map(b=>b.userNo))];
+  return '<div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">'+
+  '<div class="bigcard" data-fr="FR-7.1" onclick="A.go(\'review\')"><div><span class="bi">☑</span><div class="bn">抄表数据审核</div><div class="mut small">掌上机/柜台/表格导入待审</div></div>'+
+    '<div class="flexr"><span class="bv" style="color:var(--blue)">'+pend.length+'</span><span class="mut">条待审核</span><span style="flex:1"></span>'+(pend.length?stChip('warn','待处理'):stChip('ok','已清'))+'</div></div>'+
+  '<div class="bigcard" data-fr="FR-7.1" onclick="A.tbGoAbn()"><div><span class="bi">⚠</span><div class="bn">异常水量处理</div><div class="mut small">负水量 / 超均值3倍</div></div>'+
+    '<div class="flexr"><span class="bv" style="color:var(--bad)">'+abn.length+'</span><span class="mut">户异常</span><span style="flex:1"></span>'+(abn.length?stChip('bad','需复核'):stChip('ok','无异常'))+'</div></div>'+
+  '<div class="bigcard" data-frx="系统报表" onclick="A.go(\'sum\')"><div><span class="bi">📊</span><div class="bn">当日收费汇总</div><div class="mut small">分渠道实收统计</div></div>'+
+    '<div class="flexr"><span class="bv" style="color:var(--ok)">¥'+fmt(paySum)+'</span><span class="mut">'+db.payments.length+' 笔</span></div></div>'+
+  '<div class="bigcard" data-fr="FR-4.2" onclick="A.tbGoBatch()"><div><span class="bi">🧾</span><div class="bn">批量销账</div><div class="mut small">按表册整册处理欠费</div></div>'+
+    '<div class="flexr"><span class="bv" style="color:var(--over)">'+oweUsers.length+'</span><span class="mut">户欠费</span></div></div>'+
+  '</div>';
+}
+A.tbGoAbn=()=>{state.sel.reviewFilter='abn';state.page.tablet='review';renderStage();};
+A.tbGoBatch=()=>{state.sel.tbPayTab='batch';state.page.tablet='pay';renderStage();};
+function tbReview(){
+  let list=db.reviews.slice().reverse();
+  const f=state.sel.reviewFilter;
+  if(f==='abn')list=list.filter(r=>isAbnormal(r.cur-r.prev,r.avg));
+  else if(f==='pend')list=list.filter(r=>r.status==='待审核');
+  let cur=db.reviews.find(r=>r.id===state.sel.reviewId);
+  if(!cur||f==='abn'&&!isAbnormal(cur.cur-cur.prev,cur.avg))cur=list.find(r=>r.status==='待审核')||list[0];
+  let h='<div data-fr="FR-7.1" style="display:flex;gap:14px;height:100%;min-height:520px">';
+  h+='<div style="width:330px;flex:none;display:flex;flex-direction:column;gap:8px">'+
+  '<div class="flexr" style="margin-bottom:2px">'+[['all','全部'],['pend','待审核'],['abn','仅异常']].map(x=>
+    '<button class="btn btn-sm '+(f===x[0]?'btn-pri':'')+'" onclick="A.rvFilter(\''+x[0]+'\')">'+x[1]+'</button>').join('')+
+  '<span style="flex:1"></span><span class="mut small">'+list.length+' 条</span></div>'+
+  '<div style="flex:1;overflow:auto;display:flex;flex-direction:column;gap:8px">'+
+  (list.length?list.map(r=>{
+    const u=userByNo(r.userNo),vol=r2(r.cur-r.prev),abn=isAbnormal(vol,r.avg);
+    const on=cur&&cur.id===r.id;
+    return '<div class="mcard" style="margin:0;cursor:pointer;'+(on?'border-color:var(--blue);box-shadow:0 0 0 2px rgba(28,92,171,.2)':'')+'" onclick="A.rvPick(\''+r.id+'\')">'+
+    '<div class="flexr"><span class="b">'+esc(u.name)+'</span><span class="mut small">'+r.userNo+'</span><span style="flex:1"></span>'+
+    (r.status==='待审核'?stChip('warn','待审核'):r.status==='已通过'?stChip('ok','已通过'):stChip('bad','已驳回'))+'</div>'+
+    '<div class="flexr small" style="margin-top:4px"><span class="mut">'+r.src+' '+r.time+'</span><span style="flex:1"></span>'+
+    '<span style="font-weight:700;color:'+(abn?'var(--bad)':'var(--ink)')+'">'+vol+' m³'+(abn?' ⚠':'')+'</span></div></div>';
+  }).join(''):'<div class="mut" style="padding:20px;text-align:center">无记录</div>')+'</div></div>';
+  if(cur){
+    const u=userByNo(cur.userNo),vol=r2(cur.cur-cur.prev),abn=isAbnormal(vol,cur.avg);
+    const c=calcBill(vol);
+    h+='<div class="card" style="flex:1"><div class="cbd">'+
+    '<div class="flexr"><h3 style="font-size:19px">'+esc(u.name)+'</h3><span class="mut">'+cur.userNo+'</span>'+ustatusChip(u.status)+
+    '<span style="flex:1"></span>'+(cur.status==='待审核'?stChip('warn','待审核'):cur.status==='已通过'?stChip('ok','已通过'):stChip('bad','已驳回'))+'</div>'+
+    '<div class="mut small" style="margin:4px 0 14px">'+esc(u.addr)+' · 来源：'+cur.src+' '+cur.time+'</div>'+
+    '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;text-align:center">'+
+    [['上期行止',cur.prev],['本期行止',cur.cur],['本期水量',vol+' m³'],['上期均值',cur.avg+' m³']].map((x,i)=>
+      '<div class="card" style="padding:12px 6px"><div class="mut small">'+x[0]+'</div><div style="font-size:20px;font-weight:700;color:'+(i===2&&abn?'var(--bad)':'var(--ink)')+'">'+x[1]+'</div></div>').join('')+'</div>'+
+    (abn?'<div style="margin-top:12px;padding:10px 14px;border:1px solid rgba(208,59,59,.4);background:rgba(208,59,59,.06);border-radius:10px;color:var(--bad)">✕ <b>异常水量</b>：'+(vol<0?'本期水量为负数':'超过上期均值3倍（'+cur.avg+'×3='+cur.avg*3+' m³）')+'　异常原因：<b>'+esc(cur.reason||'未填写')+'</b></div>':
+    '<div style="margin-top:12px;padding:10px 14px;border:1px solid rgba(12,163,12,.35);background:rgba(12,163,12,.06);border-radius:10px;color:var(--ok)">● 水量在正常区间（均值 '+cur.avg+' m³）</div>')+
+    '<div class="mut small" style="margin:14px 0 4px">试算账单（随业务参数联动）</div>'+
+    '<div class="flexr" style="gap:18px"><span>水费 <b class="money">¥'+fmt(c.water)+'</b></span><span>污水费 <b class="money">¥'+fmt(c.sew)+'</b></span><span>合计 <b class="money" style="color:var(--blue);font-size:17px">¥'+fmt(c.total)+'</b></span></div>'+
+    '<div class="flexr" style="margin-top:10px"><div class="photo-box" style="flex:1;margin-top:0;height:90px">📷 现场表况照片（掌上机拍照占位）</div></div>'+
+    (cur.status==='待审核'?'<div class="flexr" style="margin-top:18px;gap:14px">'+
+      '<button class="btn btn-ok btn-lg" style="flex:1" onclick="A.rvApprove(\''+cur.id+'\')">✓ 审核通过</button>'+
+      '<button class="btn btn-bad btn-lg" style="flex:1" onclick="A.rvReject(\''+cur.id+'\')">✕ 驳回重抄</button></div>':
+      '<div class="mut small" style="margin-top:18px">该记录已处理完毕。</div>')+
+    '</div></div>';
+  }
+  return h+'</div>';
+}
+A.rvFilter=(f)=>{state.sel.reviewFilter=f;renderStage();};
+A.rvPick=(id)=>{state.sel.reviewId=id;renderStage();};
+A.rvApprove=(id)=>{
+  const r=db.reviews.find(x=>x.id===id);r.status='已通过';
+  const nxt=db.reviews.slice().reverse().find(x=>x.status==='待审核');
+  state.sel.reviewId=nxt?nxt.id:id;renderStage();toast('已通过：'+userByNo(r.userNo).name+'（'+r.userNo+'）','tk');
+};
+A.rvReject=(id)=>{
+  const r=db.reviews.find(x=>x.id===id);r.status='已驳回';
+  const nxt=db.reviews.slice().reverse().find(x=>x.status==='待审核');
+  state.sel.reviewId=nxt?nxt.id:id;renderStage();toast('已驳回并生成重抄任务：'+userByNo(r.userNo).name,'tb');
+};
+function tbPay(){
+  const tab=state.sel.tbPayTab;
+  let h='<div data-fr="FR-4.1"><div class="flexr" style="margin-bottom:14px">'+
+    [['single','单户收款'],['batch','批量销账（按表册）']].map(x=>'<button class="btn '+(tab===x[0]?'btn-pri':'')+'" style="padding:10px 20px" onclick="A.tbPayTab(\''+x[0]+'\')">'+x[1]+'</button>').join('')+'</div>';
+  if(tab==='single'){
+    h+='<div class="toolrow"><input type="text" id="tb-q" placeholder="户号 / 户名" style="width:260px;padding:11px" onkeydown="if(event.key===\'Enter\')A.tbSearch()">'+
+    '<button class="btn btn-pri" style="padding:11px 20px" onclick="A.tbSearch()">🔍 查询</button></div>';
+    if(state.sel.tbPayResults)h+=state.sel.tbPayResults.length?pickList(state.sel.tbPayResults,'tbPick'):'<div class="mut" style="padding:14px">未找到用户</div>';
+    const u=state.sel.tbPayUser?userByNo(state.sel.tbPayUser):null;
+    if(u){
+      const bills=userArrears(u.no),sum=arrearsTotal(u.no);
+      h+=userCard(u);
+      if(bills.length){
+        h+='<div class="card" style="background:var(--blue-bg)"><div class="cbd" style="text-align:center;padding:22px">'+
+        '<div class="mut">欠费 '+bills.length+' 期（'+bills.map(b=>b.period).join('、')+'）应收合计</div>'+
+        '<div style="font-size:40px;font-weight:800;color:var(--blue);margin:6px 0" class="money">¥ '+fmt(sum)+'</div>'+
+        '<div class="mut small" style="margin-bottom:14px">含违约金 · 随业务参数实时联动</div>'+
+        '<button class="btn btn-pri btn-lg" style="width:70%;font-size:19px" onclick="A.tbConfirm()">✓ 确认收款（扫码/刷卡）</button></div></div>';
+      }else h+='<div class="card"><div class="cbd" style="text-align:center;padding:24px">'+stChip('ok','该户无欠费')+'</div></div>';
+    }
+  }else{
+    h+='<div class="mut small" style="margin-bottom:10px">按表册整册销账：适用于托收回盘到账后的集中处理。</div>'+ctBatch().replace('data-fr="FR-4.2"','');
+  }
+  return h+'</div>';
+}
+A.tbPayTab=(t)=>{state.sel.tbPayTab=t;renderStage();};
+A.tbSearch=()=>{const q=$('#tb-q').value;state.sel.tbPayResults=searchUsers(q);state.sel.tbPayUser=null;
+  if(state.sel.tbPayResults.length===1){state.sel.tbPayUser=state.sel.tbPayResults[0].no;state.sel.tbPayResults=null;}
+  renderStage();};
+A.tbPick=(no)=>{state.sel.tbPayUser=no;state.sel.tbPayResults=null;renderStage();};
+A.tbConfirm=()=>{
+  const u=userByNo(state.sel.tbPayUser);const bills=userArrears(u.no);const sum=arrearsTotal(u.no);
+  bills.forEach(b=>{const m=billMoney(b);b.paid=true;b.paidAmt=m.total;b.payTime=TODAY;});
+  db.payments.push({time:nowClock().slice(0,5),userNo:u.no,name:u.name,amt:sum,channel:'平板扫码'});
+  renderStage();toast('收款成功 ¥'+fmt(sum)+'，已自动销账 '+bills.length+' 期','tk');
+};
+function tbSum(){
+  const groups={};db.payments.forEach(p=>{groups[p.channel]=groups[p.channel]||{n:0,amt:0};groups[p.channel].n++;groups[p.channel].amt=r2(groups[p.channel].amt+p.amt);});
+  const total=r2(db.payments.reduce((s,p)=>s+p.amt,0));
+  return '<div data-frx="系统报表"><div class="toolrow"><span class="badge-todo">⚠ 汇总报表 SRS 未详述，口径待与财务确认</span></div>'+
+  '<div class="flexw" style="margin-bottom:14px">'+
+  '<div class="kpi"><div class="kl">今日实收合计</div><div class="kv" style="color:var(--ok)">¥ '+fmt(total)+'</div><div class="kd mut">'+db.payments.length+' 笔</div></div>'+
+  Object.keys(groups).map(k=>'<div class="kpi"><div class="kl">'+esc(k)+'</div><div class="kv">¥ '+fmt(groups[k].amt)+'</div><div class="kd mut">'+groups[k].n+' 笔</div></div>').join('')+'</div>'+
+  '<div class="card"><div class="chd">今日收款流水</div><div class="cbd" style="padding:0"><table class="tbl"><thead><tr><th>时间</th><th>户号</th><th>户名</th><th class="num">金额(元)</th><th>渠道</th></tr></thead><tbody>'+
+  db.payments.slice().reverse().map(p=>'<tr><td>'+p.time+'</td><td>'+p.userNo+'</td><td>'+esc(p.name)+'</td><td class="num b">'+fmt(p.amt)+'</td><td>'+stChip('blue',p.channel)+'</td></tr>').join('')+
+  '</tbody></table></div></div></div>';
+}
+/* ==================== 移动端（掌上抄表APP） ==================== */
+function renderMobile(){
+  const scr=$('#mb-screen');const pg=state.page.mobile;
+  scr.innerHTML='<div class="mb-status"><span>9:41</span><span style="letter-spacing:2px">●●●○ 4G ▮▮▮▯</span></div>'+
+    '<div id="mb-page" class="mb-page">'+mbPage(pg)+'</div>'+
+    '<div class="mb-tabs">'+[['tasks','☰','任务'],['read','✎','抄表'],['pay','¥','缴费'],['me','👤','我的']].map(t=>
+      '<button class="'+(pg===t[0]?'on':'')+'" onclick="A.go(\''+t[0]+'\')"><span class="di">'+t[1]+'</span>'+t[2]+'</button>').join('')+'</div>';
+  renderPins();
+}
+function mbPage(pg){
+  if(pg==='tasks')return mbTasks();
+  if(pg==='read')return mbRead();
+  if(pg==='pay')return mbPay();
+  if(pg==='me')return mbMe();
+  return '';
+}
+function mbTasks(){
+  return '<div data-frx="掌上机抄表管理">'+
+  '<div class="flexr" style="margin-bottom:12px"><div><div style="font-size:19px;font-weight:700">你好，张伟 👋</div><div class="mut small">'+TODAY+' · 今日抄表任务</div></div>'+
+  '<span style="flex:1"></span>'+(db.sync.ok?stChip('ok','已同步'):stChip('warn','离线缓存 '+db.sync.pending+' 条'))+'</div>'+
+  db.books.map(b=>{
+    const pct=Math.round(b.done/b.total*100);const mine=b.reader==='张伟';
+    return '<div class="mcard" '+(mine?'style="border-color:rgba(28,92,171,.4)"':'')+'>'+
+    '<div class="flexr"><span class="b">'+b.code+' '+esc(b.name)+'</span><span style="flex:1"></span>'+(mine?stChip('blue','我的'):'<span class="mut small">'+esc(b.reader)+'</span>')+'</div>'+
+    '<div class="flexr" style="margin:8px 0 6px"><div class="prog" style="flex:1"><i style="width:'+pct+'%;background:'+(pct>=80?'var(--ok)':pct>=40?'var(--blue)':'var(--over)')+'"></i></div>'+
+    '<span class="small b">'+b.done+' / '+b.total+' 户</span></div>'+
+    '<div class="flexr"><span class="mut small">'+esc(b.cycle)+' · 剩余 '+(b.total-b.done)+' 户</span><span style="flex:1"></span>'+
+    '<button class="btn btn-pri btn-sm" onclick="A.mbStart(\''+b.code+'\')">开始抄表 ›</button></div></div>';
+  }).join('')+'</div>';
+}
+A.mbStart=(bk)=>{state.sel.mbBook=bk;state.sel.mbUser=null;state.sel.mbInput='';state.sel.mbReason='';state.page.mobile='read';renderStage();};
+function mbPending(bk){
+  return (db.orders[bk]||[]).map(userByNo).filter(u=>u&&statusReadable(u)&&!db.mobileDone[u.no]);
+}
+function mbRead(){
+  const bk=state.sel.mbBook;
+  if(!bk)return '<div data-frx="掌上机抄表管理"><div class="mcard" style="text-align:center;padding:26px"><div style="font-size:30px">🗂</div><div class="b" style="margin:8px 0 4px">请先选择表册任务</div>'+
+    '<div class="mut small" style="margin-bottom:12px">从任务页选择今日待抄表册</div>'+
+    db.books.map(b=>'<button class="btn" style="margin:4px" onclick="A.mbStart(\''+b.code+'\')">'+b.code+'</button>').join('')+'</div></div>';
+  const pend=mbPending(bk);
+  const b=bookByCode(bk);
+  if(!pend.length)return '<div class="mcard" style="text-align:center;padding:30px"><div style="font-size:34px">🎉</div><div class="b" style="margin-top:8px">'+bk+' 示例户已全部抄完</div><div class="mut small" style="margin-top:6px">数据已进入审核队列（平板端可审核）</div><button class="btn btn-pri" style="margin-top:14px" onclick="A.go(\'tasks\')">返回任务</button></div>';
+  let u=pend.find(x=>x.no===state.sel.mbUser)||pend[0];
+  const inp=state.sel.mbInput,vol=inp===''?null:r2(+inp-u.prev);
+  const abn=vol!==null&&isAbnormal(vol,u.avg);
+  return '<div data-fr="FR-7.1"><div class="flexr" style="margin-bottom:10px"><span class="b">'+bk+' '+esc(b.name)+'</span><span style="flex:1"></span>'+
+  '<span class="chip st-blue">剩余 '+pend.length+' 户</span></div>'+
+  '<div class="mcard" style="border-color:rgba(28,92,171,.35)">'+
+  '<div class="flexr"><span class="b" style="font-size:17px">'+esc(u.name)+'</span>'+ustatusChip(u.status)+'<span style="flex:1"></span><span class="mut small">'+u.no+'</span></div>'+
+  '<div class="mut small" style="margin:3px 0 10px">📍 '+esc(u.addr)+'</div>'+
+  '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;text-align:center">'+
+  '<div style="background:#f2f2ee;border-radius:10px;padding:8px"><div class="mut small">上期行止</div><div style="font-size:22px;font-weight:700">'+u.prev+'</div></div>'+
+  '<div style="background:var(--blue-bg);border-radius:10px;padding:8px"><div class="mut small">本期行止</div><div style="font-size:22px;font-weight:800;color:var(--blue);min-height:33px">'+(inp===''?'<span class="mut" style="font-weight:400;font-size:14px">待录入</span>':esc(inp))+'</div></div></div>'+
+  '<div style="margin-top:8px;text-align:center;min-height:44px">'+
+  (vol===null?'<span class="mut small">水量 = 本期 − 上期（均值 '+u.avg+' m³）</span>':
+   abn?'<div style="color:var(--bad);font-weight:700">⚠ 水量 '+vol+' m³ 异常'+(vol<0?'（负数）':'（超均值3倍）')+'</div>'+
+     '<div style="margin-top:6px">'+['疑似漏水','换表未登记','表故障','空置房','估抄'].map(rn=>
+      '<button class="btn btn-sm" style="margin:2px;'+(state.sel.mbReason===rn?'background:var(--bad);border-color:var(--bad);color:#fff':'color:var(--bad);border-color:rgba(208,59,59,.4)')+'" onclick="A.mbReason(\''+rn+'\')">'+rn+'</button>').join('')+'</div>':
+   '<span style="color:var(--ok);font-weight:700">● 水量 '+vol+' m³ 正常</span> <span class="mut small">水费试算 ¥'+fmt(calcBill(vol).total)+'</span>')+
+  '</div>'+
+  '<div class="photo-box" onclick="toast(\'已调起相机（演示占位）\',\'tk\')">📷 拍摄表位照片（占位）</div>'+
+  '<div class="kpad">'+
+  ['1','2','3','4','5','6','7','8','9','清','0','←'].map(k=>{
+    const act=k==='←'?'A.kpDel()':k==='清'?'A.kpClear()':'A.kp(\''+k+'\')';
+    return '<button style="'+(k==='清'||k==='←'?'color:var(--over)':'')+'" onclick="'+act+'">'+k+'</button>';}).join('')+'</div>'+
+  '<div class="flexr" style="margin-top:12px;gap:10px">'+
+  '<button class="btn" style="flex:1;padding:12px" onclick="A.mbSkip()">跳过</button>'+
+  '<button class="btn btn-pri" style="flex:2;padding:12px;font-size:16px" '+(vol===null?'disabled':'')+' onclick="A.mbSubmit()">提交本户 ✓</button></div>'+
+  '</div>'+
+  '<div class="mut small" style="margin:4px 2px">接下来：'+pend.slice(pend.indexOf(u)+1,pend.indexOf(u)+4).map(x=>esc(x.name)).join(' → ')+(pend.length>4?' …':'')+'</div></div>';
+}
+A.kp=(d)=>{if(state.sel.mbInput.length<7){state.sel.mbInput+=d;renderStage();}};
+A.kpDel=()=>{state.sel.mbInput=state.sel.mbInput.slice(0,-1);renderStage();};
+A.kpClear=()=>{state.sel.mbInput='';state.sel.mbReason='';renderStage();};
+A.mbReason=(rn)=>{state.sel.mbReason=rn;renderStage();};
+A.mbSkip=()=>{
+  const pend=mbPending(state.sel.mbBook);
+  const u=pend.find(x=>x.no===state.sel.mbUser)||pend[0];
+  const i=pend.indexOf(u);state.sel.mbUser=(pend[i+1]||pend[0]).no;
+  state.sel.mbInput='';state.sel.mbReason='';renderStage();
+};
+A.mbSubmit=()=>{
+  const bk=state.sel.mbBook,pend=mbPending(bk);
+  const u=pend.find(x=>x.no===state.sel.mbUser)||pend[0];
+  const vol=r2(+state.sel.mbInput-u.prev);
+  if(isAbnormal(vol,u.avg)&&!state.sel.mbReason){toast('水量异常，请先选择异常原因','tb');return;}
+  reviewSeq++;
+  db.reviews.push({id:'R'+reviewSeq,userNo:u.no,prev:u.prev,cur:+state.sel.mbInput,avg:u.avg,src:'掌上机',time:nowClock().slice(0,5),status:'待审核',reason:state.sel.mbReason||''});
+  db.mobileDone[u.no]=true;
+  const b=bookByCode(bk);b.done=Math.min(b.total,b.done+1);
+  db.sync.pending++;db.sync.ok=false;
+  state.sel.mbUser=null;state.sel.mbInput='';state.sel.mbReason='';
+  renderStage();toast('已提交 '+u.name+'，转入审核','tk');
+};
+function mbPay(){
+  const qr=(function(){
+    let s='<svg viewBox="0 0 120 120" width="132" style="background:#fff;border-radius:8px;padding:4px">';
+    let seed=7;const rnd=()=>{seed=(seed*97+13)%289;return seed/289;};
+    for(let y=0;y<15;y++)for(let x=0;x<15;x++){if(rnd()>0.52)s+='<rect x="'+(x*8)+'" y="'+(y*8)+'" width="7" height="7" fill="#1e1e1c"/>';}
+    [[0,0],[88,0],[0,88]].forEach(p=>{s+='<rect x="'+p[0]+'" y="'+p[1]+'" width="30" height="30" fill="#fff"/><rect x="'+p[0]+'" y="'+p[1]+'" width="30" height="30" fill="none" stroke="#1e1e1c" stroke-width="5"/><rect x="'+(p[0]+10)+'" y="'+(p[1]+10)+'" width="10" height="10" fill="#1e1e1c"/>';});
+    return s+'</svg>';
+  })();
+  const mine=db.payments.slice().reverse();
+  return '<div data-frx="掌上机抄表管理">'+
+  '<div class="mcard" style="text-align:center" data-fr="FR-3.4"><div class="b" style="font-size:16px;margin-bottom:8px">扫码收款（示意）</div>'+qr+
+  '<div class="mut small" style="margin-top:8px">用户扫码 → 公众缴费平台 → 实时销账<br>受「公众缴费平台」通道开关与限制条件约束</div></div>'+
+  '<div class="mcard"><div class="b" style="margin-bottom:8px">今日收款流水</div>'+
+  mine.map(p=>'<div class="flexr" style="padding:7px 0;border-bottom:1px solid var(--line)"><div><div class="b small">'+esc(p.name)+'</div><div class="mut" style="font-size:11px">'+p.time+' · '+p.userNo+'</div></div>'+
+  '<span style="flex:1"></span><span class="b money" style="color:var(--ok)">+'+fmt(p.amt)+'</span><span class="chip st-blue" style="margin-left:6px;font-size:10.5px">'+esc(p.channel)+'</span></div>').join('')+
+  '</div></div>';
+}
+function mbMe(){
+  return '<div data-frx="掌上机抄表管理">'+
+  '<div class="mcard" style="text-align:center;padding:20px"><div style="width:64px;height:64px;border-radius:50%;background:var(--blue);color:#fff;font-size:26px;display:flex;align-items:center;justify-content:center;margin:0 auto 8px">张</div>'+
+  '<div class="b" style="font-size:17px">张伟</div><div class="mut small">抄表员 · 工号 Y2021056 · 东城营业所</div>'+
+  '<div style="margin-top:8px">'+stChip('blue','负责表册 B001')+'</div></div>'+
+  '<div class="mcard"><div class="b" style="margin-bottom:8px">📶 数据同步状态</div>'+
+  '<div class="flexr" style="padding:6px 0"><span class="mut">同步状态</span><span style="flex:1"></span>'+(db.sync.ok?stChip('ok','已全部同步'):stChip('warn','离线缓存待上传'))+'</div>'+
+  '<div class="flexr" style="padding:6px 0"><span class="mut">待上传记录</span><span style="flex:1"></span><span class="b" style="color:'+(db.sync.pending?'var(--over)':'var(--ok)')+'">'+db.sync.pending+' 条</span></div>'+
+  '<div class="flexr" style="padding:6px 0"><span class="mut">上次同步</span><span style="flex:1"></span><span>'+db.sync.last+'</span></div>'+
+  '<button class="btn btn-pri" style="width:100%;margin-top:10px;padding:11px" onclick="A.mbSync()">⇅ 立即同步</button>'+
+  '<div class="mut" style="font-size:11px;margin-top:8px">弱网环境下读数先写入本机离线缓存，联网后增量上传（对应待补需求：掌上机抄表管理-断点续传）。</div></div>'+
+  '<div class="mcard"><div class="b" style="margin-bottom:6px">今日工作量</div>'+
+  '<div class="flexr"><span class="mut small">已抄户数</span><span style="flex:1"></span><span class="b">'+bookByCode('B001').done+' 户</span></div>'+
+  '<div class="flexr"><span class="mut small">异常上报</span><span style="flex:1"></span><span class="b" style="color:var(--over)">'+db.reviews.filter(r=>r.src==='掌上机'&&isAbnormal(r.cur-r.prev,r.avg)).length+' 条</span></div></div></div>';
+}
+A.mbSync=()=>{
+  toast('正在同步…');
+  setTimeout(()=>{db.sync.pending=0;db.sync.ok=true;db.sync.last=nowClock().slice(0,5);renderStage();toast('同步完成，离线缓存已清空','tk');},700);
+};
+
+/* ==================== 渲染调度 ==================== */
+function renderStage(){
+  if(state.device==='desktop')renderDesktop();
+  else if(state.device==='tablet')renderTablet();
+  else renderMobile();
+}
+function render(){
+  $$('#devseg button').forEach(b=>b.classList.toggle('on',b.dataset.dev===state.device));
+  $('#frame-desktop').style.display=state.device==='desktop'?'':'none';
+  $('#frame-tablet').style.display=state.device==='tablet'?'':'none';
+  $('#frame-mobile').style.display=state.device==='mobile'?'':'none';
+  $('#stage').classList.toggle('center',state.device!=='desktop');
+  fitDevices();renderStage();
+}
+function fitDevices(){
+  const st=$('#stage');const w=st.clientWidth,h=st.clientHeight;
+  state.tbScale=Math.min((w-36)/1072,(h-36)/816,1);
+  state.mbScale=Math.min((w-30)/412,(h-24)/866,1);
+  $('#frame-tablet').style.transform='translate(-50%,-50%) scale('+state.tbScale+')';
+  $('#frame-mobile').style.transform='translate(-50%,-50%) scale('+state.mbScale+')';
+}
+window.addEventListener('resize',fitDevices);
+/* ==================== 🏷 需求标签模式 ==================== */
+A.toggleTag=()=>{
+  state.tagMode=!state.tagMode;
+  if(state.tagMode&&state.noteMode)A.toggleNote();
+  document.body.classList.toggle('tag-mode',state.tagMode);
+  $('#btn-tag').classList.toggle('on',state.tagMode);
+  hideFrPop();
+  if(state.tagMode)toast('需求标签模式已开启：悬停/点按功能区查看 FR 说明');
+};
+function frPopHtml(el){
+  const fr=el.getAttribute('data-fr');
+  if(fr){
+    const f=FR_INDEX[fr];
+    if(!f)return '<div class="fp-id">'+esc(fr)+'</div><div class="fp-desc mut">未在需求分解中找到该编号</div>';
+    return '<div class="flexr"><span class="fp-id">'+esc(f.id)+' '+esc(f.name)+'</span><span style="flex:1"></span>'+prioChip(f.priority)+'</div>'+
+      '<div class="mut small" style="margin-top:3px">'+esc(f.moduleName)+' · SRS '+esc(f.srsRef)+'</div>'+
+      '<div class="fp-desc">'+esc(f.refinedDesc)+'</div>';
+  }
+  const mx=el.getAttribute('data-frx');
+  const e=EXP_INDEX[mx];
+  return '<div class="flexr"><span class="fp-id" style="color:#8a5d00">⚠ 待补需求 · '+esc(mx)+'</span></div>'+
+    '<div class="fp-desc">'+esc(e?e.reason:'SRS 未详述该模块，界面为需求建议稿。')+'</div>'+
+    '<div class="small" style="margin-top:6px;color:#8a5d00">本页界面为建议稿，请业务部门确认需求后补充 SRS。</div>';
+}
+function showFrPop(el,x,y){
+  const pop=$('#fr-pop');pop.innerHTML=frPopHtml(el);pop.style.display='block';
+  const pw=pop.offsetWidth,ph=pop.offsetHeight;
+  let px=x+14,py=y+12;
+  if(px+pw>innerWidth-10)px=innerWidth-pw-10;
+  if(py+ph>innerHeight-10)py=y-ph-10;
+  pop.style.left=Math.max(6,px)+'px';pop.style.top=Math.max(6,py)+'px';
+}
+function hideFrPop(){$('#fr-pop').style.display='none';}
+document.addEventListener('mouseover',e=>{
+  if(!state.tagMode)return;
+  const el=e.target.closest&&e.target.closest('[data-fr],[data-frx]');
+  if(el&&$('#stage').contains(el))showFrPop(el,e.clientX,e.clientY);
+  else if(!e.target.closest('#fr-pop'))hideFrPop();
+});
+/* ==================== 💬 批注模式 ==================== */
+A.toggleNote=()=>{
+  state.noteMode=!state.noteMode;
+  if(state.noteMode&&state.tagMode)A.toggleTag();
+  document.body.classList.toggle('note-mode',state.noteMode);
+  $('#btn-note').classList.toggle('on',state.noteMode);
+  if(state.noteMode)toast('批注模式已开启：点击界面任意位置放置批注 pin');
+};
+function pageRootSel(){return state.device==='desktop'?'#dt-page':state.device==='tablet'?'#tb-page':'#mb-page';}
+function curLoc(){
+  const pg=state.page[state.device];
+  const tab=state.tabs[state.device+':'+pg]||'';
+  return state.device+'|'+pg+'|'+tab;
+}
+const DEV_LABEL={desktop:'🖥 桌面',tablet:'▭ 平板',mobile:'📱 移动'};
+const PAGE_LABELS_ALL={
+  desktop:Object.assign({login:'登录页'},PAGE_TITLES),
+  tablet:{home:'值班工作台',review:'抄表审核',pay:'收款',sum:'当日汇总'},
+  mobile:{tasks:'任务',read:'抄表',pay:'缴费',me:'我的'},
+};
+function locLabel(loc){
+  const p=loc.split('|');
+  return DEV_LABEL[p[0]]+' · '+((PAGE_LABELS_ALL[p[0]]||{})[p[1]]||p[1])+(p[2]?' / '+p[2]:'');
+}
+/* 拦截舞台点击：标签模式弹说明 / 批注模式放pin */
+$('#stage').addEventListener('click',e=>{
+  if(state.tagMode){
+    const el=e.target.closest&&e.target.closest('[data-fr],[data-frx]');
+    if(el){e.preventDefault();e.stopPropagation();showFrPop(el,e.clientX,e.clientY);return;}
+    hideFrPop();return;
+  }
+  if(!state.noteMode)return;
+  const pin=e.target.closest&&e.target.closest('.pin');
+  if(pin){e.preventDefault();e.stopPropagation();showPinTip(pin,e.clientX,e.clientY);return;}
+  const root=$(pageRootSel());
+  if(!root||!root.contains(e.target))return;
+  e.preventDefault();e.stopPropagation();
+  const r=root.getBoundingClientRect();
+  const scale=state.device==='desktop'?1:(state.device==='tablet'?state.tbScale:state.mbScale);
+  const x=(e.clientX-r.left)/scale+root.scrollLeft;
+  const y=(e.clientY-r.top)/scale+root.scrollTop;
+  openNoteForm(x,y);
+},true);
+function frOptions(sel){
+  let h='<option value="">（不关联）</option>';
+  APP_DATA.modules.forEach(m=>{
+    h+='<optgroup label="'+esc(m.id+' '+m.name)+'">'+m.functions.map(f=>
+      '<option value="'+f.id+'" '+(sel===f.id?'selected':'')+'>'+f.id+' '+esc(f.name)+'</option>').join('')+'</optgroup>';
+  });
+  return h;
+}
+function openNoteForm(x,y){
+  state._pendingPin={x,y,loc:curLoc()};
+  openModal(modalShell('💬 新增批注 <span class="mut small" style="font-weight:400;margin-left:6px">'+esc(locLabel(curLoc()))+'</span>',
+    '<div class="formrow"><label>提出方</label><select id="nf-from"><option>业务部门</option><option>科技开发部</option></select></div>'+
+    '<div class="formrow"><label>类型</label><select id="nf-type"><option>需调整</option><option>有疑问</option><option>新需求</option><option>确认OK</option></select></div>'+
+    '<div class="formrow"><label>关联FR</label><select id="nf-fr">'+frOptions('')+'</select></div>'+
+    '<div class="formrow" style="align-items:flex-start"><label style="padding-top:8px">意见</label><textarea id="nf-text" rows="4" placeholder="请描述调整意见 / 疑问 / 新需求…"></textarea></div>',
+    '<button class="btn" onclick="A.closeModal()">取消</button><button class="btn btn-pri" onclick="A.noteSave()">保存批注</button>'));
+  setTimeout(()=>{const t=$('#nf-text');if(t)t.focus();},60);
+}
+A.noteSave=()=>{
+  const text=$('#nf-text').value.trim();
+  if(!text){toast('请填写批注意见','tb');return;}
+  const p=state._pendingPin;
+  state.noteSeq++;
+  state.notes.push({id:'N'+Date.now().toString(36),n:state.noteSeq,loc:p.loc,x:p.x,y:p.y,
+    from:$('#nf-from').value,type:$('#nf-type').value,fr:$('#nf-fr').value,text,
+    status:'待讨论',time:TODAY+' '+nowClock().slice(0,5)});
+  saveNotes();closeModal();renderPins();renderNotesPanel();updateNoteCnt();
+  toast('批注 #'+state.noteSeq+' 已保存','tk');
+};
+function renderPins(){
+  const root=$(pageRootSel());if(!root)return;
+  $$('.pin',root).forEach(p=>p.remove());
+  const loc=curLoc();
+  state.notes.filter(n=>n.loc===loc).forEach(n=>{
+    const d=document.createElement('div');
+    d.className='pin t-'+n.type+(n.status!=='待讨论'?' done':'');
+    d.style.left=n.x+'px';d.style.top=n.y+'px';
+    d.dataset.note=n.id;d.textContent=n.n;
+    root.appendChild(d);
+  });
+}
+function pinTipHtml(n){
+  return '<div style="display:flex;gap:6px;align-items:center;margin-bottom:5px"><b>#'+n.n+'</b>'+
+  '<span class="chip t-'+n.type+'" style="background:rgba(255,255,255,.16);color:#fff;border-color:rgba(255,255,255,.3)">'+n.type+'</span>'+
+  '<span style="opacity:.75;font-size:11px">'+esc(n.from)+'</span></div>'+
+  (n.fr?'<div style="font-size:11px;opacity:.8;margin-bottom:3px">关联 '+esc(n.fr)+' '+esc(FR_INDEX[n.fr]?FR_INDEX[n.fr].name:'')+'</div>':'')+
+  '<div>'+esc(n.text)+'</div>'+
+  '<div style="opacity:.65;font-size:11px;margin-top:5px">'+esc(n.status)+' · '+esc(n.time)+'</div>';
+}
+function showPinTip(pinEl,x,y){
+  const n=state.notes.find(z=>z.id===pinEl.dataset.note);if(!n)return;
+  const tip=$('#pin-tip');tip.innerHTML=pinTipHtml(n);tip.style.display='block';
+  let px=x+12,py=y+10;
+  if(px+tip.offsetWidth>innerWidth-8)px=innerWidth-tip.offsetWidth-8;
+  if(py+tip.offsetHeight>innerHeight-8)py=y-tip.offsetHeight-8;
+  tip.style.left=px+'px';tip.style.top=py+'px';
+}
+document.addEventListener('mouseover',e=>{
+  const pin=e.target.closest&&e.target.closest('.pin');
+  if(pin)showPinTip(pin,e.clientX,e.clientY);
+  else if(!e.target.closest('#pin-tip'))$('#pin-tip').style.display='none';
+});
+/* ---- 批注面板 ---- */
+const NOTE_STATUS=['待讨论','已采纳','不采纳'];
+function renderNotesPanel(){
+  const box=$('#notes-body');if(!box)return;
+  const f=state.noteFilter;
+  let list=state.notes.slice().reverse();
+  if(f.device!=='all')list=list.filter(n=>n.loc.split('|')[0]===f.device);
+  if(f.type!=='all')list=list.filter(n=>n.type===f.type);
+  if(f.status!=='all')list=list.filter(n=>n.status===f.status);
+  let h='<div class="flexr" style="margin-bottom:12px;flex-wrap:wrap;gap:6px">'+
+  '<select onchange="A.nFilter(\'device\',this.value)"><option value="all" '+(f.device==='all'?'selected':'')+'>全部端</option>'+
+    ['desktop','tablet','mobile'].map(d=>'<option value="'+d+'" '+(f.device===d?'selected':'')+'>'+DEV_LABEL[d]+'</option>').join('')+'</select>'+
+  '<select onchange="A.nFilter(\'type\',this.value)"><option value="all" '+(f.type==='all'?'selected':'')+'>全部类型</option>'+
+    ['需调整','有疑问','新需求','确认OK'].map(t=>'<option '+(f.type===t?'selected':'')+'>'+t+'</option>').join('')+'</select>'+
+  '<select onchange="A.nFilter(\'status\',this.value)"><option value="all" '+(f.status==='all'?'selected':'')+'>全部状态</option>'+
+    NOTE_STATUS.map(t=>'<option '+(f.status===t?'selected':'')+'>'+t+'</option>').join('')+'</select>'+
+  '<span class="mut small">'+list.length+' / '+state.notes.length+' 条</span></div>';
+  if(!state.notes.length)h+='<div class="mut" style="text-align:center;padding:30px">暂无批注。<br><span class="small">开启 💬批注模式 后点击界面任意位置即可添加。</span></div>';
+  h+=list.map(n=>{
+    const pc={需调整:'var(--over)',有疑问:'var(--warn)',新需求:'var(--blue)',确认OK:'var(--ok)'}[n.type];
+    return '<div class="note-item"><div class="nh"><span class="nno" style="background:'+pc+'">'+n.n+'</span>'+
+    '<span class="chip" style="color:'+pc+';border-color:'+pc+'">'+n.type+'</span>'+
+    '<span class="small mut">'+esc(n.from)+'</span><span style="flex:1"></span>'+
+    '<button class="btn btn-sm" title="跳转到批注位置" onclick="A.noteGoto(\''+n.id+'\')">📍</button>'+
+    '<button class="btn btn-sm" style="color:var(--bad)" onclick="A.noteDel(\''+n.id+'\')">✕</button></div>'+
+    '<div class="small mut" style="margin-bottom:4px">'+esc(locLabel(n.loc))+(n.fr?' · 关联 <b>'+esc(n.fr)+'</b>':'')+'</div>'+
+    '<div style="margin-bottom:7px">'+esc(n.text)+'</div>'+
+    '<div class="flexr"><label class="small mut">状态</label><select class="small" style="padding:3px 8px" onchange="A.noteStatus(\''+n.id+'\',this.value)">'+
+    NOTE_STATUS.map(s=>'<option '+(n.status===s?'selected':'')+'>'+s+'</option>').join('')+'</select>'+
+    '<span style="flex:1"></span><span class="small mut">'+esc(n.time)+'</span></div></div>';
+  }).join('');
+  box.innerHTML=h;
+}
+A.nFilter=(k,v)=>{state.noteFilter[k]=v;renderNotesPanel();};
+A.noteStatus=(id,v)=>{const n=state.notes.find(x=>x.id===id);if(n){n.status=v;saveNotes();renderPins();renderNotesPanel();}};
+A.noteDel=(id)=>{const i=state.notes.findIndex(x=>x.id===id);if(i>=0){state.notes.splice(i,1);saveNotes();renderPins();renderNotesPanel();updateNoteCnt();toast('批注已删除');}};
+A.noteGoto=(id)=>{
+  const n=state.notes.find(x=>x.id===id);if(!n)return;
+  const p=n.loc.split('|');
+  state.device=p[0];state.page[p[0]]=p[1];
+  if(p[2])state.tabs[p[0]+':'+p[1]]=p[2];
+  render();
+  setTimeout(()=>{const root=$(pageRootSel());const pin=root&&root.querySelector('[data-note="'+id+'"]');
+    if(pin){pin.scrollIntoView({block:'center'});pin.style.transition='transform .2s';pin.style.transform='translate(-50%,-100%) scale(1.5)';setTimeout(()=>{pin.style.transform='translate(-50%,-100%)';},450);}},80);
+};
+function updateNoteCnt(){
+  const c=$('#note-cnt');c.textContent=state.notes.length;
+  c.style.display=state.notes.length?'':'none';
+}
+function saveNotes(){
+  try{localStorage.setItem(LS_KEY,JSON.stringify({notes:state.notes,seq:state.noteSeq}));}catch(e){}
+}
+function loadNotes(){
+  try{const d=JSON.parse(localStorage.getItem(LS_KEY)||'null');
+    if(d&&Array.isArray(d.notes)){state.notes=d.notes;state.noteSeq=d.seq||d.notes.length;}
+  }catch(e){}
+}
+A.exportNotes=()=>{
+  if(!state.notes.length){toast('暂无批注可导出','tw');return;}
+  const data={project:'供水营销管理系统 · 需求沟通原型',exportedAt:TODAY+' '+nowClock(),
+    total:state.notes.length,
+    notes:state.notes.map(n=>({no:n.n,device:n.loc.split('|')[0],page:locLabel(n.loc),from:n.from,type:n.type,frRef:n.fr||null,
+      frName:n.fr&&FR_INDEX[n.fr]?FR_INDEX[n.fr].name:null,text:n.text,status:n.status,time:n.time,pos:{x:Math.round(n.x),y:Math.round(n.y)}}))};
+  const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);a.download='批注导出_shuiwu_proto_20260709.json';
+  document.body.appendChild(a);a.click();
+  setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove();},400);
+  toast('已导出 '+state.notes.length+' 条批注 JSON','tk');
+};
+/* ==================== ⚙ 业务参数面板 ==================== */
+const PARAM_DEFS=[
+  ['t1p','第一阶梯单价','元/m³',0.01],['t1q','第一阶梯水量上限','m³/月',1],
+  ['t2p','第二阶梯单价','元/m³',0.01],['t2q','第二阶梯水量上限','m³/月',1],
+  ['t3p','第三阶梯单价','元/m³',0.01],
+  ['sw','污水处理费单价','元/m³',0.01],
+  ['late','违约金日率','‰/日',0.1],
+  ['bonus','预存赠送比例','%',1],
+];
+function renderParams(){
+  $('#params-body').innerHTML=
+  '<div class="mut small" style="margin-bottom:14px">修改参数即刻生效：手工抄表账单预览、柜台销账金额（含违约金）、平板收款、移动端水费试算、欠费账龄报表将实时重算。</div>'+
+  PARAM_DEFS.map(p=>'<div class="pfield"><label><span>'+p[1]+'</span><span class="mut">'+p[2]+'</span></label>'+
+    '<input type="number" step="'+p[3]+'" value="'+state.params[p[0]]+'" oninput="A.param(\''+p[0]+'\',this.value)"></div>').join('')+
+  '<div class="card" style="margin-top:16px"><div class="cbd small">'+
+  '<div class="b" style="margin-bottom:6px">示例：月用水 26 m³ 试算</div><div id="param-demo">'+paramDemo()+'</div></div></div>'+
+  '<button class="btn" style="width:100%;margin-top:14px" onclick="A.paramReset()">恢复默认参数</button>';
+}
+function paramDemo(){
+  const c=calcBill(26),p=state.params;
+  return '一阶 '+c.q1+'×'+p.t1p+'＝'+fmt(c.w1)+'；二阶 '+c.q2+'×'+p.t2p+'＝'+fmt(c.w2)+
+  (c.q3>0?'；三阶 '+c.q3+'×'+p.t3p+'＝'+fmt(c.w3):'')+
+  '；污水 26×'+p.sw+'＝'+fmt(c.sew)+'<br>合计 <b style="color:var(--blue)">¥'+fmt(c.total)+'</b>';
+}
+let pflashTimer=null;
+A.param=(k,v)=>{
+  const n=parseFloat(v);
+  if(isNaN(n)||n<0)return;
+  state.params[k]=n;
+  const d=$('#param-demo');if(d)d.innerHTML=paramDemo();
+  const f=$('#pflash');f.classList.add('show');
+  clearTimeout(pflashTimer);pflashTimer=setTimeout(()=>f.classList.remove('show'),1600);
+  renderStage();
+};
+A.paramReset=()=>{state.params={t1p:2.80,t1q:15,t2p:3.90,t2q:22,t3p:5.60,sw:1.40,late:0.5,bonus:5};renderParams();renderStage();toast('已恢复默认参数','tk');};
+/* ==================== 面板开关 ==================== */
+A.togglePanel=(which)=>{
+  const dp=$('#drawer-params'),dn=$('#drawer-notes');
+  if(which==='params'){
+    const open=!dp.classList.contains('open');
+    dp.classList.toggle('open',open);dn.classList.remove('open');
+    $('#btn-params').classList.toggle('on',open);$('#btn-panel').classList.remove('on');
+    if(open)renderParams();
+  }else{
+    const open=!dn.classList.contains('open');
+    dn.classList.toggle('open',open);dp.classList.remove('open');
+    $('#btn-panel').classList.toggle('on',open);$('#btn-params').classList.remove('on');
+    if(open)renderNotesPanel();
+  }
+};
+$('#modal-mask').addEventListener('click',e=>{if(e.target.id==='modal-mask')closeModal();});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeModal();hideFrPop();$('#pin-tip').style.display='none';}});
+/* ==================== 启动 ==================== */
+loadNotes();
+updateNoteCnt();
+render();
+
+</script>
+</body>
+</html>
