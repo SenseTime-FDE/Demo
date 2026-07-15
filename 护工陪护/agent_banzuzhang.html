@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>班组长 Agent · 微信语音管理 | 陪护 AI 平台原型</title>
+<link rel="stylesheet" href="assets/style.css">
+<style>
+/* ---- 本页专属（bz- 前缀） ---- */
+.bz-six { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin: 2px 0 4px; }
+.bz-six .s { background: #F7F9F9; border-radius: 8px; padding: 7px 9px; }
+.bz-six .s span { display: block; font-size: 10.5px; color: #999; }
+.bz-six .s b { font-size: 15px; color: #222; font-variant-numeric: tabular-nums; }
+.bz-six .s small { font-size: 10px; font-weight: 700; margin-left: 3px; color: var(--ok); }
+.bz-six .s small.hot { color: var(--warm-d); }
+.bz-six .s small.warn { color: var(--warn); }
+.bz-six .s small.teal { color: var(--teal-d); }
+.bz-sec { font-size: 10.5px; font-weight: 700; color: var(--teal-d); letter-spacing: 1.5px; margin: 8px 0 1px; }
+.bz-sec:first-of-type { margin-top: 3px; }
+.bz-span { display: flex; align-items: stretch; gap: 10px; }
+.bz-span .bz-box { flex: 1; background: var(--bg); border: 1px solid var(--line); border-radius: 12px; padding: 13px 15px; text-align: center; }
+.bz-span .bz-box.hot { background: var(--cream); border-color: var(--warm-l); }
+.bz-span .bz-box em { display: block; font-style: normal; font-size: 11px; font-weight: 700; letter-spacing: 2px; color: var(--muted); }
+.bz-span .bz-box.hot em { color: var(--warm-d); }
+.bz-span .bz-box .v { font-size: 24px; font-weight: 800; color: var(--ink); margin: 2px 0; font-variant-numeric: tabular-nums; }
+.bz-span .bz-box.hot .v { color: var(--warm-d); }
+.bz-span .bz-box span { font-size: 12px; color: var(--sub); display: block; line-height: 1.5; }
+.bz-span .bz-arrow { display: flex; align-items: center; color: var(--warm); font-weight: 800; font-size: 20px; }
+.bz-cap3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+@media (max-width: 640px) { .bz-cap3 { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+
+<header class="topnav">
+  <div class="brand">
+    <img src="assets/st_logo.png" alt="商汤科技">
+    <span class="divider"></span>
+    <span class="name">陪护 AI 平台<small>AI CARE PLATFORM · 原型演示</small></span>
+  </div>
+  <nav>
+    <a href="index.html">方案总览</a>
+    <a href="agent_hugong.html">护工 Agent</a>
+    <a href="agent_banzuzhang.html" class="active"><span class="dot"></span>班组长 Agent</a>
+    <a href="agent_manager.html">管理者 Agent</a>
+    <a href="agent_ops.html">运营 Agent</a>
+    <a href="miniapp.html">客户小程序</a>
+    <a href="bi.html">BI 数据看板</a>
+  </nav>
+</header>
+
+<main class="page">
+  <div class="page-head">
+    <div class="eyebrow">Team Leader Agent · WeChat Voice Channel</div>
+    <h1>班组长用 AI 管人：<span class="hl">1 人从管 5-15 人，到管 10-30 人</span></h1>
+    <p class="sub">班组长 = 资深一线护工。看科室数据、督学点名、排班调度、写日报周报、客诉跟进——这些活全部交给<b>企业微信里的 S-Agent</b>，语音一句话搞定。AI 替他看数据、催任务、写报表，<b>班组长只管人，不埋头做表</b>。演示角色：<b>李凤霞 · A 班组长</b> · 协和医院 神经内科。左侧手机可点击场景演示。</p>
+  </div>
+
+  <div class="split">
+    <!-- 左：手机 -->
+    <div class="phone-wrap">
+      <div id="phone-slot"></div>
+      <p class="phone-caption">▲ 可交互原型 · 点上方场景或气泡下方 <b>🎙 快捷话术</b> 切换演示</p>
+    </div>
+
+    <!-- 右：说明 -->
+    <div>
+      <div class="panel">
+        <h3>科室六项数据：每个数背后都是一个管理动作</h3>
+        <table class="mini-table">
+          <tr><th>指标</th><th>这个数怎么用</th><th></th></tr>
+          <tr><td><b>新住院</b></td><td>科室今天新收多少人，是新增看护机会</td><td><span class="tag warm">机会</span></td></tr>
+          <tr><td><b>在院</b></td><td>当前在院看护多少人，盯覆盖率与缺口</td><td><span class="tag teal">覆盖</span></td></tr>
+          <tr><td><b>出院</b></td><td>今天出院多少，谁该转私域做复购随访</td><td><span class="tag ok">复购</span></td></tr>
+          <tr><td><b>累计看护</b></td><td>本组累计服务人次，看规模与老客沉淀</td><td><span class="tag gold">沉淀</span></td></tr>
+          <tr><td><b>科室收入</b></td><td>本组今日 / 本月收入，独立核算算得清</td><td><span class="tag warm">核算</span></td></tr>
+          <tr><td><b>学习任务</b></td><td>组内护工学习完成情况，谁没学一眼看到</td><td><span class="tag warn">督学</span></td></tr>
+        </table>
+        <p class="note"><b>每天早晚报自动推，不用问：</b>早 7:30 推六数、床位待办与今日重点，晚 21:30 推完成率与未完成明细——S-Agent 定时送到企微，异常（日报缺交 / 学习逾期 / 投诉预警）自动置顶提醒。</p>
+      </div>
+
+      <div class="panel">
+        <h3>管理幅度升级：一个人带出过去两层的量</h3>
+        <div class="bz-span">
+          <div class="bz-box"><em>现在</em><div class="v">5-15 人</div><span>约一个科室<br>人盯人 · 手工报表</span></div>
+          <div class="bz-arrow">→</div>
+          <div class="bz-box hot"><em>目标态</em><div class="v">10-30 人</div><span>跨科室带组<br>AI 带管 · 数据说话</span></div>
+        </div>
+        <p class="note"><b>AI 替他看数据、催任务、写日报——只管人，不埋头做表。</b>班组长把时间还给带教、盯质量、处理现场，管理幅度翻倍而不加班。</p>
+      </div>
+
+      <div class="panel">
+        <h3>班组长 Agent · 三项核心能力</h3>
+        <div class="bz-cap3">
+          <div class="cap"><div class="ic">💬</div><b>交互问答</b><span>数据口径随口问：人均产值、履约率、任务完成率，语音秒回不翻表</span></div>
+          <div class="cap warm"><div class="ic">📣</div><b>督促学习</b><span>每天自动点名，谁没学 1v1 客气催办，定时复查、逾期升级</span></div>
+          <div class="cap"><div class="ic">📝</div><b>自动汇总</b><span>组员语音日报自动聚合，日报周报一句话生成、直发项目经理</span></div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <h3>组织与激励：去中层、增班组长、有奔头</h3>
+        <table class="mini-table">
+          <tr><td><b>组织扁平化</b></td><td>去「项目主管」层、经理直管班组长，层级由 4 级压到 3 级</td><td><span class="tag teal">扁平</span></td></tr>
+          <tr><td><b>班组长补贴</b></td><td>本质是增加班组长：每月多拿 500-1500 元班组长补贴</td><td><span class="tag warm">多挣钱</span></td></tr>
+          <tr><td><b>晋升通道</b></td><td>护工 → 骨干 → 班组长 → 区域合伙人；资深班组长可兼店长（单院自负盈亏）</td><td><span class="tag ok">有通道</span></td></tr>
+          <tr><td><b>原主管去向</b></td><td>原项目主管转项目经理助理，减层不减人心</td><td><span class="tag gold">有安置</span></td></tr>
+        </table>
+        <p class="note"><b>这笔账：</b>S-Agent 的 token 费用从减「项目主管」层省下的人力成本出——减 1 名主管 ≈ 覆盖 5-7 名班组长补贴 + 全组 token（目标态测算）。少一层传达，效率反而更高。</p>
+      </div>
+    </div>
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="foot-brand"><img src="assets/st_logo.png" alt="商汤科技"></div>
+  <div><b>商汤科技 · 大模型生态渠道部</b> — AI 技术底座 · 高保真交互原型（页面数据均为目标态示意，非真实经营数据）</div>
+</footer>
+
+<script src="assets/chat.js"></script>
+<script>
+PeihuChat.mount(document.getElementById('phone-slot'), {
+  contact: { name: 'S-Agent 班组长助理', corp: '@安心陪护', sub: '企业微信 · 商汤 AI 技术底座' },
+  agent: { name: 'S-Agent 班组长助理', avatar: 'S' },
+  user: { name: '李凤霞', avatar: '李' },
+  scenarios: [
+    {
+      id: 'zaowanbao', title: '每日早晚报', chip: '早晚报自动推',
+      intro: '每天 7:30 早报 / 21:30 晚报定时自动推送——不用问，床位任务、六数、收费自己送上门',
+      steps: [
+        { from: 'agent', sys: '⏰ 07:30 · 每日早报自动推送（无需询问，S-Agent 定时送达）' },
+        { from: 'agent', text: '凤霞姐早上好 ☀️ A 班组今日早报送到，先看组内床位护理完成情况 👇' },
+        { from: 'agent', html: '<div class="c-card"><div class="c-head"><span class="c-ic">🌅</span><b>A 班组 · 每日早报</b><span class="tag teal">床位视角</span></div><div class="bz-sec">床位护理完成情况</div><div class="c-kv"><span>昨日完成率</span><b class="ok">96%（44/46 项 · 2 项已补录）</b></div><div class="c-kv"><span>今日待办</span><b class="warm">46 床在院 · 护理任务 46 项</b></div><div class="bz-sec">六数速览</div><div class="bz-six"><div class="s"><span>昨日新住院</span><b>12</b><small>↑2</small></div><div class="s"><span>在院看护</span><b>46</b><small class="hot">满员</small></div><div class="s"><span>昨日出院</span><b>9</b><small class="teal">转随访 6</small></div><div class="s"><span>累计看护</span><b>3,120</b><small class="teal">人次</small></div><div class="s"><span>昨日收费</span><b>¥1.8万</b><small>↑5%</small></div><div class="s"><span>学习完成</span><b>92%</b><small class="warn">1 人待学</small></div></div><div class="bz-sec">今日重点</div><div class="c-check"><span class="s warn">⚠</span>15 床骨折 · <b style="color:#C85F30">拒用助行器</b> → 建议今日到床跟进适应训练</div><div class="c-check"><span class="s warn">⚠</span>赵春梅 · 昨日日报未交 + 《防压疮护理》微课<b style="color:#C85F30">待学</b>（督学）</div><div class="c-foot">数据来源：云端数据库 · 每天 07:30 自动推送（目标态示意）</div></div>' },
+        { from: 'user', voice: '行，上午我先去 15 床盯助行器；春梅那边你客气提醒，中午还没动静再报我。', dur: 9 },
+        { from: 'agent', text: '✅ 已写入今日重点：<b>① 09:30 提醒您到 15 床跟进助行器适应训练；② 已 1v1 客气提醒赵春梅补日报 + 补课，12:00 定时复查</b>。白天不用惦记，晚报我给您对结果。' },
+        { from: 'agent', sys: '⏰ 21:30 · 每日晚报自动推送（白天不用盯，晚上对结果）' },
+        { from: 'agent', text: '凤霞姐晚上好 🌙 今日晚报来了，早上两件重点都有着落 👇' },
+        { from: 'agent', html: '<div class="c-card"><div class="c-head"><span class="c-ic">🌙</span><b>A 班组 · 每日晚报</b><span class="tag ok">今日闭环</span></div><div class="c-big"><div class="v">42 / 46 · 91%</div><div class="l">今日组内床位任务完成</div></div><div class="bz-sec">未完成明细</div><div class="c-check"><span class="s warn">⚠</span>6 床卧床 · <b style="color:#C85F30">皮肤检查未打卡</b> → 已提醒王秀兰补录</div><div class="bz-sec">今日重点回执</div><div class="c-check"><span class="s done">✓</span>15 床助行器跟进完成 · 下午扶行如厕 2 次</div><div class="c-check"><span class="s done">✓</span>赵春梅 · 已补日报 + 完成微课（12:00 复查通过）</div><div class="c-kv"><span>今日收费</span><b class="warm">¥1.8万 · 环比 ↑5%</b></div><div class="c-btns"><span class="c-btn primary">一键催办未完成</span><span class="c-btn ghost">转入明日早报</span></div><div class="c-foot">数据来源：云端数据库 · 每天 21:30 自动推送（目标态示意）</div></div>' },
+        { from: 'user', voice: '好，6 床那条催秀兰今晚就补上，其他没问题。', dur: 6 },
+        { from: 'agent', text: '✅ 已一键催办：王秀兰补录 6 床皮肤检查，补完自动销项、计入明早完成率。今天 46 床全覆盖、收费 ¥1.8万——您全天没翻一张表，明早 07:30 早报见 👋' },
+        { from: 'agent', sys: '早报 07:30 / 晚报 21:30 定时自动推送 · 全程留痕 → 与 BI 看板同一套云端数据' }
+      ]
+    },
+    {
+      id: 'duxue', title: '督学点名', chip: '谁还没学完课',
+      intro: '语音一句话点名，1v1 客气催办 + 定时复查，谁没学一眼看到',
+      steps: [
+        { from: 'user', voice: '谁还没学完这周的课？', dur: 3 },
+        { from: 'agent', text: '本周必修是《防压疮护理》微课，组里还差 <b>1 人</b>，点名表给您 👇' },
+        { from: 'agent', html: '<div class="c-card"><div class="c-head"><span class="c-ic">📚</span><b>本周学习任务 · 点名表</b><span class="tag teal">防压疮护理</span></div><div class="c-check"><span class="s done">✓</span>王秀兰 · 已完成 · 家属评分 4.9 ★</div><div class="c-check"><span class="s done">✓</span>李桂芳 · 已完成 · 家属评分 4.8 ★</div><div class="c-check"><span class="s warn">⚠</span>赵春梅 · <b style="color:#C85F30">待学</b> · 4.7 ★（已提醒 1 次）</div><div class="c-check"><span class="s done">✓</span>刘玉英 · 已完成 · 家属评分 5.0 ★</div><div class="c-check"><span class="s done">✓</span>其余 8 人 · 均已完成 · 完成率 92%</div><div class="c-foot">学习记录自动计入学习画像 · 病种胜任力累计</div></div>' },
+        { from: 'user', voice: '帮我催一下，口气客气点，她这两天夜班辛苦。', dur: 7 },
+        { from: 'agent', text: '好嘞，我这样发给她：<br><br>「春梅姐，这周的防压疮微课还差最后一节，10 分钟就能听完～您夜班辛苦，明早交接完顺手学掉就行，别耽误了这个月的学习分 😊」' },
+        { from: 'agent', text: '✅ 已发送，并设 <b>18:00 定时复查</b>：到时未完成会再客气提醒一次，同时同步给您。' },
+        { from: 'agent', sys: '督学点名 · 催办记录已写入学习画像与班组看板' }
+      ]
+    },
+    {
+      id: 'wenshu', title: '随口问数', chip: '问经营数据',
+      intro: '数据口径随口问：人均产值 / 排班履约 / 任务完成，语音秒回不翻表',
+      steps: [
+        { from: 'user', voice: '咱们组这个月人均产值多少？排班履约和任务完成怎么样？', dur: 9 },
+        { from: 'agent', text: 'A 班组本月三项核心指标 👇 都比上月好。' },
+        { from: 'agent', html: '<div class="c-card"><div class="c-head"><span class="c-ic">📈</span><b>A 班组 · 经营三指标</b><span class="tag teal">本月</span></div><div class="c-big"><div class="v">¥1,500</div><div class="l">人均日产值 · 环比上月 ↑6%</div></div><div class="c-bars"><div class="b-row"><span>排班履约</span><span class="b-track"><span class="b-fill" style="width:96%"></span></span><span class="b-val">96%</span></div><div class="b-row"><span>任务完成</span><span class="b-track"><span class="b-fill warm" style="width:92%"></span></span><span class="b-val">92%</span></div></div><div class="c-kv"><span>环比上月</span><b class="ok">履约 +2pp · 完成 +4pp</b></div><div class="c-foot">口径：人均日产值 = 收费额 ÷ 当日在岗护工数（目标态示意）</div></div>' },
+        { from: 'user', voice: '跟 B 班组比呢？', dur: 3 },
+        { from: 'agent', text: '人均产值咱们 <b>¥1,500</b>、B 组约 ¥1,390，高 8%；但任务完成率 B 组 95%，比咱们高 3 个点——差距主要在那 1 项待学任务，今天盯完就追平了。' },
+        { from: 'agent', sys: '问数由 chatBI 完成 · 与 BI 看板同一套云端指标口径' }
+      ]
+    },
+    {
+      id: 'paiban', title: '排班调度', chip: '排班找单子',
+      intro: '出院空档自动预警，按就近 + 病种胜任力推荐新单，一键派单',
+      steps: [
+        { from: 'agent', html: '<div class="c-card"><div class="c-head"><span class="c-ic">🗓</span><b>明日排班提醒</b><span class="tag warm">有空档</span></div><div class="c-kv"><span>出院</span><b>15 床 · 骨折 · 明日上午办理</b></div><div class="c-kv"><span>空档</span><b class="warm">王秀兰 · 明起白班无单</b></div><div class="c-kv"><span>随访</span><b class="teal">15 床家属已列入出院随访</b></div><div class="c-btns"><span class="c-btn primary">🎙 说「找单子」</span></div><div class="c-foot">排班数据来源：云端数据库 · 实时</div></div>' },
+        { from: 'user', voice: '给秀兰找个合适的新单子接上。', dur: 5 },
+        { from: 'agent', html: '<div class="c-card"><div class="c-head"><span class="c-ic warm">🎯</span><b>推荐派单 · 就近 + 胜任力</b><span class="tag teal">最优匹配</span></div><div class="c-kv"><span>新住院</span><b>20 床 · 中风偏瘫（今日新收）</b></div><div class="c-kv"><span>服务时段</span><b>明起 · 白班 12 小时</b></div><div class="c-kv"><span>距离</span><b class="teal">同病区 · 无缝衔接</b></div><div class="c-kv"><span>胜任匹配</span><b class="warm">王秀兰 · 擅长中风康复 · 4.9 ★</b></div><div class="c-btns"><span class="c-btn primary">一键派单</span><span class="c-btn ghost">换一个</span></div><div class="c-foot">匹配依据：病种胜任力画像 · 距离 · 排班空档</div></div>' },
+        { from: 'user', voice: '就这单，派吧。', dur: 2 },
+        { from: 'agent', text: '✅ 已派单。王秀兰的 S-Agent 已推送接单卡片，她确认后排班表自动更新；15 床的<b>出院小结 + 私域随访提醒</b>我也一并安排好了。' },
+        { from: 'agent', sys: '派单与排班变更已写入云端数据库 · 排班履约率实时刷新' }
+      ]
+    },
+    {
+      id: 'zhoubao', title: '生成周报', chip: '把周报写了',
+      intro: '语音一句话，组员日报 + 埋点自动聚合成周报，直发项目经理',
+      steps: [
+        { from: 'user', voice: '把这周的周报生成一下，直接发张经理。', dur: 6 },
+        { from: 'agent', text: '收到，30 秒生成 👇 您过目。' },
+        { from: 'agent', html: '<div class="c-card"><div class="c-head"><span class="c-ic">📊</span><b>A 班组 · 本周周报</b><span class="tag ok">自动生成</span></div><div class="bz-sec">服务</div><div class="c-kv"><span>服务打卡</span><b>1,286 次 · 达标率 97%</b></div><div class="bz-sec">收费</div><div class="c-kv"><span>本周收费</span><b class="warm">¥12.4万 · 环比 ↑5%</b></div><div class="c-kv"><span>回款率</span><b class="ok">94%</b></div><div class="bz-sec">私域</div><div class="c-kv"><span>转随访 / 复购</span><b>随访 31 人 · 复购 5 单 · 转介 2 单</b></div><div class="bz-sec">团队</div><div class="c-kv"><span>在岗 / 口碑</span><b>12 人 · 均分 4.85 ★ · 客诉 1 起已闭环</b></div><div class="c-btns"><span class="c-btn primary">确认发送</span><span class="c-btn ghost">改一下</span></div><div class="c-foot">汇总自 12 位护工语音日报 + 埋点数据（目标态示意）</div></div>' },
+        { from: 'user', voice: '挺全的，发吧。', dur: 3 },
+        { from: 'agent', text: '✅ 已发送项目经理<b>张卫东</b>，并同步到科室看板。下周一早报我会带上周对比——您只管开口问，不用再攒表。' },
+        { from: 'agent', sys: '周报生成与发送已留痕 → BI 看板同一套数可查' }
+      ]
+    },
+    {
+      id: 'kesu', title: '客诉跟进', chip: '处理客诉',
+      intro: '投诉自动预警 → SOP 处置建议 → 每步跟进留痕，闭环可追溯',
+      steps: [
+        { from: 'agent', text: '⚠ 凤霞姐，刚收到一条投诉预警，建议 <b>1 小时内</b>处置：' },
+        { from: 'agent', html: '<div class="c-card"><div class="c-head"><span class="c-ic warm">⚠</span><b>投诉预警 · 待处置</b><span class="tag warn">优先</span></div><div class="c-kv"><span>床位</span><b>22 床 · 长期卧床</b></div><div class="c-kv"><span>反映人</span><b>家属（企微会话）</b></div><div class="c-kv"><span>问题</span><b class="warm">夜间翻身不及时 · 呼叫响应慢</b></div><div class="c-kv"><span>当班</span><b>夜班护工（排班表已核对）</b></div><div class="c-foot">预警来源：企微会话关键词 + 情绪识别 · 不含病人影像与诊断</div></div>' },
+        { from: 'user', voice: '具体咋处理？给我个章程。', dur: 4 },
+        { from: 'agent', html: '<div class="c-card"><div class="c-head"><span class="c-ic">📋</span><b>处置建议 · 客诉 SOP</b><span class="tag teal">知识库</span></div><ol class="c-steps"><li>1 小时内电话家属致歉安抚，先听完整诉求</li><li>调夜班打卡与语音日报，还原昨夜服务过程</li><li>与当班护工面谈核实，上调夜间翻身提醒频次</li><li>24 小时内向家属反馈处理结果与改进项</li><li>3 天后回访确认满意度，闭环销单</li></ol><div class="c-foot">来源：客诉处置 SOP 知识库 · 班组长分册</div></div>' },
+        { from: 'user', voice: '按这个来，我现在去 22 床，后面每一步帮我记着。', dur: 8 },
+        { from: 'agent', text: '✅ 已建跟进工单 <b>#0722</b>，五步逐项打卡留痕；每完成一步说给我就行。24 小时未闭环，我会升级提醒您和张经理。' },
+        { from: 'agent', sys: '客诉处置全程留痕入库 → 投诉差评率计入科室看板' }
+      ]
+    }
+  ]
+});
+</script>
+</body>
+</html>

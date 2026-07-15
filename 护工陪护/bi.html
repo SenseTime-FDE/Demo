@@ -1,0 +1,1362 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>运营 BI 数据看板 · 六级下钻 + chatBI | 陪护 AI 平台原型</title>
+<link rel="stylesheet" href="assets/style.css">
+<style>
+/* ===== bi.html 页面专属样式（前缀 .bi-） ===== */
+
+/* 视角徽章条 */
+.bi-badges { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; margin-bottom: 18px; }
+.bi-badges .bi-hint { font-size: 12px; color: var(--muted); margin-left: 4px; }
+.bi-badge {
+  display: flex; align-items: center; gap: 9px; cursor: pointer;
+  background: var(--white); border: 1px solid var(--line); border-radius: 999px;
+  padding: 7px 16px 7px 12px; transition: all .18s; user-select: none;
+}
+.bi-badge .bd-ic { width: 26px; height: 26px; border-radius: 50%; background: var(--sky); display: flex; align-items: center; justify-content: center; font-size: 13px; flex: none; }
+.bi-badge b { font-size: 13px; color: var(--ink); display: block; line-height: 1.25; }
+.bi-badge span { font-size: 10.5px; color: var(--muted); display: block; line-height: 1.25; }
+.bi-badge:hover { border-color: var(--warm-l); box-shadow: var(--shadow-sm); }
+.bi-badge.on { background: var(--ink); border-color: var(--ink); }
+.bi-badge.on .bd-ic { background: var(--warm); }
+.bi-badge.on b { color: #fff; }
+.bi-badge.on span { color: var(--teal-l); }
+
+/* 主布局：左看板 + 右 chatBI 停靠栏 */
+.bi-layout { display: grid; grid-template-columns: 1fr 340px; gap: 24px; align-items: start; }
+@media (max-width: 1080px) { .bi-layout { grid-template-columns: 1fr; } }
+
+/* 面包屑条 */
+.bi-crumbbar {
+  display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+  background: var(--white); border: 1px solid var(--line); border-radius: 12px;
+  padding: 10px 16px; margin-bottom: 14px; box-shadow: var(--shadow-sm);
+}
+.bi-crumbs { display: flex; align-items: center; gap: 7px; flex-wrap: wrap; font-size: 13px; }
+.bi-crumb { color: var(--teal-d); cursor: pointer; padding: 2px 6px; border-radius: 6px; transition: background .15s; }
+.bi-crumb:hover { background: var(--sky); }
+.bi-crumb.cur { color: var(--ink); font-weight: 700; cursor: default; }
+.bi-crumb.cur:hover { background: none; }
+.bi-crumbs .sep { color: var(--muted); font-size: 12px; }
+.bi-view { margin-left: auto; font-size: 12px; color: var(--sub); white-space: nowrap; }
+.bi-view b { color: var(--warm-d); }
+
+/* 看板卡区 */
+.bi-board { display: none; background: var(--white); border: 1px solid var(--line); border-radius: var(--radius); padding: 20px 22px; box-shadow: var(--shadow-sm); }
+.bi-board.on { display: block; animation: biIn .32s ease both; }
+@keyframes biIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+.bi-bhead { display: flex; align-items: flex-start; gap: 12px; margin-bottom: 16px; }
+.bi-lv {
+  flex: none; width: 40px; height: 40px; border-radius: 12px; background: var(--ink); color: #fff;
+  display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 14px; letter-spacing: .5px;
+}
+.bi-bhead .bt b { display: block; font-size: 17px; color: var(--ink); line-height: 1.35; }
+.bi-bhead .bt span { display: block; font-size: 12px; color: var(--muted); margin-top: 1px; }
+.bi-bhead .tag { margin-left: auto; flex: none; margin-top: 3px; }
+
+/* KPI 卡 */
+.bi-kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(128px, 1fr)); gap: 10px; margin-bottom: 14px; }
+.bi-kpi { background: var(--bg); border: 1px solid var(--line); border-radius: 12px; padding: 11px 13px; }
+.bi-kpi .k-l { font-size: 11.5px; color: var(--muted); display: block; }
+.bi-kpi .k-v { font-size: 21px; font-weight: 800; color: var(--ink); font-variant-numeric: tabular-nums; line-height: 1.35; letter-spacing: .2px; }
+.bi-kpi .k-v small { font-size: 12px; font-weight: 600; color: var(--sub); }
+.bi-kpi .k-d { display: inline-block; margin-top: 3px; font-size: 11px; font-weight: 700; padding: 1px 8px; border-radius: 999px; }
+.bi-kpi .k-d.up { background: #E7F5EE; color: var(--ok); }
+.bi-kpi .k-d.dn { background: #FBEAEA; color: var(--warn); }
+.bi-kpi .k-d.mid { background: #FAF0DC; color: #A9761F; }
+.bi-kpi .k-d.info { background: var(--sky); color: var(--teal-d); }
+
+/* 本级关注指标条（口径带公式） */
+.bi-focal { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; }
+.bi-focal .fl { flex: none; font-size: 11px; font-weight: 700; color: var(--teal-d); letter-spacing: 1px; align-self: center; }
+.bi-focal .fc { background: var(--sky); border-radius: 10px; padding: 6px 12px; font-size: 12px; color: var(--sub); }
+.bi-focal .fc b { color: var(--ink); font-variant-numeric: tabular-nums; }
+.bi-focal .fc i { font-style: normal; color: var(--muted); font-size: 10.5px; display: block; line-height: 1.4; }
+.bi-focal .fc.warn-fc { background: #FBEAEA; }
+.bi-focal .fc.warn-fc b { color: var(--warn); }
+
+/* 横条图（L1 战队服务量） */
+.bi-bars { margin: 6px 0 4px; }
+.bi-bars .brow { display: grid; grid-template-columns: 118px 1fr 56px; gap: 10px; align-items: center; font-size: 12.5px; color: var(--sub); padding: 5px 0; }
+.bi-bars .btrack { height: 15px; border-radius: 8px; background: var(--bg); border: 1px solid var(--line); overflow: hidden; }
+.bi-bars .bfill { display: block; height: 100%; border-radius: 8px; background: linear-gradient(90deg, var(--teal), var(--teal-l)); animation: biGrow .8s ease both; transform-origin: left; }
+.bi-bars .bfill.top { background: linear-gradient(90deg, var(--warm), var(--warm-l)); }
+.bi-bars .bfill.faint { background: repeating-linear-gradient(45deg, var(--sky2), var(--sky2) 5px, var(--sky) 5px, var(--sky) 10px); }
+@keyframes biGrow { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+.bi-bars .bval { text-align: right; font-weight: 700; color: var(--ink); font-variant-numeric: tabular-nums; }
+.bi-bars .bval small { font-weight: 500; color: var(--muted); }
+.bi-sect { font-size: 13px; color: var(--ink); font-weight: 700; margin: 16px 0 8px; display: flex; align-items: center; gap: 8px; }
+.bi-sect::before { content: ""; width: 7px; height: 7px; border-radius: 2.5px; background: var(--teal); flex: none; }
+.bi-sect small { font-weight: 500; color: var(--muted); font-size: 11.5px; }
+
+/* 下钻表格 */
+.bi-tblwrap { overflow-x: auto; }
+.bi-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.bi-table th { text-align: left; color: var(--teal-d); font-weight: 600; padding: 8px 10px; background: var(--sky); font-size: 12px; white-space: nowrap; }
+.bi-table th:first-child { border-radius: 8px 0 0 8px; }
+.bi-table th:last-child { border-radius: 0 8px 8px 0; }
+.bi-table td { padding: 9px 10px; border-bottom: 1px solid var(--line); color: var(--sub); white-space: nowrap; font-variant-numeric: tabular-nums; }
+.bi-table tr:last-child td { border-bottom: none; }
+.bi-table td b { color: var(--ink); font-weight: 600; }
+.bi-table tr.drill { cursor: pointer; transition: background .15s; }
+.bi-table tr.drill:hover { background: var(--cream); }
+.bi-table tr.drill td:first-child b { color: var(--teal-d); }
+.bi-table tr.dim { cursor: pointer; }
+.bi-table tr.dim td { color: var(--muted); }
+.bi-table .go { color: var(--warm); font-weight: 800; }
+.bi-table .ok-t { color: var(--ok); font-weight: 600; }
+.bi-table .warn-t { color: var(--warn); font-weight: 700; }
+.bi-table .gold-t { color: #A9761F; font-weight: 600; }
+.bi-bfoot { margin-top: 12px; font-size: 11px; color: var(--muted); display: flex; gap: 6px; align-items: baseline; line-height: 1.6; }
+.bi-bfoot::before { content: "⛁"; color: var(--teal-l); }
+
+/* 四域指标区 */
+.bi-domains { margin-top: 24px; }
+.bi-domgrid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
+@media (max-width: 1080px) { .bi-domgrid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 640px)  { .bi-domgrid { grid-template-columns: 1fr; } }
+.bi-dom { background: var(--bg); border: 1px solid var(--line); border-radius: 12px; padding: 13px 15px; border-top: 3px solid var(--teal); }
+.bi-dom.warm-d2 { border-top-color: var(--warm); }
+.bi-dom h4 { font-size: 13.5px; color: var(--ink); margin-bottom: 6px; display: flex; gap: 6px; align-items: center; }
+.bi-dom h4 small { font-weight: 500; color: var(--muted); font-size: 10.5px; letter-spacing: .5px; }
+.bi-dom .dm { padding: 7px 0; border-bottom: 1px dashed var(--line); }
+.bi-dom .dm:last-child { border-bottom: none; }
+.bi-dom .dm .dm-t { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
+.bi-dom .dm .dm-t b { font-size: 12.5px; color: var(--ink); font-weight: 600; }
+.bi-dom .dm .dm-t .dm-v { font-size: 13.5px; font-weight: 800; color: var(--teal-d); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.bi-dom.warm-d2 .dm .dm-t .dm-v { color: var(--warm-d); }
+.bi-dom .dm .dm-f { font-size: 10.5px; color: var(--muted); line-height: 1.5; margin-top: 1px; }
+
+/* chatBI 停靠栏 */
+.bi-dock { position: sticky; top: 80px; }
+.bi-dock .panel { padding: 16px 16px 14px; }
+.bi-dock h3 small { font-weight: 500; font-size: 11px; color: var(--muted); margin-left: 2px; }
+.bi-msgs { display: flex; flex-direction: column; gap: 10px; max-height: 46vh; overflow-y: auto; padding: 2px 2px 4px; scroll-behavior: smooth; }
+.bi-msgs::-webkit-scrollbar { width: 4px; }
+.bi-msgs::-webkit-scrollbar-thumb { background: var(--line); border-radius: 2px; }
+.bi-m { max-width: 92%; border-radius: 12px; padding: 9px 12px; font-size: 12.5px; line-height: 1.6; animation: biIn .25s ease both; }
+.bi-m.q { align-self: flex-end; background: var(--cream); color: var(--ink); border: 1px solid var(--cream2); border-bottom-right-radius: 4px; }
+.bi-m.a { align-self: flex-start; background: var(--white); border: 1px solid var(--line); color: var(--sub); border-bottom-left-radius: 4px; box-shadow: var(--shadow-sm); }
+.bi-m.a b { color: var(--warm-d); }
+.bi-m.a .m-chart { margin-top: 8px; background: var(--bg); border: 1px solid var(--line); border-radius: 10px; padding: 8px 8px 4px; }
+.bi-m.a .m-chart svg { width: 100%; height: auto; display: block; }
+.bi-m.a .m-cal { margin-top: 8px; padding-top: 7px; border-top: 1px dashed var(--line); font-size: 10.5px; color: var(--muted); line-height: 1.55; }
+.bi-m.a .m-cal::before { content: "口径 · "; color: var(--teal); font-weight: 700; }
+.bi-caret { display: inline-block; width: 7px; height: 13px; background: var(--teal); vertical-align: -2px; margin-left: 1px; animation: biBlink .8s infinite; border-radius: 1px; }
+@keyframes biBlink { 0%,100% { opacity: 1; } 50% { opacity: .15; } }
+.bi-chips { display: flex; flex-wrap: wrap; gap: 6px; margin: 12px 0 10px; }
+.bi-chip {
+  font-size: 11.5px; color: var(--teal-d); background: var(--white); border: 1px solid var(--sky2);
+  padding: 5px 11px; border-radius: 999px; cursor: pointer; transition: all .15s;
+}
+.bi-chip:hover { background: var(--sky); border-color: var(--teal-l); }
+.bi-chip:active { transform: scale(.96); }
+.bi-chips.busy .bi-chip { opacity: .4; pointer-events: none; }
+.bi-inputbar { display: flex; gap: 8px; }
+.bi-inputbar input {
+  flex: 1; border: 1px solid var(--line); border-radius: 999px; padding: 8px 14px;
+  font-size: 12.5px; font-family: var(--font); background: var(--bg); color: var(--text); outline: none;
+}
+.bi-inputbar input:focus { border-color: var(--teal-l); background: var(--white); }
+.bi-inputbar button {
+  flex: none; border: none; background: var(--ink); color: #fff; font-family: var(--font);
+  border-radius: 999px; padding: 8px 16px; font-size: 12.5px; font-weight: 600; cursor: pointer; transition: background .15s;
+}
+.bi-inputbar button:hover { background: var(--ink2); }
+.bi-dockfoot { margin-top: 10px; font-size: 10.5px; color: var(--muted); line-height: 1.6; }
+.bi-dockfoot b { color: var(--teal-d); }
+
+/* 数据从哪来 */
+.bi-flowpanel { margin-top: 24px; }
+
+/* ===== 第二轮增强：角色登录 / 常驻角色栏 / 三种触达 ===== */
+body.bi-locked { overflow: hidden; }
+
+/* 角色登录层 */
+.bi-login {
+  position: fixed; inset: 0; z-index: 300; overflow-y: auto;
+  background: rgba(252, 249, 245, .96); backdrop-filter: blur(8px);
+  display: flex; align-items: center; justify-content: center;
+  padding: 30px 20px; transition: opacity .28s;
+}
+.bi-login.off { opacity: 0; pointer-events: none; }
+.bi-login-box { width: 100%; max-width: 1080px; text-align: center; }
+.bi-login-box .eyebrow { font-size: 11px; font-weight: 700; letter-spacing: 3px; color: var(--teal); text-transform: uppercase; }
+.bi-login-box h2 { font-size: 26px; color: var(--ink); margin: 6px 0 8px; }
+.bi-login-box .lg-sub { font-size: 13.5px; color: var(--sub); max-width: 660px; margin: 0 auto 24px; line-height: 1.7; }
+.bi-login-box .lg-sub b { color: var(--warm-d); }
+.bi-login-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(176px, 1fr)); gap: 14px; }
+.bi-role {
+  background: var(--white); border: 1px solid var(--line); border-radius: var(--radius);
+  padding: 22px 14px 18px; cursor: pointer; box-shadow: var(--shadow-sm);
+  transition: all .18s; display: flex; flex-direction: column; align-items: center; user-select: none;
+}
+.bi-role:hover { transform: translateY(-4px); border-color: var(--warm-l); box-shadow: var(--shadow); }
+.bi-role b { font-size: 15px; color: var(--ink); }
+.bi-role .r-t { font-size: 11.5px; color: var(--teal-d); margin: 2px 0 8px; }
+.bi-role .r-p { font-size: 11px; color: var(--muted); line-height: 1.55; min-height: 51px; }
+.bi-role .r-go { margin-top: 8px; font-size: 12px; font-weight: 700; color: var(--warm-d); }
+.r-av {
+  width: 54px; height: 54px; border-radius: 50%; color: #fff; font-size: 22px; font-weight: 800;
+  display: flex; align-items: center; justify-content: center; margin-bottom: 10px; flex: none;
+}
+.av-ink   { background: linear-gradient(135deg, var(--ink2), var(--ink)); }
+.av-teal  { background: linear-gradient(135deg, var(--teal), var(--teal-d)); }
+.av-warm  { background: linear-gradient(135deg, var(--warm), var(--warm-d)); }
+.av-gold  { background: linear-gradient(135deg, var(--gold), var(--warm-d)); }
+.av-warm2 { background: linear-gradient(135deg, var(--warm-l), var(--warm)); }
+.bi-login-foot { margin-top: 22px; font-size: 12px; color: var(--muted); }
+
+/* 常驻角色栏 */
+.bi-rolebar {
+  display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+  background: var(--ink); border-radius: 14px; padding: 10px 16px;
+  margin-bottom: 16px; box-shadow: var(--shadow-sm);
+}
+.bi-rolebar .rb-av {
+  width: 36px; height: 36px; border-radius: 50%; color: #fff; font-size: 15px; font-weight: 800;
+  display: flex; align-items: center; justify-content: center; flex: none;
+}
+.bi-rolebar .rb-t b { display: block; font-size: 13.5px; color: #fff; line-height: 1.35; }
+.bi-rolebar .rb-t span { display: block; font-size: 11.5px; color: var(--teal-l); line-height: 1.4; }
+.bi-rolebar .rb-switch {
+  margin-left: auto; flex: none; border: none; cursor: pointer; font-family: var(--font);
+  background: var(--warm); color: #fff; font-size: 12.5px; font-weight: 700;
+  border-radius: 999px; padding: 8px 18px; transition: background .15s;
+}
+.bi-rolebar .rb-switch:hover { background: var(--warm-d); }
+
+/* 权限外的视角徽章锁定 */
+.bi-badge.lock { opacity: .42; cursor: not-allowed; border-style: dashed; }
+.bi-badge.lock:hover { border-color: var(--line); box-shadow: none; }
+.bi-badge.lock b::after { content: " 🔒"; font-size: 9px; }
+
+/* 同一套数 · 三种触达 */
+.bi-touch { margin-top: 24px; }
+.bi-touchgrid { display: grid; grid-template-columns: 1fr 1.4fr 1fr; gap: 16px; align-items: stretch; }
+@media (max-width: 1080px) { .bi-touchgrid { grid-template-columns: 1fr; } }
+.bi-tcol { background: var(--bg); border: 1px solid var(--line); border-radius: 14px; padding: 16px; display: flex; flex-direction: column; }
+.tc-head { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+.tc-ic { width: 36px; height: 36px; border-radius: 11px; background: var(--sky); display: flex; align-items: center; justify-content: center; font-size: 18px; flex: none; }
+.tc-head b { display: block; font-size: 14px; color: var(--ink); line-height: 1.35; }
+.tc-head .tc-sub { display: block; font-size: 11px; color: var(--muted); }
+.tc-list { list-style: none; }
+.tc-list li { font-size: 12.5px; color: var(--sub); padding: 7px 0 7px 18px; position: relative; line-height: 1.55; border-bottom: 1px dashed var(--line); }
+.tc-list li:last-child { border-bottom: none; }
+.tc-list li::before { content: ""; position: absolute; left: 2px; top: 14px; width: 7px; height: 7px; border-radius: 2.5px; background: var(--teal); }
+.tc-list li b { color: var(--ink); }
+.tc-note { margin-top: auto; padding-top: 12px; font-size: 11px; color: var(--muted); line-height: 1.55; }
+
+/* 缩放手机壳静态 mockup */
+.bi-minis { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; }
+.bi-mini { width: 176px; }
+.mp-shell { background: #101418; border-radius: 26px; padding: 6px; box-shadow: 0 12px 28px rgba(18, 51, 59, .2), inset 0 0 0 1.5px #2a3138; }
+.mp-scr { background: var(--white); border-radius: 21px; overflow: hidden; display: flex; flex-direction: column; }
+.mp-head { background: linear-gradient(135deg, var(--teal-d), var(--ink)); color: #fff; padding: 13px 11px 9px; }
+.mp-head.warm { background: linear-gradient(135deg, var(--warm-d), var(--ink)); }
+.mp-head b { display: block; font-size: 11.5px; }
+.mp-head span { display: block; font-size: 8.5px; opacity: .75; margin-top: 1px; }
+.mp-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 5px; padding: 8px; }
+.mp-st { background: var(--bg); border: 1px solid var(--line); border-radius: 8px; padding: 5px 7px; }
+.mp-st b { display: block; font-size: 11.5px; color: var(--warm-d); font-variant-numeric: tabular-nums; }
+.mp-st span { display: block; font-size: 8px; color: var(--muted); }
+.mp-six { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; padding: 8px 8px 4px; }
+.mp-six div { background: var(--bg); border: 1px solid var(--line); border-radius: 7px; padding: 4px 2px; text-align: center; }
+.mp-six b { display: block; font-size: 10px; color: var(--ink); font-variant-numeric: tabular-nums; }
+.mp-six span { display: block; font-size: 7.5px; color: var(--muted); }
+.mp-sect { font-size: 9px; font-weight: 700; color: var(--teal-d); padding: 5px 10px 2px; }
+.mp-task { display: flex; justify-content: space-between; align-items: center; gap: 6px; font-size: 9px; color: var(--sub); padding: 4px 10px; border-top: 1px dashed var(--line); }
+.mp-task b { font-size: 8.5px; flex: none; }
+.mp-task b.ok { color: var(--ok); }
+.mp-task b.todo { color: #A9761F; }
+.mp-task b.warn { color: var(--warn); }
+.mp-ringrow { display: flex; align-items: center; gap: 8px; padding: 4px 10px 2px; }
+.mp-ringrow svg { width: 46px; height: 46px; flex: none; }
+.mp-ringtxt b { display: block; font-size: 10.5px; color: var(--ink); }
+.mp-ringtxt span { display: block; font-size: 8px; color: var(--muted); }
+.mp-btn { margin: 7px 10px 10px; text-align: center; background: var(--warm); color: #fff; font-size: 9.5px; font-weight: 700; border-radius: 999px; padding: 5px 0; }
+.mp-cap { display: block; text-align: center; font-size: 11px; color: var(--muted); margin-top: 8px; line-height: 1.5; }
+
+/* Agent 主动推送（企微气泡示意） */
+.bi-push { background: var(--wx-bg); border: 1px solid var(--line); border-radius: 12px; padding: 10px 10px 6px; }
+.push-time { text-align: center; font-size: 10.5px; color: #9b9b9b; margin: 4px 0 8px; }
+.push-b { display: flex; gap: 8px; margin-bottom: 10px; }
+.push-av { width: 30px; height: 30px; border-radius: 6px; flex: none; background: linear-gradient(135deg, var(--teal), var(--ink2)); color: #fff; font-size: 13px; font-weight: 700; display: flex; align-items: center; justify-content: center; }
+.push-bub { background: #fff; border-radius: 8px; padding: 8px 10px; font-size: 11.5px; color: #333; line-height: 1.6; box-shadow: 0 1px 1px rgba(0, 0, 0, .04); }
+.push-bub b { color: var(--teal-d); }
+.push-links { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; }
+.push-links a { font-size: 12px; font-weight: 600; color: var(--warm-d); background: var(--cream); border: 1px solid var(--cream2); border-radius: 999px; padding: 6px 13px; transition: background .15s; }
+.push-links a:hover { background: var(--cream2); }
+
+/* 提示 toast */
+.bi-toast {
+  position: fixed; left: 50%; bottom: 34px; transform: translateX(-50%) translateY(20px);
+  background: var(--ink); color: #fff; font-size: 12.5px; padding: 10px 20px; border-radius: 999px;
+  box-shadow: var(--shadow); opacity: 0; pointer-events: none; transition: all .3s; z-index: 200; max-width: 86vw; text-align: center;
+}
+.bi-toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+</style>
+</head>
+<body>
+
+<header class="topnav">
+  <div class="brand">
+    <img src="assets/st_logo.png" alt="商汤科技">
+    <span class="divider"></span>
+    <span class="name">陪护 AI 平台<small>AI CARE PLATFORM · 原型演示</small></span>
+  </div>
+  <nav>
+    <a href="index.html">方案总览</a>
+    <a href="agent_hugong.html">护工 Agent</a>
+    <a href="agent_banzuzhang.html">班组长 Agent</a>
+    <a href="agent_manager.html">管理者 Agent</a>
+    <a href="agent_ops.html">运营 Agent</a>
+    <a href="miniapp.html">客户小程序</a>
+    <a href="bi.html" class="active"><span class="dot"></span>BI 数据看板</a>
+  </nav>
+</header>
+
+<main class="page">
+  <div class="page-head">
+    <div class="eyebrow">Operations BI · Six-Level Drill-Down × chatBI</div>
+    <h1>六级下钻看板：<span class="hl">公司 → 战队 → 项目 → 科室 → 班组 → 护工</span>，一钻到底 · 层层有账</h1>
+    <p class="sub">同一套指标、同一套口径，点一下就从全公司钻到某个护工个人；右侧 <b>chatBI 对话问数</b>——一句话查任意层级、任意口径。数据源自护工<b>语音 / 埋点自动留痕</b>（云端数据库 · 商汤 AI 技术底座），从护工到董事长看的是同一份账。页面数值均为<b>目标态示意</b>。进入先选<b>角色</b>——权限由企微身份自动识别，各角色只看自己那一段。</p>
+  </div>
+
+  <!-- 常驻角色栏：当前角色 + 数据权限说明 + 切换角色 -->
+  <div class="bi-rolebar" id="bi-rolebar">
+    <span class="rb-av av-ink" id="bi-role-av">总</span>
+    <div class="rb-t">
+      <b id="bi-role-name">当前角色：运营中心 · 总部数据运营</b>
+      <span id="bi-role-perm">数据权限：全公司 4 战队全部医院 · 由企微身份自动识别，无需输密码</span>
+    </div>
+    <button class="rb-switch" id="bi-role-switch" type="button">⇄ 切换角色</button>
+  </div>
+
+  <!-- 视角徽章条：点击可直达对应层级 -->
+  <div class="bi-badges" id="bi-badges">
+    <div class="bi-badge" data-lv="0"><span class="bd-ic">🏢</span><span><b>运营中心</b><span>L1 公司总览</span></span></div>
+    <div class="bi-badge" data-lv="1"><span class="bd-ic">🚩</span><span><b>战队长</b><span>L2 战队</span></span></div>
+    <div class="bi-badge" data-lv="2"><span class="bd-ic">🏥</span><span><b>店长 · 项目经理</b><span>L3 医院 · L4 科室</span></span></div>
+    <div class="bi-badge" data-lv="4"><span class="bd-ic">👥</span><span><b>班组长</b><span>L5 班组</span></span></div>
+    <div class="bi-badge" data-lv="5"><span class="bd-ic">👩‍⚕️</span><span><b>护工本人</b><span>L6 个人看板</span></span></div>
+    <span class="bi-hint">◂ 权限内的视角可点击直达，🔒 为超出当前角色权限（切换角色后可见）</span>
+  </div>
+
+  <div class="bi-layout">
+    <!-- ================= 左：看板区 ================= -->
+    <div class="bi-main">
+
+      <!-- 面包屑 -->
+      <div class="bi-crumbbar">
+        <div class="bi-crumbs" id="bi-crumbs"></div>
+        <div class="bi-view" id="bi-view"></div>
+      </div>
+
+      <!-- L1 公司总览 -->
+      <section class="bi-board" data-board="0">
+        <div class="bi-bhead">
+          <span class="bi-lv">L1</span>
+          <div class="bt"><b>公司总览 · 战队 · 全部项目 · 今日</b><span>运营中心全盘：4 战队全医院一屏掌握</span></div>
+          <span class="tag gold">目标态示意</span>
+        </div>
+        <div class="bi-kpis">
+          <div class="bi-kpi"><span class="k-l">今日在服（人）</span><span class="k-v">1,860</span><span class="k-d up">↑ 6.2%</span></div>
+          <div class="bi-kpi"><span class="k-l">新住院</span><span class="k-v">240</span><span class="k-d up">↑ 12</span></div>
+          <div class="bi-kpi"><span class="k-l">出院</span><span class="k-v">198</span><span class="k-d info">净 +42</span></div>
+          <div class="bi-kpi"><span class="k-l">今日付费</span><span class="k-v">¥58.6<small>万</small></span><span class="k-d up">↑ 4.1%</span></div>
+          <div class="bi-kpi"><span class="k-l">今日收费</span><span class="k-v">¥52.3<small>万</small></span><span class="k-d mid">到账 89%</span></div>
+        </div>
+        <div class="bi-focal">
+          <span class="fl">本级关注</span>
+          <span class="fc"><i>营收达成率 · vs 月度目标</i><b>97.2%</b></span>
+          <span class="fc"><i>在管床位数 · 合作科室合计</i><b>2,300 张</b></span>
+          <span class="fc"><i>净利率 · 本月累计</i><b>12.4%</b></span>
+        </div>
+        <div class="bi-sect">各战队 / 项目服务量 · Top <small>（今日 · 人次）</small></div>
+        <div class="bi-bars">
+          <div class="brow"><span>一战队 · 协和</span><span class="btrack"><span class="bfill top" style="width:100%"></span></span><span class="bval">612</span></div>
+          <div class="brow"><span>二战队 · 华西</span><span class="btrack"><span class="bfill" style="width:86%"></span></span><span class="bval">528</span></div>
+          <div class="brow"><span>三战队 · 湘雅</span><span class="btrack"><span class="bfill" style="width:74%"></span></span><span class="bval">451</span></div>
+          <div class="brow"><span>四战队 · 齐鲁</span><span class="btrack"><span class="bfill" style="width:61%"></span></span><span class="bval">374</span></div>
+          <div class="brow"><span>新拓 · 中山</span><span class="btrack"><span class="bfill faint" style="width:7%"></span></span><span class="bval"><small>筹备中</small></span></div>
+        </div>
+        <div class="bi-sect">战队 / 项目明细 <small>（点击行下钻到战队）</small></div>
+        <div class="bi-tblwrap">
+        <table class="bi-table">
+          <tr><th>战队 · 旗舰项目</th><th>服务量</th><th>在院</th><th>今日付费</th><th>今日实收</th><th></th></tr>
+          <tr class="drill" data-go="1"><td><b>一战队 · 协和医院</b>（+中山 筹备）</td><td>612</td><td>480</td><td>¥19.2万</td><td>¥17.4万</td><td class="go">›</td></tr>
+          <tr class="dim" data-toast="1"><td><b>二战队 · 华西医院</b></td><td>528</td><td>410</td><td>¥16.1万</td><td>¥14.6万</td><td class="go">›</td></tr>
+          <tr class="dim" data-toast="1"><td><b>三战队 · 湘雅医院</b></td><td>451</td><td>352</td><td>¥13.5万</td><td>¥12.0万</td><td class="go">›</td></tr>
+          <tr class="dim" data-toast="1"><td><b>四战队 · 齐鲁医院</b></td><td>374</td><td>289</td><td>¥9.8万</td><td>¥8.3万</td><td class="go">›</td></tr>
+        </table>
+        </div>
+        <div class="bi-bfoot">示意稿：数值为目标态占位，上线后按真实数据实时回填 · 服务量按人次计，在服按去重客户计（见下方口径边界）· 付费 / 实收合计与顶部 KPI 对账一致（58.6 万 / 52.3 万）</div>
+      </section>
+
+      <!-- L2 战队 -->
+      <section class="bi-board" data-board="1">
+        <div class="bi-bhead">
+          <span class="bi-lv">L2</span>
+          <div class="bt"><b>一战队 · 名下医院经营</b><span>战队长视角：赋能指导、复制打法、育人才——非管控</span></div>
+          <span class="tag gold">目标态示意</span>
+        </div>
+        <div class="bi-kpis">
+          <div class="bi-kpi"><span class="k-l">医院经营健康度</span><span class="k-v">92<small> 分</small></span><span class="k-d up">A 级</span></div>
+          <div class="bi-kpi"><span class="k-l">赋能覆盖率</span><span class="k-v">86%</span><span class="k-d info">中山导入中</span></div>
+          <div class="bi-kpi"><span class="k-l">跨院复制数</span><span class="k-v">3<small> 项</small></span><span class="k-d up">本季 +1</span></div>
+        </div>
+        <div class="bi-focal">
+          <span class="fl">战队合计</span>
+          <span class="fc"><i>今日服务量（人次）</i><b>612</b></span>
+          <span class="fc"><i>在院客户</i><b>480</b></span>
+          <span class="fc"><i>今日付费</i><b>¥19.2万</b></span>
+          <span class="fc"><i>今日实收</i><b>¥17.4万</b></span>
+        </div>
+        <div class="bi-sect">医院明细 <small>（点击行下钻到医院）</small></div>
+        <div class="bi-tblwrap">
+        <table class="bi-table">
+          <tr><th>项目 · 医院</th><th>服务量</th><th>在院</th><th>今日付费</th><th>今日实收</th><th>经营健康度</th><th></th></tr>
+          <tr class="drill" data-go="2"><td><b>协和医院</b>（旗舰）</td><td>612</td><td>480</td><td>¥19.2万</td><td>¥17.4万</td><td class="ok-t">A · 92</td><td class="go">›</td></tr>
+          <tr class="dim" data-toast="2"><td><b>中山医院</b>（新拓）</td><td>—</td><td>—</td><td>—</td><td>—</td><td class="gold-t">筹备 · 下月开板</td><td class="go">›</td></tr>
+        </table>
+        </div>
+        <div class="bi-bfoot">中山医院为新拓项目：首批 30 名护工已完成 S-Agent 激活培训，开板后自动并表 · 战队长看 n 家医院，医院（店长）是最小经营单位、自负盈亏第一责任人</div>
+      </section>
+
+      <!-- L3 医院 -->
+      <section class="bi-board" data-board="2">
+        <div class="bi-bhead">
+          <span class="bi-lv">L3</span>
+          <div class="bt"><b>协和医院 · 单院全景</b><span>店长（项目经理）视角：单院自负盈亏，盯利润 · 满编 · 口碑</span></div>
+          <span class="tag gold">目标态示意</span>
+        </div>
+        <div class="bi-kpis">
+          <div class="bi-kpi"><span class="k-l">今日服务量（人次）</span><span class="k-v">612</span><span class="k-d up">↑ 4.8%</span></div>
+          <div class="bi-kpi"><span class="k-l">在院客户</span><span class="k-v">480</span><span class="k-d info">覆盖 6 科室</span></div>
+          <div class="bi-kpi"><span class="k-l">今日付费</span><span class="k-v">¥19.2<small>万</small></span><span class="k-d up">↑ 3.6%</span></div>
+          <div class="bi-kpi"><span class="k-l">今日实收</span><span class="k-v">¥17.4<small>万</small></span><span class="k-d mid">回款 92%</span></div>
+          <div class="bi-kpi"><span class="k-l">今日客诉</span><span class="k-v">1<small> 起</small></span><span class="k-d info">处置中</span></div>
+        </div>
+        <div class="bi-focal">
+          <span class="fl">本级关注</span>
+          <span class="fc"><i>单院利润 · 本月累计</i><b>¥83.5万</b></span>
+          <span class="fc warn-fc"><i>护工满编率 · 全院</i><b>91%</b>（骨科 78% ⚠）</span>
+          <span class="fc"><i>客户 NPS · 本月</i><b>62</b>（↑4）</span>
+        </div>
+        <div class="bi-sect">科室明细 <small>（点击行下钻到科室）</small></div>
+        <div class="bi-tblwrap">
+        <table class="bi-table">
+          <tr><th>科室</th><th>服务量</th><th>在院</th><th>床位覆盖率</th><th>科室毛利·本月</th><th>投诉差评率</th><th>满编率</th><th></th></tr>
+          <tr class="drill" data-go="3"><td><b>神经内科</b></td><td>132</td><td>131</td><td>87%</td><td>¥28.4万</td><td class="ok-t">0.3%</td><td>96%</td><td class="go">›</td></tr>
+          <tr class="dim" data-toast="3"><td><b>骨科</b></td><td>118</td><td>89</td><td class="warn-t">74% ⚠</td><td>¥21.6万</td><td class="warn-t">1.1% ⚠</td><td class="warn-t">78% ⚠</td><td class="go">›</td></tr>
+          <tr class="dim" data-toast="3"><td><b>普外科</b></td><td>104</td><td>81</td><td>78%</td><td>¥19.5万</td><td>0.7%</td><td>90%</td><td class="go">›</td></tr>
+          <tr class="dim" data-toast="3"><td><b>心内科</b></td><td>96</td><td>74</td><td>80%</td><td>¥17.2万</td><td>0.5%</td><td>93%</td><td class="go">›</td></tr>
+          <tr class="dim" data-toast="3"><td><b>呼吸内科</b></td><td>87</td><td>65</td><td>76%</td><td>¥14.8万</td><td>0.4%</td><td>92%</td><td class="go">›</td></tr>
+          <tr class="dim" data-toast="3"><td><b>其他科室</b></td><td>75</td><td>40</td><td>72%</td><td>¥12.0万</td><td>0.6%</td><td>89%</td><td class="go">›</td></tr>
+        </table>
+        </div>
+        <div class="bi-bfoot">科室服务量合计 612、在院合计 480，与单院对账一致 · 骨科覆盖率 / 满编率双低：管理者 Agent 已推「跨科室调 2 人 + 启动招聘」建议（见管理者 Agent 页）</div>
+      </section>
+
+      <!-- L4 科室 -->
+      <section class="bi-board" data-board="3">
+        <div class="bi-bhead">
+          <span class="bi-lv">L4</span>
+          <div class="bt"><b>神经内科 · 科室经营</b><span>店长看科室：覆盖率 · 毛利 · 口碑，独立核算算得清</span></div>
+          <span class="tag gold">目标态示意</span>
+        </div>
+        <div class="bi-kpis">
+          <div class="bi-kpi"><span class="k-l">今日服务量（人次）</span><span class="k-v">132</span><span class="k-d up">↑ 5</span></div>
+          <div class="bi-kpi"><span class="k-l">在院客户</span><span class="k-v">131</span><span class="k-d mid">近满员</span></div>
+          <div class="bi-kpi"><span class="k-l">新住院</span><span class="k-v">31</span><span class="k-d up">↑ 4</span></div>
+          <div class="bi-kpi"><span class="k-l">今日收费</span><span class="k-v">¥4.6<small>万</small></span><span class="k-d up">↑ 4%</span></div>
+        </div>
+        <div class="bi-focal">
+          <span class="fl">本级关注</span>
+          <span class="fc"><i>床位覆盖率 · 在护÷开放床位</i><b>87%</b></span>
+          <span class="fc"><i>科室毛利 · 本月累计</i><b>¥28.4万</b></span>
+          <span class="fc"><i>投诉差评率 · 本月</i><b>0.3%</b></span>
+        </div>
+        <div class="bi-sect">班组明细 <small>（点击行下钻到班组）</small></div>
+        <div class="bi-tblwrap">
+        <table class="bi-table">
+          <tr><th>班组</th><th>护工数</th><th>今日在服</th><th>人均产值·日</th><th>排班履约率</th><th>任务完成率</th><th>今日收费</th><th></th></tr>
+          <tr class="drill" data-go="4"><td><b>A 班组</b>（李凤霞）</td><td>18</td><td>46</td><td class="ok-t">¥1,000</td><td>98%</td><td>96%</td><td>¥1.8万</td><td class="go">›</td></tr>
+          <tr class="dim" data-toast="4"><td><b>B 班组</b>（周桂英）</td><td>16</td><td>44</td><td>¥938</td><td>97%</td><td>94%</td><td>¥1.5万</td><td class="go">›</td></tr>
+          <tr class="dim" data-toast="4"><td><b>C 班组</b>（马丽华）</td><td>15</td><td>41</td><td>¥867</td><td>95%</td><td class="warn-t">89% ⚠</td><td>¥1.3万</td><td class="go">›</td></tr>
+        </table>
+        </div>
+        <div class="bi-bfoot">人均日产值 = 班组收费 ÷ 当日在岗护工数（A 班组 1.8 万 ÷ 18 人 = ¥1,000）· A 班组为全公司产值 Top 班组 · C 班组任务完成率偏低，班组长 Agent 已自动点名催办</div>
+      </section>
+
+      <!-- L5 班组 -->
+      <section class="bi-board" data-board="4">
+        <div class="bi-bhead">
+          <span class="bi-lv">L5</span>
+          <div class="bt"><b>A 班组 · 神经内科</b><span>班组长李凤霞视角：看人、催学、盯质量——AI 替她看数据写日报</span></div>
+          <span class="tag gold">目标态示意</span>
+        </div>
+        <div class="bi-kpis">
+          <div class="bi-kpi"><span class="k-l">今日在服（人）</span><span class="k-v">46</span><span class="k-d up">↑ 3</span></div>
+          <div class="bi-kpi"><span class="k-l">新住院</span><span class="k-v">12</span><span class="k-d up">↑ 2</span></div>
+          <div class="bi-kpi"><span class="k-l">在院</span><span class="k-v">46</span><span class="k-d mid">满员</span></div>
+          <div class="bi-kpi"><span class="k-l">出院</span><span class="k-v">9</span><span class="k-d info">转随访 6</span></div>
+          <div class="bi-kpi"><span class="k-l">今日收费</span><span class="k-v">¥1.8<small>万</small></span><span class="k-d up">↑ 5%</span></div>
+        </div>
+        <div class="bi-focal">
+          <span class="fl">本级关注</span>
+          <span class="fc"><i>人均产值 · 收费÷在岗</i><b>¥1,000/人·日</b></span>
+          <span class="fc"><i>排班履约率</i><b>98%</b></span>
+          <span class="fc"><i>任务完成率</i><b>96%</b></span>
+        </div>
+        <div class="bi-sect">护工明细 <small>（示意节选 4 / 18 人 · 点击王秀兰看个人看板）</small></div>
+        <div class="bi-tblwrap">
+        <table class="bi-table">
+          <tr><th>护工</th><th>在护病人</th><th>今日服务</th><th>语音日报</th><th>家属评分</th><th>学习任务</th><th>今日收入</th><th></th></tr>
+          <tr class="drill" data-go="5"><td><b>王秀兰</b></td><td>3</td><td>3</td><td class="ok-t">已交 ✓</td><td>4.9 ★</td><td class="ok-t">已完成 ✓</td><td>¥520</td><td class="go">›</td></tr>
+          <tr class="dim" data-toast="5"><td><b>李桂芳</b></td><td>2</td><td>2</td><td class="ok-t">已交 ✓</td><td>4.8 ★</td><td class="ok-t">已完成 ✓</td><td>¥410</td><td class="go">›</td></tr>
+          <tr class="dim" data-toast="5"><td><b>赵春梅</b></td><td>3</td><td>3</td><td class="warn-t">未交 ⚠</td><td>4.7 ★</td><td class="warn-t">待学 ⚠</td><td>¥560</td><td class="go">›</td></tr>
+          <tr class="dim" data-toast="5"><td><b>刘玉英</b></td><td>2</td><td>2</td><td class="ok-t">已交 ✓</td><td>5.0 ★</td><td class="ok-t">已完成 ✓</td><td>¥380</td><td class="go">›</td></tr>
+        </table>
+        </div>
+        <div class="bi-bfoot">赵春梅日报未交 + 学习待学：班组长 Agent 已 1v1 客气提醒并设 21:00 复查（见班组长 Agent 页）· 出院 9 人中 6 人已转私域随访，进入复购唤醒旅程</div>
+      </section>
+
+      <!-- L6 护工个人 -->
+      <section class="bi-board" data-board="5">
+        <div class="bi-bhead">
+          <span class="bi-lv">L6</span>
+          <div class="bt"><b>王秀兰 · 个人看板（A 班组 / 神经内科）</b><span>护工本人视角：收入、服务、每个病人的活干没干</span></div>
+          <span class="tag gold">目标态示意</span>
+        </div>
+        <div class="bi-kpis">
+          <div class="bi-kpi"><span class="k-l">累计总收入</span><span class="k-v">¥68,400</span><span class="k-d up">持续增长</span></div>
+          <div class="bi-kpi"><span class="k-l">本月收入</span><span class="k-v">¥6,120</span><span class="k-d info">截至今日</span></div>
+          <div class="bi-kpi"><span class="k-l">累计服务人数</span><span class="k-v">312<small> 人</small></span><span class="k-d info">老客沉淀</span></div>
+          <div class="bi-kpi"><span class="k-l">家属评分</span><span class="k-v">4.9<small> ★</small></span><span class="k-d up">班组第 2</span></div>
+        </div>
+        <div class="bi-focal">
+          <span class="fl">本级关注</span>
+          <span class="fc"><i>今日工单完成</i><b>2 / 4</b></span>
+          <span class="fc"><i>本月在护</i><b>4 位</b></span>
+          <span class="fc"><i>引流积分</i><b>1,840 分</b></span>
+          <span class="fc"><i>本月转介</i><b>2 单</b></span>
+        </div>
+        <div class="bi-sect">今日任务 · 每个病人要做的工作 <small>（标准化操作打卡）</small></div>
+        <div class="bi-tblwrap">
+        <table class="bi-table">
+          <tr><th>病人 / 床位</th><th>要做的工作</th><th>是否完成</th></tr>
+          <tr><td><b>12 床 · 术后</b></td><td>上午翻身拍背 + 记录</td><td class="ok-t">✓ 已完成</td></tr>
+          <tr><td><b>8 床 · 中风</b></td><td>康复喂食 + 扶行训练</td><td class="ok-t">✓ 已完成</td></tr>
+          <tr><td><b>15 床 · 骨折</b></td><td>助行器搀扶如厕</td><td class="gold-t">○ 未完成</td></tr>
+          <tr><td><b>6 床 · 卧床</b></td><td>换防压疮垫 + 皮肤检查</td><td class="gold-t">○ 未完成</td></tr>
+        </table>
+        </div>
+        <div class="bi-bfoot">护工无需打开看板：在企微对 S-Agent 说「查我的看板」，同一份数据语音播报 / 卡片回传 · 任务留痕不拍病人、不含诊断；服务小结经家属授权后同步小程序</div>
+      </section>
+
+      <!-- 四域指标 + 口径 -->
+      <div class="panel bi-domains">
+        <h3>核心经营指标 · 四域口径体系 <span class="tag teal" style="margin-left:6px">今日 · 全公司口径</span></h3>
+        <div class="bi-domgrid">
+          <div class="bi-dom">
+            <h4>服务运营 <small>SERVICE</small></h4>
+            <div class="dm"><div class="dm-t"><b>在院在服率</b><span class="dm-v">94.2%</span></div><div class="dm-f">有服务记录客户数 ÷ 在院客户数</div></div>
+            <div class="dm"><div class="dm-t"><b>服务打卡数</b><span class="dm-v">5,580 人次</span></div><div class="dm-f">当日护理任务打卡条数（人次）</div></div>
+            <div class="dm"><div class="dm-t"><b>平均服务时长</b><span class="dm-v">10.8 小时</span></div><div class="dm-f">在岗服务总时长 ÷ 在服人数</div></div>
+            <div class="dm"><div class="dm-t"><b>服务达标率</b><span class="dm-v">96.8%</span></div><div class="dm-f">合格条数 ÷ 应完成条数</div></div>
+          </div>
+          <div class="bi-dom warm-d2">
+            <h4>经营收费 <small>REVENUE</small></h4>
+            <div class="dm"><div class="dm-t"><b>应收额</b><span class="dm-v">¥58.8万</span></div><div class="dm-f">在院客户按床日应计费用</div></div>
+            <div class="dm"><div class="dm-t"><b>付费单数</b><span class="dm-v">486 笔</span></div><div class="dm-f">当日支付成功的陪护订单笔数</div></div>
+            <div class="dm"><div class="dm-t"><b>回款率</b><span class="dm-v">89%</span></div><div class="dm-f">当日收费额 ÷ 当日应收额</div></div>
+            <div class="dm"><div class="dm-t"><b>人均日产值</b><span class="dm-v">¥255</span></div><div class="dm-f">收费额 ÷ 当日在岗护工数</div></div>
+          </div>
+          <div class="bi-dom">
+            <h4>私域复购 <small>RETENTION</small></h4>
+            <div class="dm"><div class="dm-t"><b>复购客户数</b><span class="dm-v">8.6万</span></div><div class="dm-f">历史成交且再次下单客户去重数</div></div>
+            <div class="dm"><div class="dm-t"><b>复购率</b><span class="dm-v">8.6%</span></div><div class="dm-f">复购客户数 ÷ 累计成交客户数</div></div>
+            <div class="dm"><div class="dm-t"><b>私域好友数</b><span class="dm-v">12.8万</span></div><div class="dm-f">企微已添加且有效的客户好友数</div></div>
+            <div class="dm"><div class="dm-t"><b>转介绍单数</b><span class="dm-v">18 单</span></div><div class="dm-f">带老客推荐标记的新签订单数</div></div>
+          </div>
+          <div class="bi-dom warm-d2">
+            <h4>团队护工 <small>WORKFORCE</small></h4>
+            <div class="dm"><div class="dm-t"><b>在册护工数</b><span class="dm-v">3,000 人</span></div><div class="dm-f">签约在册护工数（分母基数）</div></div>
+            <div class="dm"><div class="dm-t"><b>在岗护工数</b><span class="dm-v">2,052 人</span></div><div class="dm-f">当日有服务打卡的护工去重数</div></div>
+            <div class="dm"><div class="dm-t"><b>护工活跃率</b><span class="dm-v">68.4%</span></div><div class="dm-f">在岗护工数 ÷ 在册护工数</div></div>
+            <div class="dm"><div class="dm-t"><b>客诉发生数</b><span class="dm-v">3 起</span></div><div class="dm-f">当日新增客户投诉工单条数</div></div>
+          </div>
+        </div>
+        <p class="note"><b>口径边界：</b>在服人数 = 去重客户数（1 客户记 1 人）；服务打卡数 = 按次累计（人次）。<b>付费 = 客户支付金额、收费 = 公司实收到账，差额即在途</b>；人均类默认以「在岗护工」为分母。头部 5 个指标天天看，其余按四域周度复盘。</p>
+      </div>
+    </div>
+
+    <!-- ================= 右：chatBI 停靠栏 ================= -->
+    <aside class="bi-dock">
+      <div class="panel">
+        <h3>chatBI · 对话问数 <small>与看板同源同口径</small></h3>
+        <div class="bi-msgs" id="bi-msgs">
+          <div class="bi-m a">您好，我是 <b>chatBI</b>。任意层级、任意口径的经营数据，一句话就能查——答案永远带口径，和左侧看板同一套数。试试下面的问题 👇</div>
+        </div>
+        <!-- 预设问题随当前角色切换（JS 渲染） -->
+        <div class="bi-chips" id="bi-chips"></div>
+        <form class="bi-inputbar" id="bi-form">
+          <input id="bi-input" type="text" placeholder="用一句话问数，如：协和回款率…" autocomplete="off">
+          <button type="submit">发送</button>
+        </form>
+        <p class="bi-dockfoot"><b>chatBI</b> 含于管理岗套餐（699 元/月 · 企业 6 折约 419 元），与多层级 BI 看板、Agent Team 打包交付 · 演示应答为目标态示意。</p>
+      </div>
+    </aside>
+  </div>
+
+  <!-- 数据从哪来 -->
+  <div class="panel bi-flowpanel">
+    <h3>数据从哪来：说话就是录入，不额外填表</h3>
+    <div class="flow">
+      <div class="f-step hot"><div class="n">1</div><b>护工语音 / 埋点</b><span>日报 · 接单 · 加微 · 转发，过程自动留痕</span></div>
+      <div class="f-arrow">→</div>
+      <div class="f-step"><div class="n">2</div><b>云端数据库</b><span>ASR 转写 + 结构化写库（商汤云库）</span></div>
+      <div class="f-arrow">→</div>
+      <div class="f-step"><div class="n">3</div><b>指标计算</b><span>统一口径 · 四域分级 · 每数可溯源</span></div>
+      <div class="f-arrow">→</div>
+      <div class="f-step hot"><div class="n">4</div><b>六级看板 + chatBI</b><span>公司 → 护工一钻到底 · 一句话问数</span></div>
+    </div>
+    <p class="note"><b>同一套数：</b>从护工到董事长，看的是同一份账——公司总览钻到底就是王秀兰的个人看板，王秀兰在企微问到的也是这套数。云端数据库 + BI 看板（含 chatBI）由商汤交付；示意稿数值为目标态占位，上线后按真实数据实时回填。</p>
+  </div>
+
+  <!-- 同一套数 · 三种触达 -->
+  <div class="panel bi-touch">
+    <h3>同一套数 · 三种触达 <span class="tag teal" style="margin-left:6px">同一套云端数据库 · 口径一致</span></h3>
+    <div class="bi-touchgrid">
+      <!-- 1 桌面 BI -->
+      <div class="bi-tcol">
+        <div class="tc-head"><span class="tc-ic">🖥️</span><span><b>桌面 BI 看板</b><span class="tc-sub">管理层深度分析 · 即本页</span></span></div>
+        <ul class="tc-list">
+          <li><b>六级下钻</b>：公司 → 战队 → 项目 → 科室 → 班组 → 护工，一钻到底</li>
+          <li><b>四域口径体系</b>：服务 · 收费 · 私域 · 团队，每个数带公式可溯源</li>
+          <li><b>chatBI 对话问数</b>：一句话查任意层级，答案永远带口径</li>
+          <li><b>角色权限</b>：企微身份自动识别，各角色只看自己那一段</li>
+        </ul>
+        <div class="tc-note">适合：运营中心 / 战队长 / 店长的周度复盘与深度分析场景</div>
+      </div>
+      <!-- 2 员工小程序 · 手机看板 -->
+      <div class="bi-tcol">
+        <div class="tc-head"><span class="tc-ic">📱</span><span><b>员工小程序 · 手机看板</b><span class="tc-sub">护工 / 班组长手机上随时看</span></span></div>
+        <div class="bi-minis">
+          <div class="bi-mini">
+            <div class="mp-shell"><div class="mp-scr">
+              <div class="mp-head"><b>我的看板 · 王秀兰</b><span>A 班组 · 神经内科</span></div>
+              <div class="mp-stats">
+                <div class="mp-st"><b>¥68,400</b><span>累计总收入</span></div>
+                <div class="mp-st"><b>¥6,120</b><span>本月收入</span></div>
+                <div class="mp-st"><b>312 人</b><span>累计服务</span></div>
+                <div class="mp-st"><b>4.9 ★</b><span>家属评分</span></div>
+              </div>
+              <div class="mp-sect">今日床位任务 · 打卡</div>
+              <div class="mp-task"><span>12床 · 翻身拍背</span><b class="ok">✓ 已打卡</b></div>
+              <div class="mp-task"><span>8床 · 喂食扶行</span><b class="ok">✓ 已打卡</b></div>
+              <div class="mp-task"><span>15床 · 助行器如厕</span><b class="todo">○ 待打卡</b></div>
+              <div class="mp-task"><span>6床 · 防压疮垫+皮肤检查</span><b class="todo">○ 待打卡</b></div>
+            </div></div>
+            <span class="mp-cap">护工屏 · 王秀兰个人看板</span>
+          </div>
+          <div class="bi-mini">
+            <div class="mp-shell"><div class="mp-scr">
+              <div class="mp-head warm"><b>A 班组 · 李凤霞</b><span>神经内科 · 18 名护工</span></div>
+              <div class="mp-six">
+                <div><b>12</b><span>新住院</span></div>
+                <div><b>46</b><span>在院 · 满</span></div>
+                <div><b>9</b><span>出院</span></div>
+                <div><b>46</b><span>今日在服</span></div>
+                <div><b>¥1.8万</b><span>今日收费</span></div>
+                <div><b>¥1,000</b><span>人均产值</span></div>
+              </div>
+              <div class="mp-ringrow">
+                <svg viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg"><circle cx="30" cy="30" r="24" style="fill:none;stroke:var(--sky2);stroke-width:7"/><circle cx="30" cy="30" r="24" transform="rotate(-90 30 30)" style="fill:none;stroke:var(--teal);stroke-width:7;stroke-linecap:round;stroke-dasharray:137.2 150.8"/><text x="30" y="35" text-anchor="middle" style="font-size:13px;font-weight:800;fill:var(--teal-d)">91%</text></svg>
+                <div class="mp-ringtxt"><b>42 / 46</b><span>今日床位任务完成率</span></div>
+              </div>
+              <div class="mp-sect">待催办</div>
+              <div class="mp-task"><span>赵春梅 · 语音日报</span><b class="warn">⚠ 未交</b></div>
+              <div class="mp-task"><span>赵春梅 · 本周课程</span><b class="warn">⚠ 待学</b></div>
+              <div class="mp-btn">一键催办</div>
+            </div></div>
+            <span class="mp-cap">班组长屏 · 李凤霞班组看板</span>
+          </div>
+        </div>
+      </div>
+      <!-- 3 Agent 主动推送 -->
+      <div class="bi-tcol">
+        <div class="tc-head"><span class="tc-ic">🤖</span><span><b>Agent 主动推送</b><span class="tc-sub">不看板，也一样不遗漏</span></span></div>
+        <div class="bi-push">
+          <div class="push-time">每天 7:30 · 早报</div>
+          <div class="push-b"><span class="push-av">助</span><div class="push-bub"><b>📋 A 班组早报</b><br>昨日床位任务完成率 91%；今日待办 46 项床位任务。今日重点：15 床助行器训练跟进、赵春梅日报督学。</div></div>
+          <div class="push-time">每天 21:30 · 晚报</div>
+          <div class="push-b"><span class="push-av">助</span><div class="push-bub"><b>🌙 A 班组晚报</b><br>今日床位任务完成 42/46（91%）；6 床皮肤检查未打卡，已提醒王秀兰。今日收费 ¥1.8万 ↑5%。</div></div>
+        </div>
+        <div class="push-links">
+          <a href="agent_hugong.html">护工 Agent 完整演示 →</a>
+          <a href="agent_banzuzhang.html">班组长 Agent 完整演示 →</a>
+        </div>
+      </div>
+    </div>
+    <p class="note"><b>三种触达 · 一套账：</b>桌面 BI、员工手机看板、企微 Agent 推送，读的都是<b>同一套云端数据库指标</b>，口径完全一致——李凤霞早上在企微收到的 91%，和运营中心在本页钻到 A 班组看到的是同一个数。</p>
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="foot-brand"><img src="assets/st_logo.png" alt="商汤科技"></div>
+  <div><b>商汤科技 · 大模型生态渠道部</b> — AI 技术底座 · 高保真交互原型（页面数据均为目标态示意，非真实经营数据）</div>
+</footer>
+
+<div class="bi-toast" id="bi-toast"></div>
+
+<!-- ============ 角色登录层：选角色进入（企微 SSO 概念演示） ============ -->
+<div class="bi-login" id="bi-login">
+  <div class="bi-login-box">
+    <div class="eyebrow">Role-Based Access · 企微身份 = 数据权限</div>
+    <h2>选择角色，进入你的那一段数据</h2>
+    <p class="lg-sub">正式环境由<b>企业微信身份自动识别</b>直接落到本人视角、无需输密码；演示环境请点选角色体验。同一套云端数据库、同一套口径，角色只决定「能看到哪一段」。</p>
+    <div class="bi-login-cards">
+      <div class="bi-role" data-role="ops">
+        <span class="r-av av-ink">总</span>
+        <b>运营中心</b>
+        <span class="r-t">总部 · 数据运营</span>
+        <span class="r-p">数据权限：全公司 4 战队全部医院，L1→L6 一钻到底</span>
+        <span class="r-go">进入 L1 公司总览 ›</span>
+      </div>
+      <div class="bi-role" data-role="zhandui">
+        <span class="r-av av-teal">周</span>
+        <b>周建国</b>
+        <span class="r-t">战队长 · 一战队</span>
+        <span class="r-p">数据权限：仅一战队名下医院（协和 + 中山筹备）</span>
+        <span class="r-go">进入 L2 一战队 ›</span>
+      </div>
+      <div class="bi-role" data-role="dianzhang">
+        <span class="r-av av-warm">张</span>
+        <b>张卫东</b>
+        <span class="r-t">店长（项目经理）· 协和医院</span>
+        <span class="r-p">数据权限：仅协和医院本院科室 · 班组 · 护工</span>
+        <span class="r-go">进入 L3 协和医院 ›</span>
+      </div>
+      <div class="bi-role" data-role="banzu">
+        <span class="r-av av-gold">李</span>
+        <b>李凤霞</b>
+        <span class="r-t">班组长 · 神经内科 A 班组</span>
+        <span class="r-p">数据权限：仅 A 班组 18 名护工，回退不越过班组</span>
+        <span class="r-go">进入 L5 A 班组 ›</span>
+      </div>
+      <div class="bi-role" data-role="hugong">
+        <span class="r-av av-warm2">王</span>
+        <b>王秀兰</b>
+        <span class="r-t">护工 · A 班组</span>
+        <span class="r-p">数据权限：仅本人收入 · 服务 · 任务，无下钻</span>
+        <span class="r-go">进入 L6 个人看板 ›</span>
+      </div>
+    </div>
+    <p class="bi-login-foot">五个角色 · 一套账：看板与 chatBI 的可见范围随角色变化，数值均为目标态示意。</p>
+  </div>
+</div>
+
+<script>
+/* ================= 角色定义：企微身份 = 数据权限（SSO 概念演示） ================= */
+var BI_ROLES = {
+  ops:       { key: 'ops',       av: '总', avc: 'av-ink',   name: '运营中心', title: '总部 · 数据运营',            root: 0, min: 0, badges: [0, 1, 2, 3, 4], perm: '全公司 4 战队全部医院 · L1→L6 一钻到底' },
+  zhandui:   { key: 'zhandui',   av: '周', avc: 'av-teal',  name: '周建国',   title: '战队长 · 一战队',            root: 1, min: 1, badges: [1, 2, 3, 4],    perm: '仅一战队名下医院（协和 + 中山筹备）' },
+  dianzhang: { key: 'dianzhang', av: '张', avc: 'av-warm',  name: '张卫东',   title: '店长（项目经理）· 协和医院', root: 2, min: 2, badges: [2, 3, 4],       perm: '仅协和医院本院科室 · 班组 · 护工' },
+  banzu:     { key: 'banzu',     av: '李', avc: 'av-gold',  name: '李凤霞',   title: '班组长 · 神经内科 A 班组',   root: 4, min: 4, badges: [3, 4],          perm: '仅神经内科 A 班组 18 名护工' },
+  hugong:    { key: 'hugong',    av: '王', avc: 'av-warm2', name: '王秀兰',   title: '护工 · A 班组',              root: 5, min: 5, badges: [4],             perm: '仅本人收入 · 服务 · 任务（无下钻）' }
+};
+
+/* ================= 六级下钻：层级栈 + 面包屑 + 角色权限边界 ================= */
+(function () {
+  var LV = [
+    { crumb: '🏠 公司总览', view: '运营中心 / 战队长', badge: 0 },
+    { crumb: '一战队',      view: '战队长（赋能非管控）', badge: 1 },
+    { crumb: '协和医院',    view: '店长 / 项目经理', badge: 2 },
+    { crumb: '神经内科',    view: '店长 · 科室经营', badge: 2 },
+    { crumb: 'A 班组',      view: '班组长 李凤霞', badge: 3 },
+    { crumb: '王秀兰',      view: '护工本人', badge: 4 }
+  ];
+  var role = BI_ROLES.ops;   /* 登录层选择后由 __biDrillApply 覆盖 */
+  var cur = 0;
+  var crumbsEl = document.getElementById('bi-crumbs');
+  var viewEl   = document.getElementById('bi-view');
+  var boards   = document.querySelectorAll('.bi-board');
+  var badges   = document.querySelectorAll('.bi-badge');
+  var toastEl  = document.getElementById('bi-toast');
+  var toastTimer = null;
+
+  var TOASTS = {
+    '1': '演示以「一战队 → 协和」为完整下钻路径，其余战队同构，点第一行体验',
+    '2': '中山医院筹备期：首批 30 名护工已完成 AI 激活培训，开板后自动并表',
+    '3': '演示以「神经内科」为完整下钻路径，其余科室同构',
+    '4': '演示以「A 班组」为完整下钻路径，其余班组同构',
+    '5': '演示以「王秀兰」为完整下钻路径，点第一行看护工个人看板'
+  };
+
+  function toast(msg) {
+    toastEl.textContent = msg;
+    toastEl.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function () { toastEl.classList.remove('show'); }, 3200);
+  }
+  window.__biToast = toast;
+
+  function render() {
+    boards.forEach(function (b) {
+      b.classList.toggle('on', +b.getAttribute('data-board') === cur);
+    });
+    /* 面包屑：从「角色根」开始，回退不越过数据权限 */
+    var html = '';
+    for (var i = role.min; i <= cur; i++) {
+      if (i > role.min) html += '<span class="sep">›</span>';
+      html += '<span class="bi-crumb' + (i === cur ? ' cur' : '') + '" data-lv="' + i + '">' + LV[i].crumb + '</span>';
+    }
+    crumbsEl.innerHTML = html;
+    crumbsEl.querySelectorAll('.bi-crumb:not(.cur)').forEach(function (c) {
+      c.addEventListener('click', function () { go(+c.getAttribute('data-lv')); });
+    });
+    viewEl.innerHTML = '视角：<b>' + LV[cur].view + '</b> · L' + (cur + 1);
+    /* 徽章高亮 + 权限锁定 */
+    badges.forEach(function (bd, idx) {
+      bd.classList.toggle('lock', role.badges.indexOf(idx) === -1);
+      bd.classList.toggle('on', idx === LV[cur].badge);
+    });
+  }
+
+  function go(n) {
+    if (n < role.min) {
+      toast('「' + role.name + ' · ' + role.title + '」数据权限：' + role.perm + '——更上层数据不可见，可点右上「切换角色」');
+      return;
+    }
+    cur = n;
+    render();
+  }
+
+  /* 表格行下钻 / 提示 */
+  document.querySelectorAll('tr[data-go]').forEach(function (tr) {
+    tr.addEventListener('click', function () { go(+tr.getAttribute('data-go')); });
+  });
+  document.querySelectorAll('tr[data-toast]').forEach(function (tr) {
+    tr.addEventListener('click', function () { toast(TOASTS[tr.getAttribute('data-toast')] || ''); });
+  });
+  /* 徽章直达（权限内） */
+  badges.forEach(function (bd) {
+    bd.addEventListener('click', function () {
+      if (bd.classList.contains('lock')) {
+        toast('该视角超出当前角色数据权限 · 点右上「切换角色」后可见');
+        return;
+      }
+      go(+bd.getAttribute('data-lv'));
+    });
+  });
+
+  /* 角色切换入口：登录层选择后调用 */
+  window.__biDrillApply = function (r) {
+    role = r;
+    cur = r.root;
+    var av = document.getElementById('bi-role-av');
+    av.textContent = r.av;
+    av.className = 'rb-av ' + r.avc;
+    document.getElementById('bi-role-name').textContent = '当前角色：' + r.name + ' · ' + r.title;
+    document.getElementById('bi-role-perm').textContent = '数据权限：' + r.perm + ' · 由企微身份自动识别，无需输密码';
+    render();
+  };
+
+  render();
+})();
+
+/* ================= chatBI：预设问答 + 打字机 + SVG 迷你图 ================= */
+(function () {
+  var msgsEl  = document.getElementById('bi-msgs');
+  var chipsEl = document.getElementById('bi-chips');
+  var formEl  = document.getElementById('bi-form');
+  var inputEl = document.getElementById('bi-input');
+  var busy = false;
+
+  /* —— 手写 SVG 迷你图 —— */
+  var svgHuikuan =
+    '<svg viewBox="0 0 268 100" xmlns="http://www.w3.org/2000/svg">' +
+    '<line x1="24" y1="54" x2="252" y2="54" style="stroke:var(--warm);stroke-width:1;stroke-dasharray:4 4;opacity:.7"/>' +
+    '<text x="252" y="49" text-anchor="end" style="font-size:9px;fill:var(--warm-d)">全院均值 89%</text>' +
+    '<polyline points="40,66 106,50 172,42 238,34" style="fill:none;stroke:var(--teal);stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round"/>' +
+    '<circle cx="40" cy="66" r="3.5" style="fill:#fff;stroke:var(--teal);stroke-width:2"/>' +
+    '<circle cx="106" cy="50" r="3.5" style="fill:#fff;stroke:var(--teal);stroke-width:2"/>' +
+    '<circle cx="172" cy="42" r="3.5" style="fill:#fff;stroke:var(--teal);stroke-width:2"/>' +
+    '<circle cx="238" cy="34" r="4" style="fill:var(--warm);stroke:#fff;stroke-width:1.5"/>' +
+    '<text x="40" y="82" text-anchor="middle" style="font-size:9.5px;fill:var(--muted)">88%</text>' +
+    '<text x="106" y="40" text-anchor="middle" style="font-size:9.5px;fill:var(--muted)">90%</text>' +
+    '<text x="172" y="32" text-anchor="middle" style="font-size:9.5px;fill:var(--muted)">91%</text>' +
+    '<text x="238" y="24" text-anchor="middle" style="font-size:10px;font-weight:700;fill:var(--warm-d)">92%</text>' +
+    '<text x="40" y="96" text-anchor="middle" style="font-size:9px;fill:var(--muted)">第1周</text>' +
+    '<text x="106" y="96" text-anchor="middle" style="font-size:9px;fill:var(--muted)">第2周</text>' +
+    '<text x="172" y="96" text-anchor="middle" style="font-size:9px;fill:var(--muted)">第3周</text>' +
+    '<text x="238" y="96" text-anchor="middle" style="font-size:9px;fill:var(--muted)">第4周</text>' +
+    '</svg>';
+
+  var svgChanzhi =
+    '<svg viewBox="0 0 268 96" xmlns="http://www.w3.org/2000/svg">' +
+    '<text x="52" y="21" text-anchor="end" style="font-size:10px;fill:var(--sub)">A 班组</text>' +
+    '<rect x="58" y="10" width="152" height="14" rx="7" style="fill:var(--warm)"/>' +
+    '<text x="216" y="21" style="font-size:10px;font-weight:700;fill:var(--warm-d)">¥1,000</text>' +
+    '<text x="52" y="51" text-anchor="end" style="font-size:10px;fill:var(--sub)">B 班组</text>' +
+    '<rect x="58" y="40" width="142" height="14" rx="7" style="fill:var(--teal)"/>' +
+    '<text x="206" y="51" style="font-size:10px;fill:var(--sub)">¥938</text>' +
+    '<text x="52" y="81" text-anchor="end" style="font-size:10px;fill:var(--sub)">C 班组</text>' +
+    '<rect x="58" y="70" width="132" height="14" rx="7" style="fill:var(--teal-l)"/>' +
+    '<text x="196" y="81" style="font-size:10px;fill:var(--sub)">¥867</text>' +
+    '</svg>';
+
+  var svgFugou =
+    '<svg viewBox="0 0 268 100" xmlns="http://www.w3.org/2000/svg">' +
+    '<polyline points="50,64 134,50 218,36" style="fill:none;stroke:var(--teal);stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round"/>' +
+    '<circle cx="50" cy="64" r="3.5" style="fill:#fff;stroke:var(--teal);stroke-width:2"/>' +
+    '<circle cx="134" cy="50" r="3.5" style="fill:#fff;stroke:var(--teal);stroke-width:2"/>' +
+    '<circle cx="218" cy="36" r="4" style="fill:var(--warm);stroke:#fff;stroke-width:1.5"/>' +
+    '<text x="50" y="54" text-anchor="middle" style="font-size:10px;fill:var(--muted)">7.2%</text>' +
+    '<text x="134" y="40" text-anchor="middle" style="font-size:10px;fill:var(--muted)">7.9%</text>' +
+    '<text x="218" y="26" text-anchor="middle" style="font-size:10.5px;font-weight:700;fill:var(--warm-d)">8.6%</text>' +
+    '<text x="50" y="82" text-anchor="middle" style="font-size:9px;fill:var(--muted)">5月</text>' +
+    '<text x="134" y="82" text-anchor="middle" style="font-size:9px;fill:var(--muted)">6月</text>' +
+    '<text x="218" y="82" text-anchor="middle" style="font-size:9px;fill:var(--muted)">7月（至今）</text>' +
+    '</svg>';
+
+  function daySquare(x, ok, label) {
+    var box = ok
+      ? '<rect x="' + x + '" y="14" width="34" height="34" rx="9" style="fill:var(--sky);stroke:var(--teal-l);stroke-width:1.5"/>' +
+        '<text x="' + (x + 17) + '" y="37" text-anchor="middle" style="font-size:15px;font-weight:700;fill:var(--teal-d)">✓</text>'
+      : '<rect x="' + x + '" y="14" width="34" height="34" rx="9" style="fill:#FBEAEA;stroke:var(--warn);stroke-width:1.5;stroke-dasharray:3 2"/>' +
+        '<text x="' + (x + 17) + '" y="37" text-anchor="middle" style="font-size:13px;font-weight:700;fill:var(--warn)">✗</text>';
+    return box + '<text x="' + (x + 17) + '" y="64" text-anchor="middle" style="font-size:9.5px;fill:var(--muted)">' + label + '</text>';
+  }
+  var svgRibao =
+    '<svg viewBox="0 0 268 72" xmlns="http://www.w3.org/2000/svg">' +
+    daySquare(18, true, '周一') + daySquare(66, true, '周二') + daySquare(114, false, '周三') +
+    daySquare(162, true, '周四') + daySquare(210, false, '今天') +
+    '</svg>';
+
+  var svgZaitu =
+    '<svg viewBox="0 0 268 84" xmlns="http://www.w3.org/2000/svg">' +
+    '<text x="52" y="23" text-anchor="end" style="font-size:10px;fill:var(--sub)">今日付费</text>' +
+    '<rect x="58" y="12" width="188" height="15" rx="7.5" style="fill:var(--warm)"/>' +
+    '<text x="240" y="23" text-anchor="end" style="font-size:10px;font-weight:700;fill:#fff">¥58.6万</text>' +
+    '<text x="52" y="53" text-anchor="end" style="font-size:10px;fill:var(--sub)">今日收费</text>' +
+    '<rect x="58" y="42" width="168" height="15" rx="7.5" style="fill:var(--teal)"/>' +
+    '<text x="220" y="53" text-anchor="end" style="font-size:10px;font-weight:700;fill:#fff">¥52.3万</text>' +
+    '<line x1="226" y1="42" x2="246" y2="27" style="stroke:var(--muted);stroke-width:1;stroke-dasharray:3 2"/>' +
+    '<text x="134" y="76" text-anchor="middle" style="font-size:10px;fill:var(--warm-d);font-weight:600">差额 ¥6.3万 = 在途（通道 T+1 结算）</text>' +
+    '</svg>';
+
+  /* —— 第二轮新增：角色专属迷你图 —— */
+  var svgZengzhang =
+    '<svg viewBox="0 0 268 96" xmlns="http://www.w3.org/2000/svg">' +
+    '<text x="88" y="21" text-anchor="end" style="font-size:10px;fill:var(--sub)">三战队 · 湘雅</text>' +
+    '<rect x="94" y="10" width="118" height="14" rx="7" style="fill:var(--warm)"/>' +
+    '<text x="218" y="21" style="font-size:10px;font-weight:700;fill:var(--warm-d)">+9.8%</text>' +
+    '<text x="88" y="43" text-anchor="end" style="font-size:10px;fill:var(--sub)">一战队 · 协和</text>' +
+    '<rect x="94" y="32" width="77" height="14" rx="7" style="fill:var(--teal)"/>' +
+    '<text x="177" y="43" style="font-size:10px;fill:var(--sub)">+6.4%</text>' +
+    '<text x="88" y="65" text-anchor="end" style="font-size:10px;fill:var(--sub)">二战队 · 华西</text>' +
+    '<rect x="94" y="54" width="61" height="14" rx="7" style="fill:var(--teal)"/>' +
+    '<text x="161" y="65" style="font-size:10px;fill:var(--sub)">+5.1%</text>' +
+    '<text x="88" y="87" text-anchor="end" style="font-size:10px;fill:var(--sub)">四战队 · 齐鲁</text>' +
+    '<rect x="94" y="76" width="38" height="14" rx="7" style="fill:var(--teal-l)"/>' +
+    '<text x="138" y="87" style="font-size:10px;fill:var(--sub)">+3.2%</text>' +
+    '</svg>';
+
+  var svgDuibi =
+    '<svg viewBox="0 0 268 118" xmlns="http://www.w3.org/2000/svg">' +
+    '<text x="18" y="16" style="font-size:9.5px;font-weight:700;fill:var(--teal-d)">服务量（人次 · 今日）</text>' +
+    '<text x="60" y="33" text-anchor="end" style="font-size:10px;fill:var(--sub)">协和</text>' +
+    '<rect x="66" y="22" width="146" height="13" rx="6.5" style="fill:var(--warm)"/>' +
+    '<text x="218" y="33" style="font-size:10px;font-weight:700;fill:var(--warm-d)">612</text>' +
+    '<text x="60" y="53" text-anchor="end" style="font-size:10px;fill:var(--sub)">华西</text>' +
+    '<rect x="66" y="42" width="126" height="13" rx="6.5" style="fill:var(--teal)"/>' +
+    '<text x="198" y="53" style="font-size:10px;fill:var(--sub)">528</text>' +
+    '<text x="18" y="76" style="font-size:9.5px;font-weight:700;fill:var(--teal-d)">今日付费（万元）</text>' +
+    '<text x="60" y="93" text-anchor="end" style="font-size:10px;fill:var(--sub)">协和</text>' +
+    '<rect x="66" y="82" width="146" height="13" rx="6.5" style="fill:var(--warm)"/>' +
+    '<text x="218" y="93" style="font-size:10px;font-weight:700;fill:var(--warm-d)">¥19.2万</text>' +
+    '<text x="60" y="113" text-anchor="end" style="font-size:10px;fill:var(--sub)">华西</text>' +
+    '<rect x="66" y="102" width="122" height="13" rx="6.5" style="fill:var(--teal)"/>' +
+    '<text x="194" y="113" style="font-size:10px;fill:var(--sub)">¥16.1万</text>' +
+    '</svg>';
+
+  var svgFuneng =
+    '<svg viewBox="0 0 268 90" xmlns="http://www.w3.org/2000/svg">' +
+    '<text x="60" y="25" text-anchor="end" style="font-size:10px;fill:var(--sub)">协和</text>' +
+    '<rect x="66" y="14" width="150" height="14" rx="7" style="fill:var(--teal)"/>' +
+    '<text x="222" y="25" style="font-size:10px;font-weight:700;fill:var(--teal-d)">100%</text>' +
+    '<text x="60" y="55" text-anchor="end" style="font-size:10px;fill:var(--sub)">中山</text>' +
+    '<rect x="66" y="44" width="150" height="14" rx="7" style="fill:none;stroke:var(--line);stroke-width:1"/>' +
+    '<rect x="66" y="44" width="27" height="14" rx="7" style="fill:var(--warm-l)"/>' +
+    '<text x="222" y="55" style="font-size:10px;fill:var(--warm-d)">导入中</text>' +
+    '<text x="134" y="80" text-anchor="middle" style="font-size:10px;font-weight:600;fill:var(--teal-d)">战队合并覆盖率 86% · 中山开板后预计 95%+</text>' +
+    '</svg>';
+
+  var svgShenne =
+    '<svg viewBox="0 0 268 76" xmlns="http://www.w3.org/2000/svg">' +
+    '<text x="74" y="25" text-anchor="end" style="font-size:10px;fill:var(--sub)">神经内科</text>' +
+    '<rect x="80" y="14" width="150" height="14" rx="7" style="fill:var(--warm)"/>' +
+    '<text x="236" y="25" style="font-size:10px;font-weight:700;fill:var(--warm-d)">94%</text>' +
+    '<text x="74" y="55" text-anchor="end" style="font-size:10px;fill:var(--sub)">全院平均</text>' +
+    '<rect x="80" y="44" width="142" height="14" rx="7" style="fill:var(--teal)"/>' +
+    '<text x="228" y="55" style="font-size:10px;fill:var(--sub)">89%</text>' +
+    '</svg>';
+
+  var svgWeijiao =
+    '<svg viewBox="0 0 268 84" xmlns="http://www.w3.org/2000/svg">' +
+    '<text x="66" y="25" text-anchor="end" style="font-size:10px;fill:var(--sub)">已交 17 人</text>' +
+    '<rect x="72" y="14" width="160" height="14" rx="7" style="fill:var(--sky2)"/>' +
+    '<rect x="72" y="14" width="151" height="14" rx="7" style="fill:var(--teal)"/>' +
+    '<text x="238" y="25" style="font-size:10px;font-weight:700;fill:var(--teal-d)">94%</text>' +
+    '<text x="66" y="55" text-anchor="end" style="font-size:10px;fill:var(--warn)">未交 1 人</text>' +
+    '<rect x="72" y="44" width="9" height="14" rx="4" style="fill:var(--warn)"/>' +
+    '<text x="88" y="55" style="font-size:10px;font-weight:700;fill:var(--warn)">赵春梅 ⚠（已 1v1 提醒 · 21:00 复查）</text>' +
+    '</svg>';
+
+  var svgChuangwei =
+    '<svg viewBox="0 0 268 104" xmlns="http://www.w3.org/2000/svg">' +
+    '<circle cx="62" cy="52" r="36" style="fill:none;stroke:var(--sky2);stroke-width:10"/>' +
+    '<circle cx="62" cy="52" r="36" transform="rotate(-90 62 52)" style="fill:none;stroke:var(--teal);stroke-width:10;stroke-linecap:round;stroke-dasharray:205.8 226.2"/>' +
+    '<text x="62" y="50" text-anchor="middle" style="font-size:16px;font-weight:800;fill:var(--teal-d)">91%</text>' +
+    '<text x="62" y="64" text-anchor="middle" style="font-size:9px;fill:var(--muted)">42 / 46</text>' +
+    '<text x="120" y="34" style="font-size:10.5px;fill:var(--sub)">已完成 <tspan style="font-weight:700;fill:var(--ink)">42 项</tspan></text>' +
+    '<text x="120" y="54" style="font-size:10.5px;fill:var(--sub)">未完成 <tspan style="font-weight:700;fill:var(--warn)">4 项</tspan>（15床 · 6床等）</text>' +
+    '<text x="120" y="74" style="font-size:9.5px;fill:var(--muted)">Agent 已提醒对应护工</text>' +
+    '</svg>';
+
+  var svgShouru =
+    '<svg viewBox="0 0 268 96" xmlns="http://www.w3.org/2000/svg">' +
+    '<text x="72" y="21" text-anchor="end" style="font-size:10px;fill:var(--sub)">5月</text>' +
+    '<rect x="78" y="10" width="135" height="14" rx="7" style="fill:var(--teal)"/>' +
+    '<text x="219" y="21" style="font-size:10px;fill:var(--sub)">¥11,860</text>' +
+    '<text x="72" y="51" text-anchor="end" style="font-size:10px;fill:var(--sub)">6月</text>' +
+    '<rect x="78" y="40" width="140" height="14" rx="7" style="fill:var(--teal)"/>' +
+    '<text x="224" y="51" style="font-size:10px;fill:var(--sub)">¥12,340</text>' +
+    '<text x="72" y="81" text-anchor="end" style="font-size:10px;fill:var(--sub)">7月至今</text>' +
+    '<rect x="78" y="70" width="69" height="14" rx="7" style="fill:var(--warm)"/>' +
+    '<text x="153" y="81" style="font-size:10px;font-weight:700;fill:var(--warm-d)">¥6,120（进行中）</text>' +
+    '</svg>';
+
+  var svgPaiban =
+    '<svg viewBox="0 0 268 92" xmlns="http://www.w3.org/2000/svg">' +
+    '<text x="134" y="16" text-anchor="middle" style="font-size:10.5px;font-weight:700;fill:var(--ink)">明日 · 白班 12 小时</text>' +
+    '<rect x="24" y="26" width="220" height="16" rx="8" style="fill:var(--bg);stroke:var(--line);stroke-width:1"/>' +
+    '<rect x="97" y="26" width="110" height="16" rx="8" style="fill:var(--teal)"/>' +
+    '<text x="24" y="56" style="font-size:9px;fill:var(--muted)">0点</text>' +
+    '<text x="97" y="56" text-anchor="middle" style="font-size:9.5px;font-weight:700;fill:var(--teal-d)">08:00</text>' +
+    '<text x="207" y="56" text-anchor="middle" style="font-size:9.5px;font-weight:700;fill:var(--teal-d)">20:00</text>' +
+    '<text x="244" y="56" text-anchor="end" style="font-size:9px;fill:var(--muted)">24点</text>' +
+    '<text x="134" y="76" text-anchor="middle" style="font-size:9.5px;fill:var(--sub)">在护：12床 术后 · 8床 中风 · 6床 卧床</text>' +
+    '<text x="134" y="88" text-anchor="middle" style="font-size:9px;fill:var(--warm-d)">15床 上午出院 → Agent 已推荐接新住院单</text>' +
+    '</svg>';
+
+  function taskSquare(x, done, label) {
+    var box = done
+      ? '<rect x="' + x + '" y="14" width="34" height="34" rx="9" style="fill:var(--sky);stroke:var(--teal-l);stroke-width:1.5"/>' +
+        '<text x="' + (x + 17) + '" y="37" text-anchor="middle" style="font-size:15px;font-weight:700;fill:var(--teal-d)">✓</text>'
+      : '<rect x="' + x + '" y="14" width="34" height="34" rx="9" style="fill:#FAF0DC;stroke:var(--gold);stroke-width:1.5;stroke-dasharray:3 2"/>' +
+        '<text x="' + (x + 17) + '" y="37" text-anchor="middle" style="font-size:13px;font-weight:700;fill:#A9761F">○</text>';
+    return box + '<text x="' + (x + 17) + '" y="64" text-anchor="middle" style="font-size:9.5px;fill:var(--muted)">' + label + '</text>';
+  }
+  var svgRenwu =
+    '<svg viewBox="0 0 268 72" xmlns="http://www.w3.org/2000/svg">' +
+    taskSquare(18, true, '12床') + taskSquare(84, true, '8床') +
+    taskSquare(150, false, '15床') + taskSquare(216, false, '6床') +
+    '</svg>';
+
+  /* —— 预设问答（答案 + 迷你图 + 口径） —— */
+  var QA = {
+    huikuan: {
+      q: '协和这个月回款率走势怎么样？',
+      a: '协和医院本月回款率 <b>92%</b>，高于全院平均 89%；近 4 周 88% → 90% → 91% → 92%，连续 3 周爬升。',
+      svg: svgHuikuan,
+      cal: '回款率 = 当日收费额 ÷ 当日应收额；月值为日值加权。数据源：云端数据库 · 收费流水。',
+      keys: ['回款', '协和']
+    },
+    chanzhi: {
+      q: '哪个班组人均产值最高？',
+      a: '全公司最高是<b>协和 · 神经内科 A 班组</b>（班组长李凤霞）：人均日产值 <b>¥1,000</b>，环比上月 +5%；同科室 B 班组 ¥938、C 班组 ¥867。',
+      svg: svgChanzhi,
+      cal: '人均日产值 = 班组收费额 ÷ 当日在岗护工数（A 班组 ¥1.8 万 ÷ 18 人）。',
+      keys: ['产值', '班组']
+    },
+    fugou: {
+      q: '私域复购率现在是多少？',
+      a: '当前私域复购率 <b>8.6%</b>（复购客户 8.6 万），近 3 个月 7.2% → 7.9% → 8.6% 持续提升，增量主要来自企微私域唤醒与商城复购。',
+      svg: svgFugou,
+      cal: '复购率 = 复购客户数 ÷ 累计成交客户数（去重）。数据源：企微 CRM + 小程序订单埋点。',
+      keys: ['复购', '私域']
+    },
+    ribao: {
+      q: '赵春梅这周日报交了几天？',
+      a: '赵春梅本周应交 5 天、<b>已交 3 天</b>：周三与今天未交 ⚠。已同步班组长李凤霞 1v1 跟进，并设 21:00 自动复查。',
+      svg: svgRibao,
+      cal: '语音日报按自然日统计，当日 21:00 前未提交计「未交」。数据源：S-Agent 日报留痕。',
+      keys: ['日报', '赵春梅']
+    },
+    zaitu: {
+      q: '今天付费和收费差在哪？',
+      a: '今日付费 <b>¥58.6 万</b>、实收 <b>¥52.3 万</b>，差额 ¥6.3 万为在途资金（支付通道 T+1 结算），属正常范围；到账率 89%。',
+      svg: svgZaitu,
+      cal: '付费 = 客户支付成功金额；收费 = 公司实收到账；差额即在途。',
+      keys: ['付费', '收费', '在途', '差']
+    },
+    /* —— 第二轮新增：角色专属问答 —— */
+    zengzhang: {
+      q: '四个战队谁增长最快？',
+      a: '本周增长最快的是<b>三战队 · 湘雅</b>：服务量环比 <b>+9.8%</b>；一战队 +6.4%、二战队 +5.1%、四战队 +3.2%。湘雅增量主要来自新签 2 个科室上量。',
+      svg: svgZengzhang,
+      cal: '增长率 = 本周日均服务量 ÷ 上周日均服务量 − 1；数值为目标态示意。',
+      keys: ['增长', '最快', '战队']
+    },
+    duibi: {
+      q: '把协和和华西对比一下',
+      a: '<b>协和</b>：服务 612 人次 / 付费 ¥19.2万 / 健康度 A·92；<b>华西</b>：528 人次 / ¥16.1万 / A·90。协和领先点在神内 A 班组产值（¥1,000/人·日）与私域转化，打法已列入跨院复制清单。',
+      svg: svgDuibi,
+      cal: '跨战队对标数据经运营中心授权只读共享；经营健康度为多指标加权评分。',
+      keys: ['对比', '华西']
+    },
+    funeng: {
+      q: '一战队赋能覆盖率现在多少？',
+      a: '一战队赋能覆盖率 <b>86%</b>：协和已 100% 全量覆盖，中山医院导入中——首批 30 名护工完成 S-Agent 激活培训，开板后预计回到 95% 以上。',
+      svg: svgFuneng,
+      cal: '赋能覆盖率 = 已激活 AI Agent 且周活跃护工数 ÷ 战队在册护工数。',
+      keys: ['赋能', '覆盖']
+    },
+    shenne: {
+      q: '神内回款率怎么样，比全院平均呢？',
+      a: '神经内科本月回款率 <b>94%</b>，比全院平均 89% 高 5 个百分点，全院第 1——主要靠预付费比例高、出院当日结算及时。',
+      svg: svgShenne,
+      cal: '回款率 = 当日收费额 ÷ 当日应收额，月值为日值加权；数据源：收费流水。',
+      keys: ['神内', '神经内科']
+    },
+    weijiao: {
+      q: '今天谁日报没交？',
+      a: '组内 18 人已交 <b>17 人</b>，只有<b>赵春梅</b>未交 ⚠（本周课程也待学）。已按您的常用口吻 1v1 客气提醒，并设 21:00 自动复查。',
+      svg: svgWeijiao,
+      cal: '语音日报按自然日统计，21:00 前未提交计「未交」；数据源：S-Agent 日报留痕。',
+      keys: ['没交', '未交', '谁没']
+    },
+    chuangwei: {
+      q: '今天床位任务完成率怎么样？',
+      a: 'A 班组今日床位任务完成 <b>42 / 46（91%）</b>；未完成 4 项集中在 15 床助行器训练、6 床皮肤检查等，Agent 已提醒对应护工，21:30 晚报会再汇总一次。',
+      svg: svgChuangwei,
+      cal: '床位任务完成率 = 已打卡任务 ÷ 应完成任务（当日）；数据源：护工打卡留痕。',
+      keys: ['床位', '完成率']
+    },
+    shouru: {
+      q: '我这个月挣了多少？',
+      a: '本月截至今日已入账 <b>¥6,120</b>，今天 ¥520；上月全月 ¥12,340。累计总收入 ¥68,400、服务 312 人，家属评分 4.9★——好评越多，接单越多。',
+      svg: svgShouru,
+      cal: '收入 = 已完成服务打卡的结算金额（T+1 到账）+ 转介奖励；数据源：结算流水。',
+      keys: ['挣', '收入', '工资']
+    },
+    paiban: {
+      q: '我明天排班是什么？',
+      a: '明天<b>白班 08:00–20:00</b>：12 床术后、8 床中风、6 床卧床照常；15 床骨折客户上午出院（转私域随访），空出的档期 Agent 已按病种胜任力为您预约科室新住院单。',
+      svg: svgPaiban,
+      cal: '排班 = 班组排班表 + S-Agent 派单记录，每晚 21:30 同步次日班表。',
+      keys: ['排班', '明天']
+    },
+    renwu: {
+      q: '我今天还有哪些任务没做？',
+      a: '今日 4 项已完成 2 项，还差 2 项：<b>15 床 助行器搀扶如厕</b>、<b>6 床 换防压疮垫 + 皮肤检查</b>。做完对我说声「打卡」就记上，不用填表。',
+      svg: svgRenwu,
+      cal: '任务清单由护理 SOP 自动生成；打卡留痕不拍病人、不含诊断。',
+      keys: ['任务', '没做', '打卡']
+    }
+  };
+
+  function scrollBottom() { msgsEl.scrollTop = msgsEl.scrollHeight; }
+
+  function addQ(text) {
+    var el = document.createElement('div');
+    el.className = 'bi-m q';
+    el.textContent = text;
+    msgsEl.appendChild(el);
+    scrollBottom();
+  }
+
+  /* 打字机：先按纯文本逐字打，完成后换富文本并挂图表 + 口径 */
+  function addA(item) {
+    var el = document.createElement('div');
+    el.className = 'bi-m a';
+    var span = document.createElement('span');
+    var caret = document.createElement('span');
+    caret.className = 'bi-caret';
+    el.appendChild(span);
+    el.appendChild(caret);
+    msgsEl.appendChild(el);
+    scrollBottom();
+
+    var plain = item.a.replace(/<[^>]+>/g, '');
+    var t0 = Date.now();
+    var timer = setInterval(function () {
+      /* 按时间推进而非按 tick 推进：定时器被节流也能匀速走完 */
+      var i = Math.min(plain.length, Math.ceil((Date.now() - t0) / 16));
+      span.textContent = plain.slice(0, i);
+      scrollBottom();
+      if (i >= plain.length) {
+        clearInterval(timer);
+        caret.remove();
+        span.innerHTML = item.a;
+        if (item.svg) {
+          var chart = document.createElement('div');
+          chart.className = 'm-chart';
+          chart.innerHTML = item.svg;
+          el.appendChild(chart);
+        }
+        if (item.cal) {
+          var cal = document.createElement('div');
+          cal.className = 'm-cal';
+          cal.textContent = item.cal;
+          el.appendChild(cal);
+        }
+        scrollBottom();
+        busy = false;
+        chipsEl.classList.remove('busy');
+      }
+    }, 18);
+  }
+
+  function ask(key, customQ) {
+    if (busy) return;
+    var item = QA[key];
+    if (!item) return;
+    busy = true;
+    chipsEl.classList.add('busy');
+    addQ(customQ || item.q);
+    setTimeout(function () { addA(item); }, 420);
+  }
+
+  function fallback(q) {
+    if (busy) return;
+    busy = true;
+    chipsEl.classList.add('busy');
+    addQ(q);
+    setTimeout(function () {
+      addA({
+        a: '演示环境为「' + curRole.name + '」预置了 ' + allowedChips.length + ' 组示例应答（见下方问题）。正式版 chatBI 基于云端数据库，可用自然语言查询<b>您权限内任意层级、任意口径</b>的指标 👇',
+        svg: '',
+        cal: '所有应答均附口径公式与数据来源，保证「问出来的数」与「看板上的数」一致；应答范围随角色数据权限收敛。'
+      });
+    }, 420);
+  }
+
+  /* —— 预设问题随角色切换 —— */
+  var CHIPS = {
+    ops: [
+      { k: 'zengzhang', t: '四个战队谁增长最快' },
+      { k: 'huikuan',   t: '协和本月回款率走势' },
+      { k: 'fugou',     t: '私域复购率多少' },
+      { k: 'zaitu',     t: '付费和收费差在哪' }
+    ],
+    zhandui: [
+      { k: 'duibi',   t: '把协和和华西对比一下' },
+      { k: 'funeng',  t: '一战队赋能覆盖率多少' },
+      { k: 'huikuan', t: '协和本月回款率走势' }
+    ],
+    dianzhang: [
+      { k: 'shenne',  t: '神内回款率 vs 全院平均' },
+      { k: 'chanzhi', t: '哪个班组人均产值最高' },
+      { k: 'huikuan', t: '协和本月回款率走势' },
+      { k: 'zaitu',   t: '付费和收费差在哪' }
+    ],
+    banzu: [
+      { k: 'weijiao',   t: '今天谁日报没交' },
+      { k: 'chanzhi',   t: '我们组人均产值怎么样' },
+      { k: 'chuangwei', t: '床位任务完成率多少' },
+      { k: 'ribao',     t: '赵春梅这周日报交了几天' }
+    ],
+    hugong: [
+      { k: 'shouru', t: '我这个月挣了多少' },
+      { k: 'paiban', t: '我明天排班是什么' },
+      { k: 'renwu',  t: '我今天还有哪些任务没做' }
+    ]
+  };
+  var GREET = {
+    ops:       '您好，这里是<b>运营中心</b>视角——全公司任意层级、任意口径一句话可查，答案永远带口径。试试下面的问题 👇',
+    zhandui:   '周队好。<b>一战队名下医院</b>的经营健康度、赋能覆盖率、跨院对标随口问 👇',
+    dianzhang: '张经理好。协和<b>本院科室 · 班组 · 护工</b>的利润、满编、回款随口问 👇',
+    banzu:     '凤霞姐好。<b>A 班组</b>的人、活、账都在这——谁没交日报一眼看到 👇',
+    hugong:    '秀兰您好。想知道<b>自己挣了多少、明天怎么排班</b>，点下面直接问 👇'
+  };
+  var curRole = BI_ROLES.ops;
+  var allowedChips = CHIPS.ops;
+
+  function renderChips() {
+    chipsEl.innerHTML = '';
+    allowedChips.forEach(function (c) {
+      var s = document.createElement('span');
+      s.className = 'bi-chip';
+      s.textContent = c.t;
+      s.addEventListener('click', function () { ask(c.k, c.t); });
+      chipsEl.appendChild(s);
+    });
+  }
+
+  /* 角色切换入口：登录层选择后调用 */
+  window.__biChatApply = function (r) {
+    curRole = r;
+    allowedChips = CHIPS[r.key] || [];
+    renderChips();
+    busy = false;
+    chipsEl.classList.remove('busy');
+    msgsEl.innerHTML = '';
+    var g = document.createElement('div');
+    g.className = 'bi-m a';
+    g.innerHTML = GREET[r.key] || '';
+    msgsEl.appendChild(g);
+  };
+
+  formEl.addEventListener('submit', function (e) {
+    e.preventDefault();
+    var q = inputEl.value.trim();
+    if (!q || busy) return;
+    inputEl.value = '';
+    var hit = null;
+    /* 只在当前角色权限内的问答里匹配 */
+    allowedChips.forEach(function (c) {
+      if (!hit && QA[c.k].keys.some(function (w) { return q.indexOf(w) > -1; })) hit = c.k;
+    });
+    if (hit) ask(hit, q); else fallback(q);
+  });
+})();
+
+/* ================= 角色登录层：选角色 → 权限落点 ================= */
+(function () {
+  var loginEl = document.getElementById('bi-login');
+  document.body.classList.add('bi-locked');
+
+  function enter(key) {
+    var r = BI_ROLES[key];
+    if (!r) return;
+    window.__biDrillApply(r);
+    window.__biChatApply(r);
+    loginEl.classList.add('off');
+    document.body.classList.remove('bi-locked');
+    window.__biToast('已进入「' + r.name + ' · ' + r.title + '」视角 · 数据权限：' + r.perm);
+  }
+
+  loginEl.querySelectorAll('.bi-role').forEach(function (card) {
+    card.addEventListener('click', function () { enter(card.getAttribute('data-role')); });
+  });
+  document.getElementById('bi-role-switch').addEventListener('click', function () {
+    loginEl.classList.remove('off');
+    document.body.classList.add('bi-locked');
+  });
+
+  /* 登录层之下预热运营中心视角（未选择前的底图） */
+  window.__biDrillApply(BI_ROLES.ops);
+  window.__biChatApply(BI_ROLES.ops);
+})();
+</script>
+</body>
+</html>

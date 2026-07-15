@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>管理者 Agent Team · 统一编排派任务 | 陪护 AI 平台原型</title>
+<link rel="stylesheet" href="assets/style.css">
+<style>
+/* ===== 本页专属样式（mg- 前缀） ===== */
+/* Agent Team 编排示意 */
+.mg-orch { text-align: center; }
+.mg-node { display: inline-block; border-radius: 12px; padding: 9px 18px; font-size: 13px; font-weight: 700; line-height: 1.5; }
+.mg-node small { display: block; font-size: 11px; font-weight: 500; opacity: .85; }
+.mg-node.boss { background: var(--ink); color: #fff; }
+.mg-node.boss small { color: var(--teal-l); }
+.mg-node.hub { background: var(--sky); color: var(--teal-d); border: 1px solid var(--teal-l); }
+.mg-node.board { background: var(--cream); color: var(--warm-d); border: 1px solid var(--warm-l); }
+.mg-arrow { color: var(--warm); font-size: 11.5px; font-weight: 600; margin: 7px 0; }
+.mg-team { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin: 2px 0; }
+.mg-ag { font-size: 11px; padding: 5px 2px 4px; border-radius: 8px; text-align: center; border: 1px solid var(--line); background: var(--bg); color: var(--sub); line-height: 1.35; }
+.mg-ag i { font-style: normal; display: block; font-size: 10.5px; font-weight: 700; }
+.mg-ag.done { background: #F0FAF4; border-color: #CBE7D8; }
+.mg-ag.done i { color: var(--ok); }
+.mg-ag.run { background: var(--cream); border-color: var(--warm-l); }
+.mg-ag.run i { color: var(--warm-d); }
+.mg-ag.na { background: #FBEAEA; border-color: #F2CBCA; }
+.mg-ag.na i { color: var(--warn); }
+/* 六级下钻位置 */
+.mg-ladder { display: flex; flex-direction: column; gap: 6px; }
+.mg-lv { display: grid; grid-template-columns: 30px 90px 1fr; gap: 8px; align-items: baseline; font-size: 12px; padding: 7px 12px; border-radius: 10px; border: 1px solid var(--line); background: var(--bg); color: var(--sub); }
+.mg-lv .n { font-weight: 800; color: var(--muted); font-size: 11px; letter-spacing: .5px; }
+.mg-lv b { color: var(--ink); font-size: 12.5px; }
+.mg-lv .k { font-size: 11.5px; color: var(--muted); line-height: 1.5; }
+.mg-lv.hot { background: var(--cream); border-color: var(--warm-l); }
+.mg-lv.hot .n { color: var(--warm-d); }
+.mg-lv.hot .k { color: var(--sub); }
+.mg-lv.hot .k b { color: var(--warm-d); font-size: 11.5px; }
+/* 组织扁平化 */
+.mg-org-label { font-size: 11px; font-weight: 700; color: var(--muted); letter-spacing: 1.5px; margin: 12px 0 7px; }
+.mg-org-label:first-child { margin-top: 0; }
+.mg-chain { display: flex; align-items: center; flex-wrap: wrap; gap: 6px; }
+.mg-chain .c { background: var(--bg); border: 1px solid var(--line); padding: 4px 11px; border-radius: 8px; color: var(--ink); font-weight: 600; font-size: 12px; line-height: 1.4; }
+.mg-chain .c small { display: block; font-size: 10.5px; font-weight: 500; color: var(--muted); }
+.mg-chain .c.gone { color: var(--muted); background: #FBEAEA; border-color: #F2CBCA; font-weight: 500; text-decoration: line-through; }
+.mg-chain .c.hot { background: var(--cream); border-color: var(--warm-l); color: var(--warm-d); }
+.mg-chain .a { color: var(--warm); font-weight: 700; font-size: 13px; }
+/* 套餐价签 */
+.mg-price { display: flex; align-items: center; gap: 18px; background: var(--bg); border: 1px solid var(--line); border-radius: 12px; padding: 14px 18px; margin-bottom: 12px; }
+.mg-price .num { font-size: 34px; font-weight: 800; color: var(--warm-d); font-variant-numeric: tabular-nums; line-height: 1; white-space: nowrap; }
+.mg-price .num small { font-size: 12px; font-weight: 600; color: var(--muted); margin-left: 3px; }
+.mg-price .inc { font-size: 12px; color: var(--sub); line-height: 1.7; }
+.mg-price .inc b { color: var(--teal-d); }
+/* 手机内跨院对比卡 */
+.mg-cmp { display: grid; grid-template-columns: 66px 1fr 1fr; gap: 3px 8px; font-size: 12px; margin: 2px 0 4px; align-items: center; }
+.mg-cmp .h { font-size: 11px; color: #999; font-weight: 700; text-align: right; }
+.mg-cmp .l { color: #999; font-size: 11.5px; }
+.mg-cmp b { text-align: right; color: #222; font-weight: 600; font-variant-numeric: tabular-nums; }
+.mg-cmp b.a { color: var(--warm-d); }
+</style>
+</head>
+<body>
+
+<header class="topnav">
+  <div class="brand">
+    <img src="assets/st_logo.png" alt="商汤科技">
+    <span class="divider"></span>
+    <span class="name">陪护 AI 平台<small>AI CARE PLATFORM · 原型演示</small></span>
+  </div>
+  <nav>
+    <a href="index.html">方案总览</a>
+    <a href="agent_hugong.html">护工 Agent</a>
+    <a href="agent_banzuzhang.html">班组长 Agent</a>
+    <a href="agent_manager.html" class="active"><span class="dot"></span>管理者 Agent</a>
+    <a href="agent_ops.html">运营 Agent</a>
+    <a href="miniapp.html">客户小程序</a>
+    <a href="bi.html">BI 数据看板</a>
+  </nav>
+</header>
+
+<main class="page">
+  <div class="page-head">
+    <div class="eyebrow">Manager Agent · Agent Team Orchestration</div>
+    <h1>管理者 Agent Team：<span class="hl">一句话</span>，全院 Agent 一起动</h1>
+    <p class="sub">店长（项目经理）/ 战队长人手一个经营 Agent：晨会驾驶舱主动推送、一句话给全院 <b>12 位班组长 Agent</b> 统一派任务、执行进度自动回流，chatBI 随口问数不等报表。演示身份：<b>张卫东 · 协和医院项目经理（店长）</b>——医院是最小经营单位，他对单院盈亏负第一责任。左侧手机可点击场景演示。</p>
+  </div>
+
+  <div class="split">
+    <!-- 左：手机 -->
+    <div class="phone-wrap">
+      <div id="phone-slot"></div>
+      <p class="phone-caption">▲ 可交互原型 · 点上方场景或气泡下方 <b>🎙 快捷话术</b> 切换演示</p>
+    </div>
+
+    <!-- 右：说明 -->
+    <div>
+      <div class="panel">
+        <h3>Agent Team：1 个指令 → N 个下级 Agent 协同</h3>
+        <div class="mg-orch">
+          <div class="mg-node boss">🎙 管理者一句话<small>「本周排查全院卧床病人防压疮垫更换记录」</small></div>
+          <div class="mg-arrow">▼ 指令拆解 · 编排 12 份班组任务单</div>
+          <div class="mg-node hub">S-Agent 经营助理 · 编排中枢</div>
+          <div class="mg-arrow">▼ 同步下发 12 位班组长 Agent</div>
+          <div class="mg-team">
+            <span class="mg-ag done">神内A<i>✓ 完成</i></span>
+            <span class="mg-ag run">神内B<i>… 进行</i></span>
+            <span class="mg-ag done">骨科A<i>✓ 完成</i></span>
+            <span class="mg-ag run">骨科B<i>… 进行</i></span>
+            <span class="mg-ag done">心内A<i>✓ 完成</i></span>
+            <span class="mg-ag run">心内B<i>… 进行</i></span>
+            <span class="mg-ag done">普外C<i>✓ 完成</i></span>
+            <span class="mg-ag na">普外D<i>⚠ 未读</i></span>
+            <span class="mg-ag done">呼吸A<i>✓ 完成</i></span>
+            <span class="mg-ag done">消化A<i>✓ 完成</i></span>
+            <span class="mg-ag done">老年A<i>✓ 完成</i></span>
+            <span class="mg-ag done">康复A<i>✓ 完成</i></span>
+          </div>
+          <div class="mg-arrow">▼ 执行进度实时回流</div>
+          <div class="mg-node board">📊 驾驶舱：8 完成 · 3 进行 · 1 未读 → 一键催办</div>
+        </div>
+        <p class="note"><b>管理岗 699 套餐的核心能力：</b>管理者不再逐个打电话、开会传达——指令一次下发、班组长 Agent 各自领任务催执行、结果自动回流看板，事事有回音、件件可追溯。</p>
+      </div>
+
+      <div class="panel">
+        <h3>管理者在六级下钻中的位置与 KPI</h3>
+        <div class="mg-ladder">
+          <div class="mg-lv"><span class="n">L1</span><b>公司总览</b><span class="k">运营中心 · 营收达成率 / 在管床位数 / 净利率</span></div>
+          <div class="mg-lv hot"><span class="n">L2</span><b>战队</b><span class="k">战队长看名下 n 家医院 · KPI：<b>医院经营健康度 · 赋能覆盖率 · 跨院复制数</b></span></div>
+          <div class="mg-lv hot"><span class="n">L3</span><b>项目 · 医院</b><span class="k">店长（项目经理）单院全景 · KPI：<b>单院利润 · 护工满编率 · 客户 NPS</b></span></div>
+          <div class="mg-lv"><span class="n">L4</span><b>科室</b><span class="k">床位覆盖率 / 科室毛利 / 投诉差评率</span></div>
+          <div class="mg-lv"><span class="n">L5</span><b>班组</b><span class="k">人均产值 / 排班履约率 / 任务完成率</span></div>
+          <div class="mg-lv"><span class="n">L6</span><b>护工个人</b><span class="k">累计收入 / 累计服务 / 工单完成 / 引流转化</span></div>
+        </div>
+        <p class="note"><b>同一套指标一钻到底：</b>店长从单院全景一路钻到某个护工当天干没干；战队长横向对比 n 家医院——<b>赋能指导非管控</b>，复制打法、育人才。配合 chatBI，任何层级任何口径一句话就问到。</p>
+      </div>
+
+      <div class="panel">
+        <h3>组织扁平化：4 级压 3 级，店长自负盈亏</h3>
+        <div class="mg-org-label">现在 · 4 级（层层传达 · 反射弧长）</div>
+        <div class="mg-chain">
+          <span class="c">项目经理</span><span class="a">→</span>
+          <span class="c gone">项目主管</span><span class="a">→</span>
+          <span class="c">班组长<small>带 5-15 人</small></span><span class="a">→</span>
+          <span class="c">护工</span>
+        </div>
+        <div class="mg-org-label">减层后 · 3 级（AI 替管理层看数据、催任务、汇总）</div>
+        <div class="mg-chain">
+          <span class="c hot">项目经理 · 直管</span><span class="a">→</span>
+          <span class="c hot">班组长<small>带教 10-30 人</small></span><span class="a">→</span>
+          <span class="c">护工</span>
+        </div>
+        <table class="mini-table" style="margin-top:14px">
+          <tr><td><b>医院 = 最小经营单位</b></td><td>店长（项目经理）单院自负盈亏第一责任人</td><td><span class="tag warm">店长制</span></td></tr>
+          <tr><td><b>原项目主管</b></td><td>转项目经理助理，管理层由战队长承接</td><td><span class="tag teal">转岗</span></td></tr>
+          <tr><td><b>战队（4 个 · 未来扩）</b></td><td>战队长赋能指导非管控，复制打法、育人才</td><td><span class="tag ok">赋能</span></td></tr>
+        </table>
+        <p class="note"><b>这笔账：</b>S-Agent 的 token 费用从减「项目主管」层省下的人力成本出——减 1 名主管 ≈ 覆盖 5-7 名班组长补贴 + 全组套餐（目标态测算），少一层传达、效率反而更高。</p>
+      </div>
+
+      <div class="panel">
+        <h3>管理岗套餐 · 含 Agent Team 与 BI</h3>
+        <div class="mg-price">
+          <div class="num">699<small>元/人/月</small><div style="font-size:12px;font-weight:600;color:var(--teal-d);margin-top:5px">企业 6 折 ≈ 419 元/月</div></div>
+          <div class="inc"><b>Agent Team 管理</b>（统一编排 · 派任务 · 看执行）<br><b>多层级 BI 看板</b> + <b>chatBI 对话问数</b><br><b>督学与自动汇总</b>（点名催办 · 日报周报自动生成）</div>
+        </div>
+        <table class="mini-table">
+          <tr><th>角色</th><th>人数</th><th>套餐标价</th><th>6 折价</th><th>月费用（约）</th></tr>
+          <tr><td><b>一线护工</b></td><td>3,000 人</td><td>199 元/月</td><td>≈120 元</td><td>≈ 35.8 万</td></tr>
+          <tr><td><b>管理岗</b></td><td>60 人</td><td>699 元/月</td><td>≈419 元</td><td>≈ 2.5 万</td></tr>
+          <tr><td><b>合计</b></td><td>3,060 人</td><td>—</td><td>—</td><td><b>≈ 38 万/月</b></td></tr>
+        </table>
+        <p class="note"><b>支付模式演进：</b>起步公司统付、按实际开通人数月结 → 目标态探索护工自付套餐的合伙模式，人人是自己的经营者。（企业 6 折测算 · 目标态示意）</p>
+      </div>
+    </div>
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="foot-brand"><img src="assets/st_logo.png" alt="商汤科技"></div>
+  <div><b>商汤科技 · 大模型生态渠道部</b> — AI 技术底座 · 高保真交互原型（页面数据均为目标态示意，非真实经营数据）</div>
+</footer>
+
+<script src="assets/chat.js"></script>
+<script>
+PeihuChat.mount(document.getElementById('phone-slot'), {
+  contact: { name: 'S-Agent 经营助理', corp: '@安心陪护', sub: '企业微信 · 商汤 AI 技术底座' },
+  agent: { name: 'S-Agent 经营助理', avatar: 'S' },
+  user: { name: '张卫东', avatar: '张' },
+  scenarios: [
+    {
+      id: 'chenhui', title: '晨会驾驶舱', chip: '看晨会驾驶舱',
+      intro: '每天 7:40 Agent 主动推送单院全景与异常 Top3，晨会不用等报表',
+      steps: [
+        { from: 'agent', text: '张经理早上好！今天的<b>晨会驾驶舱</b>已生成，协和全院一屏看 👇' },
+        { from: 'agent', html: '<div class="c-card"><div class="c-head"><span class="c-ic warm">🏥</span><b>协和医院 · 晨会驾驶舱</b><span class="tag teal">今日</span></div><div class="c-kv"><span>今日在服</span><b>612 人</b></div><div class="c-kv"><span>在院客户</span><b>480 人</b></div><div class="c-kv"><span>今日付费</span><b class="warm">¥19.2 万</b></div><div class="c-kv"><span>实收到账</span><b>¥17.4 万</b></div><div class="c-kv"><span>护工满编率</span><b class="teal">92%</b></div><div class="c-kv"><span>客户 NPS</span><b class="ok">71</b></div><div class="c-foot">L3 单院看板 · 云端数据库 · 目标态示意</div></div>' },
+        { from: 'agent', html: '<div class="c-card"><div class="c-head"><span class="c-ic">📌</span><b>今日异常 Top3</b><span class="tag warn">需处理</span></div><div class="c-check"><span class="s warn">1</span>心内科床位覆盖率 71%（全院均值 86%），缺口 9 床</div><div class="c-check"><span class="s warn">2</span>赵春梅语音日报连续 2 天未交，班组长催办无果 → 升级到您</div><div class="c-check"><span class="s warn">3</span>骨科护工满编率 78%，下周手术高峰前需补位</div><div class="c-btns"><span class="c-btn primary">🎙 逐项安排</span><span class="c-btn ghost">稍后处理</span></div><div class="c-foot">异常规则：偏离阈值自动上浮 · 免翻报表</div></div>' },
+        { from: 'user', voice: '赵春梅的事，让李凤霞今天下班前给我结果；心内科和骨科的，上午带方案来找我。', dur: 11 },
+        { from: 'agent', text: '收到 ✅ 跟进单已派给 <b>A 班组长李凤霞的 Agent</b>（截止今日 18:00，结果自动回流驾驶舱）；心内科覆盖率与骨科补位的测算方案，10:00 前放进您的待办。' },
+        { from: 'agent', sys: '晨会摘要与 3 项跟进已留痕入库 · 事事有回音' }
+      ]
+    },
+    {
+      id: 'team', title: 'Agent Team 派任务', chip: '给班组长派任务',
+      intro: '管理者一句话 → 12 位班组长 Agent 领任务 → 执行进度自动回流',
+      steps: [
+        { from: 'user', voice: '给全院 12 位班组长发任务：本周排查所有卧床病人的防压疮垫更换记录，周五下班前反馈。', dur: 13 },
+        { from: 'agent', html: '<div class="c-card"><div class="c-head"><span class="c-ic warm">🧩</span><b>Agent Team · 任务编排</b><span class="tag warm">待确认</span></div><div class="c-kv"><span>任务</span><b>排查防压疮垫更换记录</b></div><div class="c-kv"><span>范围</span><b>全院 12 个班组 · 卧床病人</b></div><div class="c-kv"><span>截止</span><b>本周五 18:00</b></div><ol class="c-steps"><li>指令拆解为 12 份班组任务单</li><li>同步下发 12 位班组长 Agent</li><li>班组长点名护工逐床核查</li><li>执行进度实时回流您的看板</li></ol><div class="c-btns"><span class="c-btn primary">🎙 说「确认下发」</span><span class="c-btn ghost">改一下</span></div><div class="c-foot">Agent Team：1 个指令 → 12 个 Agent 协同执行</div></div>' },
+        { from: 'user', voice: '确认下发。', dur: 2 },
+        { from: 'agent', sys: '✅ 12 位班组长 Agent 已全部接收 · 16:00 执行进度自动回流' },
+        { from: 'agent', html: '<div class="c-card"><div class="c-head"><span class="c-ic">📊</span><b>排查任务 · 执行进度</b><span class="tag teal">实时回流</span></div><div class="c-big"><div class="v">8 / 12</div><div class="l">班组已完成 · 累计核查 96 床</div></div><div class="c-check"><span class="s done">✓</span>已完成 8 组：发现 2 床垫龄超期，已现场更换</div><div class="c-check"><span class="s todo">…</span>进行中 3 组：神内B · 骨科B · 心内B</div><div class="c-check"><span class="s warn">⚠</span>未读 1 组：普外D（班组长今日休假）</div><div class="c-btns"><span class="c-btn primary">一键催办</span><span class="c-btn ghost">查看明细</span></div><div class="c-foot">回流来源：12 个班组长 Agent 执行日志 · 目标态示意</div></div>' },
+        { from: 'user', voice: '催一下没读的那组，任务转给代班骨干接手。', dur: 5 },
+        { from: 'agent', text: '✅ 已提醒<b>普外 D 班组</b>代班骨干接手核查，并给班组长留言返岗后补签确认。周五 17:00 我把全院汇总报告和超期床位清单一起发您。' }
+      ]
+    },
+    {
+      id: 'chatbi', title: 'chatBI 问数', chip: '问回款率',
+      intro: 'chatBI 对话问数：任何层级、任何口径，一句话问到，不等报表',
+      steps: [
+        { from: 'user', voice: '神经内科这个月回款率怎么样？比全院平均高还是低？', dur: 7 },
+        { from: 'agent', text: '神经内科本月回款率 <b>94%</b>，高于全院平均 <b>89%</b>，排全院第 2 👇' },
+        { from: 'agent', html: '<div class="c-card"><div class="c-head"><span class="c-ic">💬</span><b>chatBI · 回款率对比</b><span class="tag teal">本月</span></div><div class="c-bars"><div class="b-row"><span>神经内科</span><span class="b-track"><span class="b-fill warm" style="width:94%"></span></span><span class="b-val">94%</span></div><div class="b-row"><span>全院平均</span><span class="b-track"><span class="b-fill" style="width:89%"></span></span><span class="b-val">89%</span></div><div class="b-row"><span>普外科</span><span class="b-track"><span class="b-fill" style="width:82%"></span></span><span class="b-val">82%</span></div></div><div style="font-size:11px;color:#999;margin-top:6px">口径：回款率 = 当日收费额 ÷ 当日应收额（本月累计）</div><div class="c-foot">chatBI · 云端数据库 · 目标态示意</div></div>' },
+        { from: 'user', voice: '普外科怎么垫底了？差额都在哪？', dur: 5 },
+        { from: 'agent', text: '普外科 82% 主要是 <b>3 笔出院结算在途</b>，约 ¥1.1 万。提醒口径：<b>付费 = 客户已支付、收费 = 公司实收到账，差额即在途</b>。催收清单已发普外班组长 Agent 跟进，到账后自动销项。' },
+        { from: 'agent', sys: '问数 · 口径 · 结果全程留痕，可在 BI 看板逐层复核' }
+      ]
+    },
+    {
+      id: 'diaopei', title: '人员调配', chip: '骨科缺人怎么办',
+      intro: '满编率预警自动上浮，Agent 按能力画像给出调配方案与影响测算',
+      steps: [
+        { from: 'agent', html: '<div class="c-card"><div class="c-head"><span class="c-ic warm">🦴</span><b>骨科 · 满编率预警</b><span class="tag warn">需决策</span></div><div class="c-kv"><span>当前满编率</span><b class="warm">78%</b></div><div class="c-kv"><span>应配 / 在岗</span><b>32 人 / 25 人</b></div><div class="c-kv"><span>缺口</span><b class="warm">7 人</b></div><div class="c-kv"><span>下周预测</span><b>手术高峰 · 新住院 ↑</b></div><div class="c-foot">预警规则：满编率&lt;85% 连续 3 天 · 目标态示意</div></div>' },
+        { from: 'user', voice: '有什么方案？对神经内科有没有影响，一并说。', dur: 6 },
+        { from: 'agent', html: '<div class="c-card"><div class="c-head"><span class="c-ic">🧭</span><b>调配建议 · 两步走</b><span class="tag teal">已测算</span></div><ol class="c-steps"><li><b>即时</b>：神经内科调 2 人——李桂芳、刘玉英持骨科术后病种胜任力认证，本周科室出院 9 人、有空档</li><li><b>补位</b>：启动招聘 5 人，人才赋能部培训认证后约 2 周上岗</li></ol><div class="c-kv"><span>调配后满编率</span><b class="teal">78% → 84%</b></div><div class="c-kv"><span>招聘到位后</span><b class="ok">约 100%</b></div><div class="c-kv"><span>神内影响</span><b>可控 · 出院空档承接</b></div><div class="c-btns"><span class="c-btn primary">🎙 说「按方案执行」</span></div><div class="c-foot">依据：护工能力画像 · 病种胜任力 · 排班数据</div></div>' },
+        { from: 'user', voice: '按方案执行，招聘需求抄送人才赋能部。', dur: 6 },
+        { from: 'agent', text: '✅ 调岗单已发<b>李桂芳、刘玉英的 S-Agent</b> 确认，两边班组长 Agent 同步调整排班；招聘需求已提交<b>人才赋能部</b>，进展每周一自动回流您的驾驶舱。' },
+        { from: 'agent', sys: '决策 · 执行 · 回流全程留痕 —— 店长管决策，跑腿的事 Agent 干' }
+      ]
+    },
+    {
+      id: 'siyu', title: '私域经营', chip: '私域复购怎么样',
+      intro: '私域是重中之重：复购、转介绍随口问，好打法一键复制到全院',
+      steps: [
+        { from: 'user', voice: '咱们院这个月私域做得怎么样？复购多少单？哪个班组转介绍最多？', dur: 10 },
+        { from: 'agent', html: '<div class="c-card"><div class="c-head"><span class="c-ic warm">🤝</span><b>协和 · 私域经营月报</b><span class="tag teal">本月</span></div><div class="c-kv"><span>私域复购成交</span><b class="warm">42 单</b></div><div class="c-kv"><span>复购客户数</span><b>38 人</b></div><div class="c-kv"><span>企微好友新增</span><b>926 人</b></div><div class="c-kv"><span>转介绍单数</span><b class="teal">17 单</b></div><div class="c-foot">口径：复购率 = 复购客户 ÷ 累计成交客户 · 目标态示意</div></div>' },
+        { from: 'agent', html: '<div class="c-card"><div class="c-head"><span class="c-ic">🏆</span><b>转介绍 · 班组排名</b><span class="tag gold">Top3</span></div><div class="c-bars"><div class="b-row"><span>神内 A 组</span><span class="b-track"><span class="b-fill warm" style="width:100%"></span></span><span class="b-val">6 单</span></div><div class="b-row"><span>骨科 B 组</span><span class="b-track"><span class="b-fill" style="width:67%"></span></span><span class="b-val">4 单</span></div><div class="b-row"><span>心内 A 组</span><span class="b-track"><span class="b-fill" style="width:50%"></span></span><span class="b-val">3 单</span></div></div><div style="font-size:12px;color:#555;line-height:1.6;margin-top:6px">神内 A 组的打法：<b style="color:#C85F30">服务小结推送后 48 小时内</b>跟进转介邀请，王秀兰个人贡献 3 单。</div><div class="c-foot">来源：企微回传 + 小程序埋点 · 目标态示意</div></div>' },
+        { from: 'user', voice: '把 A 组的做法整理成案例，推给其他班组照着学。', dur: 7 },
+        { from: 'agent', text: '✅ 已让 <b>A 班组长 Agent</b> 提取「转介开场话术 + 小结推送时机」整理成案例，明早随晨会推给其余 <b>11 位班组长 Agent</b>，学习完成率纳入督学，我来盯。' },
+        { from: 'agent', sys: '案例已入服务案例库 · 好打法跨班组复制' }
+      ]
+    },
+    {
+      id: 'kuayuan', title: '跨院对比', chip: '协和 vs 华西',
+      intro: '战队长视角：横向对比名下医院，赋能指导非管控',
+      steps: [
+        { from: 'agent', sys: '演示视角切换 · 战队长（看名下 n 家医院 · 赋能指导非管控）' },
+        { from: 'user', voice: '把协和和华西对比一下，这个月谁跑得好，差在哪？', dur: 7 },
+        { from: 'agent', html: '<div class="c-card"><div class="c-head"><span class="c-ic">⚖️</span><b>跨院对比</b><span class="tag teal">L2 战队视角</span></div><div class="mg-cmp"><span class="h"></span><span class="h">协和</span><span class="h">华西</span><span class="l">今日在服</span><b class="a">612</b><b>528</b><span class="l">在院客户</span><b class="a">480</b><b>410</b><span class="l">今日付费</span><b class="a">¥19.2万</b><b>¥16.1万</b><span class="l">实收到账</span><b class="a">¥17.4万</b><b>¥14.6万</b><span class="l">经营健康度</span><b class="a">A</b><b>B+</b></div><div class="c-foot">L2 战队看板 · 云端数据库 · 目标态示意</div></div>' },
+        { from: 'agent', text: '协和四项指标全面领先。华西差距主要在<b>回款在途偏高</b>与<b>私域转介偏少</b>——建议把协和的催收 SOP 和神内 A 组转介案例复制过去。战队长做的是<b>赋能</b>：给打法、给案例、给人才，不替店长做经营决策。' },
+        { from: 'user', voice: '好，两个案例包发给华西店长，下周战队会我要看进展。', dur: 8 },
+        { from: 'agent', text: '✅ 案例包已发<b>华西店长 Agent</b> 并排入下周战队会议程；两院经营健康度对比每周自动回流一次，开会前一天我提前提醒您。' },
+        { from: 'agent', sys: '本次动作计入战队长 KPI「跨院复制数」 · 赋能留痕' }
+      ]
+    }
+  ]
+});
+</script>
+</body>
+</html>

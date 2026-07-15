@@ -1,0 +1,659 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>方案总览 · 医院陪护 AI 平台 | 陪护 AI 平台原型</title>
+<link rel="stylesheet" href="assets/style.css">
+<style>
+/* ============ index 页专属样式（前缀 ix-） ============ */
+
+/* ---- 通用节结构 ---- */
+.ix-sec { padding: 64px 28px; }
+.ix-sec.white { background: var(--white); }
+.ix-sec.dark  { background: var(--ink); color: #E9F1F2; }
+.ix-wrap { max-width: 1280px; margin: 0 auto; }
+.ix-sec-head { text-align: center; margin-bottom: 38px; }
+.ix-sec-head .eyebrow { font-size: 11px; font-weight: 700; letter-spacing: 3px; color: var(--teal); text-transform: uppercase; margin-bottom: 8px; }
+.ix-sec.dark .ix-sec-head .eyebrow { color: var(--teal-l); }
+.ix-sec-head h2 { font-size: 26px; color: var(--ink); letter-spacing: .3px; line-height: 1.35; }
+.ix-sec.dark .ix-sec-head h2 { color: #fff; }
+.ix-sec-head h2 .hl { color: var(--warm-d); }
+.ix-sec.dark .ix-sec-head h2 .hl { color: var(--warm); }
+.ix-sec-head .sub { margin: 8px auto 0; color: var(--sub); font-size: 14px; max-width: 760px; }
+.ix-sec.dark .ix-sec-head .sub { color: rgba(233,241,242,.72); }
+
+/* ---- Hero ---- */
+.ix-hero { position: relative; overflow: hidden; background: linear-gradient(140deg, var(--ink) 0%, var(--ink2) 58%, var(--ink3) 100%); color: #E9F1F2; padding: 84px 28px 66px; }
+.ix-hero::before { /* 暖珊瑚大圆（呼应 deck 封面） */
+  content: ""; position: absolute; right: -180px; bottom: -280px; width: 620px; height: 620px; border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, var(--warm) 0%, var(--warm-d) 55%, transparent 72%);
+  opacity: .5; filter: blur(2px);
+}
+.ix-hero::after { /* 青色描边圆 */
+  content: ""; position: absolute; left: -140px; top: -180px; width: 460px; height: 460px; border-radius: 50%;
+  border: 60px solid var(--teal); opacity: .16;
+}
+.ix-hero .ix-ring2 { position: absolute; right: 16%; top: -70px; width: 210px; height: 210px; border-radius: 50%; border: 2px solid var(--teal-l); opacity: .28; }
+.ix-hero .ix-dot1 { position: absolute; left: 12%; bottom: 60px; width: 14px; height: 14px; border-radius: 50%; background: var(--warm); opacity: .8; }
+.ix-hero .ix-dot2 { position: absolute; right: 30%; bottom: 130px; width: 8px; height: 8px; border-radius: 50%; background: var(--teal-l); opacity: .7; }
+.ix-hero-in { max-width: 1280px; margin: 0 auto; position: relative; z-index: 2; }
+.ix-hero .kicker { display: inline-flex; align-items: center; gap: 10px; font-size: 12px; font-weight: 700; letter-spacing: 2.5px; color: var(--teal-l); margin-bottom: 20px; }
+.ix-hero .kicker::before { content: ""; width: 26px; height: 2px; background: var(--warm); }
+.ix-hero h1 { font-size: 44px; line-height: 1.25; color: #fff; letter-spacing: 1px; max-width: 900px; }
+.ix-hero h1 .hl { color: var(--warm); }
+.ix-hero .slogans { display: flex; gap: 12px; flex-wrap: wrap; margin: 22px 0 18px; }
+.ix-hero .slogans span { font-size: 13.5px; font-weight: 600; color: var(--teal-l); border: 1px solid rgba(169,220,227,.35); background: rgba(20,138,156,.18); padding: 6px 16px; border-radius: 999px; }
+.ix-hero .lede { font-size: 15px; color: rgba(233,241,242,.78); max-width: 720px; line-height: 1.8; }
+.ix-hero .lede b { color: #fff; font-weight: 600; }
+.ix-hero .ctas { display: flex; gap: 14px; flex-wrap: wrap; margin-top: 30px; }
+.ix-btn { display: inline-flex; align-items: center; gap: 8px; padding: 12px 26px; border-radius: 999px; font-size: 14.5px; font-weight: 700; transition: all .18s; }
+.ix-btn.primary { background: var(--warm); color: #fff; box-shadow: 0 8px 24px rgba(232,128,77,.35); }
+.ix-btn.primary:hover { background: var(--warm-d); transform: translateY(-2px); }
+.ix-btn.ghost { border: 1.5px solid rgba(169,220,227,.5); color: var(--teal-l); }
+.ix-btn.ghost:hover { background: rgba(20,138,156,.22); border-color: var(--teal-l); transform: translateY(-2px); }
+.ix-hero .stats { display: flex; gap: 0; flex-wrap: wrap; margin-top: 44px; border-top: 1px solid rgba(233,241,242,.14); padding-top: 26px; }
+.ix-hero .stat { padding: 0 40px 0 0; margin-right: 40px; border-right: 1px solid rgba(233,241,242,.14); }
+.ix-hero .stat:last-child { border-right: none; margin-right: 0; }
+.ix-hero .stat .v { font-size: 30px; font-weight: 800; color: #fff; font-variant-numeric: tabular-nums; }
+.ix-hero .stat .v small { font-size: 15px; font-weight: 700; color: var(--warm); margin-left: 2px; }
+.ix-hero .stat .l { font-size: 12px; color: rgba(233,241,242,.6); margin-top: 3px; letter-spacing: .5px; }
+
+/* ---- 一张图看懂系统 ---- */
+.ix-sysgrid { display: grid; grid-template-columns: 1fr 320px 1fr; grid-template-rows: auto auto; gap: 34px 56px; align-items: stretch; }
+.ix-hub { grid-column: 2; grid-row: 1 / 3; align-self: center; position: relative; text-align: center;
+  background: linear-gradient(150deg, var(--ink), var(--ink3)); color: #fff; border-radius: 20px; padding: 34px 26px 28px;
+  box-shadow: 0 18px 44px rgba(18,51,59,.30); z-index: 2; }
+.ix-hub::before { content: ""; position: absolute; inset: -9px; border-radius: 26px; border: 1.5px dashed var(--teal-l); opacity: .45; }
+.ix-hub::after { content: ""; position: absolute; inset: -9px; border-radius: 26px; border: 1.5px dashed var(--warm-l); opacity: 0; animation: ixbreath 3.6s ease-in-out infinite; }
+@keyframes ixbreath { 0%,100% { opacity: 0; } 50% { opacity: .5; } }
+.ix-hub .h-ic { width: 54px; height: 54px; border-radius: 16px; margin: 0 auto 12px; background: rgba(232,128,77,.16); border: 1px solid rgba(232,128,77,.45); display: flex; align-items: center; justify-content: center; font-size: 26px; }
+.ix-hub b { display: block; font-size: 19px; letter-spacing: 1px; }
+.ix-hub .h-sub { font-size: 12px; color: var(--teal-l); margin-top: 4px; letter-spacing: 1px; }
+.ix-hub .h-chips { display: flex; justify-content: center; gap: 8px; flex-wrap: wrap; margin-top: 16px; }
+.ix-hub .h-chips span { font-size: 11.5px; font-weight: 600; padding: 4px 12px; border-radius: 999px; background: rgba(20,138,156,.28); border: 1px solid rgba(169,220,227,.35); color: var(--teal-l); }
+.ix-hub .h-note { margin-top: 14px; font-size: 11px; color: rgba(233,241,242,.55); line-height: 1.6; }
+.ix-role { position: relative; background: var(--white); border: 1px solid var(--line); border-radius: 16px; padding: 20px 22px; box-shadow: var(--shadow-sm); }
+.ix-role::after { /* 连接线 → 中枢 */ content: ""; position: absolute; top: 50%; width: 56px; height: 2px;
+  background: linear-gradient(90deg, var(--warm-l), var(--teal)); }
+.ix-role.rt::after, .ix-role.rb::after { background: linear-gradient(90deg, var(--teal), var(--warm-l)); }
+.ix-role.lt::after, .ix-role.lb::after { right: -56px; }
+.ix-role.rt::after, .ix-role.rb::after { left: -56px; }
+.ix-role .r-dot { position: absolute; top: 50%; margin-top: -4px; width: 8px; height: 8px; border-radius: 50%; background: var(--warm); box-shadow: 0 0 0 4px rgba(232,128,77,.18); }
+.ix-role.lt .r-dot, .ix-role.lb .r-dot { right: -60px; }
+.ix-role.rt .r-dot, .ix-role.rb .r-dot { left: -60px; }
+.ix-role .r-head { display: flex; align-items: center; gap: 10px; margin-bottom: 6px; }
+.ix-role .r-head .ic { width: 38px; height: 38px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 19px; flex: none; background: var(--cream); }
+.ix-role.teal .r-head .ic { background: var(--sky); }
+.ix-role .r-head b { font-size: 16px; color: var(--ink); }
+.ix-role .r-head .tag { margin-left: auto; }
+.ix-role .r-way { font-size: 12.5px; font-weight: 600; color: var(--warm-d); margin-bottom: 8px; }
+.ix-role.teal .r-way { color: var(--teal-d); }
+.ix-role ul { list-style: none; }
+.ix-role li { font-size: 12.5px; color: var(--sub); line-height: 1.6; padding: 3px 0 3px 16px; position: relative; }
+.ix-role li::before { content: "▸"; position: absolute; left: 0; color: var(--warm); font-size: 11px; }
+.ix-role.teal li::before { color: var(--teal); }
+.ix-syslaw { margin-top: 34px; display: flex; align-items: center; gap: 14px; background: var(--cream); border: 1px solid var(--card-b); border-radius: 14px; padding: 16px 22px; }
+.ix-syslaw .k { flex: none; font-size: 12px; font-weight: 800; letter-spacing: 2px; color: #fff; background: var(--warm); border-radius: 8px; padding: 6px 12px; }
+.ix-syslaw p { font-size: 14px; color: var(--ink); }
+.ix-syslaw p b { color: var(--warm-d); }
+
+/* ---- 原型导览 ---- */
+.ix-tour { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
+.ix-tcard { display: block; background: var(--white); border: 1px solid var(--line); border-radius: 16px; padding: 22px 24px; box-shadow: var(--shadow-sm); transition: all .18s; position: relative; overflow: hidden; }
+.ix-tcard::before { content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 4px; background: linear-gradient(180deg, var(--warm), var(--teal)); opacity: 0; transition: opacity .18s; }
+.ix-tcard:hover { transform: translateY(-4px); box-shadow: var(--shadow); border-color: var(--warm-l); }
+.ix-tcard:hover::before { opacity: 1; }
+.ix-tcard .t-top { display: flex; align-items: center; gap: 12px; margin-bottom: 8px; }
+.ix-tcard .t-top .ic { width: 42px; height: 42px; border-radius: 13px; background: var(--sky); display: flex; align-items: center; justify-content: center; font-size: 21px; flex: none; }
+.ix-tcard.warm .t-top .ic { background: var(--cream); }
+.ix-tcard .t-top b { font-size: 16px; color: var(--ink); }
+.ix-tcard .t-top .arr { margin-left: auto; color: var(--warm); font-weight: 800; font-size: 17px; transition: transform .18s; }
+.ix-tcard:hover .t-top .arr { transform: translateX(4px); }
+.ix-tcard p { font-size: 12.5px; color: var(--sub); line-height: 1.65; min-height: 42px; }
+.ix-tcard .t-tags { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 12px; }
+.ix-tcard .t-shot { position: relative; margin: -22px -24px 16px; height: 158px; background: var(--sky); border-bottom: 1px solid var(--line); overflow: hidden; }
+.ix-tcard .t-shot iframe { width: 1440px; height: 900px; border: 0; transform-origin: 0 0; pointer-events: none; display: block; }
+.ix-tcard .t-shot::after { content: "LIVE · 实时预览"; position: absolute; top: 8px; right: 8px; font-size: 9.5px; font-weight: 700; letter-spacing: 1px; color: var(--teal-d); background: rgba(255,255,255,.88); border: 1px solid var(--sky2); padding: 2px 8px; border-radius: 999px; pointer-events: none; }
+.ix-tcard .t-shot::before { content: ""; position: absolute; inset: 0; z-index: 1; } /* 罩住 iframe，保证整卡可点 */
+
+/* ---- 角色 × 能力矩阵 ---- */
+.ix-matrix-scroll { overflow-x: auto; background: var(--white); border: 1px solid var(--line); border-radius: 16px; box-shadow: var(--shadow-sm); }
+.ix-matrix { width: 100%; min-width: 860px; border-collapse: collapse; font-size: 13px; }
+.ix-matrix th { background: var(--ink); color: #fff; font-weight: 600; text-align: left; padding: 12px 18px; font-size: 12.5px; letter-spacing: 1px; white-space: nowrap; }
+.ix-matrix td { padding: 14px 18px; border-bottom: 1px solid var(--line); color: var(--sub); vertical-align: top; line-height: 1.7; }
+.ix-matrix tr:last-child td { border-bottom: none; }
+.ix-matrix tr:hover td { background: var(--bg); }
+.ix-matrix .role { white-space: nowrap; }
+.ix-matrix .role b { display: block; color: var(--ink); font-size: 14px; }
+.ix-matrix .role span { font-size: 11.5px; color: var(--muted); }
+.ix-matrix .entry { white-space: nowrap; font-weight: 600; color: var(--teal-d); }
+.ix-matrix a.golink { display: inline-block; font-size: 12.5px; font-weight: 700; color: var(--warm-d); border: 1px solid var(--warm-l); background: var(--cream); border-radius: 999px; padding: 4px 13px; white-space: nowrap; transition: all .15s; }
+.ix-matrix a.golink:hover { background: var(--warm); color: #fff; border-color: var(--warm); }
+.ix-matrix a.golink + a.golink { margin-left: 6px; }
+
+/* ---- 商汤工作范围 ---- */
+.ix-scope { display: grid; grid-template-columns: 1.15fr 1fr 1fr; gap: 18px; align-items: stretch; }
+.ix-scard { background: var(--white); border: 1px solid var(--line); border-radius: 16px; padding: 24px; box-shadow: var(--shadow-sm); display: flex; flex-direction: column; }
+.ix-scard.st { border-top: 4px solid var(--teal); }
+.ix-scard.tp { border-top: 4px solid var(--warm); }
+.ix-scard.co { border-top: 4px solid var(--gold); }
+.ix-scard .s-who { display: flex; align-items: center; gap: 9px; margin-bottom: 4px; }
+.ix-scard .s-who b { font-size: 16.5px; color: var(--ink); }
+.ix-scard .s-sub { font-size: 12px; color: var(--muted); margin-bottom: 14px; }
+.ix-item { display: flex; gap: 10px; padding: 10px 0; border-top: 1px dashed var(--line); }
+.ix-item .m { flex: none; width: 20px; height: 20px; border-radius: 50%; font-size: 11px; font-weight: 800; display: flex; align-items: center; justify-content: center; margin-top: 2px; }
+.ix-scard.st .m { background: var(--sky); color: var(--teal-d); }
+.ix-scard.tp .m { background: var(--cream); color: var(--warm-d); }
+.ix-scard.co .m { background: #FAF0DC; color: #A9761F; }
+.ix-item b { display: block; font-size: 13.5px; color: var(--ink); margin-bottom: 2px; }
+.ix-item span { font-size: 12px; color: var(--sub); line-height: 1.6; display: block; }
+.ix-scopelaw { margin-top: 20px; text-align: center; background: var(--white); border: 1px solid var(--line); border-radius: 999px; padding: 13px 24px; font-size: 13.5px; color: var(--sub); box-shadow: var(--shadow-sm); }
+.ix-scopelaw b { color: var(--ink); }
+.ix-scopelaw .sep { color: var(--warm); font-weight: 800; padding: 0 6px; }
+
+/* ---- 商业模式条 ---- */
+.ix-biz { display: grid; grid-template-columns: 1fr 1fr 1.15fr; gap: 18px; }
+.ix-bcard { position: relative; border-radius: 18px; padding: 26px 26px 22px; background: rgba(255,255,255,.05); border: 1px solid rgba(233,241,242,.14); }
+.ix-bcard .b-tier { font-size: 12px; font-weight: 700; letter-spacing: 2px; color: var(--teal-l); margin-bottom: 10px; }
+.ix-bcard .b-price { display: flex; align-items: baseline; gap: 8px; }
+.ix-bcard .b-price .v { font-size: 40px; font-weight: 800; color: #fff; font-variant-numeric: tabular-nums; }
+.ix-bcard .b-price .u { font-size: 13px; color: rgba(233,241,242,.6); }
+.ix-bcard .b-off { display: inline-block; margin-top: 8px; font-size: 12px; font-weight: 700; color: var(--warm); background: rgba(232,128,77,.14); border: 1px solid rgba(232,128,77,.4); border-radius: 999px; padding: 3px 12px; }
+.ix-bcard ul { list-style: none; margin-top: 16px; }
+.ix-bcard li { font-size: 12.5px; color: rgba(233,241,242,.75); padding: 4px 0 4px 18px; position: relative; line-height: 1.6; }
+.ix-bcard li::before { content: "✓"; position: absolute; left: 0; color: var(--teal-l); font-weight: 700; font-size: 11px; }
+.ix-bcard.total { background: linear-gradient(150deg, rgba(232,128,77,.2), rgba(20,138,156,.16)); border-color: rgba(232,128,77,.42); }
+.ix-bcard.total .b-price .v { color: var(--warm); }
+.ix-bcard.total li::before { content: "＋"; color: var(--warm); }
+.ix-bcard .b-eq { margin-top: 14px; border-top: 1px dashed rgba(233,241,242,.22); padding-top: 12px; font-size: 12px; color: rgba(233,241,242,.65); line-height: 1.7; }
+.ix-bcard .b-eq b { color: #fff; }
+.ix-bizlaw { margin-top: 22px; display: flex; gap: 14px; align-items: flex-start; background: rgba(255,255,255,.05); border: 1px solid rgba(233,241,242,.14); border-radius: 14px; padding: 16px 22px; }
+.ix-bizlaw .k { flex: none; font-size: 12px; font-weight: 800; letter-spacing: 2px; color: var(--ink); background: var(--warm); border-radius: 8px; padding: 6px 12px; }
+.ix-bizlaw p { font-size: 13px; color: rgba(233,241,242,.78); line-height: 1.8; }
+.ix-bizlaw p b { color: #fff; }
+
+/* ---- 3 个月路线图 ---- */
+.ix-road { display: grid; grid-template-columns: 1fr 34px 1fr 34px 1fr; gap: 0; align-items: stretch; }
+.ix-rarr { display: flex; align-items: center; justify-content: center; color: var(--warm); font-size: 20px; font-weight: 800; }
+.ix-rcard { background: var(--white); border: 1px solid var(--line); border-radius: 16px; padding: 22px 24px; box-shadow: var(--shadow-sm); display: flex; flex-direction: column; }
+.ix-rcard .m-badge { display: inline-flex; align-self: flex-start; align-items: center; gap: 8px; font-size: 12px; font-weight: 800; letter-spacing: 1.5px; color: #fff; background: var(--ink); border-radius: 999px; padding: 5px 14px; margin-bottom: 12px; }
+.ix-rcard.hot .m-badge { background: var(--warm); }
+.ix-rcard h4 { font-size: 16.5px; color: var(--ink); margin-bottom: 2px; }
+.ix-rcard .r-sub { font-size: 12px; color: var(--muted); margin-bottom: 12px; }
+.ix-rcard ol { list-style: none; counter-reset: rc; margin-bottom: 14px; }
+.ix-rcard ol li { counter-increment: rc; position: relative; font-size: 12.5px; color: var(--sub); line-height: 1.6; padding: 4px 0 4px 26px; }
+.ix-rcard ol li::before { content: counter(rc); position: absolute; left: 0; top: 7px; width: 17px; height: 17px; border-radius: 50%; background: var(--sky); color: var(--teal-d); font-size: 10.5px; font-weight: 700; display: flex; align-items: center; justify-content: center; }
+.ix-rcard .r-kpi { margin-top: auto; background: var(--bg); border: 1px dashed var(--card-b); border-radius: 10px; padding: 10px 14px; font-size: 12px; color: var(--sub); line-height: 1.7; }
+.ix-rcard .r-kpi b { color: var(--warm-d); }
+.ix-rcard .r-kpi .kl { font-size: 10.5px; font-weight: 800; letter-spacing: 2px; color: var(--teal-d); display: block; margin-bottom: 2px; }
+
+/* ---- 愿景三层 ---- */
+.ix-vision { display: grid; grid-template-columns: 1.25fr 1fr; gap: 44px; align-items: center; }
+.ix-vstack { display: flex; flex-direction: column-reverse; gap: 14px; }
+.ix-vlayer { display: flex; align-items: center; gap: 16px; border-radius: 14px; padding: 18px 22px; color: #fff; box-shadow: var(--shadow-sm); }
+.ix-vlayer .n { flex: none; width: 40px; height: 40px; border-radius: 12px; background: rgba(255,255,255,.16); border: 1px solid rgba(255,255,255,.3); display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 15px; }
+.ix-vlayer b { display: block; font-size: 15.5px; }
+.ix-vlayer span { display: block; font-size: 12px; opacity: .82; margin-top: 2px; line-height: 1.6; }
+.ix-vlayer .vtag { margin-left: auto; flex: none; font-size: 11px; font-weight: 700; background: rgba(255,255,255,.16); border-radius: 999px; padding: 3px 11px; white-space: nowrap; }
+.ix-vlayer.l1 { background: linear-gradient(120deg, var(--warm), var(--warm-d)); width: 100%; }
+.ix-vlayer.l2 { background: linear-gradient(120deg, var(--teal), var(--teal-d)); width: 92%; }
+.ix-vlayer.l3 { background: linear-gradient(120deg, var(--ink3), var(--ink)); width: 84%; }
+.ix-vaside h3 { font-size: 20px; color: var(--ink); line-height: 1.5; margin-bottom: 14px; }
+.ix-vaside h3 b { color: var(--warm-d); }
+.ix-vaside .v-quote { font-size: 13.5px; color: var(--sub); border-left: 3px solid var(--warm); padding-left: 14px; line-height: 1.8; margin-bottom: 18px; }
+.ix-vaside ul { list-style: none; margin-bottom: 16px; }
+.ix-vaside li { font-size: 13px; color: var(--sub); padding: 4px 0 4px 18px; position: relative; }
+.ix-vaside li::before { content: "▸"; position: absolute; left: 0; color: var(--teal); font-size: 11px; }
+.ix-vaside .v-red { font-size: 12px; color: var(--muted); background: var(--sky); border-radius: 10px; padding: 10px 14px; }
+.ix-vaside .v-red b { color: var(--teal-d); }
+
+/* ---- 响应式 ---- */
+@media (max-width: 1080px) {
+  .ix-hero h1 { font-size: 32px; }
+  .ix-hero .stat { padding-right: 24px; margin-right: 24px; }
+  .ix-sysgrid { grid-template-columns: 1fr; gap: 18px; }
+  .ix-hub { grid-column: 1; grid-row: 1; }
+  .ix-role::after, .ix-role .r-dot { display: none; }
+  .ix-tour { grid-template-columns: 1fr 1fr; }
+  .ix-scope, .ix-biz { grid-template-columns: 1fr; }
+  .ix-road { grid-template-columns: 1fr; }
+  .ix-rarr { transform: rotate(90deg); padding: 6px 0; }
+  .ix-vision { grid-template-columns: 1fr; }
+}
+@media (max-width: 640px) {
+  .ix-tour { grid-template-columns: 1fr; }
+  .ix-hero .stats { gap: 18px; }
+  .ix-hero .stat { border-right: none; }
+}
+</style>
+</head>
+<body>
+
+<header class="topnav">
+  <div class="brand">
+    <img src="assets/st_logo.png" alt="商汤科技">
+    <span class="divider"></span>
+    <span class="name">陪护 AI 平台<small>AI CARE PLATFORM · 原型演示</small></span>
+  </div>
+  <nav>
+    <a href="index.html" class="active"><span class="dot"></span>方案总览</a>
+    <a href="agent_hugong.html">护工 Agent</a>
+    <a href="agent_banzuzhang.html">班组长 Agent</a>
+    <a href="agent_manager.html">管理者 Agent</a>
+    <a href="agent_ops.html">运营 Agent</a>
+    <a href="miniapp.html">客户小程序</a>
+    <a href="bi.html">BI 数据看板</a>
+  </nav>
+</header>
+
+<!-- ============ Hero ============ -->
+<section class="ix-hero">
+  <span class="ix-ring2"></span><span class="ix-dot1"></span><span class="ix-dot2"></span>
+  <div class="ix-hero-in">
+    <div class="kicker">安心陪护 × 商汤科技 · AI CARE PLATFORM</div>
+    <h1>医院陪护 AI 平台<br>从「卖工时」到<span class="hl">「经营家庭健康」</span></h1>
+    <div class="slogans"><span>护工即纽带</span><span>私域即资产</span><span>数据即价值</span></div>
+    <p class="lede">四类角色人手一个云端 AI Agent，入口就在<b>企业微信语音对话框</b>；家属用小程序找护工、看过程、商城复购；管理层用 BI 看板<b>从公司一路钻到某个护工</b>。商汤提供 AI 技术底座，本站为可交互高保真原型，数据均为目标态示意。</p>
+    <div class="ctas">
+      <a class="ix-btn primary" href="agent_hugong.html">▶ 看护工 Agent 演示</a>
+      <a class="ix-btn ghost" href="bi.html">看 BI 数据看板 →</a>
+    </div>
+    <div class="stats">
+      <div class="stat"><div class="v">3,000<small>名</small></div><div class="l">护工 · 北京 / 河南 / 陕西</div></div>
+      <div class="stat"><div class="v">上百万<small>客户</small></div><div class="l">累计服务的待激活存量</div></div>
+      <div class="stat"><div class="v">6<small>级</small></div><div class="l">看板下钻 · 公司到护工一钻到底</div></div>
+      <div class="stat"><div class="v">3<small>个月</small></div><div class="l">落地路线 · 先跑通再扩战队</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 一张图看懂系统 ============ -->
+<section class="ix-sec white">
+  <div class="ix-wrap">
+    <div class="ix-sec-head">
+      <div class="eyebrow">System Logic · 系统逻辑</div>
+      <h2>一张图看懂：<span class="hl">四类角色</span>怎么用这套系统</h2>
+      <p class="sub">护工、最终用户、班组长、公司，围绕一个 AI Agent 系统协同——每个角色只做顺手的事，数据自动沉淀</p>
+    </div>
+
+    <div class="ix-sysgrid">
+      <!-- 左上：护工 -->
+      <div class="ix-role lt">
+        <span class="r-dot"></span>
+        <div class="r-head"><span class="ic">👩‍⚕️</span><b>护工</b><span class="tag warm">引流入口</span></div>
+        <div class="r-way">S-Agent 交互干活 + 企微加客户</div>
+        <ul>
+          <li>问 S-Agent 派单 / SOP / 语音日报，过程自动进云端数据库</li>
+          <li>企业微信加家属 1v1，不走个人微信</li>
+          <li>收后台推送：当天客户 / 质量 / 反馈 / 收入</li>
+        </ul>
+      </div>
+
+      <!-- 中枢 -->
+      <div class="ix-hub">
+        <div class="h-ic">🧠</div>
+        <b>AI Agent 系统</b>
+        <div class="h-sub">商汤 AI 技术底座</div>
+        <div class="h-chips"><span>企业微信</span><span>云端数据库</span><span>S-Agent</span></div>
+        <div class="h-note">语音交互 → 意图理解 → 业务执行<br>每一步自动结构化写库</div>
+      </div>
+
+      <!-- 右上：家属 -->
+      <div class="ix-role rt teal">
+        <span class="r-dot"></span>
+        <div class="r-head"><span class="ic">👪</span><b>最终用户 / 家属</b><span class="tag teal">私域资产</span></div>
+        <div class="r-way">企微加护工 + 小程序找护工复购</div>
+        <ul>
+          <li>加护工企业微信，全程 1v1 触达</li>
+          <li>小程序按病种找护工、看服务过程小结</li>
+          <li>商城复购：康复 / 护理耗材 / 适老用品</li>
+        </ul>
+      </div>
+
+      <!-- 左下：班组长 -->
+      <div class="ix-role lb teal">
+        <span class="r-dot"></span>
+        <div class="r-head"><span class="ic">🧑‍🏫</span><b>班组长</b><span class="tag teal">AI 管人</span></div>
+        <div class="r-way">通过 Agent 管人：看数据 + 督学，一人管一片</div>
+        <ul>
+          <li>看科室六项数据：新住院 / 在院 / 出院 / 累计 / 收入 / 学习</li>
+          <li>每天督促并看到护工学习任务</li>
+          <li>组织更扁平，月拿 500-1500 元补贴</li>
+        </ul>
+      </div>
+
+      <!-- 右下：公司后台 -->
+      <div class="ix-role rb">
+        <span class="r-dot"></span>
+        <div class="r-head"><span class="ic">🏢</span><b>公司后台</b><span class="tag warm">中台调度</span></div>
+        <div class="r-way">Agent 自动推送调度 + 内容中台</div>
+        <ul>
+          <li>后台 Agent 自动推送 / 调度，喂给护工</li>
+          <li>内容中台批量产内容，供护工一键转发</li>
+          <li>去项目主管、经理直管班组长，token 费从省下钱出</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="ix-syslaw">
+      <span class="k">系统逻辑</span>
+      <p>关系换进企微、过程沉进云端数据库 —— <b>顺手一步，客户变公司资产</b>。护工不需要「用系统」，只是在微信里说话。</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 原型导览 ============ -->
+<section class="ix-sec" id="tour">
+  <div class="ix-wrap">
+    <div class="ix-sec-head">
+      <div class="eyebrow">Prototype Tour · 原型导览</div>
+      <h2>六个可交互演示页 · <span class="hl">点卡片进入</span></h2>
+      <p class="sub">四个角色 Agent 均可在手机壳内点场景演示微信语音交互；小程序与 BI 看板可点击操作</p>
+    </div>
+    <div class="ix-tour">
+      <a class="ix-tcard warm" href="agent_hugong.html">
+        <div class="t-shot" data-src="agent_hugong.html" data-scroll="270"></div>
+        <div class="t-top"><span class="ic">👩‍⚕️</span><b>护工 Agent</b><span class="arr">→</span></div>
+        <p>一句话接单派工、问护理 SOP、交语音日报、一键转发内容——说完的每句话自动结构化入库。</p>
+        <div class="t-tags"><span class="tag warm">语音接单</span><span class="tag teal">SOP 问答</span><span class="tag gold">跑腿增值</span></div>
+      </a>
+      <a class="ix-tcard" href="agent_banzuzhang.html">
+        <div class="t-shot" data-src="agent_banzuzhang.html" data-scroll="270"></div>
+        <div class="t-top"><span class="ic">🧑‍🏫</span><b>班组长 Agent</b><span class="arr">→</span></div>
+        <p>科室六数早报、督学点名、排班调度、周报自动生成——1 人从管 5-15 人升到管 10-30 人。</p>
+        <div class="t-tags"><span class="tag teal">科室六数</span><span class="tag warm">督学催办</span><span class="tag ok">自动周报</span></div>
+      </a>
+      <a class="ix-tcard warm" href="agent_manager.html">
+        <div class="t-shot" data-src="agent_manager.html" data-scroll="270"></div>
+        <div class="t-top"><span class="ic">👔</span><b>管理者 Agent</b><span class="arr">→</span></div>
+        <p>店长 / 战队长的 Agent Team：一个指令编排 12 个班组长 Agent 执行，chatBI 随口问数、跨院对比。</p>
+        <div class="t-tags"><span class="tag warm">Agent Team</span><span class="tag teal">chatBI 问数</span><span class="tag gold">跨院对比</span></div>
+      </a>
+      <a class="ix-tcard" href="agent_ops.html">
+        <div class="t-shot" data-src="agent_ops.html" data-scroll="320"></div>
+        <div class="t-top"><span class="ic">📡</span><b>运营 Agent</b><span class="arr">→</span></div>
+        <p>内容中台批量产科普、按病种标签分发到护工、私域旅程复购唤醒——全程合规双审、频控触达。</p>
+        <div class="t-tags"><span class="tag teal">内容流水线</span><span class="tag warm">标签分发</span><span class="tag ok">合规双审</span></div>
+      </a>
+      <a class="ix-tcard warm" href="miniapp.html">
+        <div class="t-shot" data-src="miniapp.html" data-scroll="300"></div>
+        <div class="t-top"><span class="ic">📱</span><b>客户小程序</b><span class="arr">→</span></div>
+        <p>家属按病种找护工、看服务过程留痕、自助下单支付、商城对症复购——第三方开发，商汤接入 AI 能力。</p>
+        <div class="t-tags"><span class="tag warm">找护工</span><span class="tag teal">自助下单</span><span class="tag gold">对症荐品</span></div>
+      </a>
+      <a class="ix-tcard" href="bi.html">
+        <div class="t-shot" data-src="bi.html" data-scroll="120"></div>
+        <div class="t-top"><span class="ic">📊</span><b>BI 数据看板</b><span class="arr">→</span></div>
+        <p>公司 → 战队 → 项目 → 科室 → 班组 → 护工六级下钻，同一套指标一钻到底，chatBI 一句话问任意口径。</p>
+        <div class="t-tags"><span class="tag teal">六级下钻</span><span class="tag warm">chatBI</span><span class="tag ok">口径清晰</span></div>
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 角色 × 能力矩阵 ============ -->
+<section class="ix-sec white">
+  <div class="ix-wrap">
+    <div class="ix-sec-head">
+      <div class="eyebrow">Role × Capability · 角色能力矩阵</div>
+      <h2>每个角色：<span class="hl">从哪进、做什么、沉淀什么</span></h2>
+      <p class="sub">同一个 AI 底座，五类使用者各取所需——所有动作最终汇入同一套云端数据库</p>
+    </div>
+    <div class="ix-matrix-scroll">
+      <table class="ix-matrix">
+        <tr><th>角色</th><th>交互入口</th><th>核心动作</th><th>沉淀数据</th><th>演示页面</th></tr>
+        <tr>
+          <td class="role"><b>护工</b><span>3,000 名一线</span></td>
+          <td class="entry">企业微信 · 按住说话</td>
+          <td>接单派工 · SOP 问答 · 语音日报 · 内容一键转发 · 加微登记 · 空闲跑腿</td>
+          <td>服务过程 · 运营行为 · 内容分发（语音 + 埋点，不拍病人）</td>
+          <td><a class="golink" href="agent_hugong.html">护工 Agent →</a></td>
+        </tr>
+        <tr>
+          <td class="role"><b>班组长</b><span>资深护工 · 管 10-30 人</span></td>
+          <td class="entry">企业微信 · 语音问答</td>
+          <td>科室六数速览 · 督学点名 · 排班调度 · 日报周报自动生成 · 客诉跟进</td>
+          <td>班组任务执行 · 学习完成率 · 排班履约</td>
+          <td><a class="golink" href="agent_banzuzhang.html">班组长 Agent →</a></td>
+        </tr>
+        <tr>
+          <td class="role"><b>管理者</b><span>店长 / 项目经理 / 战队长</span></td>
+          <td class="entry">企微 Agent Team + BI</td>
+          <td>统一编排派任务 · 看执行回流 · chatBI 问数 · 人员调配 · 跨院对比</td>
+          <td>经营指标 · 任务执行链路 · 医院经营健康度</td>
+          <td><a class="golink" href="agent_manager.html">管理者 Agent →</a><a class="golink" href="bi.html">BI 看板 →</a></td>
+        </tr>
+        <tr>
+          <td class="role"><b>公司运营</b><span>运营中心 · 内容与私域</span></td>
+          <td class="entry">后台 Agent · 内容中台</td>
+          <td>热点选题 · 批量创作 · 合规双审 · 标签分发 · 私域旅程 · 转介活动</td>
+          <td>内容库与回流 · 客户标签画像 · 触达转化</td>
+          <td><a class="golink" href="agent_ops.html">运营 Agent →</a></td>
+        </tr>
+        <tr>
+          <td class="role"><b>客户 / 家属</b><span>上百万存量待激活</span></td>
+          <td class="entry">企微 1v1 + 小程序</td>
+          <td>按病种找护工 · 看服务过程 · 自助下单支付 · 商城复购 · 评价转介</td>
+          <td>订单支付 · 多维评价 · 复购转介（授权后采集）</td>
+          <td><a class="golink" href="miniapp.html">客户小程序 →</a></td>
+        </tr>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 商汤工作范围 ============ -->
+<section class="ix-sec">
+  <div class="ix-wrap">
+    <div class="ix-sec-head">
+      <div class="eyebrow">Scope · 商汤工作范围</div>
+      <h2>商汤三大件交付，<span class="hl">边界清晰</span>、不重复建设</h2>
+      <p class="sub">全员 AI Agent、云库 BI、企微 AI 对接归商汤；小程序与商城第三方承接；业务体系公司已具备</p>
+    </div>
+    <div class="ix-scope">
+      <div class="ix-scard st">
+        <div class="s-who"><b>商汤负责 · AI 侧交付</b><span class="tag teal">三大件</span></div>
+        <div class="s-sub">AI 的归商汤 —— 云端 AI 助理 + 数据底座</div>
+        <div class="ix-item"><span class="m">✓</span><div><b>全员 AI Agent（云端 AI 助理）</b><span>护工 / 班组长 / 项目经理 / 管理层人手一个；含 Agent Team——管理者统一编排、派任务、看执行</span></div></div>
+        <div class="ix-item"><span class="m">✓</span><div><b>云端数据库 + BI 看板（含 chatBI）</b><span>过程数据留痕入云；公司 → 战队 → 项目 → 科室 → 班组 → 护工 六级可穿透，支持对话问数</span></div></div>
+        <div class="ix-item"><span class="m">✓</span><div><b>企业微信 AI 能力对接</b><span>标签分层 / 内容触达 / 复购转介链路追踪的 AI 能力接入企微，数据回流云端数据库</span></div></div>
+      </div>
+      <div class="ix-scard tp">
+        <div class="s-who"><b>第三方专业团队</b><span class="tag warm">承接开发</span></div>
+        <div class="s-sub">电商的归专业团队 —— 前台与履约</div>
+        <div class="ix-item"><span class="m">◆</span><div><b>客户侧小程序</b><span>找护工 / 进度查看 / 自助下单；商汤接入智能问答与推荐 AI 能力</span></div></div>
+        <div class="ix-item"><span class="m">◆</span><div><b>电商商城 + 供应链</b><span>商城 SKU / 选品备货 / 仓配履约与售后；导流分成联营，我们导流分佣</span></div></div>
+      </div>
+      <div class="ix-scard co">
+        <div class="s-who"><b>公司自有 · 已具备</b><span class="tag gold">不推倒重来</span></div>
+        <div class="s-sub">业务的归公司 —— AI 按现有业务匹配</div>
+        <div class="ix-item"><span class="m">●</span><div><b>企业微信体系 &amp; 私域 CRM</b><span>企微开通与账号体系公司自建、SCRM 选成熟产品——商汤做 AI 能力与数据打通</span></div></div>
+        <div class="ix-item"><span class="m">●</span><div><b>业务流程 · 表单 · 培训体系</b><span>公司已具备完整体系，AI 侧按现有业务匹配对应能力</span></div></div>
+      </div>
+    </div>
+    <div class="ix-scopelaw">
+      <b>分工原则</b><span class="sep">—</span>AI 的归商汤<span class="sep">·</span>电商的归专业团队<span class="sep">·</span>业务的归公司<span class="sep">—</span><b>三方以 API 与数据打通，不重复建设</b>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 商业模式条 ============ -->
+<section class="ix-sec dark">
+  <div class="ix-wrap">
+    <div class="ix-sec-head">
+      <div class="eyebrow">Business Model · 商业模式</div>
+      <h2>按人头套餐计费：<span class="hl">护工付费 · 公司赋能 · 减层养 AI</span></h2>
+      <p class="sub">Token + 平台服务打包 · 企业规模价 6 折测算 · 上线后按实际开通人数月结（目标态测算）</p>
+    </div>
+    <div class="ix-biz">
+      <div class="ix-bcard">
+        <div class="b-tier">一线护工套餐</div>
+        <div class="b-price"><span class="v">¥199</span><span class="u">/ 人 / 月</span></div>
+        <span class="b-off">企业 6 折 ≈ 120 元/月</span>
+        <ul>
+          <li>S-Agent 接单派工 · 语音日报</li>
+          <li>SOP 问答 · 内容一键转发</li>
+          <li>护工个人看板</li>
+        </ul>
+        <div class="b-eq">护工月入普遍超 1 万，套餐约占 <b>1%</b>——平台帮他多接单多挣钱</div>
+      </div>
+      <div class="ix-bcard">
+        <div class="b-tier">管理岗套餐</div>
+        <div class="b-price"><span class="v">¥699</span><span class="u">/ 人 / 月</span></div>
+        <span class="b-off">企业 6 折 ≈ 419 元/月</span>
+        <ul>
+          <li>Agent Team 管理 · 统一编排派任务</li>
+          <li>多层级 BI 看板 · chatBI 对话问数</li>
+          <li>督学与自动汇总</li>
+        </ul>
+        <div class="b-eq">管理者 1 个指令 → 编排 N 个下级 Agent → 执行回流看板</div>
+      </div>
+      <div class="ix-bcard total">
+        <div class="b-tier">全员合计（6 折测算）</div>
+        <div class="b-price"><span class="v">≈¥38万</span><span class="u">/ 月</span></div>
+        <span class="b-off">3,060 人全员 AI</span>
+        <ul>
+          <li>3,000 名护工 ≈ 35.8 万/月</li>
+          <li>60 个管理岗 ≈ 2.5 万/月</li>
+        </ul>
+        <div class="b-eq">这笔账：减少「项目主管」一层的人员成本 <b>≥ 全员 AI 套餐费</b>——少一层传达、效率反而更高</div>
+      </div>
+    </div>
+    <div class="ix-bizlaw">
+      <span class="k">组织之变</span>
+      <p>4 级压 3 级：项目经理 <b>直管</b> 班组长（原项目主管转经理助理），班组长带教幅度 <b>5-15 → 10-30 人</b>、每月多拿 <b>500-1500 元补贴</b>；支付模式起步公司统付、按实际开通人数月结，目标态探索护工自付套餐的合伙模式——人人是自己的经营者。</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 3 个月路线图 ============ -->
+<section class="ix-sec white">
+  <div class="ix-wrap">
+    <div class="ix-sec-head">
+      <div class="eyebrow">Roadmap · 3 个月落地路线图</div>
+      <h2>通道 → 私域 + BI → 小程序商城，<span class="hl">先跑通、再扩战队</span></h2>
+      <p class="sub">数据已就绪：第 1 月通道与云库、第 2 月私域与 BI 看板、第 3 月小程序商城与增值</p>
+    </div>
+    <div class="ix-road">
+      <div class="ix-rcard hot">
+        <span class="m-badge">第 1 月</span>
+        <h4>通道与云库</h4>
+        <div class="r-sub">企微 + 护工 S-Agent + 云端数据库底座</div>
+        <ol>
+          <li>企微开通配 SOP，护工加客户走企微</li>
+          <li>首批护工装 S-Agent：接单 / SOP / 语音日报 / 留痕</li>
+          <li>搭云端数据库底座，过程数据自动入库</li>
+        </ol>
+        <div class="r-kpi"><span class="kl">里程碑 · KPI</span>首批 <b>30 名护工</b> S-Agent 激活 · 周活 <b>≥70%</b>（周≥3天日报）· 试点科室客户迁企微 <b>≥800 人</b>（目标态）</div>
+      </div>
+      <div class="ix-rarr">›</div>
+      <div class="ix-rcard">
+        <span class="m-badge">第 2 月</span>
+        <h4>私域 + BI 看板</h4>
+        <div class="r-sub">私域跑通 + 班组长 AI + BI 看板上线</div>
+        <ol>
+          <li>企微打标分层，1v1 合规触达不群发</li>
+          <li>班组长 Agent 看科室数 + 督学，试管 10-30 人</li>
+          <li>BI 看板上线：运营 / 销售 / 服务 + 多级下钻</li>
+        </ol>
+        <div class="r-kpi"><span class="kl">里程碑 · KPI</span>私域成交闭环跑通 <b>≥15 单</b> · 管理层用 BI 看板做<b>周度复盘</b>、数据驱动考核</div>
+      </div>
+      <div class="ix-rarr">›</div>
+      <div class="ix-rcard">
+        <span class="m-badge">第 3 月</span>
+        <h4>小程序 + 增值</h4>
+        <div class="r-sub">自助下单 + 商城复购 + 交叉销售 / 跑腿</div>
+        <ol>
+          <li>小程序自助下单：选 SKU + 优惠码 + 支付</li>
+          <li>商城开卖 + 交叉销售：按病种荐品复购</li>
+          <li>护工跑腿增值：取送快递 / 外卖对接平台</li>
+        </ol>
+        <div class="r-kpi"><span class="kl">里程碑 · KPI</span>商城<b>复购单跑通、可复算</b>（首月不追占比）· 护工跑腿 / 交叉销售增收（目标态）</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 愿景三层 ============ -->
+<section class="ix-sec">
+  <div class="ix-wrap">
+    <div class="ix-sec-head">
+      <div class="eyebrow">Vision · 未来定位与愿景</div>
+      <h2>不止是陪护公司：<span class="hl">三层价值</span>逐层向上</h2>
+      <p class="sub">从「按工时卖陪护服务」的劳务公司，到「经营家庭健康关系与真实数据」的健康服务平台</p>
+    </div>
+    <div class="ix-vision">
+      <div class="ix-vstack">
+        <div class="ix-vlayer l1">
+          <span class="n">1</span>
+          <div><b>陪护服务</b><span>住院陪护按科室 / 病种交付，真金白银养活公司、目标态毛利稳中有升</span></div>
+          <span class="vtag">现金流基本盘</span>
+        </div>
+        <div class="ix-vlayer l2">
+          <span class="n">2</span>
+          <div><b>家庭健康私域入口</b><span>护工把家属导进企微、成为客户与公司纽带；从一次陪护变长期健康关系与复购</span></div>
+          <span class="vtag">流量复购</span>
+        </div>
+        <div class="ix-vlayer l3">
+          <span class="n">3</span>
+          <div><b>真实世界健康数据平台</b><span>护理 + 康复 + 健康数据经授权沉淀，成为可与外部合作的组织资产</span></div>
+          <span class="vtag">数据变现</span>
+        </div>
+      </div>
+      <div class="ix-vaside">
+        <h3>让每一次陪护都沉淀为一份<b>可信的健康关系与数据</b>，重新定义中国家庭的照护方式</h3>
+        <p class="v-quote">以护工为触点、以数据为资产——从陪护公司，到家庭健康的入口与平台。</p>
+        <ul>
+          <li>居家健康管理：院内延伸到出院回家</li>
+          <li>康复 / 适老服务连接：病种化对接厂商</li>
+          <li>健康数据合作：研究机构 / 药企真实世界数据</li>
+          <li>保险生态：授权用户接入（目标态）</li>
+        </ul>
+        <p class="v-red"><b>合规红线：</b>全程脱敏 + 客户授权 + 合规出表——数据不出域、只出价值；群体级匿名建模，不用于个体核保。</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer class="site-footer">
+  <div class="foot-brand"><img src="assets/st_logo.png" alt="商汤科技"></div>
+  <div><b>商汤科技 · 大模型生态渠道部</b> — AI 技术底座 · 高保真交互原型（页面数据均为目标态示意，非真实经营数据）</div>
+</footer>
+
+<script>
+/* 原型导览 · 实时缩略预览：同源 iframe + transform 缩放（fdeway 同款技巧）
+   http 服务下自动隐藏缩略图内导航页脚并滚到代表位置；file:// 打开时优雅降级为页面顶部 */
+(function () {
+  var shots = document.querySelectorAll('.t-shot');
+  var fitters = [];
+  shots.forEach(function (shot) {
+    var ifr = document.createElement('iframe');
+    ifr.src = shot.dataset.src;
+    ifr.setAttribute('tabindex', '-1');
+    ifr.setAttribute('aria-hidden', 'true');
+    ifr.setAttribute('scrolling', 'no');
+    ifr.loading = 'lazy';
+    var fit = function () {
+      var scale = shot.clientWidth / 1440;
+      ifr.style.transform = 'scale(' + scale + ')';
+    };
+    fitters.push(fit);
+    ifr.addEventListener('load', function () {
+      try {
+        var d = ifr.contentDocument;
+        var nav = d.querySelector('.topnav'); if (nav) nav.style.display = 'none';
+        var foot = d.querySelector('.site-footer'); if (foot) foot.style.display = 'none';
+        d.documentElement.style.scrollBehavior = 'auto';
+        ifr.contentWindow.scrollTo(0, parseInt(shot.dataset.scroll || '0', 10));
+      } catch (e) { /* file:// 下跨 frame 受限，保持默认视图 */ }
+    });
+    shot.appendChild(ifr);
+    fit();
+  });
+  window.addEventListener('resize', function () { fitters.forEach(function (f) { f(); }); });
+})();
+</script>
+
+</body>
+</html>

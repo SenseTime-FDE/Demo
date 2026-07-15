@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>护工 S-Agent · 微信语音助理 | 陪护 AI 平台原型</title>
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+
+<header class="topnav">
+  <div class="brand">
+    <img src="assets/st_logo.png" alt="商汤科技">
+    <span class="divider"></span>
+    <span class="name">陪护 AI 平台<small>AI CARE PLATFORM · 原型演示</small></span>
+  </div>
+  <nav>
+    <a href="index.html">方案总览</a>
+    <a href="agent_hugong.html" class="active"><span class="dot"></span>护工 Agent</a>
+    <a href="agent_banzuzhang.html">班组长 Agent</a>
+    <a href="agent_manager.html">管理者 Agent</a>
+    <a href="agent_ops.html">运营 Agent</a>
+    <a href="miniapp.html">客户小程序</a>
+    <a href="bi.html">BI 数据看板</a>
+  </nav>
+</header>
+
+<main class="page">
+  <div class="page-head">
+    <div class="eyebrow">Caregiver Agent · WeChat Voice Channel</div>
+    <h1>护工 S-Agent：<span class="hl">一句话干活</span>，全程沉淀云端</h1>
+    <p class="sub">3000 名护工人手一个云端 AI 助理，入口就在<b>企业微信对话框</b>——按住说话即可接单派工、问 SOP、交语音日报、一键转发内容、查收入接跑腿；每天早晚两报<b>自动推送</b>当日床位任务、完成情况与收入变化。<b>不装新 App、不额外填表</b>，说完的每句话自动结构化写入云端数据库。左侧手机可点击场景演示。</p>
+  </div>
+
+  <div class="split">
+    <!-- 左：手机 -->
+    <div class="phone-wrap">
+      <div id="phone-slot"></div>
+      <p class="phone-caption">▲ 可交互原型 · 点上方场景或气泡下方 <b>🎙 快捷话术</b> 切换演示</p>
+    </div>
+
+    <!-- 右：说明 -->
+    <div>
+      <div class="panel">
+        <h3>护工 Agent · 六项核心能力</h3>
+        <div class="cap-grid">
+          <div class="cap warm"><div class="ic">📋</div><b>接单派工</b><span>按病区 / 病种 / 位置就近派单，语音一键接单</span></div>
+          <div class="cap"><div class="ic">💬</div><b>护理 SOP 问答</b><span>RAG 检索护理知识库，喂药翻身规范语音秒答</span></div>
+          <div class="cap warm"><div class="ic">🎙</div><b>语音日报</b><span>ASR 转文字自动结构化成日报，不拍病人只留痕</span></div>
+          <div class="cap"><div class="ic">📤</div><b>内容一键转发</b><span>LLM 按病种改写素材，改一句开场发微信 / 朋友圈</span></div>
+          <div class="cap warm"><div class="ic">🤝</div><b>私域客户维护</b><span>加微登记、客户打标签、随访提醒，家属触达不遗漏</span></div>
+          <div class="cap"><div class="ic">💰</div><b>收入与跑腿</b><span>收入积分自动计分；空闲时段 AI 派跑腿单多挣一份</span></div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <h3>语音交互链路 · 每句话都变成数据资产</h3>
+        <div class="flow">
+          <div class="f-step hot"><div class="n">1</div><b>企微按住说话</b><span>微信生态零学习成本</span></div>
+          <div class="f-arrow">→</div>
+          <div class="f-step"><div class="n">2</div><b>ASR 转写</b><span>方言口音自适应</span></div>
+          <div class="f-arrow">→</div>
+          <div class="f-step"><div class="n">3</div><b>S-Agent 理解</b><span>意图识别 + 工具调用</span></div>
+          <div class="f-arrow">→</div>
+          <div class="f-step"><div class="n">4</div><b>业务执行</b><span>派单 / 检索 / 计费 / 转发</span></div>
+          <div class="f-arrow">→</div>
+          <div class="f-step hot"><div class="n">5</div><b>云端数据库</b><span>结构化留痕 → BI 看板</span></div>
+        </div>
+        <p class="note"><b>顺手一步，客户变公司资产：</b>护工不需要「用系统」，只是在微信里说话；派单、日报、加微、荐品全过程被 Agent 自动结构化写库，喂给班组长看板与公司 BI。</p>
+      </div>
+
+      <div class="panel">
+        <h3>过程数据自动留痕（不拍病人 · 语音 + 埋点）</h3>
+        <table class="mini-table">
+          <tr><th>数据类型</th><th>记录什么</th><th>采集方式</th></tr>
+          <tr><td><b>服务过程</b></td><td>喂药翻身、交接班、异常上报（不含诊断）</td><td>语音日报 ASR</td></tr>
+          <tr><td><b>运营行为</b></td><td>接单派工、SOP 问答、到岗时长</td><td>S-Agent 埋点自动写库</td></tr>
+          <tr><td><b>销售转化</b></td><td>报价、加微、下单支付、复购续单</td><td>小程序埋点 + 企微回传</td></tr>
+          <tr><td><b>客户互动</b></td><td>家属沟通、标签分层、评价</td><td>企微 CRM 打标 + 会话埋点</td></tr>
+          <tr><td><b>内容分发</b></td><td>素材领取、编辑转发、曝光咨询</td><td>一键转发埋点 + 链接回流</td></tr>
+        </table>
+      </div>
+
+      <div class="panel">
+        <h3>激活护工：从「干活的人」到「引流入口 + 纽带」</h3>
+        <table class="mini-table">
+          <tr><td><b>工具赋能</b></td><td>S-Agent 一句话接单 / 日报 / 荐品，越用越多挣</td><td><span class="tag warm">多挣钱</span></td></tr>
+          <tr><td><b>内容供给</b></td><td>内容中台喂对症好文，一键转发即引流</td><td><span class="tag teal">轻操作</span></td></tr>
+          <tr><td><b>积分激励</b></td><td>加微 · 转介挂积分拿奖励（不强推、不挂钩照护）</td><td><span class="tag gold">有奔头</span></td></tr>
+          <tr><td><b>成长通道</b></td><td>护工 → 骨干 → 班组长 → 区域合伙人</td><td><span class="tag ok">有通道</span></td></tr>
+        </table>
+        <p class="note"><b>边界与合规：</b>不拍病人、不含诊断；健康记录经家属授权、按最小必要采集；跑腿仅限空闲时段与院内近距离，陪护本职为先。套餐 199 元/月（企业 6 折约 120 元），约占护工月收入 1%。</p>
+      </div>
+    </div>
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="foot-brand"><img src="assets/st_logo.png" alt="商汤科技"></div>
+  <div><b>商汤科技 · 大模型生态渠道部</b> — AI 技术底座 · 高保真交互原型（页面数据均为目标态示意，非真实经营数据）</div>
+</footer>
+
+<script src="assets/chat.js"></script>
+<script>
+PeihuChat.mount(document.getElementById('phone-slot'), {
+  contact: { name: 'S-Agent 护工助理', corp: '@安心陪护', sub: '企业微信 · 商汤 AI 技术底座' },
+  agent: { name: 'S-Agent 护工助理', avatar: 'S' },
+  user: { name: '王秀兰', avatar: '王' },
+  scenarios: [
+    {
+      id: 'push', title: '每日推送', chip: '看今天推送',
+      intro: '每天 7:30 早报 / 21:30 晚报自动送达——不用问，该知道的都推给你',
+      steps: [
+        { from: 'agent', sys: '⏰ 07:30 · 今日早报自动推送' },
+        { from: 'agent', html: '<div class="c-card"><div class="c-head"><span class="c-ic warm">🛏</span><b>今日床位任务 · 4 位在护</b><span class="tag warm">早报</span></div><div class="c-check"><span class="s todo">○</span>12 床 · 术后：上午翻身拍背 + 记录</div><div class="c-check"><span class="s todo">○</span>8 床 · 中风：康复喂食 + 扶行训练</div><div class="c-check"><span class="s todo">○</span>15 床 · 骨折：助行器搀扶如厕</div><div class="c-check"><span class="s todo">○</span>6 床 · 卧床：换防压疮垫 + 皮肤检查</div><div class="c-foot">完成后说一声即可打卡 · 同步班组长看板</div></div>' },
+        { from: 'agent', html: '<div class="c-card"><div class="c-head"><span class="c-ic">💰</span><b>昨日收入 · 变化</b></div><div class="c-big"><div class="v">¥520</div><div class="l">昨日到账 · 环比 ↑8%</div></div><div class="c-kv"><span>本月累计</span><b class="warm">¥6,120</b></div><div class="c-kv"><span>家属评分</span><b class="ok">12 床家属昨晚好评 ★</b></div><div class="c-foot">明细随时语音问我：「昨天的钱怎么算的」</div></div>' },
+        { from: 'agent', text: '今日重点：<b>15 床</b>昨天不肯用助行器，今天下午家属来探视，建议配合家属再带他试一次 💪' },
+        { from: 'user', voice: '知道了，15 床下午家属来了我再带他试一次。', dur: 7 },
+        { from: 'agent', text: '✅ 已记入今日重点，下午 3 点我再提醒您。' },
+        { from: 'agent', sys: '⏰ 21:30 · 今日晚报自动推送' },
+        { from: 'agent', html: '<div class="c-card"><div class="c-head"><span class="c-ic">🌙</span><b>今日完成情况</b><span class="tag teal">晚报</span></div><div class="c-check"><span class="s done">✓</span>12 床 · 翻身拍背 + 记录</div><div class="c-check"><span class="s done">✓</span>8 床 · 喂食 + 扶行训练</div><div class="c-check"><span class="s done">✓</span>15 床 · 助行器如厕（下午家属配合完成 👏）</div><div class="c-check"><span class="s warn">⚠</span>6 床 · 皮肤检查未打卡</div><div class="c-kv"><span>今日收入</span><b class="warm">¥540</b></div><div class="c-btns"><span class="c-btn primary">🎙 说情况补打卡</span></div><div class="c-foot">完成情况实时同步班组长与家属小程序（授权后可见）</div></div>' },
+        { from: 'user', voice: '6 床皮肤检查下午做过了，忘了打卡，皮肤没有破损。', dur: 8 },
+        { from: 'agent', text: '✅ 已补录打卡（标注口述补报）。今日 4 床全部完成，收入 <b>¥540</b>，15 床还破了助行器的关——干得漂亮，晚安 🌙' }
+      ]
+    },
+    {
+      id: 'jiedan', title: '接单派工', chip: '接单派工',
+      intro: 'S-Agent 按病区 / 病种 / 位置就近派单，语音一键接单',
+      steps: [
+        { from: 'agent', html: '<div class="c-card"><div class="c-head"><span class="c-ic warm">📋</span><b>新陪护单 · 就近推荐</b><span class="tag warm">待接单</span></div><div class="c-kv"><span>科室床位</span><b>神经内科 · 12 床</b></div><div class="c-kv"><span>病种类型</span><b>术后康复（骨科转入）</b></div><div class="c-kv"><span>服务时段</span><b>今起 · 白班 12 小时</b></div><div class="c-kv"><span>距您位置</span><b class="teal">同楼层 · 约 40 米</b></div><div class="c-kv"><span>预计日收入</span><b class="warm">¥260 / 天</b></div><div class="c-btns"><span class="c-btn primary">🎙 说「接单」即可</span></div><div class="c-foot">匹配依据：病种胜任力画像 · 距离 · 当日排班</div></div>' },
+        { from: 'user', voice: '接单，我十分钟后到 12 床。', dur: 4 },
+        { from: 'agent', text: '✅ 接单成功！已通知 <b>A 班组长</b>与家属。12 床张叔叔术后第 3 天，重点：<b>上午翻身拍背 + 记录</b>，SOP 已同步到您的今日任务。' },
+        { from: 'agent', html: '<div class="c-card"><div class="c-head"><span class="c-ic">🤝</span><b>顺手一步 · 加家属企微</b></div><div style="font-size:12.5px;color:#555;line-height:1.6">家属李女士已在小程序下单，建议服务开始时引导家属添加您的<b style="color:#C85F30">企业微信</b>，服务小结将自动推送给她。</div><div class="c-btns"><span class="c-btn">出示企微二维码</span></div><div class="c-foot">客户归公司企微 · 人员流动客户不流失</div></div>' },
+        { from: 'agent', sys: '派单 · 接单 · 加微动作已自动写入云端数据库' }
+      ]
+    },
+    {
+      id: 'sop', title: 'SOP 问答', chip: '问护理 SOP',
+      intro: 'RAG 检索护理知识库，语音提问秒级回答',
+      steps: [
+        { from: 'user', voice: '8 床偏瘫病人今天要下床训练，扶行的时候要注意什么？', dur: 8 },
+        { from: 'agent', text: '好的秀兰姐，偏瘫患者<b>扶行训练</b>要点如下 👇' },
+        { from: 'agent', html: '<div class="c-card"><div class="c-head"><span class="c-ic">📖</span><b>偏瘫扶行 SOP · 五步</b><span class="tag teal">知识库</span></div><ol class="c-steps"><li>先坐床沿 2 分钟，确认无头晕再站立</li><li>站患侧后方扶腰带，勿拉拽患侧手臂</li><li>健侧先迈步，口令引导小步慢行</li><li>全程距墙 / 扶手 50cm 内，备轮椅跟随</li><li>出现面色苍白 / 出汗立即坐下并上报</li></ol><div class="c-foot">来源：护理知识库 · 中风偏瘫分册 v3 · 班组长已核</div></div>' },
+        { from: 'user', voice: '如果他说腿麻走不动呢？', dur: 4 },
+        { from: 'agent', text: '立即<b>停止训练、就地坐下</b>，测一次血压并按「异常上报」说给我，我会同步护士站和班组长。记住口诀：<b>宁可少练一次，不可摔倒一回</b>。' },
+        { from: 'agent', sys: '本次问答已计入护工学习画像 · 病种胜任力 +1' }
+      ]
+    },
+    {
+      id: 'ribao', title: '语音日报', chip: '交语音日报',
+      intro: '说 30 秒话，自动结构化成日报，不拍病人只留痕',
+      steps: [
+        { from: 'agent', text: '秀兰姐，到晚班交接时间了，说一段今天的情况给我就行～' },
+        { from: 'user', voice: '12 床上午翻身拍背两次，中午吃了大半碗粥；8 床下午扶着走了 15 分钟，比昨天多 5 分钟；15 床闹情绪不肯用助行器，我劝了一会儿，家属说明天来；6 床换了防压疮垫，皮肤没破。', dur: 32 },
+        { from: 'agent', html: '<div class="c-card"><div class="c-head"><span class="c-ic warm">📝</span><b>今日日报 · 已结构化</b><span class="tag ok">自动生成</span></div><div class="c-check"><span class="s done">✓</span>12 床 · 术后：翻身拍背 ×2 · 进食正常</div><div class="c-check"><span class="s done">✓</span>8 床 · 中风：扶行 15 分钟（环比 +5min）</div><div class="c-check"><span class="s warn">⚠</span>15 床 · 骨折：拒用助行器 → 已转班组长跟进</div><div class="c-check"><span class="s done">✓</span>6 床 · 卧床：防压疮垫更换 · 皮肤完好</div><div class="c-btns"><span class="c-btn primary">确认提交</span><span class="c-btn ghost">改一下</span></div><div class="c-foot">入库 → 班组长看板 · 家属小程序（授权后可见）</div></div>' },
+        { from: 'user', voice: '没问题，提交。', dur: 2 },
+        { from: 'agent', text: '✅ 日报已入库。8 床康复进步明显，我给家属小程序推了一条<b>服务小结</b>；15 床的情况已提醒班组长明天重点看看。今天辛苦啦 🌟' }
+      ]
+    },
+    {
+      id: 'neirong', title: '内容转发', chip: '发条朋友圈',
+      intro: '内容中台产内容 → LLM 本地化改写 → 一键转发即引流',
+      steps: [
+        { from: 'agent', html: '<div class="c-card"><div class="c-head"><span class="c-ic">📰</span><b>今日推荐素材 · 对症推送</b><span class="tag teal">内容中台</span></div><div style="font-size:12.5px;color:#555;line-height:1.6;background:#F7F9F9;border-radius:8px;padding:9px 11px">《中风康复黄金 90 天：家属最容易踩的 5 个坑》<br><span style="color:#999;font-size:11.5px">图文 · 已过医疗话术双审 · 匹配您 8 床家属标签</span></div><div class="c-btns"><span class="c-btn">预览全文</span><span class="c-btn primary">帮我改开场白</span></div><div class="c-foot">文案团队出品 · 合规审核通过 · 不露病人信息</div></div>' },
+        { from: 'user', voice: '帮我改个开场白，亲切一点，说是我带过几十个中风病人的经验。', dur: 9 },
+        { from: 'agent', text: '给您改好了 👇 直接长按复制：<br><br>「带过 30 多位中风叔叔阿姨，最心疼的就是家属走弯路。这篇讲的 5 个坑，我在病房里天天见——尤其第 3 个，很多人都做反了。有问题随时问我 😊」' },
+        { from: 'agent', html: '<div class="c-card"><div class="c-head"><span class="c-ic warm">📤</span><b>一键转发</b></div><div class="c-btns"><span class="c-btn primary">转发到朋友圈</span><span class="c-btn">发给 8 床家属</span></div><div class="c-foot">转发埋点回流 → 曝光 / 咨询计入引流积分</div></div>' },
+        { from: 'agent', sys: '昨日您转发的科普带来 2 位家属咨询 · 引流积分 +20' }
+      ]
+    },
+    {
+      id: 'shouru', title: '收入积分', chip: '查这个月收入',
+      intro: '服务 · 跑腿 · 引流自动计分，一句话对账',
+      steps: [
+        { from: 'user', voice: '我这个月一共挣了多少？都是哪来的？', dur: 5 },
+        { from: 'agent', html: '<div class="c-card"><div class="c-head"><span class="c-ic warm">💰</span><b>王秀兰 · 7 月收入账单</b><span class="tag warm">实时</span></div><div class="c-big"><div class="v">¥6,120</div><div class="l">本月累计 · 截至今日</div></div><div class="c-bars"><div class="b-row"><span>陪护服务</span><span class="b-track"><span class="b-fill warm" style="width:88%"></span></span><span class="b-val">¥5,390</span></div><div class="b-row"><span>跑腿增值</span><span class="b-track"><span class="b-fill" style="width:9%"></span></span><span class="b-val">¥430</span></div><div class="b-row"><span>转介奖励</span><span class="b-track"><span class="b-fill" style="width:6%"></span></span><span class="b-val">¥300</span></div></div><div class="c-kv"><span>累计总收入</span><b>¥68,400</b></div><div class="c-kv"><span>家属评分</span><b class="ok">4.9 ★（312 人服务）</b></div><div class="c-foot">数据来源：云端数据库 · 护工个人看板</div></div>' },
+        { from: 'user', voice: '积分呢？够不够评这个季度的优秀护工？', dur: 5 },
+        { from: 'agent', text: '您当前 <b>1,840 分</b>，班组排名 <b>第 2</b>，季度优秀线是 1,600 分——<b>稳了</b>💪。距「骨干护工」晋级还差 1 个康复类病种认证，要不要我把课程安排到明天午休？' },
+        { from: 'user', voice: '好，安排。', dur: 2 },
+        { from: 'agent', text: '✅ 已安排《骨科术后康复照护》微课到明天 12:30，学完自动计入晋级档案。' }
+      ]
+    },
+    {
+      id: 'paotui', title: '跑腿接单', chip: '空闲接跑腿',
+      intro: '空闲时段 = 平台闲置运力，AI 按位置自动派跑腿单',
+      steps: [
+        { from: 'agent', html: '<div class="c-card"><div class="c-head"><span class="c-ic">🛵</span><b>顺路跑腿单 · 空闲推荐</b><span class="tag gold">增值</span></div><div class="c-kv"><span>任务</span><b>住院部药房取药 → 送 3F 病区</b></div><div class="c-kv"><span>顺路指数</span><b class="teal">高 · 您 14:00-15:00 空闲</b></div><div class="c-kv"><span>酬劳</span><b class="warm">¥15 · 完成即结</b></div><div class="c-btns"><span class="c-btn primary">🎙 说「接跑腿」</span><span class="c-btn ghost">跳过</span></div><div class="c-foot">仅空闲时段派单 · 院内近距离 · 不影响陪护本职</div></div>' },
+        { from: 'user', voice: '接跑腿。', dur: 2 },
+        { from: 'agent', text: '✅ 已接单。取药凭证码 <b>8867</b>，送达后对家属说「完成」即可留痕结算。' },
+        { from: 'user', voice: '送到了，完成。', dur: 3 },
+        { from: 'agent', text: '👏 本单完成，<b>¥15</b> 已入账。您今天跑腿 2 单 +¥27，本月跑腿累计 <b>¥430</b>——空闲不空转！' },
+        { from: 'agent', sys: '跑腿轨迹与交接留痕已入库 · 责任可追溯' }
+      ]
+    }
+  ]
+});
+</script>
+</body>
+</html>

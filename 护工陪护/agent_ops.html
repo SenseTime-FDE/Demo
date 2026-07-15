@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>运营中枢 S-Agent · 内容中台与私域调度 | 陪护 AI 平台原型</title>
+<link rel="stylesheet" href="assets/style.css">
+<style>
+/* ---- agent_ops 页面专属样式（前缀 ops-） ---- */
+.ops-strip { display: flex; gap: 14px; flex-wrap: wrap; align-items: stretch; margin: -6px 0 28px; }
+.ops-stat {
+  background: var(--white); border: 1px solid var(--line); border-radius: 12px;
+  padding: 10px 18px 11px; box-shadow: var(--shadow-sm); min-width: 158px;
+}
+.ops-stat .k { font-size: 11px; color: var(--muted); display: flex; align-items: center; gap: 6px; white-space: nowrap; }
+.ops-stat .v { font-size: 19px; font-weight: 800; color: var(--ink); font-variant-numeric: tabular-nums; margin-top: 2px; }
+.ops-stat .v small { font-size: 11px; color: var(--muted); font-weight: 500; margin-left: 4px; }
+.ops-stat .v .up { color: var(--ok); font-size: 12px; font-weight: 700; margin-left: 4px; }
+.ops-live { width: 7px; height: 7px; border-radius: 50%; background: var(--ok); flex: none; animation: opsPulse 1.6s ease-in-out infinite; }
+@keyframes opsPulse { 0%, 100% { opacity: 1; } 50% { opacity: .25; } }
+.ops-strip-note { align-self: center; font-size: 11px; color: var(--muted); line-height: 1.5; max-width: 190px; }
+.ops-strip-note b { color: var(--teal-d); }
+</style>
+</head>
+<body>
+
+<header class="topnav">
+  <div class="brand">
+    <img src="assets/st_logo.png" alt="商汤科技">
+    <span class="divider"></span>
+    <span class="name">陪护 AI 平台<small>AI CARE PLATFORM · 原型演示</small></span>
+  </div>
+  <nav>
+    <a href="index.html">方案总览</a>
+    <a href="agent_hugong.html">护工 Agent</a>
+    <a href="agent_banzuzhang.html">班组长 Agent</a>
+    <a href="agent_manager.html">管理者 Agent</a>
+    <a href="agent_ops.html" class="active"><span class="dot"></span>运营 Agent</a>
+    <a href="miniapp.html">客户小程序</a>
+    <a href="bi.html">BI 数据看板</a>
+  </nav>
+</header>
+
+<main class="page">
+  <div class="page-head">
+    <div class="eyebrow">Operations Agent · Content Hub &amp; Private Domain</div>
+    <h1>运营中枢 Agent：<span class="hl">流水线批量产内容</span>，私域触达全程合规</h1>
+    <p class="sub">运营中心不再一篇一篇写、一群一群发——后台 Agent 把<b>选题 → 创作 → 双审 → 分发 → 回流</b>做成内容流水线，私域触达全部经过<b>频控与合规检查</b>后由旅程引擎自动调度。左侧手机是运营专员<b>陈晓</b>与 S-Agent 运营中枢的企业微信对话，点上方场景可交互演示。</p>
+  </div>
+
+  <div class="ops-strip">
+    <div class="ops-stat"><div class="k"><span class="ops-live"></span>今日内容触达</div><div class="v">9,600<small>人次</small></div></div>
+    <div class="ops-stat"><div class="k"><span class="ops-live"></span>私域新增好友</div><div class="v">+386<small>人 / 日</small></div></div>
+    <div class="ops-stat"><div class="k"><span class="ops-live"></span>个微 → 企微累计迁移</div><div class="v">8.6 万<small>人 · 目标百万存量</small></div></div>
+    <div class="ops-stat"><div class="k"><span class="ops-live"></span>在跑客户旅程</div><div class="v">3<small>条 · 频控中</small></div></div>
+    <div class="ops-strip-note">▲ 后台 Agent <b>自动调度</b>实时汇总，每日 9:00 主动推送运营日报（数据为目标态示意）</div>
+  </div>
+
+  <div class="split">
+    <!-- 左：手机 -->
+    <div class="phone-wrap">
+      <div id="phone-slot"></div>
+      <p class="phone-caption">▲ 可交互原型 · 点上方场景或气泡下方 <b>🎙 快捷话术</b> 切换演示</p>
+    </div>
+
+    <!-- 右：说明 -->
+    <div>
+      <div class="panel">
+        <h3>运营中枢 · 六项核心能力</h3>
+        <div class="cap-grid">
+          <div class="cap warm"><div class="ic">🔥</div><b>热点选题</b><span>全网护工 SOP 问答热词聚类，家属真问题变选题库</span></div>
+          <div class="cap"><div class="ic">✍️</div><b>批量创作</b><span>LLM + 多模态产图文 / 图卡 / 数字人短视频，团队把关</span></div>
+          <div class="cap warm"><div class="ic">🛡</div><b>合规双审</b><span>医疗话术 + 隐私脱敏双审，不露病人、过审才分发</span></div>
+          <div class="cap"><div class="ic">📤</div><b>标签分发</b><span>按护工在护病种标签定向推送，开场白自动本地化</span></div>
+          <div class="cap warm"><div class="ic">🧭</div><b>旅程调度</b><span>复购唤醒 / 补货提醒自动跟进，触达前先过频控</span></div>
+          <div class="cap"><div class="ic">📈</div><b>数据回流</b><span>领取 / 转发 / 咨询 / 下单全链路回流，次日自动复盘</span></div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <h3>内容流水线 · 公司产内容，护工只做轻活</h3>
+        <div class="flow">
+          <div class="f-step"><div class="n">1</div><b>选题</b><span>按病种 / 家属高频问题定选题库</span></div>
+          <div class="f-arrow">→</div>
+          <div class="f-step"><div class="n">2</div><b>创作</b><span>LLM + 多模态产文案 / 图卡 / 短视频</span></div>
+          <div class="f-arrow">→</div>
+          <div class="f-step hot"><div class="n">3</div><b>合规双审</b><span>医疗话术 + 隐私脱敏，不露病人</span></div>
+          <div class="f-arrow">→</div>
+          <div class="f-step"><div class="n">4</div><b>推送护工</b><span>内容库分标签推到护工 AI 助理</span></div>
+          <div class="f-arrow">→</div>
+          <div class="f-step hot"><div class="n">5</div><b>一键转发</b><span>护工改一句开场发微信 / 朋友圈</span></div>
+        </div>
+        <p class="note"><b>分工：</b>护工只做轻活——改一句本地化开场即可转发；抖音 / 小红书 / 点评等公域平台由内容中台<b>官号统一运营</b>，不占护工时间。文案 / 图片 / 视频由专业团队 + AI 协同产出，视频含喂药翻身 SOP 短视频与数字人口播。</p>
+      </div>
+
+      <div class="panel">
+        <h3>私域打法五步 · 企微 CRM 承载</h3>
+        <div class="flow">
+          <div class="f-step hot"><div class="n">1</div><b>加微</b><span>服务中引家属加企微，语音登记回写</span></div>
+          <div class="f-arrow">→</div>
+          <div class="f-step"><div class="n">2</div><b>分层</b><span>按病种 / 意向 / 复购意愿自动打标签</span></div>
+          <div class="f-arrow">→</div>
+          <div class="f-step"><div class="n">3</div><b>内容触达</b><span>按标签精准推科普，合规频次</span></div>
+          <div class="f-arrow">→</div>
+          <div class="f-step"><div class="n">4</div><b>复购唤醒</b><span>旅程自动跟进，商城推康复耗材</span></div>
+          <div class="f-arrow">→</div>
+          <div class="f-step hot"><div class="n">5</div><b>转介</b><span>老带新给积分，识别高意向家属</span></div>
+        </div>
+        <div style="height:14px"></div>
+        <div class="cap-grid">
+          <div class="cap"><div class="ic">🏷</div><b>客户标签画像</b><span>按病种 / 意向自动打标签分层</span></div>
+          <div class="cap warm"><div class="ic">📮</div><b>SOP 合规触达</b><span>合规频次内推送（每客每周 ≤N 次），科普为主</span></div>
+          <div class="cap"><div class="ic">🧭</div><b>客户旅程管理</b><span>咨询到复购全流程自动跟进</span></div>
+          <div class="cap warm"><div class="ic">🔁</div><b>数据回流沉淀</b><span>互动数据自动回流，持续补全客户画像</span></div>
+        </div>
+        <p class="note"><b>私域内核：</b>加一个企微，多一份可持续经营的私域客户资产——关系归公司、护工流动客户不流失。</p>
+      </div>
+
+      <div class="panel">
+        <h3>全程合规 · 红线内建为系统规则</h3>
+        <table class="mini-table">
+          <tr><th>红线</th><th>系统落地</th><th>机制</th></tr>
+          <tr><td><b>触达频控</b></td><td>每客每周 ≤2 次，超频自动拦截顺延</td><td><span class="tag teal">系统强制</span></td></tr>
+          <tr><td><b>内容口径</b></td><td>科普为主、不硬广、不含诊断建议</td><td><span class="tag warm">话术审</span></td></tr>
+          <tr><td><b>病人隐私</b></td><td>不拍病人、不露病人信息，素材脱敏入库</td><td><span class="tag warm">脱敏审</span></td></tr>
+          <tr><td><b>荐品边界</b></td><td>仅康复护理 / 适老用品，非药非诊疗、建议非医嘱</td><td><span class="tag gold">SKU 白名单</span></td></tr>
+          <tr><td><b>数据采集</b></td><td>家属授权 + 最小必要，数据不出域、只出价值</td><td><span class="tag ok">授权制</span></td></tr>
+        </table>
+        <p class="note"><b>合规不是口号，是代码：</b>频控、双审、SKU 白名单全部内建在分发与旅程引擎里——未过审内容发不出去、超频触达自动拦截，运营想违规系统也不放行。</p>
+      </div>
+    </div>
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="foot-brand"><img src="assets/st_logo.png" alt="商汤科技"></div>
+  <div><b>商汤科技 · 大模型生态渠道部</b> — AI 技术底座 · 高保真交互原型（页面数据均为目标态示意，非真实经营数据）</div>
+</footer>
+
+<script src="assets/chat.js"></script>
+<script>
+PeihuChat.mount(document.getElementById('phone-slot'), {
+  contact: { name: 'S-Agent 运营中枢', corp: '@安心陪护', sub: '企业微信 · 商汤 AI 技术底座' },
+  agent: { name: 'S-Agent 运营中枢', avatar: 'S' },
+  user: { name: '陈晓', avatar: '陈' },
+  scenarios: [
+    {
+      id: 'xuanti', title: '热点选题', chip: '出本周科普选题',
+      intro: '后台 Agent 每日 9:00 主动推运营日报；选题来自全网护工 SOP 问答热词聚类',
+      steps: [
+        { from: 'agent', html: '<div class="c-card"><div class="c-head"><span class="c-ic">📡</span><b>运营日报 · 后台自动调度</b><span class="tag teal">每日 9:00</span></div><div class="c-kv"><span>今日内容触达</span><b>9,600 人次</b></div><div class="c-kv"><span>私域新增好友</span><b class="ok">+386 人</b></div><div class="c-kv"><span>个微→企微累计迁移</span><b class="teal">8.6 万人 · 持续中</b></div><div class="c-kv"><span>在跑客户旅程</span><b>3 条 · 频控正常</b></div><div class="c-foot">云端数据库自动汇总 · 目标态示意</div></div>' },
+        { from: 'user', voice: '这周家属问得最多的问题是什么？按 Top3 出科普。', dur: 7 },
+        { from: 'agent', text: '已聚类全网 <b>3000 名护工</b>本周的 SOP 问答热词，家属最关心的 Top3 如下 👇' },
+        { from: 'agent', html: '<div class="c-card"><div class="c-head"><span class="c-ic warm">🔥</span><b>本周科普选题 · Top3</b><span class="tag warm">热词聚类</span></div><div class="c-kv"><span>① 中风居家康复</span><b class="warm">问答 412 次 ↑</b></div><div class="c-kv"><span>② 术后营养搭配</span><b>问答 358 次</b></div><div class="c-kv"><span>③ 防压疮护理</span><b>问答 291 次</b></div><div class="c-btns"><span class="c-btn primary">🎙 说「排队列」即安排创作</span></div><div class="c-foot">来源：全网护工 SOP 问答热词聚类 · 目标态示意</div></div>' },
+        { from: 'user', voice: '可以，三个都排进创作队列，这周内出。', dur: 6 },
+        { from: 'agent', text: '✅ 已排入<b>创作队列</b>：每题各产 1 篇图文，《中风居家康复》加做 1 条数字人口播短视频。完成后自动进合规双审，过审我再叫你。' },
+        { from: 'agent', sys: '选题 → 创作队列已写入内容中台 · 全程留痕' }
+      ]
+    },
+    {
+      id: 'liushui', title: '内容流水线', chip: '看创作进度',
+      intro: '选题 → 创作（LLM + 多模态）→ 合规双审 → 入内容库，全程流水线',
+      steps: [
+        { from: 'user', voice: '昨天排的那批内容做完了吗？到哪一步了？', dur: 6 },
+        { from: 'agent', html: '<div class="c-card"><div class="c-head"><span class="c-ic">✍️</span><b>创作完成 · 待入库 4 件</b><span class="tag teal">LLM+多模态</span></div><div class="c-check"><span class="s done">✓</span>图文《中风居家康复黄金 90 天》</div><div class="c-check"><span class="s done">✓</span>图文《术后营养：家属最常犯的 3 个错》</div><div class="c-check"><span class="s done">✓</span>图文《防压疮护理：2 小时翻身法》</div><div class="c-check"><span class="s done">✓</span>数字人口播短视频《中风康复居家 5 问》60″</div><div class="c-foot">内容中台 · 文案 / 设计 / 视频团队 + LLM 协同</div></div>' },
+        { from: 'agent', html: '<div class="c-card"><div class="c-head"><span class="c-ic warm">🛡</span><b>合规双审 · 全部通过</b><span class="tag ok">双审</span></div><div class="c-check"><span class="s done">✓</span>医疗话术审：无诊断建议 · 科普口径</div><div class="c-check"><span class="s done">✓</span>隐私脱敏审：不露病人 · 素材已脱敏</div><div class="c-btns"><span class="c-btn primary">一键入内容库</span><span class="c-btn ghost">退回修改</span></div><div class="c-foot">双审通过才可分发 · 未过审内容系统自动退回</div></div>' },
+        { from: 'user', voice: '好，入库，明天按标签推下去。', dur: 5 },
+        { from: 'agent', text: '✅ 4 件内容已入<b>内容库</b>并打好病种标签（中风 ×2 · 术后 ×1 · 卧床 ×1），明早 9:00 按护工在护病种标签自动分发。抖音 / 小红书 / 点评版本由中台官号另行排期，不占护工时间。' },
+        { from: 'agent', sys: '入库 · 打标 · 分发排期已写入云端数据库' }
+      ]
+    },
+    {
+      id: 'fenfa', title: '标签分发', chip: '按标签推内容',
+      intro: '内容按病种标签推给对应护工，次日回流数据自动复盘',
+      steps: [
+        { from: 'user', voice: '《中风居家康复》那篇，推给带中风病人的护工。', dur: 6 },
+        { from: 'agent', html: '<div class="c-card"><div class="c-head"><span class="c-ic">📤</span><b>定向分发 · 已就绪</b><span class="tag teal">病种标签</span></div><div class="c-kv"><span>内容</span><b>《中风居家康复黄金 90 天》</b></div><div class="c-kv"><span>命中人群</span><b class="warm">214 位护工 · 在护中风/偏瘫</b></div><div class="c-kv"><span>分发方式</span><b>推送至护工 S-Agent</b></div><div class="c-kv"><span>开场白</span><b class="teal">LLM 按在护病人本地化改写</b></div><div class="c-btns"><span class="c-btn primary">🎙 说「发」即分发</span></div><div class="c-foot">匹配依据：护工在护病种标签 · 云端数据库</div></div>' },
+        { from: 'user', voice: '发。', dur: 2 },
+        { from: 'agent', text: '✅ 已推送 <b>214 位护工</b>。每人收到的开场白已按其在护病人情况<b>本地化改写</b>，护工改一句就能转发。明早 9:00 给你回流数据。' },
+        { from: 'agent', sys: '次日 9:00 · 分发回流数据自动推送' },
+        { from: 'agent', html: '<div class="c-card"><div class="c-head"><span class="c-ic warm">📈</span><b>分发回流 · 次日复盘</b><span class="tag warm">自动回流</span></div><div class="c-bars"><div class="b-row"><span>领取素材</span><span class="b-track"><span class="b-fill" style="width:87%"></span></span><span class="b-val">186 人</span></div><div class="b-row"><span>编辑转发</span><span class="b-track"><span class="b-fill warm" style="width:71%"></span></span><span class="b-val">152 人</span></div><div class="b-row"><span>带来咨询</span><span class="b-track"><span class="b-fill warm" style="width:17%"></span></span><span class="b-val">37 条</span></div></div><div class="c-kv"><span>转化链路</span><b>领取 87% → 转发 71%</b></div><div class="c-foot">一键转发埋点 + 链接回流 · 目标态示意</div></div>' },
+        { from: 'agent', text: '转发率 <b>71%</b>，高于近 30 天均值。37 条家属咨询已自动分派给对应护工的 S-Agent 跟进，全部计入护工引流积分。' }
+      ]
+    },
+    {
+      id: 'huanxing', title: '复购唤醒', chip: '跑一波复购唤醒',
+      intro: '客户旅程自动跟进：人群圈选 → 频控检查 → 科普为主话术触达',
+      steps: [
+        { from: 'user', voice: '给出院满 30 天的骨折客户跑一波复购唤醒。', dur: 6 },
+        { from: 'agent', html: '<div class="c-card"><div class="c-head"><span class="c-ic">🧭</span><b>复购唤醒旅程 · 待确认</b><span class="tag gold">客户旅程</span></div><div class="c-kv"><span>圈选人群</span><b>出院满 30 天 · 骨折客户 1,240 人</b></div><div class="c-kv"><span>频控检查</span><b class="ok">✓ 通过 · 每客每周 ≤2 次</b></div><div class="c-kv"><span>话术策略</span><b>康复科普为主 · 不硬广</b></div><div class="c-kv"><span>荐品挂载</span><b class="teal">助行器 · 拐杖 · 护具（建议非医嘱）</b></div><div class="c-btns"><span class="c-btn primary">🎙 说「启动」即执行</span><span class="c-btn ghost">先看话术</span></div><div class="c-foot">企微 CRM 旅程引擎 · 触达前自动过频控</div></div>' },
+        { from: 'user', voice: '启动，跑三天，每天给我看结果。', dur: 5 },
+        { from: 'agent', text: '✅ 旅程已启动：D1 康复科普 → D3 护理提醒 + 对症荐品，本周已触达 2 次的客户<b>自动跳过顺延</b>。执行结果每天 18:00 推给你。' },
+        { from: 'agent', sys: '第 3 天 18:00 · 旅程执行完毕，结果自动推送' },
+        { from: 'agent', html: '<div class="c-card"><div class="c-head"><span class="c-ic warm">📊</span><b>旅程结果 · 3 天</b><span class="tag ok">已完成</span></div><div class="c-bars"><div class="b-row"><span>成功触达</span><span class="b-track"><span class="b-fill" style="width:95%"></span></span><span class="b-val">1,186</span></div><div class="b-row"><span>有效回复</span><span class="b-track"><span class="b-fill warm" style="width:17%"></span></span><span class="b-val">214</span></div><div class="b-row"><span>复购下单</span><span class="b-track"><span class="b-fill warm" style="width:5%"></span></span><span class="b-val">23 单</span></div></div><div class="c-kv"><span>频控拦截</span><b>54 人 · 自动顺延下周</b></div><div class="c-foot">企微回传 + 小程序埋点 · 目标态示意</div></div>' },
+        { from: 'agent', text: '23 单复购集中在<b>助行器与护具</b>，符合骨折病种预期。未回复客户不再追发，14 天后自动进入下一轮科普旅程。' }
+      ]
+    },
+    {
+      id: 'fenceng', title: '客户分层', chip: '看私域客户分布',
+      intro: '私域客户结构随口问：企微标签实时聚合，一句话出分布',
+      steps: [
+        { from: 'user', voice: '现在私域客户按病种分布是什么样？', dur: 5 },
+        { from: 'agent', html: '<div class="c-card"><div class="c-head"><span class="c-ic">👥</span><b>私域客户 · 病种分布</b><span class="tag teal">实时标签</span></div><div class="c-bars"><div class="b-row"><span>术后康复</span><span class="b-track"><span class="b-fill" style="width:92%"></span></span><span class="b-val">34%</span></div><div class="b-row"><span>中风偏瘫</span><span class="b-track"><span class="b-fill" style="width:60%"></span></span><span class="b-val">22%</span></div><div class="b-row"><span>骨折</span><span class="b-track"><span class="b-fill" style="width:49%"></span></span><span class="b-val">18%</span></div><div class="b-row"><span>长期卧床</span><span class="b-track"><span class="b-fill warm" style="width:41%"></span></span><span class="b-val">15%</span></div><div class="b-row"><span>慢病照护</span><span class="b-track"><span class="b-fill warm" style="width:30%"></span></span><span class="b-val">11%</span></div></div><div class="c-foot">企微 CRM 标签聚合 · 目标态示意</div></div>' },
+        { from: 'agent', text: '提示：<b>长期卧床 + 慢病</b>两类客户的耗材复购周期最短——防压疮气垫 / 护理垫 / 血糖仪按月复购，是高复购潜力人群，建议单独建旅程。' },
+        { from: 'user', voice: '行，把这两类圈出来，下周做一轮耗材补货提醒。', dur: 7 },
+        { from: 'agent', html: '<div class="c-card"><div class="c-head"><span class="c-ic">🧭</span><b>新旅程 · 已排期</b><span class="tag gold">下周一启动</span></div><div class="c-kv"><span>圈选人群</span><b>长期卧床 + 慢病 · 约占私域 26%</b></div><div class="c-kv"><span>话术策略</span><b>补货提醒 + 护理科普</b></div><div class="c-kv"><span>荐品挂载</span><b class="teal">防压疮气垫 · 护理垫 · 血糖仪</b></div><div class="c-kv"><span>频控检查</span><b class="ok">启动前自动校验</b></div><div class="c-foot">客户旅程管理 · 荐品为建议非医嘱、遵医嘱为准</div></div>' },
+        { from: 'agent', sys: '人群包 · 旅程排期已写入云端数据库' }
+      ]
+    },
+    {
+      id: 'zhuanjie', title: '转介活动', chip: '看老带新效果',
+      intro: '老带新给积分；S-Agent 从企微会话识别高意向家属，推给护工跟进',
+      steps: [
+        { from: 'user', voice: '这个月老带新活动效果怎么样？', dur: 4 },
+        { from: 'agent', html: '<div class="c-card"><div class="c-head"><span class="c-ic warm">🎁</span><b>老带新 · 本月战报</b><span class="tag warm">转介活动</span></div><div class="c-big"><div class="v">47 单</div><div class="l">本月转介绍新签 · 截至今日</div></div><div class="c-kv"><span>参与老客</span><b>132 人</b></div><div class="c-kv"><span>积分发放</span><b class="warm">9,400 分（+200/单）</b></div><div class="c-kv"><span>统计口径</span><b>带老客推荐标记的新签订单</b></div><div class="c-foot">小程序埋点 + 企微回传 · 目标态示意</div></div>' },
+        { from: 'agent', text: '另外，S-Agent 从企微会话中识别出 <b>26 位高意向家属</b>（多次咨询价格、询问出院后陪护安排），清单已按客户归属推给对应护工跟进 👇' },
+        { from: 'agent', html: '<div class="c-card"><div class="c-head"><span class="c-ic">🔍</span><b>高意向家属 · 已分派</b><span class="tag teal">S-Agent 识别</span></div><div class="c-kv"><span>王**（术后）</span><b>已派 · 护工李桂芳</b></div><div class="c-kv"><span>刘**（卧床）</span><b>已派 · 护工王秀兰</b></div><div class="c-kv"><span>陈**（中风）</span><b>已派 · 护工刘玉英</b></div><div class="c-kv"><span>其余 23 位</span><b class="ok">按归属自动分派 ✓</b></div><div class="c-foot">识别依据：企微会话意向信号 · 展示已做隐私脱敏</div></div>' },
+        { from: 'user', voice: '好。跟进话术记得用服务回访的口径，别像推销。', dur: 7 },
+        { from: 'agent', text: '✅ 已在派单附言里统一话术口径：<b>先回访康复情况，再按需提陪护安排</b>，全程科普口吻不硬广。跟进结果 48 小时内回流，我汇总后推给你。' },
+        { from: 'agent', sys: '高意向识别 · 分派 · 话术口径已留痕入库' }
+      ]
+    }
+  ]
+});
+</script>
+</body>
+</html>
