@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>君度智链 · 区域作战台 · 陈皓</title>
+<link rel="stylesheet" href="assets/style.css" />
+<style>
+/* ===== 区域作战台 · 页面专属样式（仅使用全站 CSS 变量） ===== */
+
+/* A/B/C 结构卡 */
+.abc-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 16px; }
+.abc { border: 1px solid var(--line); border-radius: 12px; padding: 10px 12px; text-align: center; background: var(--bg); }
+.abc .cls { display: inline-flex; align-items: center; justify-content: center; width: 20px; height: 20px; border-radius: 6px; font-size: 11px; font-weight: 800; color: #fff; margin-bottom: 4px; }
+.abc.a { background: linear-gradient(160deg, #fff, var(--cream)); border-color: var(--warm-l); }
+.abc.a .cls { background: var(--warm); }
+.abc.b { background: linear-gradient(160deg, #fff, rgba(169,126,47,.10)); border-color: rgba(169,126,47,.35); }
+.abc.b .cls { background: var(--gold); }
+.abc.c { background: linear-gradient(160deg, #fff, var(--sky)); border-color: var(--sky2); }
+.abc.c .cls { background: var(--teal); }
+.abc .v { font-size: 21px; font-weight: 800; color: var(--ink); font-variant-numeric: tabular-nums; line-height: 1.2; }
+.abc .l { font-size: 11px; color: var(--muted); }
+
+/* 分级动销率条 */
+.dx-row { display: grid; grid-template-columns: 74px 1fr 44px; gap: 10px; align-items: center; font-size: 12.5px; color: var(--sub); margin-bottom: 9px; }
+.dx-row .pbar { width: 100%; margin: 0; vertical-align: middle; }
+.dx-row .v { text-align: right; font-weight: 700; color: var(--ink); font-variant-numeric: tabular-nums; }
+
+/* 面板内分隔小标题 */
+.sub-h { font-size: 12px; font-weight: 700; color: var(--teal-d); letter-spacing: 1px; margin: 16px 0 8px; padding-top: 14px; border-top: 1px dashed var(--line); display: flex; align-items: center; gap: 6px; }
+.sub-h::before { content: ""; width: 5px; height: 5px; border-radius: 50%; background: var(--gold); }
+
+/* 品鉴会日历（竖排 7 格） */
+.cal { display: flex; flex-direction: column; gap: 7px; }
+.cal-row { display: grid; grid-template-columns: 74px 1fr; gap: 10px; align-items: center; }
+.cal-day { text-align: right; font-size: 11px; color: var(--muted); line-height: 1.35; }
+.cal-day b { display: block; font-size: 12.5px; color: var(--ink); }
+.cal-evt { background: var(--sky); border: 1px solid var(--sky2); border-radius: 10px; padding: 7px 12px; font-size: 12.5px; font-weight: 600; color: var(--teal-d); display: flex; align-items: center; gap: 8px; }
+.cal-evt .tag { margin-left: auto; flex: none; }
+.cal-evt.today { background: var(--cream); border-color: var(--warm-l); color: var(--warm-d); }
+.cal-evt.new { background: rgba(169,126,47,.10); border-color: rgba(169,126,47,.4); color: var(--gold); animation: msgIn .3s ease both; }
+.cal-add { border: 1.5px dashed var(--card-b); border-radius: 10px; padding: 7px 12px; font-size: 12.5px; color: var(--muted); text-align: center; cursor: pointer; transition: all .15s; }
+.cal-add:hover { border-color: var(--gold); color: var(--gold); background: rgba(169,126,47,.06); }
+
+/* 团队 313/333 行 */
+.team-list { display: flex; flex-direction: column; }
+.trow { display: grid; grid-template-columns: 148px repeat(3, 1fr) 62px; gap: 16px; align-items: center; padding: 11px 8px; border-bottom: 1px solid var(--line); border-radius: 10px; transition: background .12s; }
+.trow:last-child { border-bottom: none; }
+.trow:hover { background: var(--bg); }
+.trow .who b { font-size: 13.5px; color: var(--ink); }
+.trow .who .rk { display: inline-flex; align-items: center; justify-content: center; width: 18px; height: 18px; border-radius: 6px; background: var(--sky); color: var(--teal-d); font-size: 10.5px; font-weight: 800; margin-right: 6px; vertical-align: 1px; }
+.trow .who .medal { font-size: 14px; margin-right: 4px; }
+.trow .who .tag { display: inline-block; margin-top: 4px; }
+.m-cell .m-l { display: flex; justify-content: space-between; font-size: 11px; color: var(--muted); }
+.m-cell .m-l b { color: var(--ink); font-weight: 600; font-variant-numeric: tabular-nums; }
+.m-cell .pbar { display: block; width: 100%; margin: 4px 0 0; }
+.trow .rate { text-align: right; font-size: 16.5px; font-weight: 800; color: var(--teal-d); font-variant-numeric: tabular-nums; }
+.trow .rate small { display: block; font-size: 10px; font-weight: 500; color: var(--muted); }
+.trow.top .rate { color: var(--warm-d); }
+
+/* 发布监督表：待补发状态 + 可点提示 */
+.pub-grid .c.miss { cursor: pointer; transition: transform .1s; }
+.pub-grid .c.miss:hover { transform: scale(1.06); box-shadow: 0 0 0 1.5px var(--warm-l); }
+.pub-grid .c.pend { background: rgba(169,126,47,.14); color: var(--gold); cursor: default; }
+
+/* 轻提示 */
+.toast { position: fixed; left: 50%; bottom: 36px; transform: translateX(-50%) translateY(16px); background: var(--ink); color: #fff; font-size: 13px; padding: 10px 20px; border-radius: 999px; box-shadow: var(--shadow); opacity: 0; pointer-events: none; transition: all .28s ease; z-index: 200; max-width: 82vw; }
+.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+/* 版式微调 */
+.blk { margin-top: 18px; }
+.col-stack > .panel + .panel { margin-top: 18px; }
+@media (max-width: 1080px) {
+  .trow { grid-template-columns: 120px repeat(3, 1fr) 54px; gap: 10px; }
+}
+@media (max-width: 760px) {
+  .trow { grid-template-columns: 1fr 1fr; }
+  .trow .who, .trow .rate { grid-column: span 1; }
+}
+</style>
+</head>
+<body>
+
+<header class="topnav">
+  <div class="brand">
+    <img src="assets/st_logo.png" alt="商汤科技" />
+    <span class="divider"></span>
+    <span class="name">君度智链 · 双引擎平台<small>JUNDU CHAIN · DUAL ENGINE PROTOTYPE</small></span>
+  </div>
+  <nav>
+    <a href="index.html">总览</a>
+    <a href="plan.html">方案全景</a>
+    <a href="boss.html">总部驾驶舱</a>
+    <a class="active" href="region.html"><span class="dot"></span>区域作战台</a>
+    <a href="frontline.html">一线小程序</a>
+    <a href="distill.html">蒸馏工厂</a>
+  </nav>
+</header>
+
+<main class="page">
+
+  <!-- ===== 页头 ===== -->
+  <div class="page-head">
+    <div class="eyebrow">BATTLE DESK · 区域作战台</div>
+    <h1>杭州样板市场：<span class="hl">过程数据管到每一个动作</span></h1>
+    <p class="sub"><b>陈皓</b>（浙江大区 · 杭州城市经理）的层级视角 —— <b id="campLabel">冰萃一夏 · 杭州样板市场战役（6.22 – 7.31）</b>进行到第 21 天：团队 8 名业务员、终端 1,286 家。作战地图上看结构、盯过程，纠偏任务由 AI 生成、一键派单、全程留痕。</p>
+  </div>
+
+  <!-- ===== KPI 行（杭州口径） ===== -->
+  <div class="kpi-grid" style="margin-bottom:18px;">
+    <div class="kpi-tile">
+      <div class="k-label">🏪 铺货率</div>
+      <div class="k-val">88<small>%</small></div>
+      <div class="k-delta up">▲ +4.2pct</div>
+    </div>
+    <div class="kpi-tile">
+      <div class="k-label">📈 动销率</div>
+      <div class="k-val">61<small>%</small></div>
+      <div class="k-delta up">▲ +6.2pct</div>
+    </div>
+    <div class="kpi-tile">
+      <div class="k-label">📱 开瓶扫码</div>
+      <div class="k-val">5.8<small>万次</small></div>
+      <div class="k-delta up">▲ +38%</div>
+    </div>
+    <div class="kpi-tile">
+      <div class="k-label">🍷 品鉴会</div>
+      <div class="k-val">72<small>场</small></div>
+      <div class="k-delta up">▲ +18 场</div>
+    </div>
+    <div class="kpi-tile navy">
+      <div class="k-label">📣 全员发布率</div>
+      <div class="k-val">98<small>%</small></div>
+      <div class="k-delta up">高于全国均值 91%</div>
+    </div>
+    <div class="kpi-tile hot">
+      <div class="k-label">🚨 巡警预警</div>
+      <div class="k-val">2<small>条</small></div>
+      <div class="k-delta down">萧山动销连降 · 竞品赠饮</div>
+    </div>
+  </div>
+
+  <!-- ===== 主区：左 终端结构 + 品鉴会日历 / 右 团队过程 + 发布监督 ===== -->
+  <div class="cols-82">
+
+    <!-- 左列 -->
+    <div class="col-stack">
+
+      <div class="panel">
+        <h3>终端结构 · A/B/C 分级</h3>
+        <div class="abc-row">
+          <div class="abc a"><span class="cls">A</span><div class="v">128</div><div class="l">核心店 · 家</div></div>
+          <div class="abc b"><span class="cls">B</span><div class="v">386</div><div class="l">重点店 · 家</div></div>
+          <div class="abc c"><span class="cls">C</span><div class="v">772</div><div class="l">长尾店 · 家</div></div>
+        </div>
+        <div class="dx-row"><span>A 类动销率</span><span class="pbar"><i style="width:78%"></i></span><span class="v">78%</span></div>
+        <div class="dx-row"><span>B 类动销率</span><span class="pbar"><i class="gold" style="width:52%"></i></span><span class="v">52%</span></div>
+        <div class="dx-row"><span>C 类动销率</span><span class="pbar"><i class="red" style="width:31%"></i></span><span class="v">31%</span></div>
+
+        <div class="sub-h">待激活 C 类店 TOP5 · AI 按开瓶潜力排序</div>
+        <table class="mini-table">
+          <tr><th>店名</th><th>所在区</th><th>建议动作</th></tr>
+          <tr><td><b>三墩烟酒</b></td><td>西湖区</td><td>先做一场 8 人品鉴会</td></tr>
+          <tr><td><b>祥符桥超市</b></td><td>拱墅区</td><td>补冰柜陈列 + 开瓶红包物料</td></tr>
+          <tr><td><b>临平惠民烟酒</b></td><td>临平区</td><td>老板首次客情拜访（333）</td></tr>
+          <tr><td><b>白马湖便利</b></td><td>滨江区</td><td>上「冰萃一夏」堆头 + 海报</td></tr>
+          <tr><td><b>宁围小超市</b></td><td>萧山区</td><td>纳入本周蹲店路线</td></tr>
+        </table>
+        <div class="note"><b>作战逻辑：</b>A 类保排面、B 类提频次、C 类先激活——AI 每晚按开瓶与拜访数据重排优先级。</div>
+      </div>
+
+      <div class="panel">
+        <h3>品鉴会日历 · 本周 <span class="tag gold" style="margin-left:auto;">已排 <b id="calCount">5</b> 场</span></h3>
+        <div class="cal" id="cal">
+          <div class="cal-row"><div class="cal-day"><b>周一</b>7.6</div><div class="cal-evt">老周烟酒 · 12 人<span class="tag ok">已办</span></div></div>
+          <div class="cal-row"><div class="cal-day"><b>周二</b>7.7</div><div class="cal-evt">湖畔酒行 · 10 人<span class="tag ok">已办</span></div></div>
+          <div class="cal-row"><div class="cal-day"><b>周三</b>7.8</div><div class="cal-add" data-fill="三墩烟酒 · 8 人" data-note="补场顺延执行">＋ 可加排</div></div>
+          <div class="cal-row"><div class="cal-day"><b>周四</b>7.9</div><div class="cal-evt">万家福超市 · 8 人<span class="tag ok">已办</span></div></div>
+          <div class="cal-row"><div class="cal-day"><b>周五</b>7.10</div><div class="cal-evt">叁号仓名酒 · 8 人<span class="tag ok">已办</span></div></div>
+          <div class="cal-row"><div class="cal-day"><b>周六</b>7.11</div><div class="cal-add" data-fill="萧山补场 · 8 人" data-note="补场顺延执行">＋ 可加排</div></div>
+          <div class="cal-row"><div class="cal-day"><b>周日</b>7.12</div><div class="cal-evt today">龙井路酒窖 · 10 人<span class="tag warm">今天 19:00</span></div></div>
+        </div>
+        <div class="note">点「＋ 可加排」即完成加排：AI 自动匹配待激活店与主讲业务员，并同步到右侧派单记录。</div>
+      </div>
+
+    </div>
+
+    <!-- 右列 -->
+    <div class="col-stack">
+
+      <div class="panel">
+        <h3>团队 313/333 · 过程达成 <span class="tag teal" style="margin-left:auto;">战役期人均目标：拜访 90 · 品鉴会 5 · 蹲店 9</span></h3>
+        <div class="team-list" id="teamList"></div>
+        <div class="note"><b>过程即结果：</b>三项过程指标按日回流，排名每天 20:00 刷新；连续 3 天垫底者，AI 自动生成一对一辅导计划并推送给城市经理。</div>
+      </div>
+
+      <div class="panel">
+        <h3>全员发布监督表 · 逐人逐日（7.6 – 7.12） <span class="tag warm" style="margin-left:auto;">点 ✗ 格可一键催办</span></h3>
+        <div class="pub-grid" id="pubGrid"></div>
+        <p style="font-size:12px;color:var(--muted);margin-top:12px;">战役期累计发布率 <b style="color:var(--teal-d);">98%</b> · 缺发记录自动同步个人绩效，催办后 24 小时内补发不计扣分。</p>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ===== 下区：纠偏任务流 + 派单记录 ===== -->
+  <div class="cols-28 blk">
+
+    <div class="panel">
+      <h3>纠偏任务流 · AI 生成 <span class="tag warn" style="margin-left:auto;">今日待处理 <b id="alertCount">3</b> 条</span></h3>
+      <div class="alert-feed">
+        <div class="alert warn2">
+          <div class="a-ic">📉</div>
+          <div>
+            <b>萧山 23 家店动销连降</b>
+            <span>连续 2 周动销下滑 · AI 方案：加密蹲店频次（每店 +1 次/周）+ 本周补 2 场品鉴会，门店清单已生成。</span>
+          </div>
+          <div class="a-act" data-t="萧山动销纠偏 · 已派单" data-d="加密蹲店频次 + 本周补 2 场品鉴会 → 责任人：郑凯（萧山线），48 小时内反馈首场排期。">一键派单</div>
+        </div>
+        <div class="alert">
+          <div class="a-ic">🏪</div>
+          <div>
+            <b>叁号仓名酒 · 连降 2 周</b>
+            <span>B 类店开瓶由周均 9 次跌至 1 次 · AI 建议：启动 333 客情工程（3 次蹲店 · 3 次带菜 · 3 次老板深聊）。</span>
+          </div>
+          <div class="a-act" data-t="叁号仓名酒 · 333 客情工程启动" data-d="3 次蹲店 + 3 次带菜 + 3 次老板深聊 → 责任人：周涛，首访明日上午。">一键派单</div>
+        </div>
+        <div class="alert info">
+          <div class="a-ic">🍷</div>
+          <div>
+            <b>竞品赠饮情报 · 拱墅隔壁终端</b>
+            <span>品鉴会管家回传：竞品每周 3 场赠饮 · AI 建议：微品会口味种草 1 场，主打「39 度冰饮不辣口」对比体验。</span>
+          </div>
+          <div class="a-act" data-t="竞品应对 · 微品会口味种草" data-d="微品会 1 场（8 人内小局）主打冰饮口感对比 → 责任人：吴倩，物料由 AI 素材库直出。">一键派单</div>
+        </div>
+      </div>
+      <div class="note"><b>与口头催办的区别：</b>每条纠偏任务自动带门店清单、责任人与完成标准，派单即入留痕，完成率进过程看板。</div>
+    </div>
+
+    <div class="panel">
+      <h3>派单记录 · 留痕</h3>
+      <div class="timeline" id="tl">
+        <div class="tl-item">
+          <div class="tl-t">7.11 09:40 · 来源：AI 巡检</div>
+          <b>湖畔酒行 · 宴席跟进 <span class="tag gold">进行中</span></b>
+          <p>宴席客户询价 2 桌 → 已派王小磊携品鉴酒跟进，政策申请同步走审批。</p>
+        </div>
+        <div class="tl-item">
+          <div class="tl-t">7.10 16:05 · 来源：库存预警</div>
+          <b>老周烟酒 · 补货提醒 <span class="tag ok">已完成</span></b>
+          <p>库存 6 箱低于安全线 8 箱 → 经销商次日送达 10 箱，回执已上传。</p>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ===== 底部金句 ===== -->
+  <div class="quote-band blk">
+    「中间层不再当二传手——作战地图代替层层汇报，纠偏任务代替口头催办」
+    <small>区域作战台 · 陈皓的一天：看结构 → 盯过程 → 派纠偏 → 留痕复盘</small>
+  </div>
+
+</main>
+
+<footer class="site-footer">
+  <div class="foot-brand"><img src="assets/st_logo.png" alt="商汤科技" /></div>
+  商汤科技 · 大模型生态渠道部 × 北京君度咨询 · 链一链智能 &nbsp;|&nbsp; <b>「咨询 + AI」双引擎 · 高保真原型</b> &nbsp;|&nbsp; 演示数据均为虚构
+</footer>
+
+<div class="toast" id="toast"></div>
+
+<script src="assets/data.js"></script>
+<script>
+(function () {
+  /* ---------- 页头战役标签取自全站数据底稿 ---------- */
+  document.getElementById("campLabel").textContent = window.JD.brand.campaign;
+
+  /* ---------- 轻提示 ---------- */
+  var toastEl = document.getElementById("toast"), toastTimer = null;
+  function toast(msg) {
+    toastEl.textContent = msg;
+    toastEl.classList.add("show");
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function () { toastEl.classList.remove("show"); }, 2400);
+  }
+
+  /* ---------- 团队 313/333 过程达成（战役期目标：拜访90 · 品鉴会5 · 蹲店9） ---------- */
+  var TEAM = [
+    { n: "王小磊", bf: 42, jh: 4, dd: 6 },
+    { n: "张敏",   bf: 38, jh: 3, dd: 5 },
+    { n: "郑凯",   bf: 36, jh: 3, dd: 4 },
+    { n: "吴倩",   bf: 34, jh: 2, dd: 5 },
+    { n: "李强",   bf: 33, jh: 2, dd: 4 },
+    { n: "周涛",   bf: 30, jh: 2, dd: 3 },
+    { n: "孙洁",   bf: 28, jh: 1, dd: 3 },
+    { n: "马跃",   bf: 22, jh: 1, dd: 2 }
+  ];
+  var G = { bf: 90, jh: 5, dd: 9 };
+  TEAM.forEach(function (m) {
+    m.rate = Math.round((m.bf / G.bf + m.jh / G.jh + m.dd / G.dd) / 3 * 100);
+  });
+  var teamHtml = TEAM.map(function (m, i) {
+    var head;
+    if (i === 0) head = '<span class="medal">🥇</span><b>' + m.n + "</b>";
+    else if (i === 1) head = '<span class="medal">🥈</span><b>' + m.n + "</b>";
+    else head = '<span class="rk">' + (i + 1) + "</span><b>" + m.n + "</b>";
+    var coach = i === TEAM.length - 1
+      ? '<br /><span class="tag warm">AI 已推送辅导计划</span>'
+      : "";
+    function cell(label, val, goal, cls) {
+      var w = Math.round(val / goal * 100);
+      return '<div class="m-cell"><span class="m-l"><span>' + label + '</span><b>' + val + "/" + goal + '</b></span><span class="pbar"><i' + (cls ? ' class="' + cls + '"' : "") + ' style="width:' + w + '%"></i></span></div>';
+    }
+    return '<div class="trow' + (i < 2 ? " top" : "") + '">' +
+      '<div class="who">' + head + coach + "</div>" +
+      cell("拜访", m.bf, G.bf, "") +
+      cell("品鉴会", m.jh, G.jh, "gold") +
+      cell("蹲店", m.dd, G.dd, "red") +
+      '<div class="rate">' + m.rate + '%<small>达成率</small></div>' +
+      "</div>";
+  }).join("");
+  document.getElementById("teamList").innerHTML = teamHtml;
+
+  /* ---------- 全员发布监督表 8 人 × 7 天 ---------- */
+  var DAYS = ["7.6<br>一", "7.7<br>二", "7.8<br>三", "7.9<br>四", "7.10<br>五", "7.11<br>六", "7.12<br>日"];
+  var DAY_TXT = ["7.6", "7.7", "7.8", "7.9", "7.10", "7.11", "7.12"];
+  var MISS = { "李强": [3], "周涛": [2], "孙洁": [4], "马跃": [3, 5] };
+  var pubHtml = '<div class="h" style="text-align:left;">业务员</div>' +
+    DAYS.map(function (d) { return '<div class="h">' + d + "</div>"; }).join("");
+  TEAM.forEach(function (m) {
+    pubHtml += '<div class="n">' + m.n + "</div>";
+    for (var d = 0; d < 7; d++) {
+      var miss = (MISS[m.n] || []).indexOf(d) !== -1;
+      pubHtml += miss
+        ? '<div class="c miss" data-n="' + m.n + '" data-d="' + DAY_TXT[d] + '" title="缺发 · 点击催办">✗</div>'
+        : '<div class="c ok">✓</div>';
+    }
+  });
+  var pubGrid = document.getElementById("pubGrid");
+  pubGrid.innerHTML = pubHtml;
+
+  pubGrid.addEventListener("click", function (e) {
+    var cell = e.target.closest(".c.miss");
+    if (!cell) return;
+    cell.classList.remove("miss");
+    cell.classList.add("pend");
+    cell.textContent = "⏰";
+    cell.title = "已催办 · 待补发";
+    toast("已催办：" + cell.dataset.n + " " + cell.dataset.d + " 缺发 → ⏰ 待补发（24 小时内补发不计扣分）");
+  });
+
+  /* ---------- 派单记录：追加留痕 ---------- */
+  var tl = document.getElementById("tl");
+  function addTl(title, desc) {
+    var item = document.createElement("div");
+    item.className = "tl-item hot";
+    item.innerHTML = '<div class="tl-t">7.12 · 刚刚 · 来源：区域作战台</div>' +
+      "<b>" + title + ' <span class="tag warm">新派单</span></b>' +
+      "<p>" + desc + "</p>";
+    tl.insertBefore(item, tl.firstElementChild);
+  }
+
+  /* ---------- 纠偏任务流：一键派单 ---------- */
+  var alertCount = document.getElementById("alertCount");
+  var pending = 3;
+  document.querySelectorAll(".alert .a-act").forEach(function (btn) {
+    btn.addEventListener("click", function () {
+      if (btn.classList.contains("done")) return;
+      btn.classList.add("done");
+      btn.textContent = "已派单 ✓";
+      pending -= 1;
+      alertCount.textContent = pending;
+      addTl(btn.dataset.t, btn.dataset.d);
+      toast("已派单并留痕：" + btn.dataset.t);
+    });
+  });
+
+  /* ---------- 品鉴会日历：可加排 ---------- */
+  var calCount = document.getElementById("calCount");
+  document.querySelectorAll(".cal-add").forEach(function (slot) {
+    slot.addEventListener("click", function () {
+      var name = slot.dataset.fill;
+      var evt = document.createElement("div");
+      evt.className = "cal-evt new";
+      evt.innerHTML = name + '<span class="tag gold">新排</span>';
+      slot.parentNode.replaceChild(evt, slot);
+      calCount.textContent = String(Number(calCount.textContent) + 1);
+      addTl("品鉴会加排 · " + name, "AI 已匹配主讲业务员与物料包，" + slot.dataset.note + "，执行结果回流过程看板。");
+      toast("已加排：" + name + " 品鉴会 · 已同步派单记录");
+    });
+  });
+})();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>一线小程序 · 王小磊的移动端 | 君度智链 · 双引擎平台原型</title>
+<link rel="stylesheet" href="assets/style.css" />
+<style>
+/* ============ frontline 页面专属样式（仅用设计系统变量与 rgba 变体） ============ */
+.scene-btn { font-family: var(--font); }
+.mode-bar { margin-bottom: 14px; }
+.mode-bar .scene-btn { font-size: 13px; padding: 8px 18px; }
+
+/* ---- 小程序问候卡 ---- */
+.fl-hello {
+  margin: 12px 12px 0; border-radius: 14px; padding: 15px 16px 14px; color: var(--white);
+  background: linear-gradient(135deg, var(--warm-d), var(--warm)); position: relative; overflow: hidden;
+}
+.fl-hello::after {
+  content: ""; position: absolute; right: -34px; top: -46px; width: 130px; height: 130px;
+  border-radius: 50%; border: 1.5px solid rgba(255,255,255,.25);
+}
+.fl-hello .row1 { display: flex; align-items: center; gap: 10px; position: relative; }
+.fl-hello .av {
+  width: 42px; height: 42px; border-radius: 12px; background: rgba(255,255,255,.18);
+  display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 17px; flex: none;
+}
+.fl-hello .row1 b { font-size: 16px; display: block; line-height: 1.3; }
+.fl-hello .row1 span { font-size: 11px; opacity: .85; display: block; }
+.fl-hello .stats { display: flex; gap: 8px; margin-top: 12px; position: relative; }
+.fl-hello .stats .s { flex: 1; background: rgba(255,255,255,.14); border-radius: 9px; padding: 6px 4px; text-align: center; font-size: 10px; }
+.fl-hello .stats .s b { font-size: 15px; display: block; font-variant-numeric: tabular-nums; }
+
+/* ---- 语音拜访按钮 ---- */
+.rec-btn {
+  display: flex; align-items: center; justify-content: center; gap: 9px; width: 100%;
+  background: linear-gradient(135deg, var(--warm), var(--warm-d)); color: var(--white);
+  border: none; border-radius: 999px; padding: 13px 0; font-size: 14.5px; font-weight: 700;
+  font-family: var(--font); cursor: pointer; transition: transform .12s, background .2s;
+}
+.rec-btn:active { transform: scale(.98); }
+.rec-btn.recording { animation: recGlow 1s infinite; }
+@keyframes recGlow {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(196,33,40,.45); }
+  50%      { box-shadow: 0 0 0 12px rgba(196,33,40,0); }
+}
+.rec-btn.done { background: var(--ok); }
+.rec-wave { display: none; align-items: center; gap: 3px; height: 18px; }
+.rec-btn.recording .rec-wave { display: flex; }
+.rec-wave i { width: 3px; background: var(--white); border-radius: 2px; height: 6px; animation: rwave .8s ease-in-out infinite; }
+.rec-wave i:nth-child(2) { height: 12px; animation-delay: .1s; }
+.rec-wave i:nth-child(3) { height: 16px; animation-delay: .2s; }
+.rec-wave i:nth-child(4) { height: 10px; animation-delay: .3s; }
+.rec-wave i:nth-child(5) { height: 14px; animation-delay: .4s; }
+@keyframes rwave { 0%, 100% { transform: scaleY(.5); } 50% { transform: scaleY(1); } }
+
+/* ---- 转写条 / 报告卡 / 留痕时间线 ---- */
+.fl-transcript {
+  margin-top: 11px; border: 1px dashed var(--teal-l); background: var(--sky);
+  border-radius: 10px; padding: 9px 12px; font-size: 12px; color: var(--ink2); line-height: 1.6;
+  animation: msgIn .3s ease both;
+}
+.fl-transcript .t-label { display: block; font-size: 10px; font-weight: 700; letter-spacing: 1px; color: var(--teal); margin-bottom: 2px; }
+.fl-report { margin-top: 11px; animation: msgIn .3s ease both; }
+.fl-report .c-card { width: 100%; border: 1px solid var(--line); box-shadow: none; }
+.c-advice {
+  margin-top: 8px; padding: 8px 10px; background: rgba(169,126,47,.08); border-radius: 8px;
+  font-size: 12px; color: var(--gold); line-height: 1.55; font-weight: 600;
+}
+.c-sync { margin-top: 8px; font-size: 12px; color: var(--ok); font-weight: 700; }
+.fl-tl { margin-top: 13px; animation: msgIn .3s ease both; }
+.fl-tl-h { font-size: 11px; color: var(--muted); font-weight: 600; letter-spacing: .5px; margin-bottom: 9px; }
+
+/* ---- 口播文案 ---- */
+.fl-quote {
+  margin-top: 10px; font-size: 12px; color: var(--sub); background: var(--bg);
+  border-left: 3px solid var(--gold); border-radius: 0 8px 8px 0; padding: 8px 11px; line-height: 1.6;
+}
+.fl-quote b { color: var(--gold); }
+
+/* ---- 我的 · 简版 kv ---- */
+.fl-kv { display: flex; justify-content: space-between; gap: 10px; padding: 7px 0; border-bottom: 1px solid rgba(46,35,32,.05); font-size: 12.5px; }
+.fl-kv:last-child { border-bottom: none; }
+.fl-kv span { color: var(--muted); flex: none; }
+.fl-kv b { color: var(--ink); font-weight: 600; text-align: right; }
+.fl-kv b.gold { color: var(--gold); }
+
+/* ---- 小程序内 toast ---- */
+.fl-toast {
+  position: absolute; left: 50%; bottom: 120px; transform: translateX(-50%);
+  background: rgba(46,35,32,.88); color: var(--white); font-size: 12px; padding: 8px 16px;
+  border-radius: 999px; opacity: 0; pointer-events: none; transition: opacity .25s; z-index: 50; white-space: nowrap;
+}
+.fl-toast.show { opacity: 1; }
+
+/* ---- 胶囊分隔 ---- */
+.mp-navbar .capsule .cdiv { width: 1px; height: 14px; background: rgba(46,35,32,.12); display: block; }
+</style>
+</head>
+<body>
+
+<header class="topnav">
+  <div class="brand">
+    <img src="assets/st_logo.png" alt="商汤科技" />
+    <span class="divider"></span>
+    <span class="name">君度智链 · 双引擎平台<small>JUNDU CHAIN · DUAL ENGINE PROTOTYPE</small></span>
+  </div>
+  <nav>
+    <a href="index.html">总览</a>
+    <a href="plan.html">方案全景</a>
+    <a href="boss.html">总部驾驶舱</a>
+    <a href="region.html">区域作战台</a>
+    <a class="active" href="frontline.html"><span class="dot"></span>一线小程序</a>
+    <a href="distill.html">蒸馏工厂</a>
+  </nav>
+</header>
+
+<main class="page">
+
+  <div class="page-head">
+    <div class="eyebrow">Frontline Mini-Program · Process Data &amp; Two-Way AI</div>
+    <h1>一线小程序：<span class="hl">说句话就是留痕</span>，问一句就有答案</h1>
+    <p class="sub">王小磊（杭州拱墅片区 · 人-店 30 家）的一天装在两部手机里：<b>终端通小程序</b>管干活与留痕——语音拜访秒转结构化报告、今日素材一键转发；<b>岗位 AI 助理（企微）</b>管双向交互——你问它话术政策，它找你推任务商机。所有过程数据零表单沉淀，实时同步区域作战台与总部驾驶舱。</p>
+  </div>
+
+  <div class="split">
+
+    <!-- ================= 左：手机壳区 ================= -->
+    <div class="phone-wrap">
+      <div class="scene-bar mode-bar">
+        <button class="scene-btn active" data-mode="a">📱 终端通小程序</button>
+        <button class="scene-btn" data-mode="b">💬 岗位 AI 助理（企微）</button>
+      </div>
+
+      <!-- ===== 手机 A · 终端通小程序 ===== -->
+      <div id="modeA">
+        <div class="phone">
+          <div class="notch"></div>
+          <div class="screen">
+            <div class="statusbar"><span>9:41</span><span class="right">●●●●● 5G ▮▮▮</span></div>
+
+            <div class="mp-navbar">
+              <b>云台终端通</b>
+              <span class="capsule"><span>⋯</span><span class="cdiv"></span><span>◎</span></span>
+            </div>
+
+            <div class="mp-body" id="mpBody">
+
+              <!-- ① 问候卡 -->
+              <div class="fl-hello" id="card-hello">
+                <div class="row1">
+                  <div class="av">磊</div>
+                  <div><b>早上好，王小磊</b><span>7 月 12 日 · 周日 · 拱墅片区（人-店 30 家）</span></div>
+                </div>
+                <div class="stats">
+                  <div class="s"><b id="ptsHello">2,460</b>本月积分</div>
+                  <div class="s"><b>30</b>负责门店</div>
+                  <div class="s"><b>3</b>今日任务项</div>
+                </div>
+              </div>
+
+              <!-- ② 今日任务 321 -->
+              <div class="mp-card" id="card-task">
+                <h4>📋 今日任务 · 321<span class="more">完成自动回流作战台</span></h4>
+                <div id="taskWrap"></div>
+              </div>
+
+              <!-- ③ 语音拜访 · 说完即留痕 -->
+              <div class="mp-card" id="card-visit">
+                <h4>🎙 语音拜访 · 说完即留痕<span class="more">四要素自动抽取</span></h4>
+                <button class="rec-btn" id="recBtn">
+                  <span class="rec-wave"><i></i><i></i><i></i><i></i><i></i></span>
+                  <span class="lbl">🎙 按住说拜访</span>
+                </button>
+                <div id="recResult"></div>
+              </div>
+
+              <!-- ④ 今日素材 · AI 内容工厂 -->
+              <div class="mp-card" id="card-poster">
+                <h4>🎨 今日素材 · AI 内容工厂<span class="more">每天自动生成 · 附口播文案</span></h4>
+                <div class="poster">
+                  <span class="po-tag">今日素材 · AI 生成</span>
+                  <b>断桥冰遇 · 青云39</b>
+                  <span>冰饮场景 × 杭州在地文化 · 三十九度 · 更见高度</span>
+                </div>
+                <div class="fl-quote">口播文案：「西湖的风都是热的？<b>青云39 加冰</b>，三十九度刚刚好——今晚来一杯。」</div>
+                <div class="mp-btn" id="shareBtn">一键转发朋友圈</div>
+              </div>
+
+              <!-- 我的 -->
+              <div class="mp-card" id="card-me">
+                <h4>👤 我的<span class="more">拱墅片区 · 终端业务员</span></h4>
+                <div class="fl-kv"><span>本月积分</span><b class="gold" id="ptsMe">2,460</b></div>
+                <div class="fl-kv"><span>负责门店</span><b>人-店 30 家（A 类 4 · B 类 11 · C 类 15）</b></div>
+                <div class="fl-kv"><span>今日留痕</span><b id="traceCount">1 条</b></div>
+                <div class="fl-kv"><span>岗位 AI 助理</span><b>已开通 · 话术库 v1.3</b></div>
+              </div>
+
+            </div><!-- /mp-body -->
+
+            <!-- ⑤ 底部 tabbar -->
+            <div class="mp-tabbar">
+              <div class="t on" data-go="top"><span class="ti">🏠</span>首页</div>
+              <div class="t" data-go="card-task"><span class="ti">✅</span>任务</div>
+              <div class="t" data-go="card-poster"><span class="ti">🎨</span>素材</div>
+              <div class="t" data-go="card-me"><span class="ti">👤</span>我的</div>
+            </div>
+
+            <div class="fl-toast" id="flToast"></div>
+          </div>
+        </div>
+        <p class="phone-caption">▲ 可交互原型 · 点 <b>🎙 按住说拜访</b> 演示语音留痕 · 点 <b>一键转发</b> 看积分与监督表联动</p>
+      </div>
+
+      <!-- ===== 手机 B · 企微岗位 AI 助理 ===== -->
+      <div id="modeB" style="display:none;">
+        <div id="agent-slot"></div>
+        <p class="phone-caption">▲ 点上方场景切换三段演示 · 气泡下方 <b>🎙 快捷话术</b> 可跳场景</p>
+      </div>
+    </div>
+
+    <!-- ================= 右：说明面板区 ================= -->
+    <div>
+
+      <div class="panel">
+        <h3>过程留痕怎么发生</h3>
+        <div class="flow">
+          <div class="f-step hot"><div class="n">1</div><b>说一句话</b><span>语音拜访 · 小程序企微都行</span></div>
+          <div class="f-arrow">›</div>
+          <div class="f-step"><div class="n">2</div><b>AI 转结构化</b><span>ASR + 抽取库存/陈列/竞品/商机</span></div>
+          <div class="f-arrow">›</div>
+          <div class="f-step"><div class="n">3</div><b>同步作战台</b><span>陈皓实时可见 · 可派纠偏单</span></div>
+          <div class="f-arrow">›</div>
+          <div class="f-step hot"><div class="n">4</div><b>汇入总部大盘</b><span>周明远五级下钻直达这家店</span></div>
+        </div>
+        <p class="note"><b>零表单：</b>王小磊全程没有填过一张表——过程数据是「说话的副产品」，报告即留痕，留痕即数据。</p>
+      </div>
+
+      <div class="panel">
+        <h3>双向交互：你问它，它也找你</h3>
+        <div class="cap-grid">
+          <div class="cap warm"><div class="ic">🙋</div><b>你问它</b><span>话术 / 政策 / 库存，随口一问秒回，答案出自赵冠军话术库 v1.3</span></div>
+          <div class="cap"><div class="ic">📣</div><b>它找你</b><span>任务提醒 / 商机推送 / 纠偏动作，AI 主动找人、不等人来查</span></div>
+          <div class="cap warm"><div class="ic">⚗️</div><b>每次交互都在为蒸馏供料</b><span>评分 ≥ 95 的高分对话自动回流蒸馏工厂，话术库持续进化</span></div>
+          <div class="cap"><div class="ic">📤</div><b>数据自动进发布监督表</b><span>海报转发即埋点计入，区域作战台逐人逐日可见谁发了谁没发</span></div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <h3>「321」是什么</h3>
+        <p style="font-size:13px;color:var(--sub);">君度方法论里一线每天的最小作战单元：<b style="color:var(--warm-d);">3</b> 家门店拜访 + <b style="color:var(--warm-d);">2</b> 个 C（关键人 / 大客户）+ <b style="color:var(--warm-d);">1</b> 个推广动作。AI 每天早上拆成清单推给王小磊，完成情况自动回流，作战台上按人按日可见。</p>
+        <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:10px;">
+          <span class="tag warm">3 · 门店拜访</span>
+          <span class="tag teal">2 · 关键人拜访</span>
+          <span class="tag gold">1 · 推广动作</span>
+        </div>
+      </div>
+
+      <div class="panel">
+        <h3>这台手机背后的智能体</h3>
+        <table class="mini-table">
+          <tr><th>采集智能体</th><th>采集什么</th><th>王小磊怎么用</th></tr>
+          <tr><td><b>门店拜访智能体</b></td><td>库存 · 陈列 · 竞品 · 商机四要素</td><td>说一段话，报告自动生成</td></tr>
+          <tr><td><b>品鉴会管家</b></td><td>场次 · 到场人数 · 转化线索</td><td>湖畔酒行 12 人自动登记</td></tr>
+          <tr><td><b>集赞活动智能体</b></td><td>转发 · 集赞 · 核销数据</td><td>海报一键转发即埋点计分</td></tr>
+          <tr><td><b>自媒体矩阵智能体</b></td><td>发布率 · 曝光 · 留资</td><td>发布记录自动进监督表</td></tr>
+        </table>
+        <p class="note"><b>三个页面数据同源：</b>王小磊的每一次留痕，都会出现在区域作战台（陈皓）与总部驾驶舱（周明远）——同一条数据，三个视角。</p>
+      </div>
+
+    </div>
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="foot-brand"><img src="assets/st_logo.png" alt="商汤科技" /></div>
+  商汤科技 · 大模型生态渠道部 × 北京君度咨询 · 链一链智能 &nbsp;|&nbsp; <b>「咨询 + AI」双引擎 · 高保真原型</b> &nbsp;|&nbsp; 演示数据均为虚构
+</footer>
+
+<script src="assets/data.js"></script>
+<script src="assets/chat.js"></script>
+<script>
+(function () {
+  'use strict';
+  var FL = window.JD.frontline;
+  var V  = FL.visitDemo;
+
+  /* ============ 通用：结构化拜访报告卡（两部手机共用） ============ */
+  function reportCard() {
+    var kv = Object.keys(V.report).map(function (k) {
+      return '<div class="c-kv"><span>' + k + '</span><b>' + V.report[k] + '</b></div>';
+    }).join('');
+    return '<div class="c-card">' +
+      '<div class="c-head"><span class="c-ic warm">🏪</span><b>老周烟酒 · 拜访报告</b><span class="tag ok">已结构化</span></div>' +
+      kv +
+      '<div class="c-advice">💡 ' + V.advice + '</div>' +
+      '<div class="c-sync">✓ 已留痕并同步区域作战台</div>' +
+      '<div class="c-foot">四要素自动抽取 · 同源汇入总部驾驶舱</div>' +
+    '</div>';
+  }
+
+  /* ============ 模式切换：小程序 ⇋ 企微助理 ============ */
+  var modeBtns = document.querySelectorAll('.mode-bar .scene-btn');
+  var chatMounted = false;
+  function setMode(m) {
+    modeBtns.forEach(function (b) { b.classList.toggle('active', b.dataset.mode === m); });
+    document.getElementById('modeA').style.display = (m === 'a') ? '' : 'none';
+    document.getElementById('modeB').style.display = (m === 'b') ? '' : 'none';
+    if (m === 'b' && !chatMounted) { chatMounted = true; mountAgent(); }
+  }
+  modeBtns.forEach(function (b) { b.addEventListener('click', function () { setMode(b.dataset.mode); }); });
+
+  /* ============ 手机 A · 小程序 ============ */
+  var mpBody = document.getElementById('mpBody');
+  var toastEl = document.getElementById('flToast'), toastTimer = null;
+  function toast(msg) {
+    toastEl.textContent = msg;
+    toastEl.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function () { toastEl.classList.remove('show'); }, 2200);
+  }
+  function mpScrollShow(el) {
+    var top = el.offsetTop - mpBody.offsetTop + el.offsetHeight - mpBody.clientHeight + 24;
+    if (top > mpBody.scrollTop) mpBody.scrollTo({ top: top, behavior: 'smooth' });
+  }
+
+  /* ② 今日任务 321 */
+  var tasks = FL.tasks.map(function (t) { return { ic: t.ic, t: t.t, d: t.d, done: t.done, total: t.total }; });
+  var taskWrap = document.getElementById('taskWrap');
+  function renderTasks() {
+    taskWrap.innerHTML = tasks.map(function (t) {
+      var full = t.done >= t.total;
+      return '<div class="task-row"><div class="t-ic">' + t.ic + '</div>' +
+        '<div><b>' + t.t + '</b><span>' + t.d + '</span></div>' +
+        '<span class="t-st ' + (full ? 'done' : 'todo') + '">' + (full ? '✓ 完成' : t.done + '/' + t.total) + '</span></div>';
+    }).join('');
+  }
+  renderTasks();
+
+  /* ③ 语音拜访演示 */
+  var recBtn = document.getElementById('recBtn');
+  var recLbl = recBtn.querySelector('.lbl');
+  var recResult = document.getElementById('recResult');
+  var recState = 'idle';       // idle | running | done
+  var visitCounted = false;
+
+  var timelineHTML =
+    '<div class="fl-tl"><div class="fl-tl-h">今日留痕记录</div><div class="timeline">' +
+      '<div class="tl-item hot"><div class="tl-t">10:06 · 刚刚</div><b>老周烟酒 · 拜访留痕</b><p>四要素完整 · 已同步区域作战台</p></div>' +
+      '<div class="tl-item"><div class="tl-t">09:20</div><b>万家福超市 · 已留痕</b><p>库存正常 · 端架陈列已理货</p></div>' +
+      '<div class="tl-item"><div class="tl-t">昨日 19:40</div><b>湖畔酒行 · 品鉴会</b><p>到场 12 人 · 品鉴会管家自动登记</p></div>' +
+    '</div></div>';
+
+  recBtn.addEventListener('click', function () {
+    if (recState === 'running') return;
+    if (recState === 'done') {           // 重新演示
+      recResult.innerHTML = '';
+      recBtn.classList.remove('done');
+    }
+    recState = 'running';
+    recBtn.classList.add('recording');
+    recLbl.textContent = '● 正在录音 · 请说…';
+
+    setTimeout(function () {             // 1.5s 后：录音结束 → 出转写条
+      recBtn.classList.remove('recording');
+      recLbl.textContent = '⚙️ AI 正在生成报告…';
+      recResult.insertAdjacentHTML('beforeend',
+        '<div class="fl-transcript"><span class="t-label">语音转文字 · ASR</span>' + V.voice + '</div>');
+      mpScrollShow(recResult.lastElementChild);
+
+      setTimeout(function () {           // 再 800ms：出结构化报告卡 + 留痕时间线
+        recResult.insertAdjacentHTML('beforeend', '<div class="fl-report">' + reportCard() + '</div>' + timelineHTML);
+        recBtn.classList.add('done');
+        recLbl.textContent = '✓ 已留痕 · 点击再演示一次';
+        recState = 'done';
+        if (!visitCounted) {
+          visitCounted = true;
+          tasks[0].done = 2;             // 拜访 3 店：1/3 → 2/3
+          renderTasks();
+          document.getElementById('traceCount').textContent = '2 条';
+          toast('已同步区域作战台 · 拜访任务 2/3');
+        }
+        mpScrollShow(recResult.querySelector('.fl-report'));
+      }, 800);
+    }, 1500);
+  });
+
+  /* ④ 素材一键转发 */
+  var points = 2460;
+  var shareBtn = document.getElementById('shareBtn');
+  shareBtn.addEventListener('click', function () {
+    if (shareBtn.classList.contains('ok')) return;
+    shareBtn.classList.add('ok');
+    shareBtn.textContent = '✓ 已转发 · 积分 +2 · 已计入发布监督表';
+    points += 2;
+    var p = points.toLocaleString('en-US');
+    document.getElementById('ptsHello').textContent = p;
+    document.getElementById('ptsMe').textContent = p;
+    toast('积分 +2 · 发布监督表已记录');
+  });
+
+  /* ⑤ tabbar 锚点滚动 */
+  var mpTabs = document.querySelectorAll('.mp-tabbar .t');
+  mpTabs.forEach(function (t) {
+    t.addEventListener('click', function () {
+      mpTabs.forEach(function (x) { x.classList.toggle('on', x === t); });
+      var go = t.dataset.go;
+      if (go === 'top') { mpBody.scrollTo({ top: 0, behavior: 'smooth' }); return; }
+      var el = document.getElementById(go);
+      mpBody.scrollTo({ top: el.offsetTop - mpBody.offsetTop - 6, behavior: 'smooth' });
+    });
+  });
+
+  /* ============ 手机 B · 企微岗位 AI 助理（首次切换时挂载） ============ */
+  function mountAgent() {
+    var policyCard =
+      '<div class="c-card">' +
+        '<div class="c-head"><span class="c-ic">📜</span><b>宴席政策 · 青云39</b><span class="tag teal">7 月现行</span></div>' +
+        '<div class="c-kv"><span>起订门槛</span><b>宴席 2 桌起</b></div>' +
+        '<div class="c-kv"><span>随单赠品</span><b class="warm">品鉴酒 2 瓶</b></div>' +
+        '<div class="c-kv"><span>执行方式</span><b>报备后执行 · 城市经理审批</b></div>' +
+        '<div class="c-foot">出处：冰萃一夏战役政策包 · 有效期至 7.31</div>' +
+      '</div>';
+    var bizCard =
+      '<div class="c-card">' +
+        '<div class="c-head"><span class="c-ic warm">🔥</span><b>商机提醒 · 建议今日跟进</b><span class="tag warm">高优</span></div>' +
+        '<div class="c-kv"><span>线索</span><b class="warm">李经理 · 宴席 2 桌询价</b></div>' +
+        '<div class="c-kv"><span>来源</span><b>昨日拜访留痕 · 老周烟酒</b></div>' +
+        '<div class="c-kv"><span>AI 建议</span><b>携品鉴酒 2 瓶今日上门</b></div>' +
+        '<div class="c-foot">商机由拜访留痕自动生成 · 超 48h 未跟进将提醒城市经理</div>' +
+      '</div>';
+
+    window.AgentChat.mount(document.getElementById('agent-slot'), {
+      contact: { name: '岗位助理 · 小链', corp: '@云台酒业', sub: '君度智链 · 商汤 AI 底座' },
+      agent:   { name: '岗位助理 · 小链', avatar: '链' },
+      user:    { name: '王小磊', avatar: '磊' },
+      scenarios: [
+        {
+          id: 'visit', title: '拜访留痕 · 语音转报告', chip: '交拜访留痕',
+          intro: '说一段话，秒变一份标准拜访报告——报告即留痕',
+          steps: [
+            { from: 'user', voice: V.voice, dur: 18 },
+            { from: 'agent', text: '收到 👌 转写完成，正在抽取「库存 / 陈列 / 竞品 / 商机」四要素…' },
+            { from: 'agent', html: reportCard() },
+            { from: 'agent', text: '按「4 干管理」建议跟进：和店老板一起给<b>李经理</b>赠 2 瓶品鉴酒，争取宴席 2 单；同时可申请 333 客情工程补一次蹲店。' },
+            { from: 'user', text: '收到，明天带 2 瓶品鉴酒过去' },
+            { from: 'agent', text: '✅ 已建跟进任务「李经理宴席 · 携品鉴酒 2 瓶」，加入你明天 9:00 的日历提醒；赠酒额度已报备陈皓经理。' },
+            { from: 'agent', sys: '本次留痕已写入云端 · 区域作战台与总部驾驶舱实时可见' }
+          ]
+        },
+        {
+          id: 'ask', title: '我问 AI · 要话术', chip: '要句话术',
+          intro: '答案出自「赵冠军话术库 v1.3」——最强员工蒸馏给每个人',
+          steps: [
+            { from: 'user', text: '老板嫌 39 度太低不好卖，怎么答？' },
+            { from: 'agent', text: '话术库里有高分应答（赵冠军话术库 v1.3 · 评分 96）👇<br>金句先行：<b>「好酒不怕降度，冰饮更好喝」</b><br>三步应对：<br>① 先认同——「您说得对，老酒客是讲度数」；<br>② 再转场景——39 度就是为冰饮和年轻客设计的，夏天走量更快；<br>③ 拿证据——老周家上月开瓶扫码 386 次，冰萃场景占了一半。' },
+            { from: 'user', text: '那宴席政策现在是什么？李经理问 2 桌的价' },
+            { from: 'agent', html: policyCard },
+            { from: 'agent', sys: '本次问答评分 ≥ 95 · 已回流蒸馏工厂供料' }
+          ]
+        },
+        {
+          id: 'push', title: 'AI 找我 · 主动提醒', chip: '看主动提醒',
+          intro: '不是你找 AI，是 AI 找你——任务、商机、纠偏主动送上门',
+          steps: [
+            { from: 'agent', sys: '⏰ 07:30 · 岗位助理早安播报（自动推送）' },
+            { from: 'agent', text: '早上好小磊！今日 <b>321</b>：拜访 3 家店 · 2 个 C（李经理 / 吴总）· 1 个推广动作（老周烟酒带菜进店）。杭州今天 36℃ ☀️，记得用冰萃话术：「这么热的天，来杯加冰的青云39」。' },
+            { from: 'agent', html: bizCard },
+            { from: 'user', voice: '收到，下午就去。', dur: 6 },
+            { from: 'agent', text: '好的 👌 已把李经理跟进排进你今天 14:30 的行程，出发前 20 分钟我再提醒你 📍' }
+          ]
+        }
+      ]
+    });
+  }
+})();
+</script>
+</body>
+</html>

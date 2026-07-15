@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>君度智链 · 总部驾驶舱</title>
+<link rel="stylesheet" href="assets/style.css" />
+<style>
+  /* ===== boss.html 页面专属样式（仅使用 style.css 变量配色） ===== */
+  .ph-row { display: flex; align-items: flex-start; justify-content: space-between; gap: 24px; }
+  .user-cap {
+    flex: none; display: flex; align-items: center; gap: 11px;
+    background: var(--white); border: 1px solid var(--line); border-radius: 999px;
+    padding: 8px 20px 8px 9px; box-shadow: var(--shadow-sm); margin-top: 6px;
+  }
+  .user-cap .uc-avatar {
+    width: 38px; height: 38px; border-radius: 50%; flex: none;
+    background: linear-gradient(135deg, var(--warm), var(--warm-d));
+    color: #fff; font-weight: 800; font-size: 16px;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .user-cap b { display: block; font-size: 13.5px; color: var(--ink); line-height: 1.3; }
+  .user-cap span { display: block; font-size: 11px; color: var(--muted); }
+  @media (max-width: 1080px) { .ph-row { flex-direction: column; } .user-cap { margin-top: 0; } }
+
+  .sec-label { display: flex; align-items: baseline; gap: 10px; margin: 26px 0 12px; }
+  .sec-label b { font-size: 15.5px; color: var(--ink); }
+  .sec-label span { font-size: 12px; color: var(--muted); }
+
+  .kpi-grid.k8 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  @media (max-width: 1080px) { .kpi-grid.k8 { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+
+  .drill-table th:first-child, .drill-table td:first-child { padding-left: 4px; }
+  .drill-table th:last-child, .drill-table td:last-child { text-align: right; padding-right: 4px; }
+  tr.notice-row td {
+    background: var(--cream); color: var(--warm-d); font-size: 12px; font-weight: 600;
+    padding: 8px 14px; border-bottom: 1px solid var(--cream2); border-radius: 8px;
+    animation: msgIn .25s ease both;
+  }
+  .drill-foot { margin-top: 12px; font-size: 11.5px; color: var(--muted); display: flex; gap: 6px; align-items: baseline; }
+  .drill-foot i { font-style: normal; color: var(--warm); font-weight: 700; }
+
+  /* AI 消耗小面板 */
+  .tok-big { display: flex; align-items: baseline; gap: 10px; margin: 2px 0 4px; }
+  .tok-big .v { font-size: 34px; font-weight: 800; color: var(--teal-d); font-variant-numeric: tabular-nums; line-height: 1.15; }
+  .tok-big .u { font-size: 13px; font-weight: 600; color: var(--sub); }
+  .tok-big .d { font-size: 12px; font-weight: 700; color: var(--ok); background: rgba(46, 139, 87, .1); border-radius: 999px; padding: 2px 10px; }
+
+  /* ChatBI 打字指示 */
+  .bi-typing { align-self: flex-start; display: inline-flex; gap: 4px; padding: 12px 15px; background: var(--bg); border: 1px solid var(--line); border-radius: 12px 12px 12px 3px; }
+  .bi-typing i { width: 6px; height: 6px; border-radius: 50%; background: var(--teal-l); animation: blink 1.2s infinite; }
+  .bi-typing i:nth-child(2) { animation-delay: .2s; }
+  .bi-typing i:nth-child(3) { animation-delay: .4s; }
+
+  .quote-wrap { margin-top: 26px; }
+</style>
+</head>
+<body>
+
+<header class="topnav">
+  <div class="brand">
+    <img src="assets/st_logo.png" alt="商汤科技" />
+    <span class="divider"></span>
+    <span class="name">君度智链 · 双引擎平台<small>JUNDU CHAIN · DUAL ENGINE PROTOTYPE</small></span>
+  </div>
+  <nav>
+    <a href="index.html">总览</a>
+    <a href="plan.html">方案全景</a>
+    <a class="active" href="boss.html"><span class="dot"></span>总部驾驶舱</a>
+    <a href="region.html">区域作战台</a>
+    <a href="frontline.html">一线小程序</a>
+    <a href="distill.html">蒸馏工厂</a>
+  </nav>
+</header>
+
+<main class="page">
+
+  <div class="page-head">
+    <div class="ph-row">
+      <div>
+        <div class="eyebrow">COCKPIT · 总部驾驶舱</div>
+        <h1>站在全国大盘，<span class="hl">看见每一家终端</span></h1>
+        <p class="sub">周明远 · 云台酒业营销总经理的全局经营视角。本月 <b>2026-07</b>，正值 <b>冰萃一夏 · 杭州样板市场战役（6.22 – 7.31）</b>：大盘指标、五级下钻、空中巡警与 ChatBI，同一块屏全部看清。</p>
+      </div>
+      <div class="user-cap">
+        <div class="uc-avatar">周</div>
+        <div><b>周明远</b><span>营销总经理 · 云台酒业</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== KPI 大盘 ===== -->
+  <div class="sec-label"><b>本月全国大盘</b><span>2026-07 · 数据由一线留痕自动汇聚，非层层上报</span></div>
+  <div class="kpi-grid k8" id="kpiGrid"></div>
+
+  <!-- ===== 主区：下钻 + 巡警 ===== -->
+  <div class="cols-28" style="margin-top: 22px;">
+
+    <!-- 左：经营下钻 -->
+    <div class="panel">
+      <h3>经营下钻 · 全国 → 大区 → 省 → 城市 → 终端</h3>
+      <div class="crumb" id="crumb"></div>
+      <div style="overflow-x: auto;">
+        <table class="drill-table" id="drillTable"></table>
+      </div>
+      <div class="drill-foot"><i>›</i>点击任意一行继续下钻，点面包屑返回上级；杭州为样板市场，可一路钻到单家终端。</div>
+    </div>
+
+    <!-- 右：空中巡警 + AI 消耗 -->
+    <div>
+      <div class="panel">
+        <h3>空中巡警 · 异动预警</h3>
+        <div class="alert-feed" id="alertFeed"></div>
+        <div class="note">巡警智能体 7×24 盯价盘、扫码流与动销曲线，<b>先于人发现异动</b>，处理动作一键派单到区域。</div>
+      </div>
+
+      <div class="panel">
+        <h3>AI 消耗 · 用起来的体温计</h3>
+        <div class="tok-big"><span class="v">2.86</span><span class="u">亿 tokens · 本月</span><span class="d">环比 +23%</span></div>
+        <div class="bi-bars">
+          <div class="row"><span>内容工厂</span><span class="tr"><i style="width:42%" class="red"></i></span><span class="v">42%</span></div>
+          <div class="row"><span>拜访与品鉴录入</span><span class="tr"><i style="width:27%"></i></span><span class="v">27%</span></div>
+          <div class="row"><span>经营分析</span><span class="tr"><i style="width:18%"></i></span><span class="v">18%</span></div>
+          <div class="row"><span>岗位助理</span><span class="tr"><i style="width:13%"></i></span><span class="v">13%</span></div>
+        </div>
+        <div class="note">消耗曲线持续爬坡，说明 <b>AI 真的进了业务流</b>——不是买了摆着，而是每天被一线用着。</div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ===== ChatBI ===== -->
+  <div class="sec-label" style="margin-top: 26px;"><b>ChatBI · 想问就问</b><span>不用等报表，不用求 IT——对着数据直接提问</span></div>
+  <div class="bi-chat">
+    <div class="bi-head"><span class="dot"></span>青云39 · 经营分析智能体<span style="margin-left:auto;font-size:11px;font-weight:400;color:var(--muted);">已接入：动销 / 扫码 / 费用 / 发布 4 个数据域</span></div>
+    <div class="bi-log" id="biLog">
+      <div class="bi-msg a">您好，周总。我是青云39 经营分析智能体，全国 12,860 家终端的过程数据已就绪。您可以点下方常用问题，也可以随时追问「为什么」和「怎么办」。</div>
+    </div>
+    <div class="bi-quick" id="biQuick"></div>
+  </div>
+
+  <!-- ===== 金句带 ===== -->
+  <div class="quote-wrap">
+    <div class="quote-band">「数据中台说『是什么』，智能体回答『为什么、怎么办』」<small>驾驶舱不是报表的搬家，而是把决策的最后一公里交还给管理者本人。</small></div>
+  </div>
+
+</main>
+
+<footer class="site-footer">
+  <div class="foot-brand"><img src="assets/st_logo.png" alt="商汤科技" /></div>
+  商汤科技 · 大模型生态渠道部 × 北京君度咨询 · 链一链智能 &nbsp;|&nbsp; <b>「咨询 + AI」双引擎 · 高保真原型</b> &nbsp;|&nbsp; 演示数据均为虚构
+</footer>
+
+<script src="assets/data.js"></script>
+<script>
+(function () {
+  var JD = window.JD;
+
+  /* ============ 1. KPI 大盘 ============ */
+  var kpiGrid = document.getElementById("kpiGrid");
+  JD.national.kpis.forEach(function (k) {
+    var cls = "kpi-tile";
+    if (k.hot) cls += " hot";
+    if (k.label === "AI 消耗") cls += " navy";
+    var tile = document.createElement("div");
+    tile.className = cls;
+    tile.innerHTML =
+      '<div class="k-label">' + k.label + '</div>' +
+      '<div class="k-val">' + k.val + ' <small>' + k.unit + '</small></div>' +
+      '<div class="k-delta ' + (k.up ? "up" : "down") + '">' + (k.up ? "▲ " : "▼ ") + k.delta + '</div>';
+    kpiGrid.appendChild(tile);
+  });
+
+  /* ============ 2. 五级下钻 ============ */
+  var ALLOWED = ["华东大区", "浙江省", "杭州（样板）"]; // 演示开放链路
+  var path = []; // []=全国 → [大区] → [大区,省] → [大区,省,市]
+  var crumbEl = document.getElementById("crumb");
+  var tableEl = document.getElementById("drillTable");
+
+  function rowsForPath() {
+    if (path.length === 0) return JD.drill.regions;
+    if (path.length === 1) return JD.drill.provinces[path[0]];
+    if (path.length === 2) return JD.drill.cities[path[1]];
+    return JD.drill.terminals[path[2]];
+  }
+
+  function stTag(st) {
+    if (st === "连降 2 周") return '<span class="tag warn">连降 2 周</span>';
+    if (st === "动销↑")   return '<span class="tag ok">动销↑</span>';
+    if (st === "待激活")   return '<span class="tag gold">待激活</span>';
+    return '<span class="tag teal">' + st + '</span>';
+  }
+  function clsTag(c) {
+    if (c === "A") return '<span class="tag warm">A 类</span>';
+    if (c === "B") return '<span class="tag teal">B 类</span>';
+    return '<span class="tag gold">C 类</span>';
+  }
+
+  function renderCrumb() {
+    var parts = ["全国"].concat(path);
+    var html = "";
+    parts.forEach(function (p, i) {
+      if (i > 0) html += '<span class="sep">›</span>';
+      if (i === parts.length - 1) {
+        html += '<span class="cur">' + p + '</span>';
+      } else {
+        html += '<a data-idx="' + i + '">' + p + '</a>';
+      }
+    });
+    crumbEl.innerHTML = html;
+    crumbEl.querySelectorAll("a").forEach(function (a) {
+      a.addEventListener("click", function () {
+        path = path.slice(0, Number(a.getAttribute("data-idx")));
+        renderDrill();
+      });
+    });
+  }
+
+  function clearNotice() {
+    var n = tableEl.querySelector("tr.notice-row");
+    if (n) n.remove();
+  }
+
+  function showNotice(afterRow) {
+    clearNotice();
+    var tr = document.createElement("tr");
+    tr.className = "notice-row";
+    tr.innerHTML = '<td colspan="7">ⓘ 演示数据仅开放 华东 → 浙江 → 杭州 链路，其余分支为静态示意</td>';
+    afterRow.parentNode.insertBefore(tr, afterRow.nextSibling);
+  }
+
+  function renderDrill() {
+    renderCrumb();
+    var rows = rowsForPath();
+    var html = "";
+
+    if (path.length < 3) {
+      var unitCol = path.length === 0 ? "大区" : path.length === 1 ? "省份" : "城市";
+      html += "<thead><tr><th>" + unitCol + "</th><th>铺货率</th><th>动销率</th><th>开瓶扫码</th><th>品鉴会</th><th>发布率</th><th></th></tr></thead><tbody>";
+      rows.forEach(function (r) {
+        html +=
+          '<tr class="clickable" data-name="' + r.name + '">' +
+          "<td><b>" + r.name + "</b></td>" +
+          '<td><span class="pbar"><i style="width:' + r.pu + '%"' + (r.pu >= 80 ? ' class="gold"' : "") + "></i></span><span class=\"num\">" + r.pu + "%</span></td>" +
+          '<td class="num">' + r.dx + "%</td>" +
+          '<td class="num">' + r.scan + "</td>" +
+          '<td class="num">' + r.jh + " 场</td>" +
+          '<td class="num">' + r.fb + "%</td>" +
+          '<td><span class="drill-hint">下钻 ›</span></td>' +
+          "</tr>";
+      });
+      html += "</tbody>";
+    } else {
+      html += "<thead><tr><th>终端</th><th>类别</th><th>扫码</th><th>宴席</th><th>前开瓶</th><th>状态</th></tr></thead><tbody>";
+      rows.forEach(function (r) {
+        html +=
+          "<tr>" +
+          "<td><b>" + r.name + "</b></td>" +
+          "<td>" + clsTag(r.cls) + "</td>" +
+          '<td class="num">' + r.scan + " 次</td>" +
+          '<td class="num">' + r.ys + " 单</td>" +
+          '<td class="num">' + r.kp.replace("前开瓶 ", "") + " 瓶</td>" +
+          "<td>" + stTag(r.st) + "</td>" +
+          "</tr>";
+      });
+      html += "</tbody>";
+    }
+    tableEl.innerHTML = html;
+
+    tableEl.querySelectorAll("tr.clickable").forEach(function (tr) {
+      tr.addEventListener("click", function () {
+        var name = tr.getAttribute("data-name");
+        if (name === ALLOWED[path.length]) {
+          path.push(name);
+          renderDrill();
+        } else {
+          showNotice(tr);
+        }
+      });
+    });
+  }
+  renderDrill();
+
+  /* ============ 3. 空中巡警 ============ */
+  var feed = document.getElementById("alertFeed");
+  JD.alerts.forEach(function (a) {
+    var cls = "alert" + (a.lv === "warn2" ? " warn2" : a.lv === "info" ? " info" : "");
+    var el = document.createElement("div");
+    el.className = cls;
+    var isDone = a.act === "已处理";
+    el.innerHTML =
+      '<span class="a-ic">' + a.ic + "</span>" +
+      "<div><b>" + a.t + "</b><span>" + a.d + "</span></div>" +
+      '<span class="a-act' + (isDone ? " done" : "") + '">' + (isDone ? "已处理 ✓" : a.act) + "</span>";
+    if (!isDone) {
+      el.querySelector(".a-act").addEventListener("click", function () {
+        this.classList.add("done");
+        this.textContent = "已派单 ✓";
+      });
+    }
+    feed.appendChild(el);
+  });
+
+  /* ============ 4. ChatBI ============ */
+  var log = document.getElementById("biLog");
+  var quick = document.getElementById("biQuick");
+
+  function bars(items) {
+    var max = Math.max.apply(null, items.map(function (i) { return i.v; }));
+    var h = '<div class="bi-bars">';
+    items.forEach(function (i) {
+      h +=
+        '<div class="row"><span>' + i.l + '</span><span class="tr"><i style="width:' +
+        Math.round((i.v / max) * 100) + '%"' + (i.red ? ' class="red"' : "") + '></i></span><span class="v">' + i.t + "</span></div>";
+    });
+    return h + "</div>";
+  }
+
+  var QA = [
+    {
+      q: "杭州本月动销率多少？环比呢？",
+      a:
+        '杭州本月动销率 <span class="hl">61%</span>（样板市场，全国均值 41.5%），环比 <b>+6.2pct</b>。浙江三城对比如下——杭州战役期领跑明显：' +
+        bars([
+          { l: "杭州", v: 61, t: "61%", red: true },
+          { l: "宁波", v: 49, t: "49%" },
+          { l: "温州", v: 44, t: "44%" },
+        ]),
+    },
+    {
+      q: "哪些城市费销比超标？",
+      a:
+        "本月有 2 城费销比越过 <b>18% 红线</b>：<span class=\"hl\">温州 21.3%</span>、<span class=\"hl\">合肥 19.8%</span>。" +
+        bars([
+          { l: "温州", v: 21.3, t: "21.3%", red: true },
+          { l: "合肥", v: 19.8, t: "19.8%", red: true },
+          { l: "红线", v: 18, t: "18%" },
+        ]) +
+        "<b>建议：</b>两城均为压货型投入占比过高，建议把费用从渠道压货转向<b>开瓶扫码激励</b>，随动销真实发生再释放。",
+    },
+    {
+      q: "青云39 华东开瓶扫码趋势",
+      a:
+        "华东近 4 周开瓶扫码：<b>3.1 → 3.6 → 4.2 → 5.8 万次</b>，第 4 周跳升 38%——<span class=\"hl\">杭州「冰萃一夏」战役拉动明显</span>：" +
+        bars([
+          { l: "第 1 周", v: 3.1, t: "3.1万" },
+          { l: "第 2 周", v: 3.6, t: "3.6万" },
+          { l: "第 3 周", v: 4.2, t: "4.2万" },
+          { l: "第 4 周", v: 5.8, t: "5.8万", red: true },
+        ]),
+    },
+    {
+      q: "全员发布率最低的三个城市",
+      a:
+        "发布率倒数三城：<span class=\"hl\">石家庄 78%</span> / <span class=\"hl\">郑州 81%</span> / <span class=\"hl\">合肥 83%</span>（全国均值 91%）。" +
+        bars([
+          { l: "石家庄", v: 78, t: "78%", red: true },
+          { l: "郑州", v: 81, t: "81%", red: true },
+          { l: "合肥", v: 83, t: "83%", red: true },
+        ]) +
+        "已自动推送三地区域经理<b>催办</b>，并附上逐人未发布名单。",
+    },
+  ];
+
+  QA.forEach(function (item) {
+    var btn = document.createElement("button");
+    btn.textContent = item.q;
+    btn.addEventListener("click", function () {
+      btn.disabled = true;
+      var q = document.createElement("div");
+      q.className = "bi-msg q";
+      q.textContent = item.q;
+      log.appendChild(q);
+      var typing = document.createElement("div");
+      typing.className = "bi-typing";
+      typing.innerHTML = "<i></i><i></i><i></i>";
+      log.appendChild(typing);
+      log.scrollTop = log.scrollHeight;
+      setTimeout(function () {
+        typing.remove();
+        var a = document.createElement("div");
+        a.className = "bi-msg a";
+        a.innerHTML = item.a;
+        log.appendChild(a);
+        log.scrollTop = log.scrollHeight;
+      }, 500);
+    });
+    quick.appendChild(btn);
+  });
+})();
+</script>
+
+</body>
+</html>

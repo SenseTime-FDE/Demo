@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>君度智链 · 双引擎平台原型 · 蒸馏工厂</title>
+<link rel="stylesheet" href="assets/style.css" />
+<style>
+/* ============ 蒸馏工厂 · 页面专属样式（仅使用 style.css 变量） ============ */
+
+/* 流水线步骤角标 */
+.pipe .p-step { min-height: 128px; }
+.pipe .p-step .p-chk {
+  position: absolute; right: 14px; top: 12px;
+  width: 24px; height: 24px; border-radius: 50%;
+  background: rgba(46,139,87,.12); color: var(--ok);
+  font-size: 13px; font-weight: 800;
+  display: flex; align-items: center; justify-content: center;
+}
+.pipe .p-step .p-live {
+  position: absolute; right: 14px; top: 14px;
+  font-size: 10.5px; font-weight: 800; letter-spacing: 1px; color: var(--warm-d);
+  background: var(--cream); border-radius: 999px; padding: 3px 10px;
+  display: inline-flex; align-items: center; gap: 5px;
+}
+.pipe .p-step .p-live i {
+  width: 6px; height: 6px; border-radius: 50%; background: var(--warm);
+  animation: livePulse 1.2s ease-in-out infinite;
+}
+@keyframes livePulse { 0%,100% { opacity: .35; transform: scale(.8);} 50% { opacity: 1; transform: scale(1);} }
+
+/* 萃取源 · 人物卡 */
+.src-person { display: flex; align-items: center; gap: 14px; padding: 4px 0 14px; border-bottom: 1px solid var(--line); margin-bottom: 6px; }
+.src-person .av {
+  width: 52px; height: 52px; border-radius: 16px; flex: none;
+  background: linear-gradient(135deg, #C99A45, var(--gold));
+  color: #fff; font-size: 22px; font-weight: 800;
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: var(--shadow-sm);
+}
+.src-person b { display: block; font-size: 16px; color: var(--ink); }
+.src-person .who { font-size: 12px; color: var(--muted); margin: 1px 0 5px; }
+
+/* 萃取源三行 */
+.src-row { display: flex; gap: 12px; padding: 12px 0; border-bottom: 1px dashed var(--line); align-items: flex-start; }
+.src-row:last-child { border-bottom: none; padding-bottom: 4px; }
+.src-row .s-ic {
+  width: 36px; height: 36px; border-radius: 11px; flex: none;
+  background: var(--sky); display: flex; align-items: center; justify-content: center; font-size: 17px;
+}
+.src-row .s-main { flex: 1; min-width: 0; }
+.src-row .s-t { display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; }
+.src-row .s-t b { font-size: 13.5px; color: var(--ink); }
+.src-row .s-t .s-v { font-size: 12px; font-weight: 700; color: var(--teal-d); }
+.src-row .s-d { font-size: 12px; color: var(--sub); margin-top: 1px; }
+
+/* 录音波形条 */
+.waveband {
+  margin-top: 8px; display: flex; align-items: center; gap: 10px;
+  background: var(--sky); border: 1px solid var(--sky2); border-radius: 10px; padding: 8px 12px;
+  cursor: pointer; user-select: none; transition: background .15s;
+}
+.waveband:hover { background: var(--sky2); }
+.waveband .wv-btn {
+  width: 26px; height: 26px; border-radius: 50%; flex: none;
+  background: var(--teal); color: #fff; font-size: 10px;
+  display: flex; align-items: center; justify-content: center;
+}
+.waveband.playing .wv-btn { background: var(--warm); }
+.waveband .wv-bars { flex: 1; display: flex; align-items: center; gap: 2.5px; height: 22px; overflow: hidden; }
+.waveband .wv-bars i {
+  flex: 1; min-width: 2px; border-radius: 2px; background: var(--teal-l); transform: scaleY(var(--h, .5));
+  height: 100%; display: block; transform-origin: center;
+}
+.waveband.playing .wv-bars i { background: var(--teal); animation: wvPlay .9s ease-in-out infinite; }
+@keyframes wvPlay { 0%,100% { transform: scaleY(calc(var(--h, .5) * .55)); } 50% { transform: scaleY(var(--h, .5)); } }
+.waveband .wv-cap { flex: none; font-size: 11px; color: var(--teal-d); font-weight: 600; font-variant-numeric: tabular-nums; }
+
+/* 激励面板 · 分成大数字 */
+.royalty { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 6px 2px 2px; }
+.royalty .r-cell { flex: 1; text-align: center; }
+.royalty .r-cell .rv { font-size: 30px; font-weight: 800; color: var(--ink); font-variant-numeric: tabular-nums; line-height: 1.15; }
+.royalty .r-cell.gold .rv { color: var(--gold); }
+.royalty .r-cell .rl { font-size: 11.5px; color: var(--muted); margin-top: 3px; }
+.royalty .r-arrow { flex: none; font-size: 18px; color: var(--warm); font-weight: 800; }
+
+/* 知识原子库 */
+.atom-head-tags { display: flex; gap: 8px; margin-left: auto; }
+.panel h3 .atom-head-tags { font-weight: 400; }
+.mini-table td .eg-quote { color: var(--sub); }
+.mini-table td .eg-quote em { font-style: normal; color: var(--warm-d); }
+.mini-table td.by { white-space: nowrap; }
+.mini-table td.by small { display: block; font-size: 11px; color: var(--muted); font-weight: 400; }
+
+/* 评测面板 */
+.eval-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin-top: 18px; align-items: stretch; }
+@media (max-width: 1080px) { .eval-grid { grid-template-columns: 1fr; } }
+.eval-meta { font-size: 12px; color: var(--muted); margin-bottom: 12px; }
+.eval-meta b { color: var(--teal-d); }
+.score-wrap { display: flex; gap: 18px; align-items: center; }
+.score-ring {
+  width: 118px; height: 118px; border-radius: 50%; flex: none; position: relative;
+  background: conic-gradient(var(--teal) calc(var(--pct, 0) * 1%), var(--sky) 0);
+  display: flex; align-items: center; justify-content: center;
+}
+.score-ring::before {
+  content: ""; position: absolute; inset: 10px; border-radius: 50%; background: var(--white);
+  box-shadow: inset 0 1px 4px rgba(46,35,32,.06);
+}
+.score-ring .sc { position: relative; text-align: center; }
+.score-ring .sc .n { font-size: 34px; font-weight: 800; color: var(--teal-d); line-height: 1; font-variant-numeric: tabular-nums; }
+.score-ring .sc .u { font-size: 10.5px; color: var(--muted); margin-top: 2px; }
+.chk-list { flex: 1; display: flex; flex-direction: column; gap: 7px; }
+.chk {
+  display: flex; align-items: center; gap: 8px; font-size: 12.5px; color: var(--muted);
+  opacity: .38; transition: opacity .3s, transform .3s; transform: translateX(4px);
+}
+.chk.lit { opacity: 1; transform: none; color: var(--sub); }
+.chk .c-mk {
+  width: 18px; height: 18px; border-radius: 50%; flex: none; font-size: 10.5px; font-weight: 800;
+  background: var(--sky); color: var(--teal-l);
+  display: flex; align-items: center; justify-content: center; transition: all .3s;
+}
+.chk.lit .c-mk { background: rgba(46,139,87,.14); color: var(--ok); }
+.chk b { color: var(--ink); font-weight: 600; }
+.eval-foot { display: flex; align-items: center; gap: 10px; margin-top: 16px; flex-wrap: wrap; }
+.btn-rerun {
+  font-family: var(--font); font-size: 12.5px; font-weight: 700; cursor: pointer;
+  background: var(--teal); color: #fff; border: none; border-radius: 999px; padding: 8px 18px;
+  transition: background .15s, opacity .15s;
+}
+.btn-rerun:hover { background: var(--teal-d); }
+.btn-rerun:disabled { opacity: .45; cursor: default; }
+.expert-tag { margin-left: auto; transition: opacity .3s, transform .3s; }
+.expert-tag.hid { opacity: 0; transform: translateY(4px); }
+.expert-tag .tag { font-size: 11.5px; padding: 4px 12px; }
+
+/* 版本发布 */
+.btn-gray {
+  display: block; width: 100%; text-align: center; font-family: var(--font);
+  font-size: 12.5px; font-weight: 700; cursor: pointer;
+  background: var(--cream); color: var(--warm-d); border: 1px dashed var(--warm-l);
+  border-radius: 10px; padding: 9px 0; margin-top: 4px; transition: all .15s;
+}
+.btn-gray:hover { background: var(--cream2); }
+.btn-gray:disabled { background: rgba(46,139,87,.1); color: var(--ok); border-color: rgba(46,139,87,.3); cursor: default; }
+.tl-item.fresh { animation: msgIn .35s ease both; }
+.tl-item .tag { margin-left: 6px; vertical-align: 1px; }
+
+/* 效果段 */
+.outcome-grid { display: grid; grid-template-columns: 2fr 1fr; gap: 18px; align-items: stretch; }
+@media (max-width: 1080px) { .outcome-grid { grid-template-columns: 1fr; } }
+.outcome-grid .kpi-grid { grid-template-columns: repeat(2, 1fr); }
+.outcome-grid .quote-band { display: flex; flex-direction: column; justify-content: center; }
+.quote-band .qm { font-size: 26px; color: rgba(243,227,194,.5); line-height: 1; margin-bottom: 6px; }
+
+/* 页尾回流提示 */
+.loopback { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
+.loopback p { flex: 1; min-width: 260px; font-size: 13px; color: var(--sub); }
+.loopback p b { color: var(--warm-d); }
+.loopback .go-front {
+  flex: none; font-size: 13px; font-weight: 700; color: #fff; background: var(--teal);
+  padding: 9px 20px; border-radius: 999px; transition: background .15s;
+}
+.loopback .go-front:hover { background: var(--teal-d); }
+</style>
+</head>
+<body>
+
+<header class="topnav">
+  <div class="brand">
+    <img src="assets/st_logo.png" alt="商汤科技" />
+    <span class="divider"></span>
+    <span class="name">君度智链 · 双引擎平台<small>JUNDU CHAIN · DUAL ENGINE PROTOTYPE</small></span>
+  </div>
+  <nav>
+    <a href="index.html">总览</a>
+    <a href="plan.html">方案全景</a>
+    <a href="boss.html">总部驾驶舱</a>
+    <a href="region.html">区域作战台</a>
+    <a href="frontline.html">一线小程序</a>
+    <a class="active" href="distill.html"><span class="dot"></span>蒸馏工厂</a>
+  </nav>
+</header>
+
+<main class="page">
+
+  <div class="page-head">
+    <div class="eyebrow">DISTILL LAB · 蒸馏工厂</div>
+    <h1>把最强员工，<span class="hl">蒸馏给整个团队</span></h1>
+    <p class="sub">刘婧（君度 AI 训练师）把 <b>赵德柱「赵冠军」</b>（金牌业务员 · 连续 3 年销冠）的判断力，蒸馏成岗位 AI 助理 <b>「小链 · 销售版」v1.3</b> —— 28 人团队人手一个，新人第一天就带着「老师傅大脑」上岗。</p>
+  </div>
+
+  <!-- 四步蒸馏流水线 -->
+  <section class="pipe">
+    <div class="p-step">
+      <span class="p-chk">✓</span>
+      <div class="p-k">STEP 01</div>
+      <b>萃取 · 让经验显性化</b>
+      <p>跟岗录音、冠军案例、高分对话——把只在赵冠军脑子里的判断，一条条挖出来。</p>
+    </div>
+    <div class="p-step">
+      <span class="p-chk">✓</span>
+      <div class="p-k">STEP 02</div>
+      <b>结构化 · 拆成知识原子</b>
+      <p>拆成话术库 / 决策树 / SOP / 禁忌清单四类原子，逐条署名入库，可检索可调用。</p>
+    </div>
+    <div class="p-step">
+      <span class="p-chk">✓</span>
+      <div class="p-k">STEP 03</div>
+      <b>建模 · 考试合格再上岗</b>
+      <p>30 个真实历史场景组成评测集，85 分为通过线，专家评审签字才放行。</p>
+    </div>
+    <div class="p-step on">
+      <span class="p-live"><i></i>进行中</span>
+      <div class="p-k">STEP 04</div>
+      <b>迭代 · 越用越强</b>
+      <p>一线高分应答持续回流，版本灰度发布、留痕可溯——助理越用越像冠军。</p>
+    </div>
+  </section>
+
+  <!-- 主区：左 萃取源 + 激励 · 右 原子库 + 评测 + 版本 -->
+  <section class="cols-82" style="margin-top:18px;">
+
+    <div>
+      <div class="panel">
+        <h3>萃取源 · 赵冠军</h3>
+        <div class="src-person">
+          <div class="av">赵</div>
+          <div>
+            <b>赵德柱</b>
+            <div class="who">金牌业务员「赵冠军」</div>
+            <span class="tag gold">连续 3 年销冠</span>
+            <span class="tag teal">经验供给方</span>
+          </div>
+        </div>
+        <div id="srcList"></div>
+        <div class="note"><b>脱敏声明：</b>录音与会话经客户信息脱敏后入库，仅萃取「怎么判断、怎么说」，不留客户隐私。</div>
+      </div>
+
+      <div class="panel">
+        <h3>激励 · 老师傅愿意教</h3>
+        <div class="royalty">
+          <div class="r-cell">
+            <div class="rv" id="royCalls">0</div>
+            <div class="rl">本月原子被调用（次）</div>
+          </div>
+          <div class="r-arrow">→</div>
+          <div class="r-cell gold">
+            <div class="rv" id="royPoints">0</div>
+            <div class="rl">蒸馏分成积分</div>
+          </div>
+        </div>
+        <div class="note"><b>机制：</b>经验入库署名，调用即计分——不做「教会徒弟饿死师傅」，而是让师傅越教越值钱。</div>
+      </div>
+    </div>
+
+    <div>
+      <div class="panel">
+        <h3>知识原子库 · 862 条已入库
+          <span class="atom-head-tags">
+            <span class="tag warm" id="atomOnline">v1.3 精选上线</span>
+            <span class="tag teal">全部署名可溯</span>
+          </span>
+        </h3>
+        <table class="mini-table">
+          <thead>
+            <tr><th>原子类型</th><th>本版数量</th><th>示例 · 引用原话</th><th>署名 · 本月调用</th></tr>
+          </thead>
+          <tbody id="atomBody"></tbody>
+        </table>
+        <div class="note"><b>862 条</b>为累计入库总量（含历史版本与候选原子），当前 v1.3 精选 <b id="atomSum">—</b> 条上线；每条原子都带署名与调用计数，是「蒸馏分成」的计分依据。</div>
+      </div>
+
+      <div class="eval-grid">
+        <div class="panel" style="margin:0;">
+          <h3>评测面板 · 上岗考试</h3>
+          <div class="eval-meta">评测集 <b>30 个真实历史场景</b> · 通过线 <b>85 分</b> · 模型版本 v1.3</div>
+          <div class="score-wrap">
+            <div class="score-ring" id="scoreRing" style="--pct:0;">
+              <div class="sc"><div class="n" id="scoreNum">0</div><div class="u">综合得分</div></div>
+            </div>
+            <div class="chk-list">
+              <div class="chk" data-chk><span class="c-mk">✓</span><span><b>话术还原度</b> · 与冠军原话风格一致</span></div>
+              <div class="chk" data-chk><span class="c-mk">✓</span><span><b>决策一致性</b> · 30 场景关键决策同向</span></div>
+              <div class="chk" data-chk><span class="c-mk">✓</span><span><b>禁忌零违规</b> · 21 条禁忌清单全守住</span></div>
+              <div class="chk" data-chk><span class="c-mk">✓</span><span><b>幻觉率 0.7%</b> · 低于 2% 红线</span></div>
+            </div>
+          </div>
+          <div class="eval-foot">
+            <button class="btn-rerun" id="btnRerun">▶ 重跑评测</button>
+            <span class="expert-tag hid" id="expertTag"><span class="tag ok">专家评审 · 刘婧 · 通过</span></span>
+          </div>
+        </div>
+
+        <div class="panel" style="margin:0;">
+          <h3>版本发布 · 留痕</h3>
+          <div class="timeline" id="verTimeline">
+            <div class="tl-item">
+              <div class="tl-t">2026-06-10</div>
+              <b>v1.0 · 六月内测</b>
+              <p>拱墅片区 8 人内测，收集一线反馈 41 条。</p>
+            </div>
+            <div class="tl-item">
+              <div class="tl-t">2026-06-28</div>
+              <b>v1.2 · 修订</b>
+              <p>修正宴席政策话术 3 条（刘婧复核 · 赵德柱确认）。</p>
+            </div>
+            <div class="tl-item hot">
+              <div class="tl-t">2026-07-05</div>
+              <b>v1.3 · 全员发布<span class="tag warm">当前版</span></b>
+              <p>「小链 · 销售版」推送至 28 人团队，人手一个。</p>
+            </div>
+          </div>
+          <button class="btn-gray" id="btnGray">发布 v1.4 灰度</button>
+        </div>
+      </div>
+    </div>
+
+  </section>
+
+  <!-- 效果 · 团队一起强 -->
+  <section class="plan-sec" style="margin-top:30px;">
+    <div class="sec-tag">OUTCOME</div>
+    <h2>效果 · 团队一起强</h2>
+    <p class="sec-sub">蒸馏上线 6 周（v1.0 → v1.3），杭州样板市场 28 人团队的过程与结果指标同步改善。</p>
+    <div class="outcome-grid">
+      <div class="kpi-grid">
+        <div class="kpi-tile navy">
+          <div class="k-label">🤝 团队使用</div>
+          <div class="k-val">28 <small>人</small></div>
+          <div class="k-delta up">全员人手一个</div>
+        </div>
+        <div class="kpi-tile">
+          <div class="k-label">📈 采用率（周活跃）</div>
+          <div class="k-val">87<small>%</small></div>
+          <div class="k-delta up">+12pct vs v1.0 内测期</div>
+        </div>
+        <div class="kpi-tile hot">
+          <div class="k-label">🚀 新人首单周期</div>
+          <div class="k-val">22 天 <small>→</small> 9 <small>天</small></div>
+          <div class="k-delta up">缩短 13 天 · −59%</div>
+        </div>
+        <div class="kpi-tile">
+          <div class="k-label">🎯 团队人均成交率</div>
+          <div class="k-val">+18<small>%</small></div>
+          <div class="k-delta up">vs 蒸馏前基线</div>
+        </div>
+      </div>
+      <div class="quote-band">
+        <div class="qm">“</div>
+        过去靠金银红黄牌 PK 让人向标杆看齐，现在把标杆本身做成每个人的 AI 助理。
+        <small>刘婧 · 君度咨询 驻场顾问 / AI 训练师</small>
+      </div>
+    </div>
+  </section>
+
+  <!-- 页尾回流提示 -->
+  <div class="panel" style="margin-top:26px;">
+    <h3>经验回流 · 蒸馏不是一次性项目</h3>
+    <div class="loopback">
+      <p>王小磊们在一线的每一次<b>高分应答</b>、每一条被采纳的现场判断，都会自动回流进原子候选池，成为 <b>v1.5 的原料</b>——数据成为血液，经验成为资产，飞轮转起来就不会停。</p>
+      <a class="go-front" href="frontline.html">去一线小程序看回流现场 →</a>
+    </div>
+  </div>
+
+</main>
+
+<footer class="site-footer">
+  <div class="foot-brand"><img src="assets/st_logo.png" alt="商汤科技" /></div>
+  商汤科技 · 大模型生态渠道部 × 北京君度咨询 · 链一链智能 &nbsp;|&nbsp; <b>「咨询 + AI」双引擎 · 高保真原型</b> &nbsp;|&nbsp; 演示数据均为虚构
+</footer>
+
+<script src="assets/data.js"></script>
+<script>
+(function () {
+  var D = window.JD.distill;
+  var srcIcons = ["🎙", "🏆", "💬"];
+
+  /* ---------- 萃取源三行（跟岗录音带波形） ---------- */
+  var srcList = document.getElementById("srcList");
+  D.sources.forEach(function (s, i) {
+    var row = document.createElement("div");
+    row.className = "src-row";
+    var html =
+      '<div class="s-ic">' + srcIcons[i] + '</div>' +
+      '<div class="s-main">' +
+        '<div class="s-t"><b>' + s.t + '</b><span class="s-v">' + s.v + '</span></div>' +
+        '<div class="s-d">' + s.d + '</div>';
+    if (i === 0) {
+      var bars = "";
+      for (var j = 0; j < 34; j++) {
+        var h = (0.35 + 0.6 * Math.abs(Math.sin(j * 1.7) * Math.cos(j * 0.6))).toFixed(2);
+        bars += '<i style="--h:' + h + ';animation-delay:' + (j * 55) + 'ms;"></i>';
+      }
+      html +=
+        '<div class="waveband" id="waveband" title="点击试听">' +
+          '<span class="wv-btn" id="wvBtn">▶</span>' +
+          '<span class="wv-bars">' + bars + '</span>' +
+          '<span class="wv-cap" id="wvCap">146:00 · 已脱敏</span>' +
+        '</div>';
+    }
+    html += '</div>';
+    row.innerHTML = html;
+    srcList.appendChild(row);
+  });
+
+  var waveband = document.getElementById("waveband");
+  waveband.addEventListener("click", function () {
+    var playing = waveband.classList.toggle("playing");
+    document.getElementById("wvBtn").textContent = playing ? "⏸" : "▶";
+    document.getElementById("wvCap").textContent = playing ? "播放中 · 巡店片段 01" : "146:00 · 已脱敏";
+  });
+
+  /* ---------- 激励 · 分成大数字（载入滚动） ---------- */
+  function countUp(el, target, dur) {
+    var t0 = null;
+    function step(ts) {
+      if (!t0) t0 = ts;
+      var p = Math.min((ts - t0) / dur, 1);
+      var ease = 1 - Math.pow(1 - p, 3);
+      el.textContent = Math.round(target * ease).toLocaleString("zh-CN");
+      if (p < 1) requestAnimationFrame(step);
+    }
+    requestAnimationFrame(step);
+  }
+  countUp(document.getElementById("royCalls"), D.royalty.calls, 1100);
+  countUp(document.getElementById("royPoints"), D.royalty.points, 1100);
+
+  /* ---------- 知识原子库表格（署名调用数合计 = 本月调用总次数） ---------- */
+  var callSplit = [5214, 2308, 1096, 682]; /* 合计 9,300，与激励面板一致 */
+  var atomBody = document.getElementById("atomBody");
+  var atomSum = 0;
+  D.atoms.forEach(function (a, i) {
+    atomSum += a.v;
+    var eg = a.eg.replace(/(「[^」]*」|『[^』]*』)/g, "<em>$1</em>");
+    var tr = document.createElement("tr");
+    tr.innerHTML =
+      "<td><b>" + a.k + "</b></td>" +
+      '<td><b>' + a.v + '</b> 条</td>' +
+      '<td class="eg-quote">' + eg + "</td>" +
+      '<td class="by"><b>赵德柱</b><small>' + callSplit[i].toLocaleString("zh-CN") + " 次调用</small></td>";
+    atomBody.appendChild(tr);
+  });
+  document.getElementById("atomSum").textContent = atomSum;
+  document.getElementById("atomOnline").textContent = D.version + " 精选 " + atomSum + " 条上线";
+
+  /* ---------- 评测面板：0 → 92 滚动 + 检查项逐条亮起 ---------- */
+  var ring = document.getElementById("scoreRing");
+  var scoreNum = document.getElementById("scoreNum");
+  var chks = document.querySelectorAll("[data-chk]");
+  var expertTag = document.getElementById("expertTag");
+  var btnRerun = document.getElementById("btnRerun");
+  var running = false;
+
+  function runEval() {
+    if (running) return;
+    running = true;
+    btnRerun.disabled = true;
+    expertTag.classList.add("hid");
+    chks.forEach(function (c) { c.classList.remove("lit"); });
+
+    var target = D.evalScore, dur = 1400, t0 = null;
+    function step(ts) {
+      if (!t0) t0 = ts;
+      var p = Math.min((ts - t0) / dur, 1);
+      var ease = 1 - Math.pow(1 - p, 3);
+      var val = Math.round(target * ease);
+      scoreNum.textContent = val;
+      ring.style.setProperty("--pct", val);
+      if (p < 1) { requestAnimationFrame(step); }
+    }
+    requestAnimationFrame(step);
+
+    chks.forEach(function (c, i) {
+      setTimeout(function () { c.classList.add("lit"); }, 500 + i * 380);
+    });
+    setTimeout(function () {
+      expertTag.classList.remove("hid");
+      btnRerun.disabled = false;
+      running = false;
+    }, 500 + chks.length * 380 + 250);
+  }
+  btnRerun.addEventListener("click", runEval);
+  setTimeout(runEval, 350); /* 进页自动跑一遍 */
+
+  /* ---------- 版本发布：v1.4 灰度 ---------- */
+  var btnGray = document.getElementById("btnGray");
+  btnGray.addEventListener("click", function () {
+    var item = document.createElement("div");
+    item.className = "tl-item hot fresh";
+    item.innerHTML =
+      '<div class="tl-t">刚刚 · 2026-07-12</div>' +
+      '<b>v1.4 · 灰度<span class="tag gold">灰度中</span></b>' +
+      "<p>新增冰萃场景话术 14 条 → 5 人灰度组（含王小磊），达标后全员推送。</p>";
+    document.getElementById("verTimeline").appendChild(item);
+    btnGray.disabled = true;
+    btnGray.textContent = "✓ v1.4 已进入灰度 · 5 人灰度组";
+  });
+})();
+</script>
+
+</body>
+</html>
