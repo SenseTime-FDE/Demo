@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>平台管理 · 人民日报社智媒平台 2.0</title>
+<link rel="stylesheet" href="assets/style.css">
+<link rel="stylesheet" href="assets/modules.css">
+<style>
+.matrix-wrap{overflow:auto}.perm-matrix{min-width:940px;width:100%;border-collapse:collapse;font-size:12px}.perm-matrix th,.perm-matrix td{padding:8px;border-bottom:1px solid var(--line);text-align:center}.perm-matrix th{color:var(--sub);font-size:11px}.perm-matrix th:first-child,.perm-matrix td:first-child{text-align:left;position:sticky;left:0;background:var(--card);z-index:1}.perm-matrix td:first-child b{color:var(--ink);display:block}.perm-matrix td:first-child span{color:var(--muted);font-size:10px}.perm-matrix input{width:16px;height:16px;accent-color:var(--accent)}
+.audit-row{display:grid;grid-template-columns:130px 120px 1fr 100px;gap:12px;align-items:center;padding:10px 4px;border-bottom:1px solid var(--line);font-size:11.8px}.audit-row:last-child{border:none}@media(max-width:760px){.audit-row{grid-template-columns:1fr}.audit-row>*{display:block}}
+.health{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}.health>div{background:var(--bg2);border-radius:10px;padding:11px}.health span{display:block;color:var(--muted);font-size:10px}.health b{color:var(--ink);font-size:16px}@media(max-width:700px){.health{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="page">
+  <div class="page-head">
+    <div><div class="eyebrow">AI PLATFORM GOVERNANCE</div><h1>平台管理 · 权限、治理、网关与安全</h1><p class="sub">管理员只管理身份、能力、调用和安全元数据，不查看稿件正文或经营明细；高敏权限采用双人复核。</p></div>
+    <div class="flex wrap"><button class="btn ghost sm" id="inspect">🩺 一键巡检</button><button class="btn ghost sm" id="export">导出管理台账</button><button class="btn primary sm" id="ticket">＋ 新建配置工单</button></div>
+  </div>
+
+  <div class="metric-strip mb16">
+    <div class="metric-mini"><span>平台可用性</span><b>99.97%</b><small>运行正常</small></div>
+    <div class="metric-mini"><span>今日 API 调用</span><b>128.6万</b><small>峰值 2.4万/分</small></div>
+    <div class="metric-mini"><span>智能体在线</span><b>47 / 50</b><small style="color:var(--warn)">3 个维护中</small></div>
+    <div class="metric-mini"><span>越权拦截</span><b>3 次</b><small>均已入审计</small></div>
+    <div class="metric-mini"><span>待审批工单</span><b>6</b><small style="color:var(--warn)">高敏 2 项</small></div>
+  </div>
+
+  <div class="grid g4 mb16">
+    <div class="callout"><b>辅助不替代</b><br>AI 不具备签发与口径审定权。</div>
+    <div class="callout"><b>AIGC 强制标识</b><br>未加注内容不得出库。</div>
+    <div class="callout"><b>数据分级</b><br>密级、角色与可见粒度联动。</div>
+    <div class="callout"><b>全程留痕</b><br>权限、模型、审校与下载均审计。</div>
+  </div>
+
+  <div class="tabs mb16" id="admin-tabs"><button class="on" data-pane="perm">权限与组织</button><button data-pane="gov">智能体治理</button><button data-pane="gateway">网关与 Token</button><button data-pane="security">安全审计</button><button data-pane="upgrade">一期升级</button></div>
+
+  <div class="tab-pane on" id="pane-perm">
+    <section class="panel mb16"><h3>角色 × 模块权限矩阵 <span class="h-extra" id="change-count">0 项变更</span></h3><div class="matrix-wrap"><table class="perm-matrix" id="perm-matrix"></table></div><div class="flex-between mt16"><div class="callout" style="flex:1"><b>规则：</b>工作台为全员基础权限；平台管理为管理员自持权限。任何变更均先进入暂存，不直接生效。</div><button class="btn primary" id="submit-perm">提交权限工单</button></div></section>
+    <div class="grid g32">
+      <section class="panel"><h3>演示用户与数据范围 <span class="h-extra">统一身份认证同步</span></h3><table class="tbl" id="user-table"></table></section>
+      <section class="panel"><h3>待审批权限申请</h3><div class="list-card"><div class="list-ic">李</div><div><b>李国平申请经营数据临时下钻</b><p>范围：社属企业经营汇总 · 有效期 8 小时</p></div><button class="btn soft sm approve">复核</button></div><div class="list-card"><div class="list-ic">陈</div><div><b>陈晓雯申请决策大屏只读权限</b><p>用于重大主题报道值班 · 7 天</p></div><button class="btn soft sm approve">复核</button></div><div class="callout warn mt12">高敏模块需平台管理员提交、编委会办公室复核，并记录授权理由与到期时间。</div></section>
+    </div>
+  </div>
+
+  <div class="tab-pane" id="pane-gov">
+    <div class="grid g3 mb16">
+      <section class="panel"><h3>待上架 · 方言播报</h3><p class="small">智能体大赛优选应用，已完成基础功能测试。</p><div class="health mt12"><div><span>安全评测</span><b>通过</b></div><div><span>语料授权</span><b>通过</b></div><div><span>红线样本</span><b>19/20</b></div></div><button class="btn soft block mt16 govern">查看评测并审批</button></section>
+      <section class="panel"><h3>版本升级 · 写易成稿 v4.2</h3><p class="small">新增长录音章节切分与引用时间戳回链。</p><div class="health mt12"><div><span>灰度用户</span><b>50</b></div><div><span>满意度</span><b>92%</b></div><div><span>异常率</span><b>0.3%</b></div></div><button class="btn soft block mt16 govern">进入灰度发布</button></section>
+      <section class="panel"><h3>下架评估 · 旧版标题助手</h3><p class="small">能力已被“标题导语优化”完全覆盖，近 30 天调用持续下降。</p><div class="health mt12"><div><span>月调用</span><b>128</b></div><div><span>替代覆盖</span><b>100%</b></div><div><span>依赖流程</span><b>2</b></div></div><button class="btn ghost block mt16 govern">启动平滑下架</button></section>
+    </div>
+    <section class="panel"><h3>智能体生命周期 <span class="h-extra">需求 → 构建 → 评测 → 上架 → 运营 → 下架</span></h3><table class="tbl"><thead><tr><th>智能体</th><th>负责人</th><th>版本</th><th>日调用</th><th>成功率</th><th>状态</th></tr></thead><tbody><tr><td><b>选题推荐官</b></td><td>新闻协调部</td><td>v3.6</td><td>12,840</td><td>99.8%</td><td><span class="tag ok">在线</span></td></tr><tr><td><b>智能审核员</b></td><td>总编室</td><td>v5.1</td><td>11,020</td><td>99.9%</td><td><span class="tag ok">在线</span></td></tr><tr><td><b>网红成长追踪</b></td><td>新媒体中心</td><td>v1.8</td><td>2,540</td><td>98.7%</td><td><span class="tag accent">灰度</span></td></tr></tbody></table></section>
+  </div>
+
+  <div class="tab-pane" id="pane-gateway">
+    <div class="grid g32 mb16">
+      <section class="panel"><h3>Token 消耗趋势 <span class="h-extra">近 7 天</span></h3><svg class="line-chart" viewBox="0 0 800 150" preserveAspectRatio="none"><g class="chart-grid"><line x1="0" y1="30" x2="800" y2="30"/><line x1="0" y1="75" x2="800" y2="75"/><line x1="0" y1="120" x2="800" y2="120"/></g><path class="chart-area" d="M0 112 L130 96 L260 105 L390 78 L520 86 L650 45 L800 28 L800 150 L0 150Z"/><path class="chart-line" d="M0 112 L130 96 L260 105 L390 78 L520 86 L650 45 L800 28"/></svg><div class="callout warn mt12"><b>用量告警：</b>写易引擎昨日环比 +38%，已自动切换弹性配额池，未影响业务。</div></section>
+      <section class="panel"><h3>模型路由健康度</h3><div class="list-card"><div class="list-ic">✍️</div><div><b>写易智能写作引擎</b><p>平均时延 1.8s · 成功率 99.95%</p></div><span class="tag ok">主路由</span></div><div class="list-card"><div class="list-ic">🛡️</div><div><b>智能审核平台</b><p>平均时延 0.9s · 成功率 99.99%</p></div><span class="tag ok">正常</span></div><div class="list-card"><div class="list-ic">🧠</div><div><b>人民智媒大模型</b><p>平均时延 2.2s · 弹性算力 72%</p></div><span class="tag accent">均衡</span></div></section>
+    </div>
+    <section class="panel"><h3>部门 Token 分摊 <span class="h-extra">仅展示用量元数据</span></h3><div class="bar-row"><span class="b-label">经济社会部</span><span class="b-track"><i class="b-fill" style="width:22%"></i></span><span class="b-val">22%</span></div><div class="bar-row"><span class="b-label">总编室</span><span class="b-track"><i class="b-fill" style="width:18%"></i></span><span class="b-val">18%</span></div><div class="bar-row"><span class="b-label">新媒体中心</span><span class="b-track"><i class="b-fill gold" style="width:17%"></i></span><span class="b-val">17%</span></div><div class="bar-row"><span class="b-label">新闻协调部</span><span class="b-track"><i class="b-fill ok" style="width:14%"></i></span><span class="b-val">14%</span></div></section>
+  </div>
+
+  <div class="tab-pane" id="pane-security">
+    <div class="grid g4 mb16"><div class="kpi"><div class="k-label">今日越权调用</div><div class="k-value">3</div><div class="k-delta up">全部拦截</div></div><div class="kpi"><div class="k-label">敏感输出</div><div class="k-value">0</div><div class="k-delta up">无事件</div></div><div class="kpi"><div class="k-label">异常下载</div><div class="k-value">1</div><div class="k-delta down">已复核</div></div><div class="kpi"><div class="k-label">安全评测覆盖</div><div class="k-value">96<small>%</small></div><div class="k-delta up">+4%</div></div></div>
+    <section class="panel"><h3>审计日志 <span class="h-extra">保留 3 年 · 支持追溯</span></h3><div class="audit-row"><span>08:36:12</span><b>权限拦截</b><span>记者账号尝试访问“一体化决策大屏”</span><span class="tag red">已拦截</span></div><div class="audit-row"><span>08:22:04</span><b>语料访问</b><span>智能审核员读取领导人职务库条目 3 项</span><span class="tag ok">授权内</span></div><div class="audit-row"><span>07:58:31</span><b>模型路由</b><span>写易引擎切换弹性配额池</span><span class="tag warn">自动处置</span></div><div class="audit-row"><span>07:42:18</span><b>权限变更</b><span>管理员提交“方言播报”上架工单</span><span class="tag gray">待复核</span></div></section>
+  </div>
+
+  <div class="tab-pane" id="pane-upgrade">
+    <div class="grid g2">
+      <section class="panel"><h3>一期能力平滑升级</h3><div class="list-card"><div class="list-ic">🔀</div><div><b>人民e家双入口</b><p>保留原菜单访问习惯，新增对话式统一入口。</p></div><span class="tag ok">完成</span></div><div class="list-card"><div class="list-ic">🔥</div><div><b>新闻热点</b><p>升级为热点雷达 + 选题去重 + 风险联动。</p></div><span class="tag ok">完成</span></div><div class="list-card"><div class="list-ic">📊</div><div><b>效果监测</b><p>从单端统计升级为跨端传播链路与策略复盘。</p></div><span class="tag accent">灰度</span></div><div class="list-card"><div class="list-ic">🏅</div><div><b>考核评价</b><p>补充口径透明、人工校准与申诉机制。</p></div><span class="tag warn">设计中</span></div></section>
+      <section class="panel"><h3>迁移与连续性策略</h3><div class="tline"><div class="tl-item"><b>双入口并行</b><span class="tl-time">阶段 1</span><p>新旧系统同时可用，不改变用户已有工作习惯。</p></div><div class="tl-item"><b>按部门灰度</b><span class="tl-time">阶段 2</span><p>先覆盖新闻协调部、总编室和新媒体中心。</p></div><div class="tl-item"><b>数据校验与回退</b><span class="tl-time">阶段 3</span><p>关键数据双写校验，异常时自动回退一期流程。</p></div><div class="tl-item dim"><b>全面迁移</b><span class="tl-time">阶段 4</span><p>验收后收敛入口，保留历史归档只读访问。</p></div></div></section>
+    </div>
+  </div>
+</div>
+
+<script src="assets/data.js"></script>
+<script src="assets/app.js"></script>
+<script>
+var U=ZM.boot('admin'); var changes=0;
+var users=Object.keys(ZMD.USERS);var levels={leader:'全社（经营数据二次授权）',coord:'本条线',reporter:'本人 / 已授权项目',editor:'本人 / 审校任务',operator:'本部门端口',admin:'仅平台元数据'};
+function renderMatrix(){var html='<thead><tr><th>模块</th>'+users.map(function(id){return '<th>'+ZMD.USERS[id].role+'</th>';}).join('')+'</tr></thead><tbody>';ZMD.NAV.filter(function(n){return n.key!=='gaps';}).forEach(function(n){html+='<tr><td><b>'+n.label+'</b><span>'+n.src+'</span></td>'+users.map(function(id){var checked=n.perm.indexOf(id)>-1;var fixed=n.key==='work'||(n.key==='admin'&&id==='admin');return '<td><input type="checkbox" data-module="'+n.key+'" data-user="'+id+'" '+(checked?'checked ':'')+(fixed?'disabled':'')+'></td>';}).join('')+'</tr>';});html+='</tbody>';document.getElementById('perm-matrix').innerHTML=html;document.querySelectorAll('#perm-matrix input:not(:disabled)').forEach(function(cb){cb.onchange=function(){changes++;document.getElementById('change-count').textContent=changes+' 项变更';};});}
+function renderUsers(){document.getElementById('user-table').innerHTML='<thead><tr><th>用户</th><th>角色</th><th>数据范围</th><th>状态</th></tr></thead><tbody>'+users.map(function(id){var u=ZMD.USERS[id];return '<tr><td><b>'+u.name+'</b><span class="td-sub">'+u.empNo+' · '+u.dept+'</span></td><td>'+u.role+'</td><td>'+levels[id]+'</td><td><span class="tag ok">在职</span></td></tr>';}).join('')+'</tbody>';}
+document.querySelectorAll('#admin-tabs button').forEach(function(btn){btn.onclick=function(){document.querySelectorAll('#admin-tabs button').forEach(function(x){x.classList.remove('on');});document.querySelectorAll('.tab-pane').forEach(function(x){x.classList.remove('on');});btn.classList.add('on');document.getElementById('pane-'+btn.dataset.pane).classList.add('on');};});
+document.getElementById('submit-perm').onclick=function(){if(!changes){ZM.toast('暂无权限变更','warn');return;}ZM.modal('<h3>提交权限变更工单</h3><div class="m-body">共 '+changes+' 项变更。提交后由编委会办公室复核，高敏模块将额外记录授权理由和有效期。</div><div class="m-actions"><button class="btn ghost" data-close>取消</button><button class="btn primary" id="confirm-perm">提交复核</button></div>');setTimeout(function(){document.getElementById('confirm-perm').onclick=function(){changes=0;document.getElementById('change-count').textContent='0 项变更';ZM.toast('权限工单已提交双人复核','ok');document.querySelector('.overlay').remove();};},0);};
+document.querySelectorAll('.approve,.govern').forEach(function(btn){btn.onclick=function(){ZM.toast('已打开审批与评测详情（演示）','ok');};});
+document.getElementById('inspect').onclick=function(){this.textContent='巡检中…';var self=this;setTimeout(function(){self.textContent='✓ 巡检完成';ZM.toast('权限、智能体、网关与安全共 32 项检查通过','ok');},1100);};
+document.getElementById('export').onclick=function(){ZM.toast('管理台账已生成（权限、用量、安全审计）','ok');};
+document.getElementById('ticket').onclick=function(){ZM.modal('<h3>新建配置工单</h3><div class="m-body"><select class="select" style="width:100%;margin:6px 0"><option>权限变更</option><option>智能体上架</option><option>模型路由调整</option></select><textarea class="control" style="width:100%;height:90px;margin:6px 0;resize:vertical">说明变更原因、影响范围和回退方案。</textarea></div><div class="m-actions"><button class="btn ghost" data-close>取消</button><button class="btn primary" id="create-ticket">创建工单</button></div>');setTimeout(function(){document.getElementById('create-ticket').onclick=function(){ZM.toast('配置工单已创建','ok');document.querySelector('.overlay').remove();};},0);};renderMatrix();renderUsers();
+</script>
+</body>
+</html>

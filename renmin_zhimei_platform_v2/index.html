@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>智能工作台 · 人民日报社智媒平台 2.0</title>
+<link rel="stylesheet" href="assets/style.css">
+<style>
+  .todo { display: flex; align-items: flex-start; gap: 10px; padding: 10px 8px; border-bottom: 1px solid var(--line); }
+  .todo:last-child { border-bottom: none; }
+  .todo .cb { width: 17px; height: 17px; border-radius: 5px; border: 1.6px solid var(--line2); flex: none; margin-top: 2px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 11px; color: transparent; transition: all .15s; }
+  .todo .cb:hover { border-color: var(--accent); }
+  .todo.done .cb { background: var(--ok); border-color: var(--ok); color: #fff; }
+  .todo.done .t-txt { text-decoration: line-through; color: var(--muted); }
+  .todo .t-txt { font-size: 13px; color: var(--text); flex: 1; line-height: 1.5; }
+  .hot-item { display: flex; align-items: center; gap: 9px; padding: 8px 4px; border-bottom: 1px dashed var(--line); cursor: pointer; }
+  .hot-item:last-child { border-bottom: none; }
+  .hot-item:hover { background: var(--accent-l2); border-radius: 8px; }
+  .hot-item .h-heat { width: 34px; flex: none; text-align: center; font-size: 13px; font-weight: 800; color: var(--accent-d); font-variant-numeric: tabular-nums; }
+  [data-theme="blue"] .hot-item .h-heat { color: var(--accent); }
+  .hot-item .h-t { flex: 1; font-size: 12.8px; color: var(--text); line-height: 1.45; }
+  .quick { display: grid; grid-template-columns: 1fr 1fr; gap: 9px; }
+  .quick a { display: flex; align-items: center; gap: 9px; padding: 10px 11px; border: 1px solid var(--line); border-radius: 11px; background: var(--card2); transition: all .15s; }
+  .quick a:hover { border-color: var(--accent); transform: translateY(-1px); box-shadow: var(--shadow-sm); }
+  .quick a .q-ic { font-size: 17px; }
+  .quick a b { font-size: 12.5px; color: var(--ink); display: block; line-height: 1.3; }
+  .quick a span { font-size: 10.5px; color: var(--muted); }
+  .entry-note { display: flex; align-items: center; gap: 14px; background: var(--accent-l2); border: 1px dashed var(--line2); border-radius: 12px; padding: 11px 16px; font-size: 12.5px; color: var(--sub); }
+  .entry-note b { color: var(--accent-d); }
+  [data-theme="blue"] .entry-note b { color: var(--accent); }
+  .chat-wrap { height: 600px; }
+  @media (max-width: 1080px) { .chat-wrap { height: 520px; } }
+</style>
+</head>
+<body>
+
+<div class="page">
+  <div class="page-head">
+    <div>
+      <div class="eyebrow" id="greet-eyebrow">智能工作台</div>
+      <h1 id="greet">早上好</h1>
+      <p class="sub" id="greet-sub"></p>
+    </div>
+    <div class="flex wrap">
+      <a class="btn ghost sm" href="mobile.html">📱 移动端视图</a>
+      <a class="btn soft sm" href="agents.html">✦ 能力货架</a>
+      <a class="btn primary sm" href="bianpai.html">🧩 造一个自己的智能体</a>
+    </div>
+  </div>
+
+  <!-- 保留一期人民e家菜单式入口的说明（需求书 §3(一)） -->
+  <div class="entry-note mb16">
+    <span style="font-size:20px">🔀</span>
+    <div class="grow">
+      <b>双入口并行</b>：保留一期「人民e家」菜单式访问路径，同时提供对话式数字员工入口 —— 老习惯不打断，新能力随手可得。
+    </div>
+    <a class="btn ghost sm" href="#" onclick="ZM.toast('已切换到一期人民e家菜单式布局（原型示意）','ok');return false;">切到菜单式</a>
+  </div>
+
+  <!-- KPI -->
+  <div class="grid g4 mb16" id="kpis"></div>
+
+  <div class="grid g32">
+    <!-- 左：数字员工 -->
+    <div>
+      <div class="chat-wrap" id="chat-main"></div>
+      <div class="panel mt16">
+        <h3>数字员工能做什么 <span class="h-extra">按您的岗位自动配置</span></h3>
+        <div class="grid g3" id="persona-caps" style="gap:10px"></div>
+        <div class="note">
+          红线：AI 全程<b>辅助不替代</b>——选题立项、稿件签发、口径审定的最终决定权始终在人；所有 AI 生成内容自动加注标识并留痕可溯。
+        </div>
+      </div>
+    </div>
+
+    <!-- 右：待办 / 热点 / 快捷 -->
+    <div>
+      <div class="panel">
+        <h3>我的待办 <span class="h-extra" id="todo-count"></span></h3>
+        <div id="todos"></div>
+      </div>
+
+      <div class="panel mt16">
+        <h3>今日热点雷达 <span class="h-extra">7×24h 全网</span></h3>
+        <div id="hots"></div>
+      </div>
+
+      <div class="panel mt16">
+        <h3>常用智能体</h3>
+        <div class="quick" id="quick"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="assets/data.js"></script>
+<script src="assets/app.js"></script>
+<script>
+(function () {
+  var u = ZM.boot('work', { noAssist: true }); // 工作台内嵌大面板，不再叠加浮动助手
+  if (!u) return;
+
+  document.addEventListener('DOMContentLoaded', function () {
+    var P = ZMD.PERSONAS[u.id];
+    var h = new Date().getHours();
+    var hello = h < 11 ? '早上好' : h < 14 ? '中午好' : h < 18 ? '下午好' : '晚上好';
+    document.getElementById('greet').innerHTML = hello + '，' + u.name + '<span class="hl"> · ' + u.title.split(' · ')[0] + '</span>';
+    document.getElementById('greet-eyebrow').textContent = u.dept.toUpperCase ? '智能工作台 / ' + u.dept : '智能工作台';
+    document.getElementById('greet-sub').innerHTML = '您的专属数字员工 <b>' + P.name + '</b> 已就位 —— ' + P.intro;
+
+    /* KPI（按角色） */
+    var KPI = {
+      leader:   [['全端总阅读（昨日）','4.2','亿','+6.2%','up',[40,52,48,66,72,60,88]],
+                 ['风险面 · 待决策','2','条','L1×1 L2×1','down',[10,14,22,18,40,52,60]],
+                 ['好稿池 · 本周发现','23','篇','+9 篇','up',[20,28,34,30,48,56,70]],
+                 ['数字员工日活','2,846','人','覆盖率 78%','up',[30,38,42,50,58,66,76]]],
+      coord:    [['今日待研判选题','7','条','2 条带风险','down',[30,40,36,52,60,55,72]],
+                 ['会议任务闭环率','86','%','+11pt','up',[40,44,52,58,62,70,86]],
+                 ['舆情预警','3','条','L1×1','down',[12,20,18,34,42,50,58]],
+                 ['稿件调度量','142','篇','+18','up',[44,50,48,60,66,72,80]]],
+      reporter: [['我的稿件（本月）','18','篇','+3','up',[24,32,30,44,50,58,64]],
+                 ['进入好稿池','4','篇','命中率 22%','up',[10,18,24,20,36,44,52]],
+                 ['数字员工替我省下','11.5','小时','本周','up',[20,26,34,40,48,56,70]],
+                 ['稿件总阅读','3,860','万','+24%','up',[30,36,44,50,54,66,78]]],
+      editor:   [['今日待审','14','篇','2 篇需复核','down',[20,30,26,40,48,44,56]],
+                 ['风控命中','9','处','P1×2','down',[14,18,26,22,34,40,48]],
+                 ['平均处理时长','6.8','分/篇','-42%','up',[70,62,54,48,40,34,28]],
+                 ['三审三校留痕','100','%','全流程可溯','up',[50,58,64,70,76,84,92]]],
+      operator: [['今日全端触达','1.24','亿','+9%','up',[36,42,50,46,62,70,82]],
+                 ['爆款（>1亿）','2','条','本周 5 条','up',[10,16,14,26,32,40,48]],
+                 ['青年用户占比','37.8','%','+3.6pt','up',[40,44,48,52,58,64,72]],
+                 ['IP 账号涨粉','48.2','万','本周','up',[22,30,38,42,50,58,68]]],
+      admin:    [['API 调用（昨日）','128.6','万','成功率 99.97%','up',[40,48,52,58,64,70,80]],
+                 ['Token 消耗','4.2','亿','+38% 已扩容','down',[20,26,34,40,52,64,84]],
+                 ['活跃智能体','47','个','新增 2','up',[26,30,34,38,40,44,47]],
+                 ['安全拦截','3','次','敏感输出 0','up',[8,12,10,16,14,20,18]]]
+    };
+    var box = document.getElementById('kpis');
+    (KPI[u.id] || KPI.reporter).forEach(function (k) {
+      var d = document.createElement('div');
+      d.className = 'kpi';
+      var max = Math.max.apply(null, k[5]);
+      d.innerHTML = '<div class="k-label">' + k[0] + '</div>' +
+        '<div class="k-value">' + k[1] + '<small>' + k[2] + '</small></div>' +
+        '<div class="k-delta ' + k[4] + '">' + (k[4] === 'up' ? '▲ ' : '● ') + k[3] + '</div>' +
+        '<div class="k-spark">' + k[5].map(function (v, i) {
+          return '<i style="height:' + Math.round(v / max * 30) + 'px"' + (i === k[5].length - 1 ? ' class="hot"' : '') + '></i>';
+        }).join('') + '</div>';
+      box.appendChild(d);
+    });
+
+    /* 数字员工对话 */
+    ZM.mountChat('#chat-main', { persona: P, scenarios: ZMD.SCENARIOS[u.id] || [] });
+
+    /* 岗位能力卡 */
+    var CAPS = {
+      leader:   [['🧭','决策晨报','全社传播态势 + 风险面每日 7:00 推送'],['💬','对话问数','自然语言直接查任意口径数据'],['✅','移动审批','口径审定 / 选题立项随时随地签批']],
+      coord:    [['📋','会议全流程','会前材料 · 会中纪要 · 会后任务闭环'],['📡','舆情研判','分级预警 + 处置建议 + 分级查看'],['🎯','稿件调度','任务派发到人到时，进度可视']],
+      reporter: [['🎯','选题推荐','跑口画像 × 热点雷达 × 同题去重'],['🎙️','录音成稿','转写 98%+ · 引语时间戳可溯源'],['🌐','多语转译','英文外宣规范库自动校验']],
+      editor:   [['📕','职务核对','联动中央领导同志姓名及职务数据库'],['⚠️','敏感提示','涉政/涉外/民族宗教分级标注'],['📋','留痕可溯','三审三校全流程修改记录归档']],
+      operator: [['📊','传播复盘','六端链路还原 + 可复制策略沉淀'],['🗓️','智能排期','按端口活跃曲线匹配最优时段'],['🌱','IP 追踪','创作者画像 + 传播趋势预测']],
+      admin:    [['🖥️','网关监控','API/模型路由/健康度实时巡检'],['🧾','Token 计量','按部门与智能体两维度出账'],['🔐','权限审计','越权拦截与操作留痕全记录']]
+    };
+    var cb = document.getElementById('persona-caps');
+    (CAPS[u.id] || CAPS.reporter).forEach(function (c) {
+      var d = document.createElement('div');
+      d.style.cssText = 'background:var(--card2);border:1px solid var(--line);border-radius:12px;padding:12px 14px';
+      d.innerHTML = '<div style="font-size:18px;margin-bottom:5px">' + c[0] + '</div>' +
+        '<b style="display:block;font-size:13px;color:var(--ink);margin-bottom:3px">' + c[1] + '</b>' +
+        '<span style="font-size:11.8px;color:var(--sub);line-height:1.55">' + c[2] + '</span>';
+      cb.appendChild(d);
+    });
+
+    /* 待办 */
+    var todos = ZMD.TODOS[u.id] || [];
+    var tb = document.getElementById('todos');
+    document.getElementById('todo-count').textContent = todos.length + ' 项 · ' + todos.filter(function (t) { return t.urgent; }).length + ' 项紧急';
+    todos.forEach(function (t) {
+      var d = document.createElement('div');
+      d.className = 'todo';
+      d.innerHTML = '<div class="cb">✓</div><div class="t-txt">' + t.t + '</div>' +
+        '<span class="tag ' + (t.urgent ? 'red' : 'gray') + '">' + t.tag + '</span>';
+      d.querySelector('.cb').onclick = function () {
+        d.classList.toggle('done');
+        if (d.classList.contains('done')) ZM.toast('已完成：' + t.t, 'ok');
+      };
+      tb.appendChild(d);
+    });
+
+    /* 热点 */
+    var hb = document.getElementById('hots');
+    ZMD.HOTS.slice(0, 6).forEach(function (h) {
+      var d = document.createElement('div');
+      d.className = 'hot-item';
+      d.innerHTML = '<span class="h-heat">' + h.heat + '</span><span class="h-t">' + h.t + '</span>' +
+        (h.risk ? '<span class="tag red">' + h.risk + '</span>' : '<span class="tag gray">' + h.tag + '</span>');
+      d.onclick = function () {
+        ZM.modal('<h3>' + h.t + '</h3><div class="m-body mt8">' +
+          '热度指数 <b>' + h.heat + '</b>（24h ' + h.trend + '）· 领域：' + h.tag +
+          (h.risk ? ' · <span class="tag red">风险 ' + h.risk + '</span>' : '') +
+          '<div class="note mt12" style="background:var(--accent-l2);padding:11px 14px;border-radius:10px">' +
+          '<b>数字员工建议</b>：已检索同主题报道专题库，近 30 天同题 ' + (10 + h.heat % 40) + ' 篇，建议切口差异化；可一键生成采访提纲并提交选题立项。</div>' +
+          '</div><div class="m-actions"><button class="btn ghost" data-close>关闭</button>' +
+          '<button class="btn primary" id="mk-xuanti">生成选题并立项</button></div>');
+        document.getElementById('mk-xuanti').onclick = function () {
+          ZM.toast('选题「' + h.t + '」已生成提纲并提交立项审批', 'ok');
+          document.querySelector('.overlay').remove();
+        };
+      };
+      hb.appendChild(d);
+    });
+
+    /* 常用智能体 */
+    var qb = document.getElementById('quick');
+    ZMD.AGENTS.filter(function (a) { return a.hot; }).slice(0, 6).forEach(function (a) {
+      var d = document.createElement('a');
+      d.href = 'agents.html';
+      d.innerHTML = '<span class="q-ic">' + a.ic + '</span><span><b>' + a.n + '</b><span>' + (a.calls / 1000).toFixed(1) + 'k 次调用</span></span>';
+      qb.appendChild(d);
+    });
+  });
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>智能体矩阵 · 人民日报社智媒平台 2.0</title>
+<link rel="stylesheet" href="assets/style.css">
+<link rel="stylesheet" href="assets/modules.css">
+</head>
+<body>
+<div class="page">
+  <div class="page-head">
+    <div>
+      <div class="eyebrow">AI CAPABILITY SHELF</div>
+      <h1>智能体应用矩阵 · AI 能力货架</h1>
+      <p class="sub">将已有 AI 能力、知识库和业务流程封装成可复用智能体，按岗位发现、试用、收藏与组合，持续扩展至 50+ 生态。</p>
+    </div>
+    <div class="flex wrap">
+      <a class="btn ghost sm" href="bianpai.html">进入编排工厂</a>
+      <button class="btn primary sm" id="apply-agent">申请新能力</button>
+    </div>
+  </div>
+
+  <div class="metric-strip mb16">
+    <div class="metric-mini"><span>已上架智能体</span><b>50+</b><small>今日新增 2 个</small></div>
+    <div class="metric-mini"><span>今日调用</span><b>12.8万</b><small>成功率 99.7%</small></div>
+    <div class="metric-mini"><span>平台自研</span><b>34</b><small>覆盖 7 类场景</small></div>
+    <div class="metric-mini"><span>AI 资产复用</span><b>11</b><small>写易 / 审核等</small></div>
+    <div class="metric-mini"><span>外部生态</span><b>8</b><small>均完成安全评测</small></div>
+  </div>
+
+  <div class="toolbar">
+    <div class="tabs" id="cats"></div>
+    <span class="spacer"></span>
+    <input class="control" id="agent-search" placeholder="搜索智能体名称或能力">
+    <select class="select" id="source"><option value="全部">全部来源</option><option>平台自研</option><option>AI资产复用</option><option>外部生态</option></select>
+  </div>
+
+  <div class="callout mb16"><b>岗位推荐：</b><span id="recommend">根据当前角色，优先为您展示最常用的选题、写作、审校和协同能力。</span></div>
+  <div class="agent-grid" id="agent-grid"></div>
+</div>
+
+<script src="assets/data.js"></script>
+<script src="assets/app.js"></script>
+<script>
+var U = ZM.boot('agents');
+var activeCat='全部';
+var recommend={leader:'为社领导优先推荐晨报摘要、对话问数、舆情分析和国际传播策略。',coord:'为新闻协调部优先推荐会议纪要、舆情研判、新闻月历和任务派发能力。',reporter:'为记者优先推荐选题、录音转写、写易成稿和多语种转译。',editor:'为编辑审校优先推荐智能审核、职务核对、事实核查和三审三校留痕。',operator:'为新媒体运营优先推荐传播复盘、爆款拆解、端口排期和 IP 成长追踪。',admin:'为平台管理员优先推荐网关监控、Token 计量、安全评测和能力上架。'};
+if(U) document.getElementById('recommend').textContent=recommend[U.id];
+document.getElementById('cats').innerHTML=ZMD.AGENT_CATS.map(function(c,i){return '<button class="'+(i===0?'on':'')+'" data-cat="'+c+'">'+c+'</button>';}).join('');
+function render(){var q=document.getElementById('agent-search').value.trim();var src=document.getElementById('source').value;var list=ZMD.AGENTS.filter(function(a){return (activeCat==='全部'||a.c===activeCat)&&(src==='全部'||a.by===src)&&(!q||(a.n+a.d).indexOf(q)>-1);});document.getElementById('agent-grid').innerHTML=list.map(function(a){return '<article class="agent-card" data-index="'+ZMD.AGENTS.indexOf(a)+'"><div class="flex-between"><div class="agent-ic">'+a.ic+'</div>'+(a.hot?'<span class="tag red">热门</span>':'<span class="tag gray">'+a.c+'</span>')+'</div><h3>'+a.n+'</h3><p>'+a.d+'</p><div class="agent-foot"><span>'+a.by+'</span><span>'+a.calls.toLocaleString()+' 次调用</span></div><button class="btn soft sm block mt12">立即试用</button></article>';}).join('')||'<div class="panel tc" style="grid-column:1/-1;padding:50px">没有找到匹配能力</div>';bind();}
+function bind(){document.querySelectorAll('.agent-card').forEach(function(card){card.onclick=function(){var a=ZMD.AGENTS[Number(card.dataset.index)];var scenario={persona:{name:a.n,icon:a.ic,sub:a.c+' · '+a.by},scenarios:[{id:'demo',title:'▶ 业务演示',steps:[{from:'user',text:'请用“'+a.n+'”帮我处理当前任务。'},{from:'ai',tool:{ic:a.ic,name:a.n,detail:'已连接授权知识库与当前工作台上下文'}},{from:'ai',think:900},{from:'ai',card:{eyebrow:'智能体执行结果',title:a.n+' · 演示结果',body:a.d+'。已生成一份可编辑结果，并标注数据来源、使用模型和人工确认点。',meta:['全链路留痕','安全评测通过'],aigc:true}},{from:'ai',text:'结果已放入临时工作区。您可以继续修改、交给其他智能体接力，或提交人工审核。'}]}]};var ov=ZM.modal('<div id="agent-demo" style="height:600px"></div>',{wide:true});ZM.mountChat(document.getElementById('agent-demo'),scenario);};});}
+document.querySelectorAll('#cats button').forEach(function(btn){btn.onclick=function(){document.querySelectorAll('#cats button').forEach(function(x){x.classList.remove('on');});btn.classList.add('on');activeCat=btn.dataset.cat;render();};});
+document.getElementById('agent-search').oninput=render; document.getElementById('source').onchange=render;
+document.getElementById('apply-agent').onclick=function(){ZM.modal('<h3>申请新能力</h3><div class="m-body"><input class="control" style="width:100%;margin:8px 0" placeholder="希望解决什么业务问题？" value="把地方分社视频素材自动剪成 60 秒竖屏短视频"><select class="select" style="width:100%;margin:4px 0"><option>内容生产</option><option>运营分析</option><option>会议协同</option></select><div class="callout mt12">平台运营将评估是否复用已有能力、组合智能体或进入新能力开发流程。</div></div><div class="m-actions"><button class="btn ghost" data-close>取消</button><button class="btn primary" id="submit-agent">提交需求</button></div>');setTimeout(function(){document.getElementById('submit-agent').onclick=function(){ZM.toast('能力需求已提交，已匹配到 2 个可组合智能体','ok');document.querySelector('.overlay').remove();};},0);};
+render();
+</script>
+</body>
+</html>

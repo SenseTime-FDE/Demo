@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>创作者运营 · 人民日报社智媒平台 2.0</title>
+<link rel="stylesheet" href="assets/style.css">
+<link rel="stylesheet" href="assets/modules.css">
+</head>
+<body>
+<div class="page">
+  <div class="page-head">
+    <div>
+      <div class="eyebrow">CREATOR & MEDIA IP OPERATIONS</div>
+      <h1>内容创作者运营与网红成长追踪</h1>
+      <p class="sub">形成全社创作者数据看板，用供约稿匹配、IP 画像与传播趋势预测优化选题资源配置。</p>
+    </div>
+    <div class="flex wrap">
+      <button class="btn ghost sm" id="export-report">导出运营周报</button>
+      <button class="btn primary sm" id="new-brief">＋ 发布约稿需求</button>
+    </div>
+  </div>
+
+  <div class="metric-strip mb16">
+    <div class="metric-mini"><span>活跃创作者</span><b>1,286</b><small>本周 +43</small></div>
+    <div class="metric-mini"><span>重点媒体 IP</span><b>86</b><small>成熟 IP 24 个</small></div>
+    <div class="metric-mini"><span>本周净增粉</span><b>286万</b><small>环比 +12.6%</small></div>
+    <div class="metric-mini"><span>约稿匹配成功率</span><b>82%</b><small>平均 18 分钟匹配</small></div>
+    <div class="metric-mini"><span>爆款预测命中</span><b>74%</b><small>近 30 天</small></div>
+  </div>
+
+  <div class="grid g32 mb16">
+    <section class="panel">
+      <h3>创作者生态增长趋势 <span class="h-extra">近 12 周</span></h3>
+      <svg class="line-chart" viewBox="0 0 800 150" preserveAspectRatio="none">
+        <g class="chart-grid"><line x1="0" y1="30" x2="800" y2="30"/><line x1="0" y1="75" x2="800" y2="75"/><line x1="0" y1="120" x2="800" y2="120"/></g>
+        <path class="chart-area" d="M0 127 L70 118 L140 121 L210 102 L280 107 L350 88 L420 80 L490 86 L560 61 L630 52 L700 35 L800 21 L800 150 L0 150Z"/>
+        <path class="chart-line" d="M0 127 L70 118 L140 121 L210 102 L280 107 L350 88 L420 80 L490 86 L560 61 L630 52 L700 35 L800 21"/>
+      </svg>
+      <div class="flex-between mt8"><span class="tiny">重点 IP 粉丝总量</span><b style="color:var(--ink)">8,420 万 <span style="color:var(--ok);font-size:11px">+18.2%</span></b></div>
+    </section>
+    <section class="panel">
+      <h3>供约稿智能匹配 <span class="h-extra">当前需求</span></h3>
+      <div class="callout"><b>约稿：</b>“县域商业新活力”系列，需要熟悉地方经济、擅长人物叙事且能独立拍摄短视频的记者或创作者。</div>
+      <div class="list-card"><div class="list-ic">赵</div><div><b>赵铁柱 · 「柱子看乡村」</b><p>匹配度 94% · 三农跑口 · 下沉受众占比 68%</p></div><button class="btn soft sm match">邀约</button></div>
+      <div class="list-card"><div class="list-ic">林</div><div><b>林小满 · 「小满说政策」</b><p>匹配度 89% · 政策解读 · 短视频完播率高</p></div><button class="btn soft sm match">邀约</button></div>
+    </section>
+  </div>
+
+  <div class="toolbar">
+    <div class="tabs" id="creator-filter"><button class="on" data-lv="全部">全部创作者</button><button data-lv="成熟IP">成熟 IP</button><button data-lv="成长期">成长期</button><button data-lv="高潜力">高潜力</button></div>
+    <span class="spacer"></span><input class="control" id="creator-search" placeholder="搜索姓名、IP、部门">
+  </div>
+  <div class="creator-grid" id="creators"></div>
+
+  <div class="grid g2 mt16">
+    <section class="panel">
+      <h3>下周传播潜力预测 <span class="h-extra">AI 模型 + 运营校准</span></h3>
+      <div class="bar-row"><span class="b-label">畅聊经济</span><span class="b-track"><i class="b-fill" style="width:95%"></i></span><span class="b-val">95</span></div>
+      <div class="bar-row"><span class="b-label">小满说政策</span><span class="b-track"><i class="b-fill" style="width:91%"></i></span><span class="b-val">91</span></div>
+      <div class="bar-row"><span class="b-label">边疆行记</span><span class="b-track"><i class="b-fill gold" style="width:89%"></i></span><span class="b-val">89</span></div>
+      <div class="bar-row"><span class="b-label">柱子看乡村</span><span class="b-track"><i class="b-fill ok" style="width:84%"></i></span><span class="b-val">84</span></div>
+      <div class="callout warn mt16">预测仅用于资源配置参考，不作为个人考核的唯一依据；指标口径和模型版本对创作者公开。</div>
+    </section>
+    <section class="panel">
+      <h3>创作者支持计划 <span class="h-extra">本月</span></h3>
+      <div class="list-card"><div class="list-ic">✂️</div><div><b>专属剪辑数字员工</b><p>建议为「边疆行记」配置，减少跨语种字幕与竖屏适配耗时。</p></div><span class="tag accent">待确认</span></div>
+      <div class="list-card"><div class="list-ic">🌍</div><div><b>国际传播联合运营</b><p>「畅聊经济」适合开设英文内容支线，预计增量触达 +8%。</p></div><span class="tag ok">建议采纳</span></div>
+      <div class="list-card"><div class="list-ic">🎓</div><div><b>短视频叙事训练营</b><p>面向 18 位成长型创作者，结合历史爆款进行个性化训练。</p></div><span class="tag gray">8 月</span></div>
+    </section>
+  </div>
+</div>
+
+<script src="assets/data.js"></script>
+<script src="assets/app.js"></script>
+<script>
+var U = ZM.boot('yunying'); var level='全部';
+function render(){var q=document.getElementById('creator-search').value.trim();var list=ZMD.CREATORS.filter(function(c){return(level==='全部'||c.level===level)&&(!q||(c.n+c.ip+c.dept).indexOf(q)>-1);});document.getElementById('creators').innerHTML=list.map(function(c){return '<article class="creator-card" data-name="'+c.n+'"><div class="creator-head"><div class="creator-avatar">'+c.n.slice(0,1)+'</div><div><h3>'+c.n+' · '+c.ip+'</h3><p>'+c.dept+' · <span class="tag '+(c.level==='成熟IP'?'ok':c.level==='高潜力'?'accent':'warn')+'">'+c.level+'</span></p></div><b style="margin-left:auto;color:var(--accent);font-size:20px">'+c.score+'</b></div><div class="creator-stats"><div><span>全平台粉丝</span><b>'+c.fans+'</b></div><div><span>本周增长</span><b style="color:var(--ok)">'+c.grow+'</b></div></div><div class="callout"><b>预测：</b>'+c.predict+'</div><div class="flex-between mt12"><span class="tiny">代表作：'+c.best+'</span><button class="btn soft sm">查看画像</button></div></article>';}).join('');bind();}
+function bind(){document.querySelectorAll('.creator-card').forEach(function(card){card.onclick=function(){var c=ZMD.CREATORS.find(function(x){return x.n===card.dataset.name;});ZM.modal('<h3>'+c.n+' · '+c.ip+' 创作者画像</h3><div class="m-body"><div class="grid g2"><div class="callout"><b>内容优势</b><br>现场叙事、政策解读、青年受众沟通</div><div class="callout"><b>受众结构</b><br>18-35 岁 48% · 下沉市场 36%</div></div><h4 style="margin:16px 0 6px;color:var(--ink)">AI 运营建议</h4><p>'+c.predict+'</p><div class="callout warn mt12">个人画像仅用于内容支持和资源匹配，不展示私人信息，不直接形成考核结论。</div></div><div class="m-actions"><button class="btn ghost" data-close>关闭</button><button class="btn primary" id="support-plan">生成支持计划</button></div>',{wide:true});setTimeout(function(){document.getElementById('support-plan').onclick=function(){ZM.toast('个性化支持计划已生成并等待本人确认','ok');document.querySelector('.overlay').remove();};},0);};});}
+document.querySelectorAll('#creator-filter button').forEach(function(btn){btn.onclick=function(){document.querySelectorAll('#creator-filter button').forEach(function(x){x.classList.remove('on');});btn.classList.add('on');level=btn.dataset.lv;render();};});
+document.getElementById('creator-search').oninput=render;document.querySelectorAll('.match').forEach(function(btn){btn.onclick=function(e){e.stopPropagation();btn.textContent='✓ 已邀约';btn.disabled=true;ZM.toast('约稿邀请已发送到移动端','ok');};});
+document.getElementById('new-brief').onclick=function(){ZM.modal('<h3>发布约稿需求</h3><div class="m-body"><input class="control" style="width:100%;margin:6px 0" value="县域商业新活力 · 系列报道"><textarea class="control" style="width:100%;height:100px;margin:6px 0;resize:vertical">需要熟悉地方经济、擅长人物叙事、可独立完成短视频拍摄的记者或创作者。</textarea><div class="callout mt12">供约稿匹配智能体将基于跑口、作品、档期和意愿推荐候选人，最终邀约由业务负责人确认。</div></div><div class="m-actions"><button class="btn ghost" data-close>取消</button><button class="btn primary" id="match-creators">智能匹配</button></div>');setTimeout(function(){document.getElementById('match-creators').onclick=function(){ZM.toast('已匹配 8 位候选创作者','ok');document.querySelector('.overlay').remove();};},0);};
+document.getElementById('export-report').onclick=function(){ZM.toast('运营周报已生成并加注目标态示意口径','ok');};render();
+</script>
+</body>
+</html>
