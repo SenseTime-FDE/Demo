@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>编排工厂 · 人民日报社智媒平台 2.0</title>
+<link rel="stylesheet" href="assets/style.css">
+<link rel="stylesheet" href="assets/modules.css">
+</head>
+<body>
+<div class="page">
+  <div class="page-head">
+    <div>
+      <div class="eyebrow">LOW / NO-CODE AGENT ORCHESTRATION</div>
+      <h1>智能体编排工厂</h1>
+      <p class="sub">编辑记者以低/零代码组合智能体、知识库与审批节点；技术人员可切换 AI 代码模式扩展能力。</p>
+    </div>
+    <div class="flex wrap">
+      <button class="btn ghost sm" id="save">保存草稿</button>
+      <button class="btn soft sm" id="test">▶ 测试运行</button>
+      <button class="btn primary sm" id="publish">发布到能力货架</button>
+    </div>
+  </div>
+
+  <div class="toolbar">
+    <input class="control" value="采访录音 → 多形态稿件" aria-label="流程名称">
+    <span class="tag ok">草稿已保存</span>
+    <span class="tag gray">版本 v0.7</span>
+    <span class="spacer"></span>
+    <div class="tabs" id="mode"><button class="on" data-mode="visual">可视化编排</button><button data-mode="code">AI 代码</button></div>
+  </div>
+
+  <div class="builder" id="visual-builder">
+    <aside class="node-palette">
+      <h3 style="font-size:13px;color:var(--ink);margin-bottom:10px">能力节点</h3>
+      <div class="palette-item" data-node="🎙️ 录音转写">🎙️ 录音转写</div>
+      <div class="palette-item" data-node="✍️ 写易成稿">✍️ 写易成稿</div>
+      <div class="palette-item" data-node="🛡️ 风险审校">🛡️ 风险审校</div>
+      <div class="palette-item" data-node="🌐 英文转译">🌐 英文转译</div>
+      <div class="palette-item" data-node="📲 端口分发">📲 端口分发</div>
+      <h3 style="font-size:13px;color:var(--ink);margin:18px 0 10px">流程控制</h3>
+      <div class="palette-item" data-node="◇ 条件分支">◇ 条件分支</div>
+      <div class="palette-item" data-node="👤 人工审批">👤 人工审批</div>
+      <div class="palette-item" data-node="⏰ 定时触发">⏰ 定时触发</div>
+      <div class="callout mt16"><b>提示：</b>点击节点即可添加到画布。生产发布前必须通过安全评测与权限审批。</div>
+    </aside>
+
+    <section class="canvas" id="canvas">
+      <div class="connector" style="left:190px;top:100px;width:120px"></div>
+      <div class="connector" style="left:480px;top:100px;width:100px"></div>
+      <div class="connector" style="left:665px;top:151px;width:115px;transform:rotate(48deg)"></div>
+      <div class="connector" style="left:665px;top:151px;width:115px;transform:rotate(-48deg)"></div>
+      <div class="flow-node active" style="left:20px;top:58px" data-name="触发器"><div class="node-title">📎 上传采访录音</div><p>支持音频 / 视频 / 会议录制</p></div>
+      <div class="flow-node" style="left:310px;top:58px" data-name="录音转写"><div class="node-title">🎙️ 录音转写</div><p>方言增强 · 说话人分离 · 时间戳</p></div>
+      <div class="flow-node" style="left:580px;top:108px" data-name="条件判断"><div class="node-title">◇ 时长是否大于 20 分钟</div><p>长采访进入摘要与章节切分</p></div>
+      <div class="flow-node" style="left:790px;top:28px" data-name="长稿成稿"><div class="node-title">✍️ 深度稿成稿</div><p>现场—人物—数据—政策结构</p></div>
+      <div class="flow-node" style="left:790px;top:238px" data-name="快讯成稿"><div class="node-title">⚡ 快讯成稿</div><p>800 字以内 · 时效优先</p></div>
+      <div class="flow-node" style="left:580px;top:388px" data-name="审核"><div class="node-title">🛡️ 审校与事实核查</div><p>P1 未清零自动阻断</p></div>
+      <div class="flow-node" style="left:310px;top:500px" data-name="人工审批"><div class="node-title">👤 记者人工确认</div><p>确认引语、数据、标题与 AIGC 标识</p></div>
+      <div class="flow-node" style="left:20px;top:500px" data-name="结果"><div class="node-title">📦 输出工作台</div><p>生成报纸稿 / 客户端稿 / 短视频脚本</p></div>
+    </section>
+
+    <aside class="inspector">
+      <h3 style="font-size:13px;color:var(--ink);margin-bottom:12px">节点配置</h3>
+      <div id="node-config">
+        <label class="small">节点名称</label><input class="control" style="width:100%;min-width:0;margin:5px 0 12px" value="上传采访录音">
+        <label class="small">可用角色</label><select class="select" style="width:100%;margin:5px 0 12px"><option>记者 / 编辑</option><option>全部用户</option></select>
+        <label class="small">数据密级</label><select class="select" style="width:100%;margin:5px 0 12px"><option>内部</option><option>公开</option><option>核心</option></select>
+        <label class="small">失败策略</label><select class="select" style="width:100%;margin:5px 0 12px"><option>转人工处理</option><option>重试 2 次</option><option>终止流程</option></select>
+      </div>
+      <h3 style="font-size:13px;color:var(--ink);margin:18px 0 8px">运行日志</h3>
+      <div class="run-log" id="run-log">等待测试运行…</div>
+    </aside>
+  </div>
+
+  <section class="panel hide" id="code-builder">
+    <h3>AI 代码工作区 <span class="h-extra">受控沙箱 · 代码审查后发布</span></h3>
+    <div style="display:grid;grid-template-columns:1fr 320px;gap:14px">
+      <pre style="background:#071326;color:#b7d7ee;border-radius:12px;padding:18px;overflow:auto;min-height:480px;font:12px/1.8 ui-monospace,SFMono-Regular,Menlo,monospace"><code>// 由自然语言生成的流程扩展代码
+export async function transform(interview, context) {
+  const transcript = await tools.transcribe({
+    media: interview.file,
+    diarization: true,
+    dialectBoost: context.region
+  });
+
+  const draft = await agents.run('写易 · 智能写作', {
+    transcript,
+    structure: '现场-人物-数据-政策',
+    citations: 'required'
+  });
+
+  return await workflow.humanReview(draft, {
+    blockOn: ['P1'],
+    aigcLabel: true
+  });
+}</code></pre>
+      <div>
+        <div class="callout"><b>AI 编程助手：</b>描述你想增加的能力，我会生成代码、单元测试和权限声明。</div>
+        <textarea class="control" style="width:100%;height:130px;margin-top:12px;resize:vertical">增加一个规则：如果录音中出现未成年人姓名，自动脱敏后再进入成稿节点。</textarea>
+        <button class="btn primary block mt12" id="generate-code">生成安全补丁</button>
+        <div class="callout warn mt12">AI 代码只能在隔离环境测试；发布需技术管理员审核依赖、权限和数据边界。</div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<script src="assets/data.js"></script>
+<script src="assets/app.js"></script>
+<script>
+var U = ZM.boot('bianpai');
+document.querySelectorAll('.flow-node').forEach(function(node){node.onclick=function(){document.querySelectorAll('.flow-node').forEach(function(x){x.classList.remove('active');});node.classList.add('active');document.querySelector('#node-config input').value=node.dataset.name;};});
+document.querySelectorAll('.palette-item').forEach(function(item){item.onclick=function(){ZM.toast('已将「'+item.dataset.node+'」添加到画布（演示）','ok');};});
+document.getElementById('test').onclick=function(){var log=document.getElementById('run-log');log.innerHTML='<span style="color:var(--ok)">08:42:01 ✓ 测试素材载入</span><br>08:42:02 → 录音转写<br>08:42:03 → 时长条件：47:22 &gt; 20:00<br>08:42:04 → 深度稿成稿<br>08:42:05 → 审校命中 P2 ×2<br><span style="color:var(--warn)">08:42:06 ⏸ 等待人工确认</span>';ZM.toast('测试运行已到达人工审批节点','ok');};
+document.getElementById('save').onclick=function(){ZM.toast('流程草稿已保存为 v0.8','ok');};
+document.getElementById('publish').onclick=function(){ZM.modal('<h3>发布前检查</h3><div class="m-body"><div class="list-card"><div class="list-ic">✓</div><div><b>流程完整性</b><p>8 个节点均已配置失败策略。</p></div><span class="tag ok">通过</span></div><div class="list-card"><div class="list-ic">🛡️</div><div><b>安全评测</b><p>需运行 20 组红线样本与数据泄露测试。</p></div><span class="tag warn">待测</span></div><div class="list-card"><div class="list-ic">👤</div><div><b>权限审批</b><p>将提交平台管理员审核可用角色与知识库范围。</p></div><span class="tag gray">待提交</span></div></div><div class="m-actions"><button class="btn ghost" data-close>取消</button><button class="btn primary" id="submit-flow">提交评测与审批</button></div>');setTimeout(function(){document.getElementById('submit-flow').onclick=function(){ZM.toast('已提交安全评测与上架审批','ok');document.querySelector('.overlay').remove();};},0);};
+document.querySelectorAll('#mode button').forEach(function(btn){btn.onclick=function(){document.querySelectorAll('#mode button').forEach(function(x){x.classList.remove('on');});btn.classList.add('on');document.getElementById('visual-builder').classList.toggle('hide',btn.dataset.mode!=='visual');document.getElementById('code-builder').classList.toggle('hide',btn.dataset.mode!=='code');};});
+document.getElementById('generate-code').onclick=function(){this.textContent='正在生成补丁与测试…';var self=this;setTimeout(function(){self.textContent='✓ 已生成脱敏中间件';ZM.toast('安全补丁与 6 条单元测试已生成','ok');},1200);};
+</script>
+</body>
+</html>

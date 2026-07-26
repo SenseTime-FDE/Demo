@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>好稿池 · 人民日报社智媒平台 2.0</title>
+<link rel="stylesheet" href="assets/style.css">
+<link rel="stylesheet" href="assets/modules.css">
+</head>
+<body>
+<div class="page">
+  <div class="page-head">
+    <div>
+      <div class="eyebrow">AI-POWERED QUALITY CONTENT POOL</div>
+      <h1>好稿池 · 从“人找稿”到“稿找人”</h1>
+      <p class="sub">AI 全库扫描快速发现优质稿件，给出可解释评分、端口匹配和复盘策略，人工研判后再转发。</p>
+    </div>
+    <div class="flex wrap">
+      <button class="btn ghost sm" id="rules">评分规则</button>
+      <button class="btn primary sm" id="scan">✦ 立即扫描新稿</button>
+    </div>
+  </div>
+
+  <div class="metric-strip mb16">
+    <div class="metric-mini"><span>今日 AI 发现</span><b>23 篇</b><small>较昨日 +5</small></div>
+    <div class="metric-mini"><span>待人工研判</span><b>5 篇</b><small style="color:var(--warn)">2 篇时效窗口短</small></div>
+    <div class="metric-mini"><span>已完成多端转发</span><b>12 篇</b><small>覆盖 38 个端口</small></div>
+    <div class="metric-mini"><span>发现至转发均时</span><b>42 分</b><small>原流程 6.5 小时</small></div>
+    <div class="metric-mini"><span>进入周榜</span><b>4 篇</b><small>国际传播 2 篇</small></div>
+  </div>
+
+  <div class="toolbar">
+    <div class="tabs" id="filters"><button class="on" data-state="all">全部</button><button data-state="待研判">待研判</button><button data-state="转发">转发中/已转发</button><button data-state="已归档">已归档</button></div>
+    <span class="spacer"></span>
+    <input class="control" id="search" placeholder="搜索标题、作者、部门">
+    <select class="select" id="sort"><option value="score">按 AI 评分</option><option value="time">按发现时间</option><option value="potential">按传播潜力</option></select>
+  </div>
+
+  <div class="good-grid" id="good-grid"></div>
+
+  <div class="grid g32 mt16">
+    <section class="panel">
+      <h3>好稿转发链路 <span class="h-extra">今日实时</span></h3>
+      <table class="tbl">
+        <thead><tr><th>稿件</th><th>发现</th><th>人工研判</th><th>端口转发</th><th>效果回流</th></tr></thead>
+        <tbody>
+          <tr><td><b>一块光伏板的出海之旅</b></td><td>06:42</td><td><span class="tag ok">06:55 通过</span></td><td>6 端完成</td><td><span class="tag accent">2.8 亿</span></td></tr>
+          <tr><td><b>县城青年返乡创业图鉴</b></td><td>07:15</td><td><span class="tag ok">07:32 通过</span></td><td>3/5 端</td><td><span class="tag warn">回流中</span></td></tr>
+          <tr><td><b>寒潮下的能源保供一线</b></td><td>08:20</td><td><span class="tag red">待研判</span></td><td>—</td><td>—</td></tr>
+        </tbody>
+      </table>
+    </section>
+    <section class="panel">
+      <h3>可复制传播策略 <span class="h-extra">复盘沉淀</span></h3>
+      <div class="list-card"><div class="list-ic">🌍</div><div><b>实物出海叙事</b><p>实物切入 + 制造现场 + 中英同步 + 海外 KOL 联动。</p></div><span class="tag ok">命中率 82%</span></div>
+      <div class="list-card"><div class="list-ic">🎬</div><div><b>人物蹲点双形态</b><p>长图文负责深度，短视频负责现场感与青年触达。</p></div><span class="tag accent">复用 11 次</span></div>
+      <div class="list-card"><div class="list-ic">📊</div><div><b>政策图解 + 问答</b><p>关键数字可视化，评论区问题反向补齐解释。</p></div><span class="tag gray">模板</span></div>
+    </section>
+  </div>
+</div>
+
+<script src="assets/data.js"></script>
+<script src="assets/app.js"></script>
+<script>
+var U = ZM.boot('haogao');
+var currentState='all';
+function render(){ var q=document.getElementById('search').value.trim(); var rows=ZMD.HAOGAO.filter(function(x){ var match=!q||(x.t+x.author+x.dept).indexOf(q)>-1; var state=currentState==='all'||(currentState==='转发'?x.state.indexOf('转发')>-1:x.state===currentState); return match&&state; }); document.getElementById('good-grid').innerHTML=rows.map(function(x,i){ return '<article class="good-card" data-index="'+ZMD.HAOGAO.indexOf(x)+'"><div class="good-top"><div class="good-score" style="--score:'+x.score+'"><b>'+x.score+'</b></div><div><h3>'+x.t+'</h3><p class="small">'+x.author+' · '+x.dept+' · '+x.found+' '+x.time+'</p></div><span class="tag '+(x.state==='待研判'?'warn':x.state==='已归档'?'gray':'ok')+'" style="margin-left:auto">'+x.state+'</span></div><div class="good-reason"><b>AI 推荐理由：</b>'+x.reason+'</div><div class="flex-between"><div>'+x.ports.slice(0,4).map(function(p){return '<span class="tag gray" style="margin-right:4px">'+p+'</span>';}).join('')+'</div><button class="btn soft sm">查看并研判</button></div></article>'; }).join('')||'<div class="panel tc" style="grid-column:1/-1;padding:40px">没有匹配的稿件</div>'; bindCards(); }
+function bindCards(){ document.querySelectorAll('.good-card').forEach(function(card){ card.onclick=function(){ var x=ZMD.HAOGAO[Number(card.dataset.index)]; var ports=x.ports.map(function(p){return '<label class="tag gray" style="margin:3px"><input type="checkbox" checked> '+p+'</label>';}).join(''); var ov=ZM.modal('<h3>'+x.t+'</h3><div class="m-body"><div class="flex-between mb12"><span>'+x.author+' · '+x.dept+'</span><span class="tag accent">AI 评分 '+x.score+'</span></div><div class="callout"><b>可解释推荐：</b>'+x.reason+'</div><h4 style="color:var(--ink);margin:16px 0 6px">建议转发端口</h4><div>'+ports+'</div><div class="callout warn mt12">AI 仅提供发现和推荐，转发前必须由值班编辑完成事实、版权与口径确认。</div></div><div class="m-actions"><button class="btn ghost" data-close>退回并标注原因</button><button class="btn primary" id="push-good">确认并智能转发</button></div>',{wide:true}); setTimeout(function(){document.getElementById('push-good').onclick=function(){ ZM.toast('稿件已进入端口适配与转发流程','ok'); ov.remove(); };},0); }; }); }
+document.querySelectorAll('#filters button').forEach(function(btn){btn.onclick=function(){document.querySelectorAll('#filters button').forEach(function(x){x.classList.remove('on');});btn.classList.add('on');currentState=btn.dataset.state;render();};});
+document.getElementById('search').oninput=render;
+document.getElementById('sort').onchange=function(){ ZMD.HAOGAO.sort(function(a,b){return b.score-a.score;}); render(); ZM.toast('排序口径已切换','ok'); };
+document.getElementById('scan').onclick=function(){ this.disabled=true; this.textContent='扫描 4 个内容库中…'; var self=this; setTimeout(function(){ self.disabled=false; self.textContent='✦ 立即扫描新稿'; ZM.toast('扫描完成：发现 3 篇候选好稿，已进入待研判','ok'); },1300); };
+document.getElementById('rules').onclick=function(){ ZM.modal('<h3>好稿五维评分规则</h3><div class="m-body"><div class="bar-row"><span class="b-label">主题价值</span><span class="b-track"><i class="b-fill" style="width:30%"></i></span><span class="b-val">30%</span></div><div class="bar-row"><span class="b-label">内容质量</span><span class="b-track"><i class="b-fill" style="width:25%"></i></span><span class="b-val">25%</span></div><div class="bar-row"><span class="b-label">时效窗口</span><span class="b-track"><i class="b-fill" style="width:20%"></i></span><span class="b-val">20%</span></div><div class="bar-row"><span class="b-label">传播潜力</span><span class="b-track"><i class="b-fill" style="width:15%"></i></span><span class="b-val">15%</span></div><div class="bar-row"><span class="b-label">端口适配</span><span class="b-track"><i class="b-fill" style="width:10%"></i></span><span class="b-val">10%</span></div><div class="callout mt12">评分用于排序与解释，不替代人工编辑判断；规则变更需审批并保留版本。</div></div><div class="m-actions"><button class="btn primary" data-close>关闭</button></div>'); };
+render();
+</script>
+</body>
+</html>

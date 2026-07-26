@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>数据基座 · 人民日报社智媒平台 2.0</title>
+<link rel="stylesheet" href="assets/style.css">
+<link rel="stylesheet" href="assets/modules.css">
+</head>
+<body>
+<div class="page">
+  <div class="page-head">
+    <div>
+      <div class="eyebrow">TRUSTED MEDIA DATA FOUNDATION</div>
+      <h1>数据基座与主流价值知识库</h1>
+      <p class="sub">打通大报与“海新网环”等生产库，统筹四类语料归集、清洗、标注、授权和服务，为智能体提供安全可信数据。</p>
+    </div>
+    <div class="flex wrap">
+      <button class="btn ghost sm" id="catalog">数据目录</button>
+      <button class="btn primary sm" id="import">＋ 发起语料归集</button>
+    </div>
+  </div>
+
+  <div class="db-grid mb16">
+    <article class="db-card"><div class="db-ic">📚</div><h3>专题知识语料库</h3><p>总书记专题、中央领导同志姓名及职务、党媒评论、同主题报道等权威专题库。</p><div class="db-meta"><div><span class="tiny">知识条目</span><b>3,286万</b></div><span class="tag ok">可信可溯源</span></div></article>
+    <article class="db-card"><div class="db-ic">🗃️</div><h3>全媒体生产库</h3><p>生产稿、媒资、素材、互联网稿和文件统一检索，保留三审三校全流程修改记录。</p><div class="db-meta"><div><span class="tiny">内容资产</span><b>1.81亿</b></div><span class="tag accent">核心底座</span></div></article>
+    <article class="db-card"><div class="db-ic">📊</div><h3>精准运营数据库</h3><p>客户端埋点、端口监测、舆情风险、传播指数与海外传播数据统一归集。</p><div class="db-meta"><div><span class="tiny">日增记录</span><b>8.6亿</b></div><span class="tag ok">实时回流</span></div></article>
+  </div>
+
+  <section class="panel mb16">
+    <h3>跨库语义检索 <span class="h-extra">权限过滤后返回</span></h3>
+    <div class="toolbar" style="margin-bottom:0"><input class="control" id="semantic-query" style="flex:1" value="查找近三年关于新能源汽车以旧换新的权威稿件、政策原文和传播效果"><select class="select"><option>三库联合检索</option><option>仅专题知识库</option><option>仅生产库</option></select><button class="btn primary" id="semantic-search">语义检索</button></div>
+    <div id="search-results" class="hide mt16">
+      <div class="list-card"><div class="list-ic">📄</div><div><b>国务院关于加力支持大规模设备更新和消费品以旧换新的若干措施</b><p>权威政策原文 · 已核验发布机构与发布时间 · 可引用</p></div><span class="tag ok">权威源</span></div>
+      <div class="list-card"><div class="list-ic">📰</div><div><b>以旧换新政策效果显现：消费市场添动能</b><p>人民日报历史稿件 · 关联三审三校记录 6 个版本</p></div><span class="tag accent">同题参考</span></div>
+      <div class="list-card"><div class="list-ic">📈</div><div><b>相关稿件传播效果聚合</b><p>共 218 篇；图解类平均互动率高 27%，问答类收藏率最高。</p></div><span class="tag gray">运营数据</span></div>
+    </div>
+  </section>
+
+  <div class="grid g32">
+    <section class="panel">
+      <h3>四类重点语料归集进度 <span class="h-extra">一体化推进</span></h3>
+      <div id="corpus"></div>
+    </section>
+    <section class="panel">
+      <h3>数据治理流水线 <span class="h-extra">今日</span></h3>
+      <div class="tline">
+        <div class="tl-item"><b>采集接入</b><span class="tl-time">1,286 万条</span><p>自动校验来源系统、授权范围与文件完整性。</p></div>
+        <div class="tl-item"><b>清洗去重</b><span class="tl-time">96.4%</span><p>版权重复、格式异常、低质转码与敏感个人信息处理。</p></div>
+        <div class="tl-item"><b>结构化标注</b><span class="tl-time">82.7%</span><p>人物、机构、主题、时间、地点、稿件版本与权威等级。</p></div>
+        <div class="tl-item"><b>质量与安全评测</b><span class="tl-time">31 项告警</span><p>异常语料隔离，未经授权数据不得进入模型训练或知识服务。</p></div>
+      </div>
+    </section>
+  </div>
+
+  <div class="grid g2 mt16">
+    <section class="panel">
+      <h3>授权与合规看板 <span class="h-extra">缺失需求补充</span></h3>
+      <table class="tbl"><thead><tr><th>数据域</th><th>授权范围</th><th>二次使用</th><th>到期/退出</th></tr></thead><tbody><tr><td><b>公开发布历史数据</b></td><td><span class="tag ok">内容服务</span></td><td>可用于检索增强</td><td>长期</td></tr><tr><td><b>生产系统业务数据</b></td><td><span class="tag warn">内部授权</span></td><td>禁止外传</td><td>随岗位权限</td></tr><tr><td><b>采编个性化素材</b></td><td><span class="tag accent">本人/项目组</span></td><td>需再次确认</td><td>支持撤回</td></tr><tr><td><b>合作单位授权内容</b></td><td><span class="tag red">合同约束</span></td><td>按条款执行</td><td>自动预警</td></tr></tbody></table>
+    </section>
+    <section class="panel">
+      <h3>知识服务健康度 <span class="h-extra">智能体调用侧</span></h3>
+      <div class="bar-row"><span class="b-label">引用可溯源率</span><span class="b-track"><i class="b-fill ok" style="width:98.7%"></i></span><span class="b-val">98.7%</span></div>
+      <div class="bar-row"><span class="b-label">权威源命中率</span><span class="b-track"><i class="b-fill" style="width:94.2%"></i></span><span class="b-val">94.2%</span></div>
+      <div class="bar-row"><span class="b-label">数据新鲜度</span><span class="b-track"><i class="b-fill gold" style="width:91.6%"></i></span><span class="b-val">91.6%</span></div>
+      <div class="bar-row"><span class="b-label">权限过滤准确</span><span class="b-track"><i class="b-fill ok" style="width:99.99%"></i></span><span class="b-val">99.99%</span></div>
+      <div class="callout warn mt16"><b>安全原则：</b>知识库返回结果必须携带来源、更新时间、授权标签和可见范围；智能体不得绕过权限读取原始语料。</div>
+    </section>
+  </div>
+</div>
+
+<script src="assets/data.js"></script>
+<script src="assets/app.js"></script>
+<script>
+var U = ZM.boot('ziliao');
+document.getElementById('corpus').innerHTML=ZMD.CORPUS.map(function(c){return '<div style="margin-bottom:17px"><div class="flex-between"><div><b style="color:var(--ink);font-size:13px">'+c.n+'</b><p class="tiny">'+c.d+'</p></div><div style="text-align:right"><b style="color:var(--ink)">'+c.total+'</b><p class="tiny">完成 '+c.done+'%</p></div></div><div class="progress mt8"><i style="width:'+c.done+'%"></i></div></div>';}).join('');
+document.getElementById('semantic-search').onclick=function(){var btn=this;btn.textContent='检索并校验权限…';setTimeout(function(){btn.textContent='语义检索';document.getElementById('search-results').classList.remove('hide');ZM.toast('检索完成：返回 28 项，已按当前角色过滤 6 项','ok');},900);};
+document.getElementById('import').onclick=function(){ZM.modal('<h3>发起语料归集</h3><div class="m-body"><select class="select" style="width:100%;margin:6px 0"><option>采编人员个性化素材</option><option>合作单位授权内容</option><option>生产系统业务数据</option></select><input class="control" style="width:100%;margin:6px 0" value="经济社会部 · 2026 年新能源汽车采访素材"><div class="callout mt12"><b>归集前检查：</b>确认版权归属、授权范围、个人信息脱敏、二次使用边界和退出机制。</div></div><div class="m-actions"><button class="btn ghost" data-close>取消</button><button class="btn primary" id="start-import">进入授权确认</button></div>');setTimeout(function(){document.getElementById('start-import').onclick=function(){ZM.toast('归集任务已创建，等待数据责任人确认授权','ok');document.querySelector('.overlay').remove();};},0);};
+document.getElementById('catalog').onclick=function(){ZM.toast('数据目录已按当前角色展示 126 个可见数据集','ok');};
+</script>
+</body>
+</html>

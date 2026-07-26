@@ -1,0 +1,601 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>移动端预览 · 人民日报社智媒平台 2.0</title>
+<link rel="stylesheet" href="assets/style.css">
+<style>
+  /* ===== 页面布局 ===== */
+  .mob-layout { display: grid; grid-template-columns: minmax(0,1fr) 380px; gap: 22px; align-items: start; }
+  @media (max-width: 1560px) { .mob-layout { grid-template-columns: 1fr; } }
+  .phone-rail { display: flex; gap: 22px; overflow-x: auto; padding: 4px 4px 18px; }
+  .ph-wrap { flex: none; width: 375px; }
+  .ph-cap { display: flex; align-items: baseline; gap: 8px; margin-bottom: 9px; padding-left: 4px; }
+  .ph-cap b { font-size: 13.5px; color: var(--ink); }
+  .ph-cap span { font-size: 11.5px; color: var(--muted); }
+  .ph-foot { margin-top: 13px; font-size: 11.5px; color: var(--muted); line-height: 1.65; border-left: 2px solid var(--line2); padding-left: 10px; }
+  .ph-foot b { color: var(--sub); }
+  .rail-tip { display: flex; align-items: center; gap: 12px; background: var(--accent-l2); border: 1px dashed var(--line2); border-radius: 12px; padding: 10px 15px; font-size: 12.5px; color: var(--sub); margin-bottom: 16px; }
+  .rail-tip b { color: var(--accent-d); }
+  [data-theme="blue"] .rail-tip b { color: var(--accent); }
+
+  /* ===== 手机外框（覆盖高度以便三台并排） ===== */
+  .phone { height: 720px; }
+  .phone .screen { --fs: 1; font-size: calc(13px * var(--fs)); }
+  .phone .statusbar { font-size: calc(11.5px * var(--fs)); }
+
+  /* 手机内复用全站组件的尺寸适配 */
+  .phone .tag { font-size: calc(10px * var(--fs)); padding: 1px calc(7px * var(--fs)); }
+  .phone .aigc-mark { font-size: calc(9.5px * var(--fs)); padding: 1px calc(5px * var(--fs)); }
+  .phone .bar-row { font-size: calc(11.5px * var(--fs)); margin-bottom: calc(9px * var(--fs)); gap: calc(8px * var(--fs)); }
+  .phone .bar-row .b-label { width: calc(56px * var(--fs)); font-size: calc(11.5px * var(--fs)); }
+  .phone .bar-row .b-track { height: calc(8px * var(--fs)); }
+  .phone .bar-row .b-val { width: calc(52px * var(--fs)); font-size: calc(11px * var(--fs)); }
+  .phone .rank-item { padding: calc(7px * var(--fs)) 0; gap: calc(9px * var(--fs)); }
+  .phone .rank-item .r-no { width: calc(20px * var(--fs)); height: calc(20px * var(--fs)); font-size: calc(10.5px * var(--fs)); border-radius: 6px; }
+  .phone .rank-item .r-body b { font-size: calc(12px * var(--fs)); }
+  .phone .rank-item .r-body span { font-size: calc(10px * var(--fs)); }
+  .phone .rank-item .r-val { font-size: calc(11.5px * var(--fs)); }
+  .phone .tline { padding-left: calc(18px * var(--fs)); }
+  .phone .tline .tl-item b { font-size: calc(12px * var(--fs)); }
+  .phone .tline .tl-item p { font-size: calc(11px * var(--fs)); }
+  .phone .tline .tl-item .tl-time { font-size: calc(10px * var(--fs)); }
+  .phone .m-tabbar .mt { font-size: calc(10px * var(--fs)); position: relative; }
+  .phone .m-tabbar .mt .mi { font-size: calc(19px * var(--fs)); }
+  .m-tabbar .mt .mdot { position: absolute; top: calc(2px * var(--fs)); right: calc(22px * var(--fs)); min-width: calc(15px * var(--fs)); height: calc(15px * var(--fs)); padding: 0 3px; border-radius: 999px; background: var(--brand-red); color: var(--card); font-size: calc(9px * var(--fs)); font-weight: 700; display: flex; align-items: center; justify-content: center; }
+  [data-theme="blue"] .m-tabbar .mt .mdot { color: var(--ink); }
+
+  /* ===== 手机内组件 ===== */
+  .m-app-top { flex: none; display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 0 15px 9px; border-bottom: 1px solid var(--line); background: var(--card); }
+  .m-app-top .mt-t b { display: block; font-size: calc(14px * var(--fs)); color: var(--ink); line-height: 1.25; }
+  .m-app-top .mt-t span { font-size: calc(10px * var(--fs)); color: var(--muted); }
+  .m-ic { width: calc(27px * var(--fs)); height: calc(27px * var(--fs)); border-radius: 9px; background: var(--chip); border: none; font-size: calc(12.5px * var(--fs)); color: var(--sub); display: inline-flex; align-items: center; justify-content: center; }
+  .m-ic:hover { background: var(--accent-l); color: var(--accent-d); }
+
+  .m-body-scroll { padding-bottom: 12px; scrollbar-width: none; }
+  .m-body-scroll::-webkit-scrollbar { display: none; }
+  .m-sec { padding: 0 13px; }
+  .m-card { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: calc(11px * var(--fs)) calc(12px * var(--fs)); box-shadow: var(--shadow-sm); }
+  .m-card + .m-card { margin-top: 9px; }
+  .m-h { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; margin: 13px 2px 7px; }
+  .m-h b { font-size: calc(13px * var(--fs)); color: var(--ink); }
+  .m-h span { font-size: calc(10.5px * var(--fs)); color: var(--muted); }
+  .m-h span.lk { color: var(--accent-d); cursor: pointer; }
+  [data-theme="blue"] .m-h span.lk { color: var(--accent); }
+  .m-tt { font-size: calc(12.5px * var(--fs)); color: var(--ink); font-weight: 600; line-height: 1.45; }
+  .m-sm { font-size: calc(11px * var(--fs)); color: var(--sub); line-height: 1.6; }
+  .m-xs { font-size: calc(10px * var(--fs)); color: var(--muted); line-height: 1.55; }
+  .m-hello { padding: 10px 2px 2px; }
+  .m-hello b { font-size: calc(17px * var(--fs)); color: var(--ink); }
+  .m-hello span { display: block; font-size: calc(11px * var(--fs)); color: var(--muted); margin-top: 2px; }
+
+  /* 数字员工卡 */
+  .m-ai-head { display: flex; align-items: center; gap: 9px; }
+  .m-ai-av { width: calc(32px * var(--fs)); height: calc(32px * var(--fs)); border-radius: 11px; flex: none; display: flex; align-items: center; justify-content: center; font-size: calc(15px * var(--fs)); background: linear-gradient(135deg, var(--accent), var(--accent-d)); color: var(--card); }
+  [data-theme="blue"] .m-ai-av { color: var(--ink); }
+  .m-chat { margin-top: 9px; display: flex; flex-direction: column; gap: 7px; max-height: calc(150px * var(--fs)); overflow-y: auto; scrollbar-width: none; }
+  .m-chat::-webkit-scrollbar { display: none; }
+  .m-bub { font-size: calc(11.5px * var(--fs)); line-height: 1.62; padding: calc(8px * var(--fs)) calc(11px * var(--fs)); border-radius: 12px; max-width: 88%; animation: mbin .22s ease; }
+  @keyframes mbin { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: none; } }
+  .m-bub.ai { background: var(--bg2); color: var(--text); border-top-left-radius: 4px; align-self: flex-start; }
+  .m-bub.me { background: var(--accent); color: var(--card); border-top-right-radius: 4px; align-self: flex-end; }
+  [data-theme="blue"] .m-bub.me { color: var(--ink); }
+  .m-bub b { color: var(--accent-d); }
+  [data-theme="blue"] .m-bub b { color: var(--accent); }
+  .m-bub.me b { color: var(--card); }
+  [data-theme="blue"] .m-bub.me b { color: var(--ink); }
+  .m-typing { display: flex; gap: 4px; align-self: flex-start; padding: calc(10px * var(--fs)) calc(12px * var(--fs)); background: var(--bg2); border-radius: 12px; }
+  .m-typing i { width: 6px; height: 6px; border-radius: 50%; background: var(--muted); animation: think 1.2s infinite; }
+  .m-typing i:nth-child(2) { animation-delay: .18s; }
+  .m-typing i:nth-child(3) { animation-delay: .36s; }
+  .m-chips { display: flex; gap: 6px; margin-top: 9px; overflow-x: auto; scrollbar-width: none; }
+  .m-chips::-webkit-scrollbar { display: none; }
+  .m-chips button { flex: none; border: 1px solid var(--line2); background: transparent; color: var(--sub); border-radius: 999px; padding: calc(4px * var(--fs)) calc(10px * var(--fs)); font-size: calc(10.5px * var(--fs)); }
+  .m-chips button:hover { border-color: var(--accent); color: var(--accent-d); }
+  .m-voicebar { display: flex; align-items: center; gap: 8px; margin-top: 9px; border-top: 1px solid var(--line); padding-top: 9px; }
+  .m-voicebar .vb-in { flex: 1; background: var(--bg2); border-radius: 999px; padding: calc(6px * var(--fs)) calc(12px * var(--fs)); font-size: calc(11px * var(--fs)); color: var(--muted); }
+  .m-voicebar .vb-mic { flex: none; border: none; border-radius: 999px; background: var(--accent); color: var(--card); font-size: calc(11px * var(--fs)); font-weight: 700; padding: calc(6px * var(--fs)) calc(12px * var(--fs)); }
+  [data-theme="blue"] .m-voicebar .vb-mic { color: var(--ink); }
+
+  /* 待办 */
+  .m-todo { display: flex; align-items: flex-start; gap: 9px; padding: calc(8px * var(--fs)) 0; border-bottom: 1px solid var(--line); }
+  .m-todo:last-child { border-bottom: none; }
+  .m-todo .cb { width: calc(17px * var(--fs)); height: calc(17px * var(--fs)); border-radius: 5px; border: 1.6px solid var(--line2); flex: none; margin-top: 2px; display: flex; align-items: center; justify-content: center; font-size: calc(10px * var(--fs)); color: transparent; }
+  .m-todo.done .cb { background: var(--ok); border-color: var(--ok); color: var(--card); }
+  .m-todo.done .m-tt { text-decoration: line-through; color: var(--muted); font-weight: 400; }
+
+  /* 快捷发起 */
+  .m-quick { display: grid; grid-template-columns: 1fr 1fr; gap: 9px; }
+  .m-quick button { display: flex; align-items: center; gap: 9px; text-align: left; background: var(--card); border: 1px solid var(--line); border-radius: 13px; padding: calc(10px * var(--fs)) calc(11px * var(--fs)); box-shadow: var(--shadow-sm); }
+  .m-quick button:hover { border-color: var(--accent); }
+  .m-quick .q-ic { width: calc(30px * var(--fs)); height: calc(30px * var(--fs)); border-radius: 10px; flex: none; display: flex; align-items: center; justify-content: center; font-size: calc(15px * var(--fs)); background: var(--accent-l); }
+  .m-quick b { display: block; font-size: calc(12px * var(--fs)); color: var(--ink); line-height: 1.3; }
+  .m-quick span { font-size: calc(9.5px * var(--fs)); color: var(--muted); }
+
+  /* 看板 */
+  .m-seg { display: flex; gap: 3px; background: var(--chip); border-radius: 10px; padding: 3px; }
+  .m-seg button { flex: 1; border: none; background: transparent; border-radius: 8px; font-size: calc(11px * var(--fs)); font-weight: 600; color: var(--sub); padding: calc(5px * var(--fs)) 0; }
+  .m-seg button.on { background: var(--card); color: var(--accent-d); box-shadow: var(--shadow-sm); }
+  [data-theme="blue"] .m-seg button.on { color: var(--accent); }
+  .m-kpi4 { display: grid; grid-template-columns: 1fr 1fr; gap: 9px; }
+  .m-big { background: var(--card); border: 1px solid var(--line); border-radius: 13px; padding: calc(10px * var(--fs)) calc(11px * var(--fs)); box-shadow: var(--shadow-sm); }
+  .m-big .bl { font-size: calc(10.5px * var(--fs)); color: var(--sub); }
+  .m-big .bv { font-size: calc(24px * var(--fs)); font-weight: 800; color: var(--ink); font-variant-numeric: tabular-nums; line-height: 1.2; margin: 2px 0 1px; }
+  .m-big .bv small { font-size: calc(11px * var(--fs)); font-weight: 600; color: var(--sub); margin-left: 2px; }
+  .m-big .bd { font-size: calc(10px * var(--fs)); font-weight: 700; }
+  .m-big .bd.up { color: var(--ok); }
+  .m-big .bd.down { color: var(--danger); }
+  .m-chartbox { position: relative; }
+  .m-chartbox svg { display: block; width: 100%; height: calc(112px * var(--fs)); overflow: visible; }
+  .m-chartbox .pt { cursor: pointer; }
+  .m-chartbox .pt:hover circle.hit { opacity: .18; }
+  .m-xlab { display: flex; justify-content: space-between; margin-top: 4px; font-size: calc(9px * var(--fs)); color: var(--muted); }
+  .m-tip { margin-top: 8px; background: var(--accent-l2); border-radius: 9px; padding: calc(7px * var(--fs)) calc(10px * var(--fs)); font-size: calc(10.5px * var(--fs)); color: var(--sub); }
+  .m-tip b { color: var(--accent-d); }
+  [data-theme="blue"] .m-tip b { color: var(--accent); }
+  .m-alert { display: flex; align-items: center; gap: 9px; border-radius: 12px; padding: calc(9px * var(--fs)) calc(11px * var(--fs)); margin-bottom: 8px; border: 1px solid var(--line); background: var(--card); }
+  .m-alert.l1 { background: var(--danger-l); border-color: var(--danger); }
+  .m-alert.l1 .al-lv { background: var(--danger); color: var(--card); animation: pulse 1.8s infinite; }
+  [data-theme="blue"] .m-alert.l1 .al-lv { color: var(--ink); }
+  .m-alert .al-lv { flex: none; width: calc(26px * var(--fs)); height: calc(26px * var(--fs)); border-radius: 8px; background: var(--chip); color: var(--sub); font-size: calc(10.5px * var(--fs)); font-weight: 800; display: flex; align-items: center; justify-content: center; }
+  .m-alert b { display: block; font-size: calc(11.8px * var(--fs)); color: var(--ink); line-height: 1.35; }
+  .m-alert span { font-size: calc(9.8px * var(--fs)); color: var(--sub); }
+
+  /* 审批 */
+  .m-appr { border: 1px solid var(--line); background: var(--card); border-radius: 13px; padding: calc(11px * var(--fs)) calc(12px * var(--fs)); margin-bottom: 9px; box-shadow: var(--shadow-sm); }
+  .m-appr:hover { border-color: var(--accent); }
+  .m-appr .ap-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; }
+  .m-appr .ap-meta { display: flex; align-items: center; gap: 6px; margin-top: 7px; flex-wrap: wrap; }
+  .m-sub { position: absolute; inset: 0; z-index: 30; background: var(--bg); display: flex; flex-direction: column; border-radius: 38px; overflow: hidden; transform: translateX(103%); transition: transform .28s ease; pointer-events: none; }
+  .m-sub.open { transform: none; pointer-events: auto; }
+  .m-sub .sub-head { flex: none; display: flex; align-items: center; gap: 9px; padding: 46px 15px 10px; background: var(--card); border-bottom: 1px solid var(--line); }
+  .m-sub .sub-head b { font-size: calc(13.5px * var(--fs)); color: var(--ink); }
+  .m-sub .sub-body { flex: 1; overflow-y: auto; padding: 0 13px 14px; scrollbar-width: none; }
+  .m-sub .sub-body::-webkit-scrollbar { display: none; }
+  .m-sub .sub-act { flex: none; display: flex; gap: 9px; padding: 10px 13px 20px; background: var(--card); border-top: 1px solid var(--line); }
+  .m-btn { flex: 1; border: 1px solid transparent; border-radius: 11px; font-size: calc(12.5px * var(--fs)); font-weight: 700; padding: calc(10px * var(--fs)) 0; }
+  .m-btn.pri { background: var(--accent); color: var(--card); }
+  [data-theme="blue"] .m-btn.pri { color: var(--ink); }
+  .m-btn.dan { background: transparent; border-color: var(--danger); color: var(--danger); }
+  .m-btn.gh { background: transparent; border-color: var(--line2); color: var(--sub); }
+  .m-btn.ok { background: var(--ok); color: var(--card); }
+  [data-theme="blue"] .m-btn.ok { color: var(--ink); }
+  .m-prog { height: 6px; border-radius: 6px; background: var(--bg2); overflow: hidden; }
+  .m-prog i { display: block; height: 100%; width: 0; background: var(--accent); transition: width 1.1s linear; }
+  .m-okmark { width: calc(46px * var(--fs)); height: calc(46px * var(--fs)); border-radius: 50%; background: var(--ok-l); color: var(--ok); display: flex; align-items: center; justify-content: center; font-size: calc(24px * var(--fs)); margin: 0 auto; animation: pop .35s ease; }
+  @keyframes pop { from { transform: scale(.4); opacity: 0; } to { transform: none; opacity: 1; } }
+
+  /* 消息 */
+  .m-msg { display: flex; gap: 9px; padding: calc(10px * var(--fs)) calc(11px * var(--fs)); border-radius: 12px; background: var(--card); border: 1px solid var(--line); margin-bottom: 8px; }
+  .m-msg.unread { border-left: 3px solid var(--accent); }
+  .m-msg.l1 { border-left-color: var(--danger); }
+  .m-msg .mg-ic { width: calc(30px * var(--fs)); height: calc(30px * var(--fs)); border-radius: 10px; flex: none; display: flex; align-items: center; justify-content: center; font-size: calc(14px * var(--fs)); background: var(--accent-l2); }
+  .m-msg .mg-t { display: flex; align-items: center; gap: 5px; }
+  .m-msg .mg-t b { font-size: calc(12px * var(--fs)); color: var(--ink); }
+  .m-msg.read .mg-t b { color: var(--sub); font-weight: 500; }
+  .m-msg .rd { width: 7px; height: 7px; border-radius: 50%; background: var(--brand-red); flex: none; }
+  .m-msg .mg-b { font-size: calc(10.8px * var(--fs)); color: var(--sub); line-height: 1.6; margin-top: 2px; }
+  .m-msg.read .mg-b { color: var(--muted); }
+
+  /* 我的 */
+  .m-me-hero { background: linear-gradient(135deg, var(--accent), var(--accent-d)); border-radius: 16px; padding: calc(14px * var(--fs)); display: flex; align-items: center; gap: 11px; }
+  .m-me-hero .av { width: calc(46px * var(--fs)); height: calc(46px * var(--fs)); border-radius: 50%; background: var(--card); color: var(--accent-d); font-size: calc(19px * var(--fs)); font-weight: 800; display: flex; align-items: center; justify-content: center; flex: none; }
+  .m-me-hero b { display: block; font-size: calc(15px * var(--fs)); color: var(--card); }
+  .m-me-hero span { font-size: calc(10.5px * var(--fs)); color: var(--card); opacity: .85; display: block; line-height: 1.55; }
+  [data-theme="blue"] .m-me-hero b, [data-theme="blue"] .m-me-hero span { color: var(--ink); }
+  .m-row { display: flex; align-items: center; gap: 10px; padding: calc(10px * var(--fs)) 0; border-bottom: 1px solid var(--line); }
+  .m-row:last-child { border-bottom: none; }
+  .m-row .rw-ic { width: calc(26px * var(--fs)); height: calc(26px * var(--fs)); border-radius: 8px; background: var(--chip); display: flex; align-items: center; justify-content: center; font-size: calc(13px * var(--fs)); flex: none; }
+  .m-row .rw-t { flex: 1; min-width: 0; }
+  .m-row .rw-t b { display: block; font-size: calc(12.2px * var(--fs)); color: var(--ink); font-weight: 600; }
+  .m-row .rw-t span { font-size: calc(10px * var(--fs)); color: var(--muted); line-height: 1.5; }
+  .m-sw { width: calc(40px * var(--fs)); height: calc(23px * var(--fs)); border-radius: 999px; background: var(--line2); position: relative; flex: none; transition: background .2s; }
+  .m-sw i { position: absolute; top: calc(2.5px * var(--fs)); left: calc(2.5px * var(--fs)); width: calc(18px * var(--fs)); height: calc(18px * var(--fs)); border-radius: 50%; background: var(--card); box-shadow: var(--shadow-sm); transition: left .2s; }
+  .m-sw.on { background: var(--ok); }
+  .m-sw.on i { left: calc(19.5px * var(--fs)); }
+  .m-themes { display: flex; gap: 7px; }
+  .m-themes .td { width: calc(24px * var(--fs)); height: calc(24px * var(--fs)); border-radius: 50%; border: 2px solid transparent; }
+  .m-themes .td.on { border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent-l); }
+  .m-themes .td.t-red { background: linear-gradient(135deg, var(--card) 45%, var(--brand-red) 55%); }
+  .m-themes .td.t-light { background: linear-gradient(135deg, var(--bg2) 45%, var(--sub) 55%); }
+  .m-themes .td.t-blue { background: linear-gradient(135deg, var(--ink) 45%, var(--info) 55%); }
+
+  /* 底部合规条 */
+  .m-redline { margin: 12px 13px 0; border: 1px dashed var(--line2); background: var(--accent-l2); border-radius: 11px; padding: calc(9px * var(--fs)) calc(11px * var(--fs)); font-size: calc(10px * var(--fs)); color: var(--sub); line-height: 1.65; }
+  .m-redline b { color: var(--accent-d); }
+  [data-theme="blue"] .m-redline b { color: var(--accent); }
+
+  /* 推送横幅 */
+  .m-banner { position: absolute; top: 44px; left: 10px; right: 10px; z-index: 45; background: var(--card); border: 1px solid var(--line2); border-left: 3px solid var(--danger); border-radius: 13px; box-shadow: var(--shadow); padding: 9px 12px; transform: translateY(-160%); transition: transform .32s cubic-bezier(.2,.8,.3,1); }
+  .m-banner.show { transform: none; }
+  .m-banner b { display: block; font-size: calc(11.8px * var(--fs)); color: var(--ink); }
+  .m-banner span { font-size: calc(10px * var(--fs)); color: var(--sub); line-height: 1.5; }
+
+  /* 底部弹层 */
+  .m-sheet-wrap { position: absolute; inset: 0; z-index: 50; visibility: hidden; border-radius: 38px; overflow: hidden; }
+  .m-sheet-wrap.open { visibility: visible; }
+  .m-mask { position: absolute; inset: 0; background: var(--ink); opacity: 0; transition: opacity .22s; }
+  .m-sheet-wrap.open .m-mask { opacity: .45; }
+  .m-sheet { position: absolute; left: 0; right: 0; bottom: 0; background: var(--card); border-radius: 20px 20px 0 0; max-height: 82%; overflow-y: auto; scrollbar-width: none; transform: translateY(100%); transition: transform .26s ease; padding: 9px 15px 20px; }
+  .m-sheet::-webkit-scrollbar { display: none; }
+  .m-sheet-wrap.open .m-sheet { transform: none; }
+  .m-sheet .grab { width: 38px; height: 4px; border-radius: 3px; background: var(--line2); margin: 0 auto 11px; }
+  .m-sheet h4 { font-size: calc(14px * var(--fs)); color: var(--ink); margin-bottom: 3px; }
+  .m-field { margin-top: 11px; }
+  .m-field label { display: block; font-size: calc(10.5px * var(--fs)); color: var(--muted); margin-bottom: 4px; }
+  .m-field input, .m-field textarea, .m-field select { width: 100%; border: 1px solid var(--line2); background: var(--bg2); color: var(--text); border-radius: 10px; padding: calc(8px * var(--fs)) calc(11px * var(--fs)); font-size: calc(11.5px * var(--fs)); font-family: var(--font); outline: none; }
+  .m-field input:focus, .m-field textarea:focus { border-color: var(--accent); background: var(--card); }
+  .m-field textarea { resize: none; line-height: 1.6; }
+  .m-pick { display: flex; gap: 6px; flex-wrap: wrap; }
+  .m-pick button { border: 1px solid var(--line2); background: transparent; color: var(--sub); border-radius: 999px; padding: calc(4px * var(--fs)) calc(10px * var(--fs)); font-size: calc(10.5px * var(--fs)); }
+  .m-pick button.on { background: var(--accent); border-color: var(--accent); color: var(--card); font-weight: 700; }
+  [data-theme="blue"] .m-pick button.on { color: var(--ink); }
+
+  /* 语音波形 */
+  .m-wave { display: flex; align-items: center; justify-content: center; gap: 4px; height: 56px; }
+  .m-wave i { width: 4px; border-radius: 3px; background: var(--accent); animation: wv .9s ease-in-out infinite; }
+  @keyframes wv { 0%,100% { height: 8px; opacity: .5; } 50% { height: 40px; opacity: 1; } }
+
+  /* 扫码 */
+  .m-scan { position: relative; width: calc(160px * var(--fs)); height: calc(160px * var(--fs)); margin: 6px auto 0; border-radius: 14px; background: var(--bg2); border: 1px solid var(--line2); padding: 14px; overflow: hidden; }
+  .m-scan .laser { position: absolute; left: 0; right: 0; height: 2px; background: var(--accent); box-shadow: 0 0 10px var(--accent); animation: sc 1.6s ease-in-out infinite; }
+  @keyframes sc { 0% { top: 6%; } 50% { top: 92%; } 100% { top: 6%; } }
+  .m-scan .corner { position: absolute; width: 20px; height: 20px; border: 2px solid var(--accent); }
+  .m-scan .c1 { top: 8px; left: 8px; border-right: none; border-bottom: none; }
+  .m-scan .c2 { top: 8px; right: 8px; border-left: none; border-bottom: none; }
+  .m-scan .c3 { bottom: 8px; left: 8px; border-right: none; border-top: none; }
+  .m-scan .c4 { bottom: 8px; right: 8px; border-left: none; border-top: none; }
+
+  /* 生物识别 */
+  .m-face { width: calc(78px * var(--fs)); height: calc(78px * var(--fs)); margin: 4px auto 0; border-radius: 24px; border: 2px solid var(--accent); display: flex; align-items: center; justify-content: center; font-size: calc(34px * var(--fs)); animation: fpulse 1.3s ease-in-out infinite; }
+  @keyframes fpulse { 0%,100% { box-shadow: 0 0 0 0 var(--accent-l); } 50% { box-shadow: 0 0 0 10px var(--accent-l); } }
+
+  /* ===== 右侧说明面板 ===== */
+  .cap-item { display: flex; gap: 10px; padding: 9px 0; border-bottom: 1px dashed var(--line); }
+  .cap-item:last-child { border-bottom: none; }
+  .cap-item .ci-ic { width: 26px; height: 26px; border-radius: 8px; background: var(--accent-l); display: flex; align-items: center; justify-content: center; font-size: 13px; flex: none; }
+  .cap-item b { display: block; font-size: 12.8px; color: var(--ink); }
+  .cap-item span { font-size: 11.5px; color: var(--sub); line-height: 1.6; }
+  .plus-card { border: 1px solid var(--line); border-radius: 12px; padding: 11px 13px; background: var(--card2); margin-bottom: 9px; }
+  .plus-card b { font-size: 12.8px; color: var(--ink); display: flex; align-items: center; gap: 6px; }
+  .plus-card p { font-size: 11.5px; color: var(--sub); line-height: 1.65; margin-top: 4px; }
+  .plus-card .why { font-size: 10.5px; color: var(--accent-d); margin-top: 5px; }
+  [data-theme="blue"] .plus-card .why { color: var(--accent); }
+</style>
+</head>
+<body>
+
+<div class="page wide">
+  <div class="page-head">
+    <div>
+      <div class="eyebrow">移动端预览 / 需求书 §5(二)</div>
+      <h1>移动端 · <span class="hl">便携指挥终端</span></h1>
+      <p class="sub">PC 端是核心工作台，承载复杂生产流程与全量数据分析；移动端聚焦<b>任务高效发起、核心运营数据可视化看板、重要审批结果与系统消息的即时分发提醒</b>。下方三台设备为同一账号在不同场景下的真机交互演示，五个页签均可点击切换，状态互不干扰。</p>
+    </div>
+    <div class="flex wrap">
+      <button class="btn ghost sm" id="btn-reset">↺ 三机复位</button>
+      <button class="btn soft sm" id="btn-elder">🔎 全局适老化</button>
+      <button class="btn primary sm" id="btn-push">📡 模拟推送 L1 预警</button>
+    </div>
+  </div>
+
+  <div class="rail-tip">
+    <span style="font-size:19px">📱</span>
+    <div class="grow">
+      <b>同源不同形</b>：移动端与 PC 端共用一套统一身份认证、权限矩阵与数据分级策略 —— 侧边栏灰显的模块，在移动端同样不可见；水印、留痕、AIGC 标识跨端一致。
+    </div>
+    <span class="tag gray">iOS / Android / 鸿蒙 同构</span>
+  </div>
+
+  <div class="mob-layout">
+    <div class="phone-rail" id="rail"></div>
+
+    <aside class="side-doc">
+      <div class="panel">
+        <h3>PC 端 vs 移动端 · 职能划分 <span class="h-extra">需求书原文口径</span></h3>
+        <table class="tbl">
+          <thead><tr><th style="width:64px">维度</th><th>PC 端 · 核心工作台</th><th>移动端 · 便携指挥终端</th></tr></thead>
+          <tbody>
+            <tr><td><b>定位</b></td><td>承载复杂生产流程与全量数据分析</td><td>任务高效发起、核心看板、审批与消息即时分发提醒</td></tr>
+            <tr><td><b>采编生产</b></td><td>选题→采写→审校→签发全链路，多窗并行、长文编辑</td><td>只做任务发起与进度跟踪，不承载长文精编</td></tr>
+            <tr><td><b>数据分析</b></td><td>决策大屏、多维下钻、自定义报表与导出</td><td>核心指标一屏概览，下钻至二级即回 PC</td></tr>
+            <tr><td><b>审批签批</b></td><td>流程配置、批量处理、留痕检索</td><td>单条即时签批，附 AI 预审意见与生物识别验证</td></tr>
+            <tr><td><b>消息触达</b></td><td>消息中心汇总查阅</td><td>分级推送到端，L1 强提醒穿透免打扰</td></tr>
+            <tr><td><b>智能体</b></td><td>编排工厂、能力上架、提示词调试</td><td>调用已发布智能体，可语音唤起</td></tr>
+            <tr><td><b>安全</b></td><td>水印 + 分级查看 + 全量审计</td><td>叠加生物识别二次验证、离线缓存加密与定时失效</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="panel mt16">
+        <h3>移动端已实现能力 <span class="h-extra">对应五个页签</span></h3>
+        <div id="cap-list"></div>
+      </div>
+
+      <div class="panel mt16">
+        <h3>我们补充的移动端能力 <span class="h-extra">需求书未展开，本方案补齐</span></h3>
+        <div id="plus-list"></div>
+        <div class="note">以上六项均为一线使用场景倒推得出：夜班值班、外出采访、会场签批、弱网现场是移动端真正的高频环境。</div>
+      </div>
+
+      <div class="panel mt16">
+        <h3>合规红线在移动端的落地</h3>
+        <div class="cap-item"><div class="ci-ic">✍️</div><div><b>辅助不替代终审签发</b><span>移动端审批页仅呈现 AI 预审意见与风险点位，签批动作必须由本人完成；涉密件强制生物识别二次验证。</span></div></div>
+        <div class="cap-item"><div class="ci-ic">✦</div><div><b>AIGC 内容加注标识</b><span>看板结论、语音转写任务卡、智能体产出一律带 <span class="aigc-mark">✦ AI 辅助生成</span> 标识，跨端一致不可去除。</span></div></div>
+        <div class="cap-item"><div class="ci-ic">🔒</div><div><b>数据分级查看</b><span>移动端默认仅下发本人权限内的摘要级数据；核心层全文与全量明细需回 PC 端在内网环境查看。</span></div></div>
+        <div class="cap-item"><div class="ci-ic">🧾</div><div><b>操作留痕可溯</b><span>登录设备、审批动作、缓存下载、截屏行为全部进入审计日志，与 PC 端同一条时间线。</span></div></div>
+      </div>
+    </aside>
+  </div>
+</div>
+
+<script src="assets/data.js"></script>
+<script src="assets/app.js"></script>
+<script>
+(function () {
+  var u = ZM.boot('mobile');
+  if (!u) return;
+
+  document.addEventListener('DOMContentLoaded', function () {
+    var P = ZMD.PERSONAS[u.id];
+    var THEMES = ['red', 'light', 'blue'];
+    var TABS = [['home', '首页', '🏠'], ['board', '看板', '📊'], ['appr', '审批', '✅'], ['msg', '消息', '💬'], ['me', '我的', '👤']];
+
+    /* ---------- 移动端专属系统消息（补充 ZMD.NOTIFS） ---------- */
+    var EXTRA_NOTIFS = [
+      { ic: '📲', cls: 'info', title: '移动端 · 离线缓存已完成', body: '今日采前会材料、待批事项与热点榜单已加密缓存至本机，弱网环境可离线查看，24 小时后自动失效。', time: '06:20', to: [] },
+      { ic: '🔐', cls: 'warn', title: '安全提醒 · 新设备登录', body: '您的账号 08:41 于社内 5G 专网（北京·金台西路 2 号院）登录移动端，如非本人操作请立即联系技术部。', time: '08:41', to: [] },
+      { ic: '📢', cls: 'gold', title: '系统公告 · 移动端 v2.0.3', body: '新增语音发起任务、扫码快速核稿、适老化大字模式；审批页接入 AI 预审意见。', time: '昨日', to: [] }
+    ];
+
+    function levelOf(n) { return n.cls === 'red' ? 'L1' : n.cls === 'warn' ? 'L2' : 'L3'; }
+
+    function baseNotifs() {
+      var list = ZMD.NOTIFS.filter(function (n) { return !n.to.length || n.to.indexOf(u.id) >= 0; }).concat(EXTRA_NOTIFS);
+      return list.map(function (n, i) {
+        return { ic: n.ic, cls: n.cls, title: n.title, body: n.body, time: n.time, lv: levelOf(n), read: i > 3 };
+      });
+    }
+
+    /* ---------- 看板数据 ---------- */
+    var PORTS = ['客户端', '人民网', '微信', '微博', '抖音', '英文客户端'];
+    var BOARD = {
+      today: {
+        seg: '今日',
+        kpi: [['全端总阅读', '4.28', '亿', '较昨日 +6.2%', 'up'], ['今日发稿', '386', '篇', '较昨日 +24 篇', 'up'],
+              ['好稿池新增', '9', '篇', 'AI 发现 7 篇', 'up'], ['舆情预警', '3', '条', 'L1×1 待研判', 'down']],
+        read: [12800, 6100, 4300, 7400, 9600, 2600], act: [386, 164, 233, 518, 742, 88], fans: [8.6, 3.2, 5.1, 12.8, 21.4, 2.4],
+        labels: ['07-19', '07-20', '07-21', '07-22', '07-23', '07-24', '今日'],
+        trend: [3.62, 3.94, 3.41, 4.12, 4.46, 3.88, 4.28], tunit: '亿'
+      },
+      week: {
+        seg: '本周',
+        kpi: [['全端总阅读', '27.5', '亿', '环比 +4.1%', 'up'], ['本周发稿', '2,684', '篇', '环比 +153 篇', 'up'],
+              ['好稿池新增', '23', '篇', 'AI 发现 18 篇', 'up'], ['舆情预警', '11', '条', 'L1×2 已处置', 'down']],
+        read: [81200, 39600, 27300, 47800, 62400, 16900], act: [2410, 1020, 1486, 3260, 4780, 552], fans: [54.2, 19.8, 31.4, 79.6, 132.8, 14.6],
+        labels: ['W23', 'W24', 'W25', 'W26', 'W27', 'W28', '本周'],
+        trend: [24.1, 25.8, 23.4, 26.9, 28.2, 26.1, 27.5], tunit: '亿'
+      },
+      month: {
+        seg: '本月',
+        kpi: [['全端总阅读', '116.7', '亿', '同比 +9.4%', 'up'], ['本月发稿', '11,420', '篇', '同比 +892 篇', 'up'],
+              ['好稿池新增', '96', '篇', 'AI 发现 71 篇', 'up'], ['舆情预警', '42', '条', 'L1×5 全部闭环', 'down']],
+        read: [342000, 168000, 116000, 201000, 268000, 72000], act: [10200, 4380, 6140, 13800, 20400, 2360], fans: [228, 84, 132, 336, 561, 62],
+        labels: ['1月', '2月', '3月', '4月', '5月', '6月', '本月'],
+        trend: [98.2, 104.6, 112.3, 107.8, 119.4, 124.1, 116.7], tunit: '亿'
+      }
+    };
+    var METRICS = { read: ['阅读量', '万'], act: ['互动量', '万'], fans: ['净涨粉', '万'] };
+
+    /* ---------- 审批扩展信息 ---------- */
+    var APPR_EXT = {
+      '涉外舆情回应口径（三语版）': {
+        secret: 1, risk: '中', riskCls: 'warn',
+        files: [['口径正文_中英法西.docx', '46 KB'], ['境外声量监测附图.png', '812 KB'], ['AI 安全评测报告.pdf', '128 KB']],
+        pre: ['外宣表述规范库比对：通过，4 处译法已按《外宣译法手册 v2026》校正',
+              '事实核查：引用的 3 组海关与产业数据均可溯源，出处已标注',
+              '风险点位：第 2 段反问句式在英文语境易被截取二次传播，建议改为陈述句'],
+        concl: '建议在修改第 2 段句式后审定发布；涉外口径属涉密事项，签批需生物识别二次验证。',
+        flow: [['08:02', '国际部 苏文 起草', 1], ['08:07', '涉外回应口径智能体 生成三语版本 · 已加注 AIGC 标识', 1], ['08:11', '国际部主任 初审通过', 1], ['08:15', '待您审定（终审签发）', 0]]
+      },
+      '建军节融媒策划立项': {
+        secret: 0, risk: '低', riskCls: 'ok',
+        files: [['建军节融媒策划案.pptx', '3.2 MB'], ['预算与排期表.xlsx', '86 KB']],
+        pre: ['新闻月历比对：距节点 7 天，提前量符合重大策划立项要求',
+              '同题去重：近 30 天社内同主题策划 1 项，切口不重合',
+              '资源冲突：微纪录片拍摄档期与「乡村六十秒」第 3 季重叠 2 天，建议错峰'],
+        concl: '选题价值与提前量均达标，建议批准立项，拍摄档期请军事部与视频中心另行协调。',
+        flow: [['07:26', '军事部 李慧 提交', 1], ['07:33', '新闻月历 / 选题去重 智能体核验', 1], ['07:40', '待您批准立项', 0]]
+      },
+      '《以旧换新一年间》选题立项': {
+        secret: 0, risk: '低', riskCls: 'ok',
+        files: [['选题申报表.docx', '32 KB'], ['采访提纲（9 问）.docx', '28 KB']],
+        pre: ['热点雷达匹配度 91，同题密度低（近 30 天深度稿 3 篇）',
+              '预估客户端阅读 800 万+，建议深度稿 + 短视频双形态',
+              '采访资源：车辆与录音转写额度已预留'],
+        concl: '已由新闻协调部王建军批准立项，抄送经济社会部主任，任务已进入记者工作台。',
+        flow: [['07:52', '经济社会部 陈晓雯 提交', 1], ['07:58', '选题推荐官 智能体核验通过', 1], ['08:03', '新闻协调部 王建军 批准', 1]]
+      },
+      '新智能体上架：方言播报': {
+        secret: 0, risk: '低', riskCls: 'ok',
+        files: [['智能体能力说明.md', '12 KB'], ['安全评测报告.pdf', '204 KB'], ['语料授权书.pdf', '96 KB']],
+        pre: ['AI 安全评测：越权调用 0、敏感输出 0，通过',
+              '语料授权：方言音库已取得合作单位书面授权',
+              '资源占用：预估日均 Token 消耗 120 万，纳入技术部配额'],
+        concl: '智能体大赛优秀作品，评测与授权齐备，已批准上架至能力货架「内容生产」分类。',
+        flow: [['昨日 15:10', '技术部 张涛 提交上架申请', 1], ['昨日 16:02', '安全评测 / 语料授权核验', 1], ['昨日 17:20', '平台管理员 批准上架', 1]]
+      }
+    };
+    var REJECT_REASONS = ['口径需再斟酌', '材料不齐待补充', '时机不合适，缓议', '需上会集体研判', '转他人复核'];
+
+    /* ---------- 快捷发起任务表单 ---------- */
+    var QUICKS = {
+      xuanti: { ic: '🎯', t: '发起选题', s: '报选题立项', title: '发起选题立项',
+        note: '热点雷达为您预填了当前匹配度最高的方向（匹配度 91）',
+        fields: [['title', '选题名称', 'input', '县域充电桩建设的“最后一公里”'],
+                 ['dept', '归口部门', 'pick', ['经济社会部', '政文部', '地方部', '国际部']],
+                 ['form', '建议形态', 'pick', ['深度稿', '短视频', '图解', '直播']],
+                 ['urgent', '紧急度', 'pick', ['常规', '加急（今日上会）', '重大（需社领导阅示）']],
+                 ['note', '选题说明', 'area', '切口：从一张充电桩报修单入手，串起县域电网改造、运营商盈利模型与用户体验。']],
+        ok: '选题已提交新闻协调部，将进入 9:00 采前会待研判清单' },
+      caifang: { ic: '🎙️', t: '发起采访', s: '约人约车约设备', title: '发起采访申请',
+        note: '数字员工会同步预约车辆、摄像与录音转写额度',
+        fields: [['obj', '采访对象', 'input', '国网某县供电公司 运维班组'],
+                 ['time', '采访时间', 'input', '2026-07-26 14:00'],
+                 ['place', '采访地点', 'input', '河北保定 · 涞水县供电所'],
+                 ['need', '资源需求', 'pick', ['车辆', '摄像', '录音转写', '无人机']],
+                 ['note', '采访要点', 'area', '重点了解报修响应时长、备件供应与冬季负荷压力，需拿到近三年台账数据。']],
+        ok: '采访申请已提交，车辆与录音转写额度已同步预约' },
+      agent: { ic: '✦', t: '呼叫智能体', s: '移动端唤起能力', title: '呼叫智能体',
+        note: '移动端仅调用已发布智能体；编排与上架请回 PC 端「编排工厂」',
+        agents: 1, ok: '已唤起智能体，结果将同步至 PC 工作台与消息中心' },
+      xiansuo: { ic: '📍', t: '上报线索', s: '现场随手报', title: '上报新闻线索',
+        note: '支持语音转文字、拍照与定位，弱网下先落本地队列，恢复后自动补传',
+        fields: [['desc', '线索描述', 'area', '涞水县城郊新建充电站投用两周即有 3 台桩停用，居民反映扫码无响应，现场无运维公示牌。'],
+                 ['kind', '线索类别', 'pick', ['民生', '经济', '社会', '涉外', '突发']],
+                 ['loc', '定位', 'input', '河北保定涞水县 · 已自动获取（精度 12m）']],
+        ok: '线索已上报新闻协调部线索池，编号 XS-20260725-039' }
+    };
+
+    /* ---------- 迷你对话回复库 ---------- */
+    var CHIPS = {
+      leader: [['晨报摘要', '昨日全端总阅读 <b>4.28 亿</b>（环比 +6.2%）。风险面两条：校园食品安全 L1、涉外供应链 L2，均已布置跟进。详版决策大屏请回 PC 端查看。'],
+               ['今日待签', '待您签批 <b>2 件</b>：涉外回应口径（涉密，需生物识别）、建军节融媒策划立项。均已附 AI 预审意见。'],
+               ['问数：青年用户占比', '本月 18–35 岁用户占比 <b>37.8%</b>（+3.6pt），增量主要来自「县城青年」「冬日美学」两个话题。<b>移动端只给到二级下钻</b>，更细口径请回 PC。']],
+      coord: [['采前会材料', '9:00 采前会会议包已生成并分发 12 位与会人：热点研判 7 条（2 条带风险标注）、待批选题 5 项、新闻月历提前量提醒 1 条。'],
+              ['派发任务', '已按分工把「校园食品安全锐评」派给评论部，回执时限 11:00，进度会在这里提醒您。'],
+              ['风险面速览', '当前 L1×1、L2×1、L3×1。L1 事件属地仍未权威通报，建议编前会定调。']],
+      reporter: [['今日选题推荐', '为您筛出 <b>3 条</b>低同题密度选题，第一条：《以旧换新一年间：一张家电发票背后的消费账本》，热度 91，同题仅 3 篇深度稿。'],
+                 ['生成采访提纲', '已按「现场—人物—数据—政策」四段式生成 <b>9 问</b>提纲，附 5 组国家统计局数据与 3 位候选专家，已存入工作台。'],
+                 ['录音转写成稿', '上午 47 分钟录音转写完成，准确率 98.2%，已结构化成稿 1,860 字，2 处数据待您复核（黄色高亮）。']],
+      editor: [['今日待审', '待审 <b>14 篇</b>，其中 2 篇触发领导人职务表述复核，建议优先处理；平均处理时长已降至 6.8 分/篇。'],
+               ['风控速查', '本批稿件命中 9 处：P1 必改 2 处（职务表述、数据时点缺失），P2 建议 7 处，均已定位到段落。'],
+               ['留痕情况', '本周三审三校全流程留痕率 <b>100%</b>，可按稿件号回溯每一次修改与责任人。']],
+      operator: [['昨日传播复盘', '光伏出海稿全端触达 <b>2.8 亿</b>，英文版发布 2 小时后被 3 家外媒转引形成第二波峰，策略已沉淀为模板。'],
+                 ['今日排期', '六端排期已生成：07:30 客户端置顶、12:00 微信头条、18:30 抖音、21:00 微博互动帖，冲突检测通过。'],
+                 ['IP 追踪', '「边疆行记」本周涨粉 15.2 万，涨粉斜率全社第一，建议配备专属剪辑数字员工。']],
+      admin: [['平台运行', '昨日 API 调用 <b>128.6 万次</b>，成功率 99.97%；Token 消耗 4.2 亿，写易引擎占 38%，已切弹性配额池。'],
+              ['告警处置', '当前告警 1 条（写易 Token 用量），已自动扩容，待您在 PC 端确认处置结论。'],
+              ['安全审计', '昨日拦截越权调用 3 次、敏感输出 0 次；移动端新设备登录 1 次，已核验通过。']]
+    };
+
+    /* ---------- 工具 ---------- */
+    function fmt(n) {
+      if (n >= 10000) return (n / 10000).toFixed(2).replace(/\.?0+$/, '') + ' 万';
+      return String(n);
+    }
+    function esc(s) { return String(s).replace(/</g, '&lt;'); }
+
+    /* ---------- 三台移动设备原型 ---------- */
+    var phoneDefs = [
+      { title: '个人工作台', sub: '任务发起与数字员工', tab: 'home' },
+      { title: '核心运营看板', sub: '指标、榜单与风险面', tab: 'board' },
+      { title: '移动审批中心', sub: 'AI 预审 + 本人签批', tab: 'appr' }
+    ];
+
+    function tabbar(active) {
+      return '<div class="m-tabbar">' + TABS.map(function (t) {
+        var unread = t[0] === 'msg' ? '<span class="mdot">2</span>' : '';
+        return '<button class="mt' + (active === t[0] ? ' on' : '') + '" data-tab="' + t[0] + '"><span class="mi">' + t[2] + '</span>' + t[1] + unread + '</button>';
+      }).join('') + '</div>';
+    }
+
+    function homeHtml() {
+      var todos = (ZMD.TODOS[u.id] || []).slice(0, 3);
+      var chips = (CHIPS[u.id] || []).slice(0, 3);
+      return '<div class="m-sec"><div class="m-hello"><b>中午好，' + u.name + '</b><span>' + u.role + ' · 今日有 ' + todos.length + ' 项重点待办</span></div>' +
+        '<div class="m-h"><b>我的数字员工</b><span class="lk">在线</span></div>' +
+        '<div class="m-card"><div class="m-ai-head"><div class="m-ai-av">' + P.icon + '</div><div><div class="m-tt">' + P.name + '</div><div class="m-xs">' + P.sub + '</div></div></div>' +
+        '<div class="m-chat"><div class="m-bub ai">' + P.intro + ' 您可以直接语音布置任务。</div></div>' +
+        '<div class="m-chips">' + chips.map(function (c) { return '<button class="m-chip" data-reply="' + esc(c[1]) + '">' + c[0] + '</button>'; }).join('') + '</div>' +
+        '<div class="m-voicebar"><div class="vb-in">向数字员工说点什么…</div><button class="vb-mic">🎙 按住说话</button></div></div>' +
+        '<div class="m-h"><b>我的待办</b><span>' + todos.length + ' 项</span></div><div class="m-card">' + todos.map(function (t) { return '<div class="m-todo"><span class="cb">✓</span><div><div class="m-tt">' + t.t + '</div><div class="m-xs">' + t.tag + (t.urgent ? ' · 紧急' : '') + '</div></div></div>'; }).join('') + '</div>' +
+        '<div class="m-h"><b>快捷发起</b><span>轻量协同</span></div><div class="m-quick">' + Object.keys(QUICKS).map(function (k) { var q = QUICKS[k]; return '<button class="m-quick-btn" data-quick="' + k + '"><span class="q-ic">' + q.ic + '</span><span><b>' + q.t + '</b><span>' + q.s + '</span></span></button>'; }).join('') + '</div>' +
+        '<div class="m-redline"><b>移动端边界：</b>用于任务发起与进度查看；长文精编、全量数据下钻和智能体编排请回 PC 端完成。</div></div>';
+    }
+
+    function boardHtml(period) {
+      var b = BOARD[period || 'today'];
+      return '<div class="m-sec"><div class="m-h"><b>核心运营看板</b><span>更新于 08:42</span></div>' +
+        '<div class="m-seg"><button class="on" data-period="today">今日</button><button data-period="week">本周</button><button data-period="month">本月</button></div>' +
+        '<div class="m-kpi4" style="margin-top:10px">' + b.kpi.map(function (k) { return '<div class="m-big"><div class="bl">' + k[0] + '</div><div class="bv">' + k[1] + '<small>' + k[2] + '</small></div><div class="bd ' + k[4] + '">' + k[3] + '</div></div>'; }).join('') + '</div>' +
+        '<div class="m-h"><b>六端阅读量</b><span class="lk">仅二级下钻</span></div><div class="m-card">' + PORTS.map(function (p, i) { var max = Math.max.apply(null, b.read); return '<div class="bar-row"><span class="b-label">' + p + '</span><span class="b-track"><i class="b-fill" style="width:' + Math.round(b.read[i] / max * 100) + '%"></i></span><span class="b-val">' + fmt(b.read[i]) + '</span></div>'; }).join('') + '</div>' +
+        '<div class="m-h"><b>风险面</b><span class="lk">3 条</span></div>' + ZMD.ALERTS.map(function (a) { return '<div class="m-alert ' + (a.lv === 'L1' ? 'l1' : '') + '"><span class="al-lv">' + a.lv + '</span><div><b>' + a.t + '</b><span>' + a.advice + '</span></div></div>'; }).join('') +
+        '<div class="m-redline"><b>数据分级：</b>移动端仅展示当前角色可见的汇总和摘要；经营明细、稿件正文需回 PC 内网环境查看。</div></div>';
+    }
+
+    function approvalsHtml() {
+      return '<div class="m-sec"><div class="m-h"><b>待我审批</b><span>' + ZMD.APPROVALS.filter(function (a) { return a.state === 'pending'; }).length + ' 项</span></div>' +
+        ZMD.APPROVALS.map(function (a, i) { return '<button class="m-appr" data-appr="' + i + '" style="width:100%;text-align:left"><div class="ap-top"><div><div class="m-tt">' + a.t + '</div><div class="m-xs">' + a.from + ' · ' + a.time + '</div></div><span class="tag ' + (a.state === 'pending' ? 'warn' : 'ok') + '">' + (a.state === 'pending' ? '待审批' : '已通过') + '</span></div><div class="ap-meta"><span class="tag gray">' + a.type + '</span><span class="aigc-mark">✦ 已附 AI 预审</span></div></button>'; }).join('') +
+        '<div class="m-redline"><b>签批红线：</b>AI 预审仅提供风险点与材料完整性检查；最终批准、驳回和口径审定必须由本人完成。</div></div>';
+    }
+
+    function messagesHtml() {
+      return '<div class="m-sec"><div class="m-h"><b>消息中心</b><span>分级推送</span></div>' + baseNotifs().map(function (n) { return '<button class="m-msg ' + (!n.read ? 'unread ' : 'read ') + (n.lv === 'L1' ? 'l1' : '') + '" style="width:100%;text-align:left"><span class="mg-ic">' + n.ic + '</span><span><span class="mg-t"><b>' + n.title + '</b>' + (!n.read ? '<i class="rd"></i>' : '') + '</span><span class="mg-b">' + n.body + ' · ' + n.time + '</span></span></button>'; }).join('') + '</div>';
+    }
+
+    function meHtml() {
+      return '<div class="m-sec"><div class="m-h"><b>我的</b><span>统一身份认证</span></div><div class="m-me-hero"><div class="av">' + u.avatar + '</div><div><b>' + u.name + '</b><span>' + u.role + ' · ' + u.dept + '<br>' + u.empNo + '</span></div></div>' +
+        '<div class="m-card" style="margin-top:10px"><div class="m-row"><span class="rw-ic">🔐</span><span class="rw-t"><b>生物识别二次验证</b><span>涉密审批与核心数据查看</span></span><span class="m-sw on"><i></i></span></div><div class="m-row"><span class="rw-ic">📴</span><span class="rw-t"><b>弱网离线缓存</b><span>加密缓存，24 小时自动失效</span></span><span class="m-sw on"><i></i></span></div><div class="m-row"><span class="rw-ic">🔎</span><span class="rw-t"><b>适老化大字模式</b><span>放大字号与触控目标</span></span><span class="m-sw elder-switch"><i></i></span></div><div class="m-row"><span class="rw-ic">🎨</span><span class="rw-t"><b>界面皮肤</b><span>透红 / 淡色 / 科技蓝</span></span><span class="m-themes"><button class="td t-red" data-theme="red"></button><button class="td t-light" data-theme="light"></button><button class="td t-blue" data-theme="blue"></button></span></div></div></div>';
+    }
+
+    function content(tab, period) {
+      if (tab === 'home') return homeHtml();
+      if (tab === 'board') return boardHtml(period);
+      if (tab === 'appr') return approvalsHtml();
+      if (tab === 'msg') return messagesHtml();
+      return meHtml();
+    }
+
+    function renderScreen(screen, active, period) {
+      screen.dataset.active = active;
+      screen.querySelector('.m-body-scroll').innerHTML = content(active, period);
+      screen.querySelector('.m-tabbar').outerHTML = tabbar(active);
+      bindPhone(screen);
+    }
+
+    function approvalSheet(screen, idx) {
+      var a = ZMD.APPROVALS[idx];
+      var ext = APPR_EXT[a.t] || { risk: '低', riskCls: 'ok', pre: ['材料完整性检查通过', '未发现明显红线风险'], concl: '建议人工复核后决定。' };
+      var wrap = screen.querySelector('.m-sheet-wrap');
+      wrap.innerHTML = '<div class="m-mask"></div><div class="m-sheet"><div class="grab"></div><h4>' + a.t + '</h4><div class="m-xs">' + a.from + ' · ' + a.type + '</div><div class="m-card" style="margin-top:10px"><div class="m-tt">AI 预审意见 <span class="tag ' + ext.riskCls + '">风险 ' + ext.risk + '</span></div>' + ext.pre.map(function (p) { return '<div class="m-sm" style="margin-top:6px">✓ ' + p + '</div>'; }).join('') + '<div class="m-tip"><b>结论：</b>' + ext.concl + '</div><div class="aigc-mark" style="margin-top:8px">✦ AI 辅助生成 · 仅供签批人参考</div></div><div class="m-sub-act" style="display:flex;gap:8px;margin-top:12px"><button class="m-btn dan reject-appr">驳回</button><button class="m-btn pri approve-appr">本人确认批准</button></div></div>';
+      wrap.classList.add('open');
+      wrap.querySelector('.m-mask').onclick = function () { wrap.classList.remove('open'); };
+      wrap.querySelector('.approve-appr').onclick = function () { this.textContent = '✓ 已批准'; this.className = 'm-btn ok'; setTimeout(function () { wrap.classList.remove('open'); ZM.toast('审批结果已同步 PC 端并写入审计日志', 'ok'); }, 500); };
+      wrap.querySelector('.reject-appr').onclick = function () { wrap.classList.remove('open'); ZM.toast('已退回补充材料', 'warn'); };
+    }
+
+    function bindPhone(screen) {
+      screen.querySelectorAll('.m-tabbar .mt').forEach(function (btn) { btn.onclick = function () { renderScreen(screen, btn.dataset.tab); }; });
+      screen.querySelectorAll('.m-chip').forEach(function (btn) { btn.onclick = function () { var chat = screen.querySelector('.m-chat'); chat.innerHTML += '<div class="m-bub me">' + btn.textContent + '</div><div class="m-bub ai">' + btn.dataset.reply + '<div class="aigc-mark" style="margin-top:6px">✦ AI 辅助生成</div></div>'; chat.scrollTop = chat.scrollHeight; }; });
+      screen.querySelectorAll('.m-todo').forEach(function (row) { row.onclick = function () { row.classList.toggle('done'); }; });
+      screen.querySelectorAll('.m-quick-btn').forEach(function (btn) { btn.onclick = function () { ZM.toast(QUICKS[btn.dataset.quick].ok, 'ok'); }; });
+      screen.querySelectorAll('[data-period]').forEach(function (btn) { btn.onclick = function () { renderScreen(screen, 'board', btn.dataset.period); }; });
+      screen.querySelectorAll('.m-appr').forEach(function (btn) { btn.onclick = function () { approvalSheet(screen, Number(btn.dataset.appr)); }; });
+      screen.querySelectorAll('.m-msg').forEach(function (msg) { msg.onclick = function () { msg.classList.remove('unread'); msg.classList.add('read'); var dot = msg.querySelector('.rd'); if (dot) dot.remove(); }; });
+      var elder = screen.querySelector('.elder-switch'); if (elder) elder.onclick = function () { elder.classList.toggle('on'); screen.style.setProperty('--fs', elder.classList.contains('on') ? '1.16' : '1'); };
+      screen.querySelectorAll('[data-theme]').forEach(function (btn) { btn.onclick = function () { ZM.applyTheme(btn.dataset.theme); }; });
+    }
+
+    var rail = document.getElementById('rail');
+    rail.innerHTML = phoneDefs.map(function (p, i) {
+      return '<div class="ph-wrap"><div class="ph-cap"><b>' + p.title + '</b><span>' + p.sub + '</span></div><div class="phone"><div class="notch"></div><div class="screen" data-phone="' + i + '"><div class="statusbar"><span>9:41</span><span>5G　▰ 100%</span></div><div class="m-app-top"><div class="mt-t"><b>智媒平台</b><span>' + u.name + ' · ' + u.role + '</span></div><button class="m-ic">🔔</button></div><div class="m-banner"><b>🔴 L1 舆情预警</b><span>校园食品安全事件声量持续上升，请及时研判。</span></div><div class="m-body-scroll"></div>' + tabbar(p.tab) + '<div class="m-sheet-wrap"></div></div></div><div class="ph-foot"><b>' + (i + 1) + ' / 3</b> · ' + p.sub + '</div></div>';
+    }).join('');
+    rail.querySelectorAll('.screen').forEach(function (screen, i) { renderScreen(screen, phoneDefs[i].tab); });
+
+    document.getElementById('btn-reset').onclick = function () { rail.querySelectorAll('.screen').forEach(function (screen, i) { screen.style.setProperty('--fs', '1'); renderScreen(screen, phoneDefs[i].tab); }); ZM.toast('三台设备已复位', 'ok'); };
+    document.getElementById('btn-elder').onclick = function () { rail.querySelectorAll('.screen').forEach(function (screen) { screen.style.setProperty('--fs', '1.16'); }); ZM.toast('已开启全局适老化大字模式', 'ok'); };
+    document.getElementById('btn-push').onclick = function () { rail.querySelectorAll('.m-banner').forEach(function (b) { b.classList.add('show'); setTimeout(function () { b.classList.remove('show'); }, 3000); }); };
+
+    document.getElementById('cap-list').innerHTML = [
+      ['🏠','首页','数字员工、待办与轻量任务发起'],['📊','看板','核心指标、榜单与风险预警'],['✅','审批','AI 预审意见与本人签批'],['💬','消息','分级推送，L1 强提醒'],['👤','我的','生物识别、离线缓存、皮肤与适老化']
+    ].map(function (x) { return '<div class="cap-item"><div class="ci-ic">' + x[0] + '</div><div><b>' + x[1] + '</b><span>' + x[2] + '</span></div></div>'; }).join('');
+    document.getElementById('plus-list').innerHTML = [
+      ['🎙️','语音发起任务','外出采访或夜班值守时可单手操作'],['📴','弱网离线缓存','会场与现场网络不稳定时保证关键材料可读'],['🔐','高敏审批二次验证','防止手机丢失或账号冒用'],['🔎','适老化大字模式','面向高频移动审批人群改善阅读与触控'],['📡','L1 穿透提醒','重大风险在合规范围内确保及时触达'],['🧾','跨端同一审计链','PC 与移动操作统一追溯']
+    ].map(function (x) { return '<div class="plus-card"><b>' + x[0] + ' ' + x[1] + '</b><p>' + x[2] + '</p><div class="why">补充理由：贴近报社全天候与移动场景</div></div>'; }).join('');
+  });
+})();
+</script>
+</body>
+</html>

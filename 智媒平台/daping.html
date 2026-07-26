@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>一体化决策大屏 · 人民日报社智媒平台 2.0</title>
+<link rel="stylesheet" href="assets/style.css">
+<link rel="stylesheet" href="assets/modules.css">
+</head>
+<body>
+<div class="page">
+  <div class="page-head">
+    <div>
+      <div class="eyebrow">INTEGRATED COMMAND CENTER</div>
+      <h1>一体化决策大屏</h1>
+      <p class="sub">升级中央厨房大屏，贯通热点挖掘、指挥调度、生产制作、效果监测与考核评价。</p>
+    </div>
+    <div class="flex wrap">
+      <button class="btn ghost sm" id="brief">生成决策简报</button>
+      <button class="btn primary sm" id="fullscreen">⛶ 投屏模式</button>
+    </div>
+  </div>
+
+  <section class="bigscreen" id="screen">
+    <div class="bs-head">
+      <div><h2>人民日报社 · 全媒体指挥调度态势</h2><span style="font-size:10px;color:#6f94b2">数据刷新：2026-07-25 08:42:16 · 目标态示意数据</span></div>
+      <div style="text-align:right"><b style="font-size:22px">08:42</b><span style="display:block;font-size:10px;color:#7da7c5">北京 · 值班中</span></div>
+    </div>
+    <div class="bs-grid">
+      <div>
+        <section class="bs-card">
+          <h3>今日传播核心指标</h3>
+          <div class="bs-kpi">
+            <div><span>全端触达</span><b>4.2亿</b></div><div><span>环比</span><b style="color:#49d298">+6.0%</b></div>
+            <div><span>发布内容</span><b>1,286</b></div><div><span>端口在线率</span><b>99.9%</b></div>
+          </div>
+          <svg class="line-chart" viewBox="0 0 360 135" preserveAspectRatio="none" style="margin-top:12px">
+            <g class="chart-grid"><line x1="0" y1="32" x2="360" y2="32"/><line x1="0" y1="67" x2="360" y2="67"/><line x1="0" y1="102" x2="360" y2="102"/></g>
+            <path d="M0,115 L35,110 L70,92 L105,98 L140,72 L175,65 L210,78 L245,49 L280,55 L315,27 L360,18 L360,135 L0,135 Z" fill="rgba(53,169,224,.12)"/>
+            <path d="M0,115 L35,110 L70,92 L105,98 L140,72 L175,65 L210,78 L245,49 L280,55 L315,27 L360,18" fill="none" stroke="#35a9e0" stroke-width="3"/>
+          </svg>
+        </section>
+        <section class="bs-card" style="margin-top:12px">
+          <h3>实时舆情风险</h3>
+          <div class="list-card" style="border-color:rgba(255,255,255,.08)"><div class="list-ic" style="background:#401b27">🔴</div><div><b style="color:#fff">校园食品安全事件</b><p style="color:#8fa8c0">负面情绪 62% · 仍在爆发期</p></div><span class="tag red">L1</span></div>
+          <div class="list-card" style="border-color:rgba(255,255,255,.08)"><div class="list-ic" style="background:#3d2d15">🟠</div><div><b style="color:#fff">涉华供应链不实报道</b><p style="color:#8fa8c0">境外扩散加速 · 已生成回应素材</p></div><span class="tag warn">L2</span></div>
+          <div class="list-card" style="border:none"><div class="list-ic" style="background:#183148">🟡</div><div><b style="color:#fff">货币政策误读</b><p style="color:#8fa8c0">传播平缓 · 建议专家解读对冲</p></div><span class="tag gray">L3</span></div>
+        </section>
+      </div>
+
+      <div>
+        <section class="bs-card" style="text-align:center;min-height:405px">
+          <h3 style="text-align:left">全网主流价值传播指数</h3>
+          <div class="pulse-ring"><div><b>86.4</b><span>综合传播指数</span></div></div>
+          <div class="bs-kpi">
+            <div><span>正向内容占比</span><b>91.2%</b></div><div><span>权威首发命中</span><b>78.6%</b></div>
+            <div><span>青年触达占比</span><b>37.8%</b></div><div><span>海外有效触达</span><b>8,600万</b></div>
+          </div>
+          <div style="margin-top:14px;text-align:left;font-size:10px;color:#7194ae">传播链路：人民日报客户端 → 人民网 → 社交平台 → 海外端口 → 合作媒体</div>
+          <div style="height:8px;border-radius:8px;background:#102641;overflow:hidden;margin-top:7px"><i style="display:block;width:86%;height:100%;background:linear-gradient(90deg,#35a9e0,#57d3af,#d8b96a)"></i></div>
+        </section>
+        <section class="bs-card" style="margin-top:12px">
+          <h3>指挥调度任务闭环</h3>
+          <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:6px;text-align:center">
+            <div><b style="font-size:18px">28</b><span style="display:block;font-size:9px;color:#6f91ab">热点发现</span></div>
+            <div><b style="font-size:18px">18</b><span style="display:block;font-size:9px;color:#6f91ab">研判立项</span></div>
+            <div><b style="font-size:18px">12</b><span style="display:block;font-size:9px;color:#6f91ab">生产中</span></div>
+            <div><b style="font-size:18px">9</b><span style="display:block;font-size:9px;color:#6f91ab">多端分发</span></div>
+            <div><b style="font-size:18px;color:#49d298">7</b><span style="display:block;font-size:9px;color:#6f91ab">已复盘</span></div>
+          </div>
+        </section>
+      </div>
+
+      <div>
+        <section class="bs-card">
+          <h3>今日热点雷达</h3>
+          <div id="hot-list"></div>
+        </section>
+        <section class="bs-card" style="margin-top:12px">
+          <h3>国际传播周榜</h3>
+          <div id="intl-list"></div>
+        </section>
+      </div>
+    </div>
+  </section>
+</div>
+
+<script src="assets/data.js"></script>
+<script src="assets/app.js"></script>
+<script>
+var U = ZM.boot('daping',{noAssist:true});
+document.getElementById('hot-list').innerHTML=ZMD.HOTS.slice(0,6).map(function(x,i){return '<div style="display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid rgba(255,255,255,.07)"><b style="width:20px;color:'+(i<3?'#35a9e0':'#6d8ba5')+'">'+(i+1)+'</b><span style="flex:1;font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+x.t+'</span><span style="font-size:10px;color:#49d298">'+x.trend+'</span></div>';}).join('');
+document.getElementById('intl-list').innerHTML=ZMD.RANK_INTL.slice(0,4).map(function(x,i){return '<div style="display:flex;gap:8px;padding:7px 0;border-bottom:1px solid rgba(255,255,255,.07)"><span style="color:#35a9e0">0'+(i+1)+'</span><div style="min-width:0"><b style="display:block;font-size:10.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+x.t+'</b><span style="font-size:9px;color:#7999b1">'+x.v+' · '+x.sub+'</span></div></div>';}).join('');
+document.getElementById('fullscreen').onclick=function(){ document.body.classList.toggle('fullscreen-mode'); this.textContent=document.body.classList.contains('fullscreen-mode')?'退出投屏':'⛶ 投屏模式'; };
+document.getElementById('brief').onclick=function(){ ZM.modal('<h3>决策简报已生成</h3><div class="m-body"><div class="callout"><b>今日建议：</b>校园食品安全事件进入爆发期，建议人民锐评跟进定调；光伏出海稿形成海外二次传播，建议复制“实物叙事 + 中英同步”策略；八一策划需本周完成立项。</div><div class="mt12"><span class="aigc-mark">✦ AI 辅助生成 · 需值班编委审定</span></div></div><div class="m-actions"><button class="btn ghost" data-close>关闭</button><button class="btn primary" id="share-brief">发送至移动端</button></div>'); setTimeout(function(){document.getElementById('share-brief').onclick=function(){ZM.toast('简报已发送至社领导移动端','ok');document.querySelector('.overlay').remove();};},0); };
+</script>
+</body>
+</html>
