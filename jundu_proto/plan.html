@@ -1,0 +1,782 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>君度智链 · 方案全景 · Web 版</title>
+<link rel="stylesheet" href="assets/style.css" />
+<style>
+/* ============ 方案全景页 · 专属样式（仅用全站 CSS 变量配色） ============ */
+.plan-sec { scroll-margin-top: 136px; }
+
+/* 粘性锚点导航 */
+.secnav {
+  position: sticky; top: 62px; z-index: 90;
+  display: flex; gap: 8px; flex-wrap: wrap; align-items: center;
+  padding: 12px 0 12px; margin-top: 4px;
+  background: linear-gradient(to bottom, var(--bg) 82%, rgba(252,250,247,0));
+}
+.secnav button {
+  font-family: var(--font); font-size: 12.5px; padding: 6px 14px; border-radius: 999px;
+  background: var(--white); border: 1px solid var(--line); color: var(--sub);
+  cursor: pointer; transition: all .15s; white-space: nowrap;
+}
+.secnav button:hover { border-color: var(--warm-l); color: var(--warm-d); }
+.secnav button.on { background: var(--ink); border-color: var(--ink); color: #fff; font-weight: 600; }
+.secnav button.on i { display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: var(--warm); margin-right: 6px; vertical-align: 1.5px; }
+.secnav button i { display: none; }
+
+/* 通用三列 / 网格 */
+.tri { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+@media (max-width: 1080px) { .tri { grid-template-columns: 1fr; } }
+
+/* 01 为什么是现在 */
+.why-card { background: var(--white); border: 1px solid var(--line); border-radius: 14px; padding: 18px 20px; box-shadow: var(--shadow-sm); }
+.why-card .w-k { font-size: 11px; font-weight: 800; letter-spacing: 2px; color: var(--teal); margin-bottom: 6px; }
+.why-card b { display: block; font-size: 15.5px; color: var(--ink); margin-bottom: 6px; }
+.why-card p { font-size: 12.8px; color: var(--sub); line-height: 1.6; }
+.truth { background: var(--bg); border: 1px solid var(--line); border-radius: 14px; padding: 16px 18px; position: relative; }
+.truth .t-ic { width: 34px; height: 34px; border-radius: 10px; background: var(--cream); display: flex; align-items: center; justify-content: center; font-size: 16px; margin-bottom: 8px; }
+.truth b { display: block; font-size: 14.5px; color: var(--warm-d); margin-bottom: 4px; }
+.truth p { font-size: 12.5px; color: var(--sub); line-height: 1.6; }
+.position-band {
+  margin-top: 16px; border-radius: 14px; padding: 16px 22px;
+  background: linear-gradient(120deg, rgba(169,126,47,.13), rgba(169,126,47,.05));
+  border: 1px solid rgba(169,126,47,.4);
+  display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap;
+}
+.position-band .p-k { font-size: 11px; font-weight: 800; letter-spacing: 2px; color: var(--gold); flex: none; }
+.position-band b { font-size: 15.5px; color: var(--ink); }
+.position-band b em { font-style: normal; color: var(--warm-d); }
+
+/* 02 三大方向 */
+.dir-card { background: var(--white); border: 1px solid var(--line); border-radius: 14px; padding: 0 0 18px; box-shadow: var(--shadow-sm); overflow: hidden; display: flex; flex-direction: column; }
+.dir-card .d-top { padding: 14px 20px 12px; color: #fff; }
+.dir-card .d-top.navy { background: linear-gradient(135deg, var(--ink2), var(--teal)); }
+.dir-card .d-top.red  { background: linear-gradient(135deg, var(--warm-d), rgba(196,33,40,.88)); }
+.dir-card .d-top.gold { background: linear-gradient(135deg, rgba(169,126,47,.95), var(--gold)); }
+.dir-card .d-top .d-k { font-size: 10.5px; letter-spacing: 2px; opacity: .8; font-weight: 700; }
+.dir-card .d-top b { display: block; font-size: 16px; margin-top: 2px; letter-spacing: .5px; }
+.dir-card .d-body { padding: 14px 20px 0; flex: 1; }
+.dir-card .d-body p { font-size: 12.8px; color: var(--sub); line-height: 1.65; }
+.dir-card .d-body p b { color: var(--ink); }
+.dir-card .d-tags { display: flex; flex-wrap: wrap; gap: 6px; padding: 12px 20px 0; }
+
+/* 03 金字塔 */
+.pyr-wrap { display: grid; grid-template-columns: 1.15fr 1fr; gap: 20px; align-items: start; }
+@media (max-width: 1080px) { .pyr-wrap { grid-template-columns: 1fr; } }
+.pyr { display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 6px 0; }
+.pyr .lyr {
+  border: none; font-family: var(--font); cursor: pointer; color: #fff; border-radius: 10px;
+  padding: 11px 16px; text-align: center; transition: all .18s; position: relative;
+}
+.pyr .lyr b { display: block; font-size: 14px; letter-spacing: .5px; }
+.pyr .lyr span { display: block; font-size: 11px; opacity: .82; margin-top: 1px; }
+.pyr .lyr:hover { transform: translateY(-2px); box-shadow: var(--shadow-sm); }
+.pyr .l4 { width: 46%; background: linear-gradient(135deg, var(--ink2), var(--teal-d)); }
+.pyr .l3 { width: 62%; background: linear-gradient(135deg, var(--teal-d), var(--teal)); }
+.pyr .l2 { width: 78%; background: linear-gradient(135deg, rgba(169,126,47,.95), var(--gold)); }
+.pyr .l1 { width: 94%; background: linear-gradient(135deg, var(--warm-d), rgba(196,33,40,.88)); }
+.pyr .lyr.on { outline: 3px solid var(--warm-l); outline-offset: 2px; }
+.pyr-detail { background: var(--white); border: 1px solid var(--line); border-radius: 14px; padding: 18px 20px; box-shadow: var(--shadow-sm); min-height: 240px; }
+.pyr-detail .pd-tag { font-size: 11px; font-weight: 800; letter-spacing: 2px; color: var(--warm); }
+.pyr-detail h4 { font-size: 17px; color: var(--ink); margin: 4px 0 12px; }
+.pyr-detail .pd-kv { display: flex; gap: 10px; padding: 7px 0; border-bottom: 1px solid var(--line); font-size: 13px; }
+.pyr-detail .pd-kv span { flex: none; width: 74px; color: var(--muted); }
+.pyr-detail .pd-kv b { color: var(--ink); font-weight: 600; }
+.pyr-detail .pd-note { margin-top: 12px; font-size: 12.5px; color: var(--sub); background: var(--sky); border-radius: 10px; padding: 10px 14px; line-height: 1.6; }
+.judge { background: var(--bg); border: 1px solid var(--line); border-radius: 12px; padding: 13px 16px; }
+.judge b { display: block; font-size: 13.5px; color: var(--teal-d); margin-bottom: 3px; }
+.judge span { font-size: 12px; color: var(--sub); line-height: 1.55; display: block; }
+.principle {
+  margin-top: 16px; text-align: center; font-size: 14.5px; font-weight: 700; color: var(--ink);
+  background: var(--white); border: 1px dashed var(--gold); border-radius: 12px; padding: 13px 18px;
+}
+.principle em { font-style: normal; color: var(--warm-d); }
+
+/* 章节间引导链接 */
+.jump-link {
+  display: inline-flex; align-items: center; gap: 8px; margin-top: 16px;
+  font-size: 13px; font-weight: 700; color: var(--teal-d);
+  background: var(--sky); border-radius: 999px; padding: 8px 18px; transition: all .15s;
+}
+.jump-link:hover { background: var(--sky2); transform: translateX(3px); }
+.jump-link.red { background: var(--cream); color: var(--warm-d); }
+.jump-link.red:hover { background: var(--cream2); }
+
+/* 04 蒸馏 · 关键设计 */
+.key-design { background: var(--white); border: 1px solid var(--line); border-radius: 12px; padding: 14px 16px; box-shadow: var(--shadow-sm); }
+.key-design .kd-ic { font-size: 18px; margin-bottom: 6px; }
+.key-design b { display: block; font-size: 13.5px; color: var(--ink); margin-bottom: 3px; }
+.key-design span { font-size: 12px; color: var(--sub); line-height: 1.55; display: block; }
+
+/* 05 空地联合 */
+.band { border-radius: 14px; padding: 18px 24px; color: #fff; display: grid; grid-template-columns: 130px 1fr; gap: 18px; align-items: center; }
+@media (max-width: 1080px) { .band { grid-template-columns: 1fr; } }
+.band.navy { background: linear-gradient(120deg, var(--ink2), var(--teal)); }
+.band.red  { background: linear-gradient(120deg, var(--warm-d), rgba(196,33,40,.85)); }
+.band .b-side .b-k { font-size: 24px; font-weight: 800; letter-spacing: 4px; }
+.band .b-side span { display: block; font-size: 11px; opacity: .78; letter-spacing: 1px; margin-top: 2px; }
+.band .b-items { display: flex; gap: 10px; flex-wrap: wrap; }
+.band .b-items div { background: rgba(255,255,255,.12); border: 1px solid rgba(255,255,255,.25); border-radius: 10px; padding: 8px 14px; }
+.band .b-items b { display: block; font-size: 13px; }
+.band .b-items span { font-size: 11px; opacity: .8; }
+.link-node { display: flex; align-items: center; justify-content: center; margin: 10px 0; }
+.link-node span {
+  font-size: 13.5px; font-weight: 800; letter-spacing: 2px; color: var(--gold);
+  background: linear-gradient(120deg, rgba(169,126,47,.14), rgba(169,126,47,.06));
+  border: 1.5px solid var(--gold); border-radius: 999px; padding: 8px 26px;
+}
+.methodo { display: grid; grid-template-columns: 92px 1fr; gap: 14px; align-items: center; padding: 12px 0; border-bottom: 1px solid var(--line); }
+.methodo:last-child { border-bottom: none; }
+.methodo .m-who { font-size: 13px; font-weight: 800; }
+.methodo .m-who.jd { color: var(--warm-d); }
+.methodo .m-who.rm { color: var(--teal-d); }
+.methodo .m-steps { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; font-size: 12.5px; color: var(--sub); }
+.methodo .m-steps b { background: var(--bg); border: 1px solid var(--line); border-radius: 8px; padding: 5px 12px; color: var(--ink); font-weight: 600; }
+.methodo .m-steps i { font-style: normal; color: var(--warm); font-weight: 700; }
+.formula {
+  margin-top: 16px; text-align: center; background: var(--white); border: 1px solid var(--line);
+  border-radius: 14px; padding: 18px 20px; box-shadow: var(--shadow-sm);
+}
+.formula .f-line { font-size: 16.5px; font-weight: 800; color: var(--ink); display: flex; gap: 10px; align-items: center; justify-content: center; flex-wrap: wrap; }
+.formula .f-line .op { color: var(--gold); font-size: 20px; }
+.formula .f-line .res { color: var(--warm-d); }
+.formula .f-sub { margin-top: 8px; font-size: 12.5px; color: var(--sub); }
+.formula .f-sub b { color: var(--teal-d); }
+
+/* 06 路线图 */
+.prio-card { background: var(--white); border: 1px solid var(--line); border-radius: 14px; padding: 16px 18px; box-shadow: var(--shadow-sm); border-top: 4px solid var(--teal); }
+.prio-card.p0 { border-top-color: var(--warm); }
+.prio-card.p2 { border-top-color: var(--gold); }
+.prio-card .p-badge { font-size: 11px; font-weight: 800; letter-spacing: 1.5px; }
+.prio-card.p0 .p-badge { color: var(--warm-d); }
+.prio-card.p1 .p-badge { color: var(--teal-d); }
+.prio-card.p2 .p-badge { color: var(--gold); }
+.prio-card b.t { display: block; font-size: 15px; color: var(--ink); margin: 3px 0 6px; }
+.prio-card p { font-size: 12.5px; color: var(--sub); line-height: 1.6; }
+.stage-tabs { display: flex; gap: 10px; flex-wrap: wrap; margin: 18px 0 12px; }
+.stage-tabs button {
+  font-family: var(--font); flex: 1; min-width: 160px; text-align: left; cursor: pointer;
+  background: var(--white); border: 1px solid var(--line); border-radius: 12px; padding: 12px 16px; transition: all .15s;
+}
+.stage-tabs button .s-k { font-size: 11px; font-weight: 800; letter-spacing: 1.5px; color: var(--muted); }
+.stage-tabs button b { display: block; font-size: 15px; color: var(--ink); margin-top: 2px; }
+.stage-tabs button:hover { border-color: var(--warm-l); }
+.stage-tabs button.on { background: var(--ink); border-color: var(--ink); }
+.stage-tabs button.on .s-k { color: var(--warm-l); }
+.stage-tabs button.on b { color: #fff; }
+.stage-detail { background: var(--white); border: 1px solid var(--line); border-radius: 14px; padding: 16px 20px; box-shadow: var(--shadow-sm); }
+.stage-detail .sd-goals { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px; }
+.northstar {
+  margin-top: 16px; border-radius: 14px; padding: 16px 22px; text-align: center;
+  background: linear-gradient(120deg, var(--ink2), var(--teal-d)); color: var(--sky);
+  font-size: 14.5px; letter-spacing: .5px;
+}
+.northstar b { color: #fff; }
+.northstar .star { color: var(--gold); margin-right: 8px; }
+
+/* 07 落地治理 */
+.gov-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; align-items: start; }
+@media (max-width: 1080px) { .gov-grid { grid-template-columns: 1fr; } }
+.temp-line { display: flex; align-items: flex-end; gap: 5px; height: 56px; margin-top: 10px; }
+.temp-line i { flex: 1; border-radius: 4px 4px 0 0; background: linear-gradient(to top, var(--teal), var(--teal-l)); display: block; }
+.temp-line i.hot { background: linear-gradient(to top, var(--warm), var(--warm-l)); }
+.ledger { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+@media (max-width: 1080px) { .ledger { grid-template-columns: 1fr; } }
+.ledger .lg-col { background: var(--bg); border: 1px solid var(--line); border-radius: 12px; padding: 14px 16px; }
+.ledger .lg-col h5 { font-size: 12.5px; letter-spacing: 1px; margin-bottom: 10px; }
+.ledger .lg-col.done h5 { color: var(--ok); }
+.ledger .lg-col.goal h5 { color: var(--gold); }
+.ledger .lg-row { display: flex; justify-content: space-between; gap: 10px; padding: 6px 0; border-bottom: 1px solid var(--line); font-size: 12.8px; }
+.ledger .lg-row:last-child { border-bottom: none; }
+.ledger .lg-row span { color: var(--sub); }
+.ledger .lg-row b { color: var(--ink); font-variant-numeric: tabular-nums; }
+.org-restr { display: grid; grid-template-columns: 1fr 60px 1fr; gap: 12px; align-items: center; }
+@media (max-width: 1080px) { .org-restr { grid-template-columns: 1fr; } .org-restr .o-arrow { transform: rotate(90deg); } }
+.org-restr .o-col { display: flex; flex-direction: column; align-items: center; gap: 5px; }
+.org-restr .o-bar { border-radius: 7px; padding: 6px 0; text-align: center; font-size: 11.5px; color: var(--sub); background: var(--sky); width: 100%; }
+.org-restr .o-col.old .o-bar:nth-child(2) { width: 42%; }
+.org-restr .o-col.old .o-bar:nth-child(3) { width: 56%; }
+.org-restr .o-col.old .o-bar:nth-child(4) { width: 70%; }
+.org-restr .o-col.old .o-bar:nth-child(5) { width: 84%; }
+.org-restr .o-col.old .o-bar:nth-child(6) { width: 98%; }
+.org-restr .o-col.new .o-bar { color: #fff; font-weight: 600; }
+.org-restr .o-col.new .o-bar:nth-child(2) { width: 54%; background: linear-gradient(120deg, var(--warm-d), var(--warm)); }
+.org-restr .o-col.new .o-bar:nth-child(3) { width: 76%; background: linear-gradient(120deg, var(--ink2), var(--teal)); }
+.org-restr .o-col.new .o-bar:nth-child(4) { width: 98%; background: linear-gradient(120deg, rgba(169,126,47,.95), var(--gold)); }
+.org-restr .o-cap { font-size: 11.5px; color: var(--muted); margin-top: 4px; }
+.org-restr .o-arrow { text-align: center; font-size: 22px; color: var(--warm); font-weight: 800; }
+
+/* 08 愿景 */
+.vision-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-top: 16px; }
+@media (max-width: 1080px) { .vision-grid { grid-template-columns: 1fr; } }
+.vision { background: var(--white); border: 1px solid var(--line); border-radius: 14px; padding: 22px 20px; text-align: center; box-shadow: var(--shadow-sm); }
+.vision .v-num { font-size: 40px; font-weight: 800; color: var(--warm-d); line-height: 1.15; font-variant-numeric: tabular-nums; }
+.vision .v-num small { font-size: 20px; }
+.vision b { display: block; font-size: 13.5px; color: var(--ink); margin-top: 6px; }
+.vision span { display: block; font-size: 12px; color: var(--sub); margin-top: 3px; line-height: 1.55; }
+
+/* 回到顶部 */
+#toTop {
+  position: fixed; right: 26px; bottom: 30px; z-index: 99; width: 42px; height: 42px; border-radius: 50%;
+  background: var(--ink); color: #fff; border: none; font-size: 16px; cursor: pointer;
+  box-shadow: var(--shadow); opacity: 0; pointer-events: none; transition: all .25s; font-family: var(--font);
+}
+#toTop.show { opacity: 1; pointer-events: auto; }
+#toTop:hover { background: var(--warm-d); }
+</style>
+</head>
+<body>
+
+<header class="topnav">
+  <div class="brand">
+    <img src="assets/st_logo.png" alt="商汤科技" />
+    <span class="divider"></span>
+    <span class="name">君度智链 · 双引擎平台<small>JUNDU CHAIN · DUAL ENGINE PROTOTYPE</small></span>
+  </div>
+  <nav>
+    <a href="index.html">总览</a>
+    <a class="active" href="plan.html"><span class="dot"></span>方案全景</a>
+    <a href="boss.html">总部驾驶舱</a>
+    <a href="region.html">区域作战台</a>
+    <a href="frontline.html">一线小程序</a>
+    <a href="distill.html">蒸馏工厂</a>
+  </nav>
+</header>
+
+<main class="page">
+
+  <div class="page-head">
+    <div class="eyebrow">PLAN · 高层研讨版 V1.0</div>
+    <h1>「咨询 + AI」双引擎 <span class="hl">AI 应用场景全景与落地路线图</span></h1>
+    <p class="sub">39 页方案浓缩为一页长卷：从<b>为什么是现在</b>到<b>三年北极星</b>，八个章节走完「战略判断 → 方向选择 → 选型框架 → 组织能力 → 联合作战 → 路线图 → 治理 → 愿景」的完整逻辑。</p>
+  </div>
+
+  <!-- 粘性锚点导航 -->
+  <div class="secnav" id="secnav">
+    <button data-sec="s1"><i></i>01 为什么是现在</button>
+    <button data-sec="s2"><i></i>02 三大方向</button>
+    <button data-sec="s3"><i></i>03 选型框架</button>
+    <button data-sec="s4"><i></i>04 最强员工蒸馏</button>
+    <button data-sec="s5"><i></i>05 联合作战</button>
+    <button data-sec="s6"><i></i>06 路线图</button>
+    <button data-sec="s7"><i></i>07 落地治理</button>
+    <button data-sec="s8"><i></i>08 愿景</button>
+  </div>
+
+  <!-- ============ 01 为什么是现在 ============ -->
+  <section class="plan-sec" id="s1">
+    <div class="sec-tag">SECTION 01 · WHY NOW</div>
+    <h2>为什么是现在</h2>
+    <p class="sec-sub">客户在变、竞争在变，而君度手里握着 AI 时代最稀缺的东西——被验证过的行业 Know-how。</p>
+
+    <div class="quote-band" style="margin-bottom:16px;">
+      「20 年行业 Know-how，是 AI 时代最稀缺的燃料——大模型人人可买，行业经验无处可买。」
+      <small>高层研讨版 · 开篇判断</small>
+    </div>
+
+    <div class="tri">
+      <div class="why-card">
+        <div class="w-k">变化一</div>
+        <b>客户变了</b>
+        <p>B 端客户不再为「报告 + 培训」付费，只为<b style="color:var(--warm-d);">增长执行力</b>付费——要 7×24 在线、要效果可衡量、要陪跑到动销。</p>
+      </div>
+      <div class="why-card">
+        <div class="w-k">变化二</div>
+        <b>竞争变了</b>
+        <p>AI 原生服务商正以「智能体 + 订阅」的轻模式切入咨询腹地，用软件的边际成本打人天的报价体系。</p>
+      </div>
+      <div class="why-card">
+        <div class="w-k">我们的位置</div>
+        <b>君度领先半步</b>
+        <p>君度近百人咨询师 · 200+ 客户的方法论沉淀 × 链一链智能体<b style="color:var(--warm-d);">已在 7 家企业付费导入</b>——不是从零起跑。</p>
+      </div>
+    </div>
+
+    <div class="panel" style="margin-top:16px;">
+      <h3>三真检验：不是概念，是正在发生的生意</h3>
+      <div class="tri">
+        <div class="truth">
+          <div class="t-ic">📦</div>
+          <b>真产品</b>
+          <p>智酒大模型 + 八大智能体，7×24 跑在客户业务流里，不是发布会 PPT。</p>
+        </div>
+        <div class="truth">
+          <div class="t-ic">🤝</div>
+          <b>真客户</b>
+          <p>五粮液、迎驾、招金、刘伶醉等企业付费导入，用真金白银投票。</p>
+        </div>
+        <div class="truth">
+          <div class="t-ic">⚡</div>
+          <b>真消耗</b>
+          <p>每天产生 token 消耗与数据回流，系统在被真实使用——不是 Demo。</p>
+        </div>
+      </div>
+      <div class="position-band">
+        <span class="p-k">新定位</span>
+        <b>酒水 · 快消 · 珠宝行业的增长 AI 公司——<em>咨询是入口，智能体是产品，数据是护城河</em>。</b>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 02 三大方向 ============ -->
+  <section class="plan-sec" id="s2">
+    <div class="sec-tag">SECTION 02 · THREE TRACKS</div>
+    <h2>三大方向</h2>
+    <p class="sec-sub">从策略到内容到经营执行，三条产品线共用一个飞轮：咨询把经验梳理出来，智能体把经验跑起来。</p>
+
+    <div class="tri">
+      <div class="dir-card">
+        <div class="d-top navy">
+          <div class="d-k">方向一 · STRATEGY</div>
+          <b>品牌咨询 × AI</b>
+        </div>
+        <div class="d-body">
+          <p>把「策略大脑」产品化：<b>诊断、区域策略、红宝书共创</b>全面智能体化——把 20 年方法论装进系统，<b>卖系统，不卖人天</b>。</p>
+        </div>
+        <div class="d-tags"><span class="tag teal">诊断智能体</span><span class="tag teal">区域策略</span><span class="tag gold">红宝书共创</span></div>
+      </div>
+      <div class="dir-card">
+        <div class="d-top red">
+          <div class="d-k">方向二 · CONTENT</div>
+          <b>营销内容 AI 生成</b>
+        </div>
+        <div class="d-body">
+          <p><b>产品品质 × 在地文化 × 客户类型 × 实时热点</b>四要素驱动，批量产出图文 / 海报 / 短视频 / IP。行业标杆：<b>ROI 1:20~25、内容效率 ×12、获客成本 ↓70%+</b>。</p>
+        </div>
+        <div class="d-tags"><span class="tag warm">内容工厂</span><span class="tag warm">四要素引擎</span><span class="tag ok">ROI 1:20~25</span></div>
+      </div>
+      <div class="dir-card">
+        <div class="d-top gold">
+          <div class="d-k">方向三 · OPERATION</div>
+          <b>经营管理智能体 B2B2C</b>
+        </div>
+        <div class="d-body">
+          <p>八大智能体串起<b>数据录入 → 分析大脑 → 执行闭环</b>；拜访报告效率 <b>+80% 已验证</b>。由 B 入 C：从压货式增长转向<b>开瓶式增长</b>。</p>
+        </div>
+        <div class="d-tags"><span class="tag gold">八大智能体</span><span class="tag ok">+80% 已验证</span><span class="tag teal">开瓶式增长</span></div>
+      </div>
+    </div>
+
+    <div class="panel" style="margin-top:16px;">
+      <h3>三条方向共转一个飞轮</h3>
+      <div class="flow">
+        <div class="f-step hot"><div class="n">1</div><b>咨询梳理</b><span>行业诊断 · 打法拆解</span></div>
+        <div class="f-arrow">›</div>
+        <div class="f-step"><div class="n">2</div><b>Know-how 注入</b><span>方法论 → 知识库</span></div>
+        <div class="f-arrow">›</div>
+        <div class="f-step"><div class="n">3</div><b>智能体执行</b><span>7×24 跑在业务里</span></div>
+        <div class="f-arrow">›</div>
+        <div class="f-step"><div class="n">4</div><b>数据回流</b><span>过程数据 · 效果度量</span></div>
+        <div class="f-arrow">›</div>
+        <div class="f-step hot"><div class="n">5</div><b>方法论迭代</b><span>越用越准 · 越转越快</span></div>
+      </div>
+      <a class="jump-link red" href="frontline.html">→ 到一线小程序看「内容工厂 + 语音拜访」实况</a>
+    </div>
+  </section>
+
+  <!-- ============ 03 场景 × Agent 选型框架 ============ -->
+  <section class="plan-sec" id="s3">
+    <div class="sec-tag">SECTION 03 · SELECTION FRAMEWORK</div>
+    <h2>场景 × Agent 选型框架</h2>
+    <p class="sec-sub">四层金字塔 + 三判据：先想清楚「谁在用、错了谁买单、数据能不能出门」，再决定上什么形态的智能体。点击金字塔各层查看详情。</p>
+
+    <div class="pyr-wrap">
+      <div class="panel">
+        <h3>四层智能体金字塔</h3>
+        <div class="pyr" id="pyr">
+          <button class="lyr l4 on" data-l="L4"><b>L4 决策智能体</b><span>高管层 · AI 分析 + 人决策</span></button>
+          <button class="lyr l3" data-l="L3"><b>L3 流程智能体</b><span>业务流 · 工作流自动化 + 抽检</span></button>
+          <button class="lyr l2" data-l="L2"><b>L2 岗位智能体</b><span>一岗一体 · AI 起草 人拍板</span></button>
+          <button class="lyr l1" data-l="L1"><b>L1 全员 AI 助理</b><span>人人标配 · 对话式 Copilot</span></button>
+        </div>
+      </div>
+      <div class="pyr-detail" id="pyrDetail"></div>
+    </div>
+
+    <div class="tri" style="margin-top:16px;">
+      <div class="judge"><b>判据一 · 频次 × 标准化</b><span>高频且高标准化的场景先上流程智能体，效率收益最先兑现。</span></div>
+      <div class="judge"><b>判据二 · 容错成本</b><span>错了要赔钱、伤客户的场景，AI 只出初稿与建议，人保留最终拍板权。</span></div>
+      <div class="judge"><b>判据三 · 数据敏感度</b><span>越敏感越靠近决策层，越要私有化部署与权限分级。</span></div>
+    </div>
+
+    <div class="principle">原则：不追求最聪明的 Agent，追求<em>场景—形态—模式的正确匹配</em>。</div>
+    <a class="jump-link" href="boss.html">→ 到总部驾驶舱看 L4 层「五级下钻 + 空中巡警」实况</a>
+  </section>
+
+  <!-- ============ 04 最强员工蒸馏 ============ -->
+  <section class="plan-sec" id="s4">
+    <div class="sec-tag">SECTION 04 · DISTILLATION</div>
+    <h2>最强员工蒸馏</h2>
+    <p class="sec-sub">把销冠的经验变成全团队的岗位 AI 助理：四步流水线跑通「经验显性化 → 结构化 → 上岗考试 → 月度进化」。</p>
+
+    <div class="pipe">
+      <div class="p-step on">
+        <div class="p-num">01</div>
+        <div class="p-k">萃取</div>
+        <b>让经验显性化</b>
+        <p>跟岗录音 · 深度访谈 · 冠军案例复盘，把只在销冠脑子里的打法采出来。</p>
+      </div>
+      <div class="p-step">
+        <div class="p-num">02</div>
+        <div class="p-k">结构化</div>
+        <b>拆成可复用资产</b>
+        <p>话术库 · 决策树 · SOP · 禁忌清单——从「故事」变成「结构」。</p>
+      </div>
+      <div class="p-step">
+        <div class="p-num">03</div>
+        <div class="p-k">建模</div>
+        <b>评测过线才上岗</b>
+        <p>知识库挂载 + 评测集考试，达标发布——AI 助理和新员工一样要通过转正答辩。</p>
+      </div>
+      <div class="p-step on">
+        <div class="p-num">04</div>
+        <div class="p-k">迭代</div>
+        <b>使用数据回流</b>
+        <p>一线真实调用与纠错回流，月度升级版本，助理越用越像销冠。</p>
+      </div>
+    </div>
+
+    <div class="tri" style="margin-top:16px;">
+      <div class="key-design"><div class="kd-ic">✍️</div><b>老师傅愿意教</b><span>经验入库带署名，按调用量拿蒸馏分成——教得越多，挣得越多。</span></div>
+      <div class="key-design"><div class="kd-ic">🚀</div><b>新人立刻会</b><span>带着「老师傅大脑」上岗，培训周期从月级压缩到周级。</span></div>
+      <div class="key-design"><div class="kd-ic">🏛</div><b>团队一起强</b><span>个人经验沉淀为公司公共资产，人可以流动，能力留在组织里。</span></div>
+    </div>
+    <a class="jump-link" href="distill.html">→ 到蒸馏工厂看「赵冠军 → 全团队」的完整流水线</a>
+  </section>
+
+  <!-- ============ 05 联合作战 ============ -->
+  <section class="plan-sec" id="s5">
+    <div class="sec-tag">SECTION 05 · JOINT OPERATION</div>
+    <h2>联合作战：君度 × 人民网</h2>
+    <p class="sec-sub">空中看舆论，地面看终端，中间用数据打通——两套同构方法论拼成白酒行业全链路 AI 解决方案。</p>
+
+    <div class="band navy">
+      <div class="b-side"><div class="b-k">空</div><span>人民网 · AI 传播引擎</span></div>
+      <div class="b-items">
+        <div><b>内容生产</b><span>权威媒体级批量产出</span></div>
+        <div><b>AI 可见度诊断</b><span>品牌在大模型里的存在感</span></div>
+        <div><b>舆情监测</b><span>「AI 回声探测」看舆论</span></div>
+      </div>
+    </div>
+    <div class="link-node"><span>打通 ＝ 全域智能</span></div>
+    <div class="band red">
+      <div class="b-side"><div class="b-k">地</div><span>君度 + 链一链 · 终端管理</span></div>
+      <div class="b-items">
+        <div><b>铺货 313</b><span>网点覆盖节奏管理</span></div>
+        <div><b>动销 333</b><span>开瓶为王的过程管理</span></div>
+        <div><b>品鉴数据采集</b><span>「空中巡警」看终端</span></div>
+      </div>
+    </div>
+
+    <div class="panel" style="margin-top:16px;">
+      <h3>双方法论同构：路数一样，才能拼得起来</h3>
+      <div class="methodo">
+        <div class="m-who jd">君度</div>
+        <div class="m-steps"><b>咨询梳理</b><i>›</i><b>Know-how</b><i>›</i><b>智能体</b><i>›</i><b>7×24 执行</b></div>
+      </div>
+      <div class="methodo">
+        <div class="m-who rm">人民网</div>
+        <div class="m-steps"><b>行业报告</b><i>›</i><b>原子化知识库</b><i>›</i><b>MoE 专家路由</b><i>›</i><b>LLM 全驱动内容</b></div>
+      </div>
+    </div>
+
+    <div class="formula">
+      <div class="f-line">
+        <span>君度终端智能体</span><span class="op">＋</span><span>人民网 AI 传播引擎</span><span class="op">＝</span><span class="res">白酒行业全链路 AI 解决方案</span>
+      </div>
+      <div class="f-sub">线上种树 · 线下开花：<b>3·3·5·10 传播节奏</b> ＋ <b>信任转嫁</b>替代广告灌输。</div>
+    </div>
+    <a class="jump-link" href="region.html">→ 到区域作战台看「地面部队」的 313/333 过程数据</a>
+  </section>
+
+  <!-- ============ 06 优先级与路线图 ============ -->
+  <section class="plan-sec" id="s6">
+    <div class="sec-tag">SECTION 06 · ROADMAP</div>
+    <h2>优先级与路线图</h2>
+    <p class="sec-sub">已验证的先规模化，有把握的做产品化，看得见的做平台化——点击下方阶段查看各期目标。</p>
+
+    <div class="tri">
+      <div class="prio-card p0">
+        <span class="p-badge">P0 · 立即规模化</span>
+        <b class="t">内容工厂 + 门店拜访智能体</b>
+        <p>两大场景效果已验证（内容效率 ×12、拜访 +80%），直接铺开，边跑边收。</p>
+      </div>
+      <div class="prio-card p1">
+        <span class="p-badge">P1 · 6-12 个月产品化</span>
+        <b class="t">经营决策套件 + 联合样板</b>
+        <p>经营决策智能体套件打包成标准产品；君度 × 人民网联合方案落地 1-2 家酒企样板。</p>
+      </div>
+      <div class="prio-card p2">
+        <span class="p-badge">P2 · 12 个月+ 平台化</span>
+        <b class="t">B2B2C 平台 + 订阅 SaaS</b>
+        <p>向多品牌连锁快消复制 B2B2C 平台，转向订阅制 SaaS 收入结构。</p>
+      </div>
+    </div>
+
+    <div class="stage-tabs" id="stageTabs">
+      <button class="on" data-st="0"><span class="s-k">2026 H2</span><b>固本</b></button>
+      <button data-st="1"><span class="s-k">2027 H1</span><b>破局</b></button>
+      <button data-st="2"><span class="s-k">2027 H2+</span><b>平台</b></button>
+    </div>
+    <div class="stage-detail" id="stageDetail"></div>
+
+    <div class="northstar"><span class="star">✦ 北极星</span>三年，从项目制咨询公司进化为<b>「咨询 + AI」产品公司</b>。</div>
+  </section>
+
+  <!-- ============ 07 落地治理 ============ -->
+  <section class="plan-sec" id="s7">
+    <div class="sec-tag">SECTION 07 · GOVERNANCE</div>
+    <h2>落地治理</h2>
+    <p class="sec-sub">AI 项目十有九死在「买了不用」。治理的核心只有一件事：让消耗曲线持续爬坡。</p>
+
+    <div class="gov-grid">
+      <div class="panel">
+        <h3>「用起来」的三个标志</h3>
+        <table class="mini-table">
+          <tr><td><b>① 人人有 AI 助理</b></td><td>全员开通率 100%，助理挂在每个人的企微里</td></tr>
+          <tr><td><b>② 周人均调用进看板</b></td><td>使用量与业务指标并列，成为管理例会数据</td></tr>
+          <tr><td><b>③ 消耗曲线持续爬坡</b></td><td>token 消耗是组织 AI 化的「体温计」</td></tr>
+        </table>
+        <div class="temp-line" aria-hidden="true">
+          <i style="height:22%"></i><i style="height:30%"></i><i style="height:27%"></i><i style="height:38%"></i><i style="height:45%"></i><i style="height:41%"></i><i style="height:54%"></i><i style="height:62%"></i><i style="height:70%"></i><i class="hot" style="height:82%"></i><i class="hot" style="height:95%"></i>
+        </div>
+        <p class="note" style="margin-top:10px;">体温计读数（与驾驶舱同源）：本月 AI 消耗 <b id="tokVal">—</b>，<b id="tokDelta">—</b>，持续爬坡即组织在真用。</p>
+      </div>
+      <div class="panel">
+        <h3>消耗治理四件事</h3>
+        <div class="cap-grid">
+          <div class="cap"><div class="ic">💰</div><b>Token 预算制</b><span>按部门 / 场景下达预算，像管费用一样管消耗。</span></div>
+          <div class="cap"><div class="ic">📊</div><b>消耗看板</b><span>逐部门逐场景可视化，谁在用、用在哪一目了然。</span></div>
+          <div class="cap warm"><div class="ic">🧮</div><b>单位经济账</b><span>每个场景算清「每千 token 换来什么业务结果」。</span></div>
+          <div class="cap warm"><div class="ic">🔔</div><b>低用量预警</b><span>连续两周低于基线自动预警，训练师上门陪跑。</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel" style="margin-top:16px;">
+      <h3>六大风险与解法</h3>
+      <table class="mini-table">
+        <tr><th>风险</th><th>解法</th><th>责任机制</th></tr>
+        <tr><td><b>用不起来</b></td><td>全员 AI 训练营 + 使用考核</td><td>周人均调用进管理例会</td></tr>
+        <tr><td><b>数据安全</b></td><td>私有化部署 + 数据分级</td><td>敏感数据不出域</td></tr>
+        <tr><td><b>模型幻觉</b></td><td>知识库锚定 + 人审门禁</td><td>对外内容先过人再发布</td></tr>
+        <tr><td><b>成本失控</b></td><td>Token 预算制 + 消耗看板</td><td>超支自动熔断提醒</td></tr>
+        <tr><td><b>组织抵触</b></td><td>「AI 成就顾问」叙事 + 绩效挂钩</td><td>蒸馏署名与分成兜底</td></tr>
+        <tr><td><b>底座锁定</b></td><td>多模型兼容架构</td><td>底座可替换、资产不迁移</td></tr>
+      </table>
+    </div>
+
+    <div class="panel" style="margin-top:16px;">
+      <h3>效率账本</h3>
+      <div class="ledger">
+        <div class="lg-col done">
+          <h5>✔ 已验证（客户现场跑出来的）</h5>
+          <div class="lg-row"><span>拜访报告效率</span><b>+80%</b></div>
+          <div class="lg-row"><span>内容产出效率</span><b>×12（成本 −85%）</b></div>
+          <div class="lg-row"><span>获客成本</span><b>−70%+</b></div>
+        </div>
+        <div class="lg-col goal">
+          <h5>◎ 内部目标（对自己动刀）</h5>
+          <div class="lg-row"><span>诊断周期</span><b>4 周 → 1 周</b></div>
+          <div class="lg-row"><span>报告初稿</span><b>3 天 → 半天</b></div>
+          <div class="lg-row"><span>项目交付人天</span><b>−30%</b></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel" style="margin-top:16px;">
+      <h3>组织重构：从五层金字塔到三层</h3>
+      <div class="org-restr">
+        <div class="o-col old">
+          <div class="o-cap" style="margin:0 0 2px;">现在 · 五层金字塔</div>
+          <div class="o-bar">决策层</div>
+          <div class="o-bar">总监层</div>
+          <div class="o-bar">经理层</div>
+          <div class="o-bar">主管层</div>
+          <div class="o-bar">执行层</div>
+        </div>
+        <div class="o-arrow">➜</div>
+        <div class="o-col new">
+          <div class="o-cap" style="margin:0 0 2px;">未来 · 三层</div>
+          <div class="o-bar">小前端</div>
+          <div class="o-bar">大中台</div>
+          <div class="o-bar">AI 助理层</div>
+        </div>
+      </div>
+      <p class="note" style="margin-top:12px;">管理链路缩短，信息不再层层衰减；<b>管理费用率随层级压缩而下降</b>——组织红利与效率红利同时兑现。</p>
+    </div>
+  </section>
+
+  <!-- ============ 08 愿景 ============ -->
+  <section class="plan-sec" id="s8">
+    <div class="sec-tag">SECTION 08 · VISION</div>
+    <h2>愿景</h2>
+    <p class="sec-sub">技术叙事的落点始终是人：AI 不替代顾问，AI 放大顾问。</p>
+
+    <div class="quote-band">
+      「先成就人、再成就事业——AI 成就顾问，顾问成就客户。」
+      <small>写给每一位君度顾问</small>
+    </div>
+
+    <div class="vision-grid" id="visionGrid">
+      <div class="vision">
+        <div class="v-num">1 <small>→</small> N</div>
+        <b>每位顾问 × N 个智能体</b>
+        <span>一个人带一支 AI 团队作战，顾问从执行者升级为指挥官。</span>
+      </div>
+      <div class="vision">
+        <div class="v-num"><span id="vNum30">0</span><small>%</small></div>
+        <b>订阅 + 内容收入占比</b>
+        <span>收入结构从一次性项目制转向可复利的订阅与内容。</span>
+      </div>
+      <div class="vision">
+        <div class="v-num">No.1</div>
+        <b>白酒全链路 AI 标准制定者</b>
+        <span>定义行业的场景分层、数据规范与交付标准。</span>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<button id="toTop" title="回到顶部">↑</button>
+
+<footer class="site-footer">
+  <div class="foot-brand"><img src="assets/st_logo.png" alt="商汤科技" /></div>
+  商汤科技 · 大模型生态渠道部 × 北京君度咨询 · 链一链智能 &nbsp;|&nbsp; <b>「咨询 + AI」双引擎 · 高保真原型</b> &nbsp;|&nbsp; 演示数据均为虚构
+</footer>
+
+<script src="assets/data.js"></script>
+<script>
+/* ---------- 数据同源：从 window.JD 取 AI 消耗指标 ---------- */
+(function () {
+  var k = (window.JD && JD.national && JD.national.kpis || []).filter(function (x) { return x.label === "AI 消耗"; })[0];
+  if (k) {
+    document.getElementById("tokVal").textContent = k.val + " " + k.unit;
+    document.getElementById("tokDelta").textContent = k.delta;
+  }
+})();
+
+/* ---------- 粘性锚点导航：点击滚动 + 滚动高亮 ---------- */
+(function () {
+  var btns = Array.prototype.slice.call(document.querySelectorAll("#secnav button"));
+  var secs = btns.map(function (b) { return document.getElementById(b.dataset.sec); });
+  btns.forEach(function (b) {
+    b.addEventListener("click", function () {
+      document.getElementById(b.dataset.sec).scrollIntoView({ behavior: "smooth", block: "start" });
+    });
+  });
+  function spy() {
+    var pos = window.scrollY + 150, cur = 0;
+    secs.forEach(function (s, i) { if (s.offsetTop <= pos) cur = i; });
+    btns.forEach(function (b, i) { b.classList.toggle("on", i === cur); });
+  }
+  window.addEventListener("scroll", spy, { passive: true });
+  spy();
+})();
+
+/* ---------- 03 金字塔：点击各层切换详情 ---------- */
+(function () {
+  var DATA = {
+    L4: { tag: "L4 · 决策智能体", name: "高管层 · AI 分析 + 人决策",
+      who: "董事长 / 营销总经理 / 大区总", eg: "空中巡警 · 16 维作战地图", mode: "AI 做侦察与推演，人扣扳机",
+      note: "数据敏感度与容错成本都最高——AI 给判断依据与推演结论，最终决策权永远在人。" },
+    L3: { tag: "L3 · 流程智能体", name: "业务流 · 工作流自动化 + 抽检",
+      who: "市场部 / 销管 / 内容团队", eg: "拜访采集 · 品鉴管家 · 内容工厂", mode: "全流程自动跑，人工按比例抽检",
+      note: "高频 × 高标准化场景的主战场，效率收益最先兑现，是规模化的第一梯队。" },
+    L2: { tag: "L2 · 岗位智能体", name: "一岗一体 · AI 起草 人拍板",
+      who: "导购 / 店长 / 咨询顾问", eg: "导购话术 · 店长看板 · 顾问初稿", mode: "AI 出初稿与建议，人负责签字",
+      note: "围绕岗位 Know-how 建模，把「最强员工」蒸馏进每一个岗位助理。" },
+    L1: { tag: "L1 · 全员 AI 助理", name: "人人标配 · 对话式 Copilot",
+      who: "全员（含职能后台）", eg: "检索 · 写作 · 纪要 · 表格", mode: "对话式随问随答",
+      note: "门槛最低、覆盖最大，是「用起来」的起点，也是上三层智能体的用户土壤。" }
+  };
+  var panel = document.getElementById("pyrDetail");
+  var layers = Array.prototype.slice.call(document.querySelectorAll("#pyr .lyr"));
+  function render(key) {
+    var d = DATA[key];
+    panel.innerHTML =
+      '<div class="pd-tag">' + d.tag + "</div>" +
+      "<h4>" + d.name + "</h4>" +
+      '<div class="pd-kv"><span>使用人群</span><b>' + d.who + "</b></div>" +
+      '<div class="pd-kv"><span>代表场景</span><b>' + d.eg + "</b></div>" +
+      '<div class="pd-kv"><span>人机模式</span><b>' + d.mode + "</b></div>" +
+      '<div class="pd-note">' + d.note + "</div>";
+  }
+  layers.forEach(function (l) {
+    l.addEventListener("click", function () {
+      layers.forEach(function (x) { x.classList.remove("on"); });
+      l.classList.add("on");
+      render(l.dataset.l);
+    });
+  });
+  render("L4");
+})();
+
+/* ---------- 06 阶段切换 ---------- */
+(function () {
+  var STAGES = [
+    { k: "2026 H2 · 固本", t: "把已验证的跑成样板", d: "跑透杭州样板市场，签下 3 个灯塔客户；全员 AI 训练营覆盖 100%，周人均调用进管理看板。",
+      goals: ["3 个灯塔客户", "全员 AI 训练营", "P0 场景规模化", "消耗曲线爬坡"] },
+    { k: "2027 H1 · 破局", t: "联合方案与订阅收入起量", d: "君度 × 人民网联合方案落地 2 家酒企；经营决策套件完成产品化，订阅收入占比突破 10%+。",
+      goals: ["联合方案 2 家酒企", "订阅收入 10%+", "决策套件产品化", "内容工厂复制"] },
+    { k: "2027 H2+ · 平台", t: "从酒业方案到行业平台", d: "多品牌连锁快消 B2B2C 平台上线，订阅 + 内容收入占比达 30%，成为白酒全链路 AI 的标准制定者。",
+      goals: ["B2B2C 平台上线", "订阅+内容收入 30%", "跨品类复制", "行业标准输出"] }
+  ];
+  var tabs = Array.prototype.slice.call(document.querySelectorAll("#stageTabs button"));
+  var box = document.getElementById("stageDetail");
+  function render(i) {
+    var s = STAGES[i];
+    box.innerHTML =
+      '<div style="font-size:11px;font-weight:800;letter-spacing:2px;color:var(--warm);">' + s.k + "</div>" +
+      '<b style="display:block;font-size:16px;color:var(--ink);margin:3px 0 6px;">' + s.t + "</b>" +
+      '<p style="font-size:13px;color:var(--sub);line-height:1.65;">' + s.d + "</p>" +
+      '<div class="sd-goals">' + s.goals.map(function (g) { return '<span class="tag teal">' + g + "</span>"; }).join("") + "</div>";
+  }
+  tabs.forEach(function (t, i) {
+    t.addEventListener("click", function () {
+      tabs.forEach(function (x) { x.classList.remove("on"); });
+      t.classList.add("on");
+      render(i);
+    });
+  });
+  render(0);
+})();
+
+/* ---------- 08 大数字滚动进场 ---------- */
+(function () {
+  var el = document.getElementById("vNum30"), played = false;
+  var io = new IntersectionObserver(function (entries) {
+    entries.forEach(function (e) {
+      if (e.isIntersecting && !played) {
+        played = true;
+        var t0 = null;
+        function step(ts) {
+          if (!t0) t0 = ts;
+          var p = Math.min((ts - t0) / 900, 1);
+          el.textContent = Math.round(30 * (1 - Math.pow(1 - p, 3)));
+          if (p < 1) requestAnimationFrame(step);
+        }
+        requestAnimationFrame(step);
+      }
+    });
+  }, { threshold: 0.4 });
+  io.observe(document.getElementById("visionGrid"));
+})();
+
+/* ---------- 回到顶部 ---------- */
+(function () {
+  var btn = document.getElementById("toTop");
+  window.addEventListener("scroll", function () {
+    btn.classList.toggle("show", window.scrollY > 600);
+  }, { passive: true });
+  btn.addEventListener("click", function () {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  });
+})();
+</script>
+
+</body>
+</html>
