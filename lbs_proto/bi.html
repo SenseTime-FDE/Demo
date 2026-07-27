@@ -1,0 +1,942 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>场景四 · 经营数据看板 | LBS 史伟莎 × 商汤 AI 现场服务原型</title>
+<link rel="stylesheet" href="assets/style.css">
+<style>
+/* ============================================================
+   bi.html 页面专属样式（前缀 .bi-）
+   深色 BI console：与 dispatch.html 同质感，topnav / footer 页内覆盖为深色
+   ============================================================ */
+body {
+  background:
+    radial-gradient(1100px 520px at 82% -12%, rgba(26, 122, 210, .16), transparent 60%),
+    radial-gradient(900px 420px at -6% 0%, rgba(206, 74, 45, .09), transparent 55%),
+    linear-gradient(180deg, #081D3D 0%, #0A2547 46%, #061831 100%);
+  background-attachment: fixed;
+  color: #D5E3F0;
+}
+
+/* ---- 深色 topnav 覆盖 ---- */
+.topnav { background: rgba(6, 20, 40, .86); border-bottom-color: rgba(169, 212, 245, .12); }
+.topnav .brand .divider { background: rgba(169, 212, 245, .22); }
+.topnav .brand .name { color: #F1F8FD; }
+.topnav .brand .name small { color: rgba(213, 227, 240, .45); }
+.topnav nav a { color: rgba(213, 227, 240, .68); }
+.topnav nav a:hover { background: rgba(206, 74, 45, .14); color: #F6C3B6; }
+.topnav nav a.active { background: var(--teal); color: #fff; }
+.topnav nav a.active .dot { background: #FBD8CF; }
+
+/* ---- 深色页头 + 章位标注 ---- */
+.bi-chapter {
+  display: inline-flex; align-items: center; gap: 10px; flex-wrap: wrap;
+  background: rgba(217, 154, 62, .13); border: 1px solid rgba(217, 154, 62, .35);
+  border-radius: 999px; padding: 5px 14px; margin-bottom: 12px;
+}
+.bi-chapter b { font-size: 12px; color: #E7C078; letter-spacing: 1px; }
+.bi-chapter span { font-size: 11px; color: rgba(213, 227, 240, .55); }
+.page-head .eyebrow { color: #5AAEF0; }
+.page-head h1 { color: #F1F8FD; }
+.page-head h1 .hl { color: #6CB8F5; }
+.page-head .sub { color: rgba(213, 227, 240, .72); }
+.page-head .sub b { color: #6CB8F5; }
+
+/* ---- console 状态条 ---- */
+.bi-console {
+  display: flex; align-items: center; gap: 14px; flex-wrap: wrap;
+  background: rgba(255, 255, 255, .04); border: 1px solid rgba(169, 212, 245, .14);
+  border-radius: 14px; padding: 11px 18px; margin: 18px 0 20px; font-size: 12.5px;
+  color: rgba(213, 227, 240, .75);
+}
+.bi-console .live { display: flex; align-items: center; gap: 7px; font-weight: 700; color: #8CC8F7; letter-spacing: 1px; font-size: 12px; }
+.bi-console .live i { width: 8px; height: 8px; border-radius: 50%; background: #2F8FD8; animation: biPulse 1.6s infinite; }
+@keyframes biPulse { 0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(47, 143, 216, .55); } 50% { opacity: .55; box-shadow: 0 0 0 5px rgba(47, 143, 216, 0); } }
+.bi-console .sep { width: 1px; height: 14px; background: rgba(169, 212, 245, .2); }
+.bi-console b { color: #EEF6FD; font-weight: 600; }
+.bi-console .demo-tag {
+  margin-left: auto; background: rgba(26, 122, 210, .2); color: #6CB8F5;
+  border: 1px solid rgba(206, 74, 45, .35); border-radius: 999px;
+  padding: 3px 12px; font-size: 11.5px; font-weight: 700; letter-spacing: 1px;
+}
+@media (max-width: 720px) { .bi-console .demo-tag { margin-left: 0; } }
+
+/* ---- 1. 角色视角切换条 ---- */
+.bi-roles { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; margin-bottom: 20px; }
+.bi-role {
+  display: flex; align-items: center; gap: 10px; cursor: pointer; user-select: none;
+  background: rgba(255, 255, 255, .035); border: 1px solid rgba(169, 212, 245, .16);
+  border-radius: 999px; padding: 7px 18px 7px 9px; transition: all .18s;
+  font-family: var(--font); text-align: left;
+}
+.bi-role:hover { border-color: rgba(90, 174, 240, .5); }
+.bi-role .r-av {
+  width: 30px; height: 30px; border-radius: 50%; flex: none; color: #fff;
+  display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 800;
+  background: linear-gradient(135deg, var(--teal), var(--ink3));
+}
+.bi-role .r-t b { display: block; font-size: 13px; color: #E9F2FB; line-height: 1.3; }
+.bi-role .r-t span { display: block; font-size: 10.5px; color: rgba(213, 227, 240, .5); line-height: 1.35; }
+.bi-role.on { background: rgba(26, 122, 210, .15); border-color: #6CB8F5; box-shadow: 0 0 0 1px rgba(90, 174, 240, .4); }
+.bi-role.on .r-av { background: linear-gradient(135deg, var(--warm), var(--warm-d)); }
+.bi-role.on .r-t b { color: #FDE3DC; }
+.bi-role.on .r-t b::before { content: "▸ "; color: #6CB8F5; }
+.bi-role.on .r-t span { color: rgba(248, 207, 160, .75); }
+.bi-roles .r-hint { font-size: 11.5px; color: rgba(213, 227, 240, .45); }
+
+/* ---- 2. KPI 行 ---- */
+.bi-kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin-bottom: 24px; }
+.bi-kpi {
+  background: rgba(255, 255, 255, .035); border: 1px solid rgba(169, 212, 245, .13);
+  border-radius: 14px; padding: 14px 16px; position: relative; overflow: hidden; animation: biIn .3s ease both;
+}
+.bi-kpi::after { content: ""; position: absolute; left: 0; top: 0; width: 100%; height: 2px; background: linear-gradient(90deg, rgba(90, 174, 240, .7), transparent 70%); }
+.bi-kpi.hot::after { background: linear-gradient(90deg, rgba(108, 184, 245, .85), transparent 70%); }
+.bi-kpi .k-l { font-size: 11.5px; color: rgba(213, 227, 240, .55); letter-spacing: .5px; }
+.bi-kpi .k-v { font-size: 26px; font-weight: 800; color: #F7FBFE; font-variant-numeric: tabular-nums; line-height: 1.35; letter-spacing: .3px; }
+.bi-kpi .k-v small { font-size: 13px; font-weight: 600; color: rgba(213, 227, 240, .55); margin-left: 2px; }
+.bi-kpi .k-s { font-size: 11px; color: #7F9CC0; margin-top: 2px; }
+.bi-kpi .k-s b { color: #6AB6F2; font-weight: 700; }
+.bi-kpi.hot .k-s b { color: #6CB8F5; }
+@keyframes biIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+
+/* ---- 通用深色面板 / 区块标题 ---- */
+.bi-panel {
+  background: rgba(255, 255, 255, .035); border: 1px solid rgba(169, 212, 245, .13);
+  border-radius: 16px; padding: 22px 24px; box-shadow: 0 16px 44px rgba(0, 0, 0, .28);
+  margin-bottom: 24px;
+}
+.bi-sect { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; margin-bottom: 14px; }
+.bi-sect::before { content: ""; width: 8px; height: 8px; border-radius: 3px; background: var(--warm); flex: none; align-self: center; }
+.bi-sect b { font-size: 16.5px; color: #F1F8FD; }
+.bi-sect small { font-size: 12px; color: rgba(213, 227, 240, .48); }
+.bi-sect .star {
+  background: rgba(26, 122, 210, .2); color: #6CB8F5; border-radius: 999px;
+  font-size: 10.5px; font-weight: 700; padding: 2px 10px; letter-spacing: 1px;
+}
+.bi-note {
+  font-size: 12.5px; color: rgba(213, 227, 240, .58); background: rgba(26, 122, 210, .08);
+  border: 1px dashed rgba(90, 174, 240, .28); border-radius: 10px; padding: 10px 14px; margin-top: 14px;
+}
+.bi-note b { color: #6AB6F2; }
+
+/* ---- 主布局：左下钻 + 右 chatBI ---- */
+.bi-layout { display: grid; grid-template-columns: 1fr 360px; gap: 24px; align-items: start; }
+@media (max-width: 1080px) { .bi-layout { grid-template-columns: 1fr; } }
+
+/* ---- 3. 六级下钻 ---- */
+.bi-crumbbar {
+  display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+  background: rgba(255, 255, 255, .03); border: 1px solid rgba(169, 212, 245, .14);
+  border-radius: 12px; padding: 9px 14px; margin-bottom: 14px;
+}
+.bi-crumbs { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; font-size: 13px; }
+.bi-crumb { color: #6AB6F2; cursor: pointer; padding: 2px 7px; border-radius: 6px; transition: background .15s; }
+.bi-crumb:hover { background: rgba(26, 122, 210, .14); }
+.bi-crumb.cur { color: #FDE3DC; font-weight: 700; cursor: default; }
+.bi-crumb.cur:hover { background: none; }
+.bi-crumbs .csep { color: rgba(213, 227, 240, .35); font-size: 12px; }
+.bi-scope { margin-left: auto; font-size: 11.5px; color: rgba(213, 227, 240, .5); }
+.bi-scope b { color: #6CB8F5; font-weight: 600; }
+@media (max-width: 720px) { .bi-scope { margin-left: 0; } }
+
+.bi-board { animation: biIn .32s ease both; }
+.bi-bhead { display: flex; align-items: flex-start; gap: 12px; margin-bottom: 13px; }
+.bi-bhead .b-lv {
+  flex: none; width: 40px; height: 40px; border-radius: 12px;
+  background: rgba(26, 122, 210, .18); border: 1px solid rgba(90, 174, 240, .4); color: #8CC8F7;
+  display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 13px; letter-spacing: .5px;
+}
+.bi-bhead .b-t b { display: block; font-size: 16.5px; color: #F1F8FD; line-height: 1.35; }
+.bi-bhead .b-t span { display: block; font-size: 11.5px; color: rgba(213, 227, 240, .52); margin-top: 2px; }
+.bi-bhead .b-tag {
+  margin-left: auto; flex: none; margin-top: 4px; background: rgba(217, 154, 62, .14); color: #E7C078;
+  border-radius: 999px; font-size: 10.5px; font-weight: 700; padding: 2px 10px; letter-spacing: 1px;
+}
+
+.bi-tblwrap { overflow-x: auto; }
+.bi-table { width: 100%; border-collapse: collapse; font-size: 13px; min-width: 560px; }
+.bi-table th {
+  text-align: left; font-size: 11px; font-weight: 700; letter-spacing: 1.2px; color: #7F9CC0;
+  padding: 8px 10px; border-bottom: 1px solid rgba(169, 212, 245, .22); white-space: nowrap;
+}
+.bi-table td { padding: 10px; border-bottom: 1px solid rgba(169, 212, 245, .08); color: #C4D6E8; white-space: nowrap; font-variant-numeric: tabular-nums; }
+.bi-table tr:last-child td { border-bottom: none; }
+.bi-table td b { color: #EEF6FD; font-weight: 600; }
+.bi-table td .r-sub { display: block; font-style: normal; font-size: 11px; color: rgba(213, 227, 240, .45); margin-top: 1px; }
+.bi-table tr.drill { cursor: pointer; transition: background .15s; }
+.bi-table tr.drill:hover { background: rgba(26, 122, 210, .08); }
+.bi-table tr.drill td:first-child b { color: #6AB6F2; }
+.bi-table tr.dim { cursor: pointer; }
+.bi-table tr.dim td b { color: rgba(213, 227, 240, .6); }
+.bi-table tr.dim:hover { background: rgba(255, 255, 255, .02); }
+.bi-table .go { color: #6CB8F5; font-weight: 800; font-size: 15px; }
+.bi-table tr.dim .go { color: rgba(213, 227, 240, .25); }
+.tr-up { color: #FF9D9A; font-weight: 700; }
+.tr-dn { color: #7EC0F4; font-weight: 700; }
+.tr-flat { color: rgba(213, 227, 240, .55); }
+.bi-tag { display: inline-block; padding: 2px 10px; border-radius: 999px; font-size: 11px; font-weight: 600; white-space: nowrap; }
+.r-low  { background: rgba(0, 161, 0, .2); color: #7BD87B; }
+.r-mid  { background: rgba(217, 154, 62, .16); color: #E7C078; }
+.r-high { background: rgba(217, 83, 79, .16); color: #FF9D9A; }
+.bi-bfoot { margin-top: 11px; font-size: 11px; color: rgba(213, 227, 240, .42); display: flex; gap: 6px; align-items: baseline; line-height: 1.6; }
+.bi-bfoot::before { content: "⛁"; color: rgba(90, 174, 240, .5); }
+.bi-legend { margin-top: 12px; font-size: 11.5px; color: rgba(213, 227, 240, .5); line-height: 1.7; }
+.bi-legend i { font-style: normal; font-weight: 700; }
+
+/* L6 技师个人看板 */
+.bi-techhead { display: flex; align-items: center; gap: 13px; flex-wrap: wrap; margin-bottom: 14px; }
+.bi-techhead .t-av {
+  width: 46px; height: 46px; border-radius: 13px; flex: none; color: #fff;
+  display: flex; align-items: center; justify-content: center; font-size: 19px; font-weight: 800;
+  background: linear-gradient(135deg, var(--warm), var(--warm-d));
+}
+.bi-techhead .t-id b { font-size: 16.5px; color: #F1F8FD; }
+.bi-techhead .t-id span { display: block; font-size: 11.5px; color: rgba(213, 227, 240, .52); margin-top: 2px; }
+.bi-techhead .t-star {
+  margin-left: auto; background: rgba(217, 154, 62, .15); color: #E7C078;
+  border: 1px solid rgba(217, 154, 62, .4); border-radius: 999px; padding: 3px 12px;
+  font-size: 11px; font-weight: 700;
+}
+.bi-techkpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(112px, 1fr)); gap: 9px; margin-bottom: 14px; }
+.bi-tk { background: rgba(255, 255, 255, .03); border: 1px solid rgba(169, 212, 245, .13); border-radius: 11px; padding: 9px 12px; }
+.bi-tk b { display: block; font-size: 17px; font-weight: 800; color: #6CB8F5; font-variant-numeric: tabular-nums; }
+.bi-tk span { display: block; font-size: 10.5px; color: rgba(213, 227, 240, .5); margin-top: 1px; }
+.st-done { color: #7EC0F4; font-weight: 700; }
+.st-serv { color: #8CC8F7; font-weight: 700; }
+.st-serv::before { content: "●"; font-size: 8px; margin-right: 5px; animation: biPulse 1.4s infinite; }
+
+/* ---- 4. chatBI 停靠栏 ---- */
+.bi-dock { position: sticky; top: 80px; }
+.bi-dock .bi-panel { padding: 18px 18px 16px; margin-bottom: 0; }
+.bi-msgs { display: flex; flex-direction: column; gap: 10px; max-height: 46vh; overflow-y: auto; padding: 2px 2px 4px; scroll-behavior: smooth; }
+.bi-msgs::-webkit-scrollbar { width: 4px; }
+.bi-msgs::-webkit-scrollbar-thumb { background: rgba(169, 212, 245, .2); border-radius: 2px; }
+.bi-m { max-width: 94%; border-radius: 12px; padding: 9px 12px; font-size: 12.5px; line-height: 1.65; animation: biIn .25s ease both; }
+.bi-m.q { align-self: flex-end; background: rgba(206, 74, 45, .14); border: 1px solid rgba(206, 74, 45, .32); color: #F6C3B6; border-bottom-right-radius: 4px; }
+.bi-m.a { align-self: flex-start; background: rgba(255, 255, 255, .05); border: 1px solid rgba(169, 212, 245, .16); color: #C9DFD6; border-bottom-left-radius: 4px; }
+.bi-caret { display: inline-block; width: 7px; height: 13px; background: #5AAEF0; vertical-align: -2px; margin-left: 1px; animation: biBlink .8s infinite; border-radius: 1px; }
+@keyframes biBlink { 0%, 100% { opacity: 1; } 50% { opacity: .15; } }
+.m-cal { margin-top: 8px; padding-top: 7px; border-top: 1px dashed rgba(169, 212, 245, .2); font-size: 10.5px; color: rgba(213, 227, 240, .45); line-height: 1.55; }
+.m-cal::before { content: "口径 · "; color: #5AAEF0; font-weight: 700; }
+/* 回答内 mini 条形图 */
+.m-bars { margin-top: 8px; background: rgba(0, 0, 0, .18); border: 1px solid rgba(169, 212, 245, .12); border-radius: 10px; padding: 9px 10px; }
+.m-bars .mb { display: grid; grid-template-columns: 52px 1fr 52px; gap: 8px; align-items: center; font-size: 11px; color: #9CB9D6; padding: 3px 0; }
+.m-bars .mb i { display: block; height: 10px; border-radius: 5px; background: rgba(255, 255, 255, .07); overflow: hidden; font-style: normal; }
+.m-bars .mb i b { display: block; height: 100%; border-radius: 5px; background: linear-gradient(90deg, #1A7AD2, #5AAEF0); animation: mGrow .7s ease both; transform-origin: left; }
+.m-bars .mb i b.warm { background: linear-gradient(90deg, var(--warm), var(--warm-l)); }
+.m-bars .mb em { font-style: normal; text-align: right; font-weight: 700; color: #EEF6FD; font-variant-numeric: tabular-nums; }
+@keyframes mGrow { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+/* 回答内 mini 表格 */
+.m-tbl { margin-top: 8px; background: rgba(0, 0, 0, .18); border: 1px solid rgba(169, 212, 245, .12); border-radius: 10px; padding: 6px 10px; overflow-x: auto; }
+.m-tbl table { width: 100%; border-collapse: collapse; font-size: 11px; }
+.m-tbl th { text-align: left; color: #7F9CC0; font-weight: 700; padding: 5px 6px; border-bottom: 1px solid rgba(169, 212, 245, .18); white-space: nowrap; }
+.m-tbl td { padding: 5px 6px; color: #C4D6E8; border-bottom: 1px solid rgba(169, 212, 245, .07); white-space: nowrap; }
+.m-tbl tr:last-child td { border-bottom: none; }
+/* 预设问题 chips */
+.bi-chips { display: flex; flex-wrap: wrap; gap: 6px; margin: 12px 0 10px; }
+.bi-chip {
+  font-family: var(--font); font-size: 11.5px; color: #8CC8F7; background: rgba(26, 122, 210, .1);
+  border: 1px solid rgba(90, 174, 240, .3); padding: 5px 11px; border-radius: 999px;
+  cursor: pointer; transition: all .15s;
+}
+.bi-chip:hover { background: rgba(26, 122, 210, .2); border-color: #5AAEF0; }
+.bi-chip:active { transform: scale(.96); }
+.bi-chips.busy .bi-chip { opacity: .4; pointer-events: none; }
+.bi-inputbar { display: flex; gap: 8px; }
+.bi-inputbar input {
+  flex: 1; min-width: 0; border: 1px solid rgba(169, 212, 245, .2); border-radius: 999px; padding: 8px 14px;
+  font-size: 12.5px; font-family: var(--font); background: rgba(0, 0, 0, .2); color: #E9F2FB; outline: none;
+}
+.bi-inputbar input::placeholder { color: rgba(213, 227, 240, .35); }
+.bi-inputbar input:focus { border-color: rgba(90, 174, 240, .5); }
+.bi-inputbar button {
+  flex: none; border: none; background: linear-gradient(92deg, #CE4A2D, #B2371D); color: #fff; font-family: var(--font);
+  border-radius: 999px; padding: 8px 16px; font-size: 12.5px; font-weight: 700; cursor: pointer; transition: opacity .15s;
+}
+.bi-inputbar button:hover { opacity: .88; }
+.bi-dockfoot { margin-top: 10px; font-size: 10.5px; color: rgba(213, 227, 240, .42); line-height: 1.6; }
+.bi-dockfoot b { color: #6AB6F2; }
+
+/* ---- 5. 纯 CSS 图表区 ---- */
+.bi-figs { display: grid; grid-template-columns: 1.25fr 1fr; gap: 22px; align-items: stretch; }
+@media (max-width: 980px) { .bi-figs { grid-template-columns: 1fr; } }
+.bi-fig { background: rgba(255, 255, 255, .03); border: 1px solid rgba(169, 212, 245, .12); border-radius: 13px; padding: 16px 18px; }
+.bi-fig .f-t { font-size: 13.5px; color: #E9F2FB; font-weight: 700; margin-bottom: 3px; }
+.bi-fig .f-s { font-size: 11px; color: rgba(213, 227, 240, .45); margin-bottom: 13px; }
+.bi-fleg { display: flex; gap: 14px; flex-wrap: wrap; font-size: 11px; color: rgba(213, 227, 240, .6); margin-bottom: 12px; }
+.bi-fleg i { display: inline-block; width: 10px; height: 10px; border-radius: 3px; margin-right: 5px; vertical-align: -1px; font-style: normal; }
+/* 双条形柱状图 */
+.bi-cols { display: flex; align-items: flex-end; gap: 4px; }
+.bi-cols .cg { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 7px; min-width: 0; }
+.bi-cols .cg .pair { display: flex; align-items: flex-end; gap: 5px; height: 150px; }
+.bi-cols .cg .pair i {
+  display: block; width: 17px; border-radius: 4px 4px 2px 2px; position: relative; font-style: normal;
+  animation: colUp .7s ease both; transform-origin: bottom;
+}
+@keyframes colUp { from { transform: scaleY(0); } to { transform: scaleY(1); } }
+.bi-cols .cg .pair i.c1 { background: linear-gradient(180deg, #5AAEF0, #1A7AD2); }
+.bi-cols .cg .pair i.c2 { background: linear-gradient(180deg, #F6C3B6, #CE4A2D); }
+.bi-cols .cg .pair i b {
+  position: absolute; top: -16px; left: 50%; transform: translateX(-50%);
+  font-size: 9px; font-weight: 700; color: rgba(213, 227, 240, .65); white-space: nowrap; font-variant-numeric: tabular-nums;
+}
+.bi-cols .cg .m { font-size: 11px; color: rgba(213, 227, 240, .5); white-space: nowrap; }
+/* 类型占比横条 */
+.bi-stk { display: flex; height: 18px; border-radius: 9px; overflow: hidden; margin-bottom: 14px; border: 1px solid rgba(169, 212, 245, .12); }
+.bi-stk i { display: block; height: 100%; font-style: normal; }
+.tp-plan  { background: #1A7AD2; }
+.tp-clean { background: #A9D4F5; }
+.tp-re    { background: #D99A3E; }
+.tp-ur    { background: #B2371D; }
+.bi-tps .tp-row { display: grid; grid-template-columns: 92px 1fr 44px; gap: 10px; align-items: center; font-size: 12px; color: #9CB9D6; padding: 5px 0; }
+.bi-tps .tp-row .tk { height: 11px; border-radius: 6px; background: rgba(255, 255, 255, .06); overflow: hidden; }
+.bi-tps .tp-row .tk i { display: block; height: 100%; border-radius: 6px; font-style: normal; animation: mGrow .8s ease both; transform-origin: left; }
+.bi-tps .tp-row em { font-style: normal; text-align: right; font-weight: 700; color: #EEF6FD; font-variant-numeric: tabular-nums; }
+
+/* ---- 6. 数据从哪里来 flow（深色覆盖共享 .flow） ---- */
+.bi-panel .flow .f-step b { color: #E9F2FB; }
+.bi-panel .flow .f-step span { color: rgba(213, 227, 240, .45); }
+.bi-panel .flow .f-step .n { background: #10305A; color: #8CC8F7; border: 1px solid rgba(90, 174, 240, .35); }
+.bi-panel .flow .f-step.hot .n { background: var(--warm); color: #fff; border-color: transparent; }
+.bi-panel .flow .f-arrow { color: #6CB8F5; }
+
+/* ---- toast / footer ---- */
+.bi-toast {
+  position: fixed; left: 50%; bottom: 34px; transform: translateX(-50%) translateY(20px);
+  background: #10305A; border: 1px solid rgba(90, 174, 240, .4); color: #DFF7EC;
+  font-size: 12.5px; padding: 10px 20px; border-radius: 999px;
+  box-shadow: 0 14px 34px rgba(0, 0, 0, .4); opacity: 0; pointer-events: none;
+  transition: all .3s; z-index: 200; max-width: 86vw; text-align: center;
+}
+.bi-toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+.site-footer { background: rgba(6, 18, 15, .7); border-top-color: rgba(169, 212, 245, .12); color: rgba(213, 227, 240, .45); }
+.site-footer b { color: rgba(213, 227, 240, .75); }
+</style>
+</head>
+<body>
+
+<header class="topnav">
+  <div class="brand">
+    <img src="assets/st_logo_white.png" alt="商汤科技">
+    <div class="divider"></div>
+    <div class="name">LBS 史伟莎 · AI 现场服务<small>SENSETIME × LBS GROUP · PROTOTYPE</small></div>
+  </div>
+  <nav>
+    <a href="index.html">方案总览</a>
+    <a href="agent_jishi.html">一线技师 Agent</a>
+    <a href="kefu.html">AI 智能客服</a>
+    <a href="dispatch.html">AI 工单调度</a>
+    <a class="active" href="bi.html"><span class="dot"></span>数据看板</a>
+  </nav>
+</header>
+
+<main class="page">
+
+  <div class="page-head">
+    <div class="bi-chapter"><b>扩展场景 · 数据分析与报告</b><span>首批试点为 AI 工单排班 + AI 客服，本页为后续扩展章位预览</span></div>
+    <div class="eyebrow">SCENE 04 · BI CONSOLE × CHATBI</div>
+    <h1>场景四 · 经营数据看板 —— 「服务过程数据自动沉淀，<span class="hl">一句话问出经营答案</span>」</h1>
+    <p class="sub">技师 Agent 留痕、AI 客服受理、调度台流转的每一步都自动沉淀为结构化数据：<b>六级下钻</b>从全国一路看到每一位技师，<b>chatBI</b> 一句话问出工单、SLA、虫情趋势与续约情况。同一套数据底座，后续可延伸至采购、销售报价等分析场景。</p>
+  </div>
+
+  <div class="bi-console">
+    <span class="live"><i></i>LIVE BI</span>
+    <span class="sep"></span>
+    <span>当前视角：<b id="vRole">总部运营 · 全国</b></span>
+    <span class="sep"></span>
+    <span>2026-07-20 周一 <b>16:40</b></span>
+    <span class="demo-tag">目标态示意</span>
+  </div>
+
+  <!-- 1. 角色视角切换 -->
+  <div class="bi-roles" id="roleBar">
+    <button class="bi-role on" type="button" data-role="hq">
+      <span class="r-av">总</span>
+      <span class="r-t"><b>总部运营</b><span>全国 4 大区 · 32 城市</span></span>
+    </button>
+    <button class="bi-role" type="button" data-role="east">
+      <span class="r-av">华</span>
+      <span class="r-t"><b>大区经理 · 华东</b><span>吴丽娟调度中心所在大区</span></span>
+    </button>
+    <button class="bi-role" type="button" data-role="sn">
+      <span class="r-av">沪</span>
+      <span class="r-t"><b>调度主管 · 沪南</b><span>上海 · 陈国栋所在片区</span></span>
+    </button>
+    <span class="r-hint">◂ 假登录视角演示：切换后 KPI、下钻表与 chatBI 预设问题联动变化</span>
+  </div>
+
+  <!-- 2. KPI 行（随视角联动） -->
+  <div class="bi-kpis" id="kpiGrid"></div>
+
+  <div class="bi-layout">
+
+    <!-- 3. 六级下钻（核心交互） -->
+    <section class="bi-panel">
+      <div class="bi-sect">
+        <b>六级下钻 · 层层有账</b>
+        <span class="star">★ 本页核心交互</span>
+        <small>全国 → 大区 → 城市 → 客户（合同）→ 门店 / 厂区 → 技师 · 点击行下钻，点面包屑返回</small>
+      </div>
+      <div class="bi-crumbbar">
+        <div class="bi-crumbs" id="crumbs"></div>
+        <div class="bi-scope" id="scopeNote"></div>
+      </div>
+      <div id="boardZone"></div>
+      <div class="bi-legend">
+        虫情等级仅分 <i>Ⅰ / Ⅱ / Ⅲ</i> 级：<i class="tr-up">↑</i> 等级上升需关注 · <i class="tr-flat">→</i> 平稳 · <i class="tr-dn">↓</i> 好转（处置见效）。等级为点位巡查综合评估，处置目标为<i>持续控制</i>；所有数字均为目标态示意。
+      </div>
+    </section>
+
+    <!-- 4. chatBI 对话问数 -->
+    <aside class="bi-dock">
+      <section class="bi-panel">
+        <div class="bi-sect"><b>chatBI · 对话问数</b><small>大语言模型 · 商汤 AI 技术底座</small></div>
+        <div class="bi-msgs" id="chatMsgs"></div>
+        <div class="bi-chips" id="chatChips"></div>
+        <div class="bi-inputbar">
+          <input id="chatInput" type="text" placeholder="也可以直接输入你的问题…">
+          <button type="button" id="chatSend">问一下</button>
+        </div>
+        <div class="bi-dockfoot"><b>同一套口径：</b>chatBI 与左侧看板读同一份结构化数据，答案附带口径说明，可追溯到单条工单留痕。回答内容为目标态示意。</div>
+      </section>
+    </aside>
+
+  </div>
+
+  <!-- 5. 纯 CSS 图表区 -->
+  <section class="bi-panel">
+    <div class="bi-sect"><b>趋势与结构</b><small>全国口径 · 2026 年 2–7 月（7 月截至 07-20）· 目标态示意</small></div>
+    <div class="bi-figs">
+
+      <div class="bi-fig">
+        <div class="f-t">近 6 个月工单量 × AI 自动派单率</div>
+        <div class="f-s">工单量稳步增长，AI 自动派单率持续爬坡，调度团队规模保持不变</div>
+        <div class="bi-fleg">
+          <span><i style="background:#1A7AD2"></i>工单量（单 / 月）</span>
+          <span><i style="background:#CE4A2D"></i>AI 自动派单率（%）</span>
+        </div>
+        <div class="bi-cols">
+          <div class="cg"><div class="pair"><i class="c1" style="height:79%"><b>9,860</b></i><i class="c2" style="height:78%"><b>78%</b></i></div><span class="m">2月</span></div>
+          <div class="cg"><div class="pair"><i class="c1" style="height:84%"><b>10,420</b></i><i class="c2" style="height:82%"><b>82%</b></i></div><span class="m">3月</span></div>
+          <div class="cg"><div class="pair"><i class="c1" style="height:88%"><b>10,980</b></i><i class="c2" style="height:85%"><b>85%</b></i></div><span class="m">4月</span></div>
+          <div class="cg"><div class="pair"><i class="c1" style="height:93%"><b>11,540</b></i><i class="c2" style="height:88%"><b>88%</b></i></div><span class="m">5月</span></div>
+          <div class="cg"><div class="pair"><i class="c1" style="height:96%"><b>11,920</b></i><i class="c2" style="height:90%"><b>90%</b></i></div><span class="m">6月</span></div>
+          <div class="cg"><div class="pair"><i class="c1" style="height:100%"><b>12,480</b></i><i class="c2" style="height:91%"><b>91%</b></i></div><span class="m">7月</span></div>
+        </div>
+      </div>
+
+      <div class="bi-fig">
+        <div class="f-t">本月工单类型占比</div>
+        <div class="f-s">计划巡检为基本盘，急单占比约一成、全部进入 SLA 盯单</div>
+        <div class="bi-stk">
+          <i class="tp-plan" style="width:62%"></i><i class="tp-clean" style="width:16%"></i><i class="tp-re" style="width:12%"></i><i class="tp-ur" style="width:10%"></i>
+        </div>
+        <div class="bi-tps">
+          <div class="tp-row"><span>计划巡检</span><span class="tk"><i class="tp-plan" style="width:62%"></i></span><em>62%</em></div>
+          <div class="tp-row"><span>清洁消毒</span><span class="tk"><i class="tp-clean" style="width:16%"></i></span><em>16%</em></div>
+          <div class="tp-row"><span>复查</span><span class="tk"><i class="tp-re" style="width:12%"></i></span><em>12%</em></div>
+          <div class="tp-row"><span>急单</span><span class="tk"><i class="tp-ur" style="width:10%"></i></span><em>10%</em></div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- 6. 数据从哪里来 -->
+  <section class="bi-panel">
+    <div class="bi-sect"><b>数据从哪里来</b><small>不新增一张报表、不多填一个字段——数据在服务过程中自动产生</small></div>
+    <div class="flow">
+      <div class="f-step"><div class="n">1</div><b>技师 Agent 留痕</b><span>语音 / 拍照 / 签核<br>ASR 转写自动结构化</span></div>
+      <div class="f-arrow">›</div>
+      <div class="f-step"><div class="n">2</div><b>AI 客服受理记录</b><span>全渠道对话与建单<br>诉求意图自动归类</span></div>
+      <div class="f-arrow">›</div>
+      <div class="f-step"><div class="n">3</div><b>调度台流转</b><span>派单 · SLA · 改派<br>每一步动作留痕</span></div>
+      <div class="f-arrow">›</div>
+      <div class="f-step hot"><div class="n">4</div><b>自动结构化入库</b><span>工单 · 点位 · 虫情等级<br>统一口径数据底座</span></div>
+      <div class="f-arrow">›</div>
+      <div class="f-step"><div class="n">5</div><b>看板 / chatBI / 月报</b><span>下钻分析 · 对话问数<br>月度报告自动生成</span></div>
+    </div>
+    <div class="bi-note"><b>同一套数据底座：</b>呼应合作纪要「数据分析与报告支持」——本页看板与 chatBI 之外，后续可扩展至采购、销售报价等分析场景，无需重复建设。</div>
+  </section>
+
+</main>
+
+<footer class="site-footer">
+  <div class="foot-brand"><img src="assets/st_logo_white.png" alt="商汤科技"></div>
+  <b>商汤科技 · 大模型生态渠道部</b> — AI 技术底座 · 高保真交互原型（页面数据均为目标态示意，非真实经营数据）
+</footer>
+
+<div class="bi-toast" id="biToast"></div>
+
+<script>
+(function () {
+  'use strict';
+
+  function $(id) { return document.getElementById(id); }
+
+  /* ============================================================
+     数据（全部写死 · 目标态示意）
+     ============================================================ */
+
+  /* ---------- KPI 三套（随视角联动） ---------- */
+  var KPIS = {
+    hq: [
+      { l: '本月工单', v: '12,480', u: '单', s: '环比 <b>+8.4%</b>' },
+      { l: 'SLA 达标率', v: '98.2', u: '%', s: '急单 <b>99.1%</b>' },
+      { l: '急单占比', v: '9.6', u: '%', s: '环比 <b>-0.8pp</b>' },
+      { l: 'AI 自动派单率', v: '91', u: '%', s: '人工改派 9% · 全留痕', hot: true },
+      { l: '报告自动生成率', v: '96', u: '%', s: '单均省约 <b>30 分钟</b>' },
+      { l: '客户续约率', v: '93.5', u: '%', s: '同比 <b>+2.1pp</b>' }
+    ],
+    east: [
+      { l: '本月工单', v: '5,860', u: '单', s: '环比 <b>+9.1%</b>' },
+      { l: 'SLA 达标率', v: '98.6', u: '%', s: '急单 <b>100%</b>' },
+      { l: '急单占比', v: '10.2', u: '%', s: '环比 <b>-0.5pp</b>' },
+      { l: 'AI 自动派单率', v: '92', u: '%', s: '人工改派 8% · 全留痕', hot: true },
+      { l: '报告自动生成率', v: '97', u: '%', s: '单均省约 <b>30 分钟</b>' },
+      { l: '客户续约率', v: '94.2', u: '%', s: '同比 <b>+2.4pp</b>' }
+    ],
+    sn: [
+      { l: '本月工单', v: '1,236', u: '单', s: '环比 <b>+7.6%</b>' },
+      { l: 'SLA 达标率', v: '99.1', u: '%', s: '急单 <b>100%</b>' },
+      { l: '急单占比', v: '11.8', u: '%', s: '含今晨悦丰楼急单' },
+      { l: 'AI 自动派单率', v: '94', u: '%', s: '人工改派 6% · 全留痕', hot: true },
+      { l: '报告自动生成率', v: '98', u: '%', s: '单均省约 <b>30 分钟</b>' },
+      { l: '客户续约率', v: '95.0', u: '%', s: '同比 <b>+2.8pp</b>' }
+    ]
+  };
+
+  /* ---------- 角色 ---------- */
+  var ROLES = {
+    hq:   { name: '总部运营 · 全国', root: ['cn'],
+            scope: '视角范围：<b>全国 4 大区</b> · 从 L1 全国下钻',
+            hello: '当前视角：总部运营（全国）。我读的是与左侧看板同一份数据，可以问工单、SLA、虫情趋势、续约情况——先试试下面的预设问题。' },
+    east: { name: '大区经理 · 华东', root: ['cn', 'east'],
+            scope: '视角范围：<b>华东大区</b>（上海 / 杭州 / 苏州 / 南京 / 宁波）· 从 L2 华东下钻',
+            hello: '当前视角：大区经理 · 华东（吴丽娟调度中心所在大区）。可以问大区内任意城市、客户与技师的数——试试下面的预设问题。' },
+    sn:   { name: '调度主管 · 沪南', root: ['cn', 'east', 'sh'],
+            scope: '视角范围：<b>上海 · 沪南片区聚焦</b> · 从 L3 上海下钻（示例支线客户均在辖区）',
+            hello: '当前视角：调度主管 · 沪南（陈国栋所在片区）。可以问辖区门店虫情、今日工单完成情况——试试下面的预设问题。' }
+  };
+
+  /* ---------- 六级下钻树（示例支线：华东 → 上海 → 悦丰楼 HT-2026-088 → 徐家汇店 → 陈国栋） ---------- */
+  var TREE = {
+    id: 'cn', name: '全国', lv: 0,
+    sub: '本月工单 12,480 · SLA 98.2% · 4 大区 · 32 城市 · 700+ 持证技师',
+    children: [
+      { id: 'east', name: '华东大区', note: '上海 / 杭州 / 苏州 / 南京 / 宁波 · 吴丽娟调度中心所在大区',
+        wo: '5,860', sla: '98.6%', trend: { f: 'Ⅰ', t: 'Ⅱ', d: 'up' }, risk: '低',
+        sub: '本月工单 5,860 · SLA 98.6% · 2 个点位虫情等级上升（顺着 ↑ 下钻可定位）',
+        children: [
+          { id: 'sh', name: '上海', note: '沪南一区 / 沪南二区 / 松江站 等 6 片区',
+            wo: '2,650', sla: '99.0%', trend: { f: 'Ⅰ', t: 'Ⅱ', d: 'up' }, risk: '低',
+            sub: '本月工单 2,650 · SLA 99.0% · 含沪南一区 / 沪南二区 / 松江站等片区',
+            children: [
+              { id: 'yfl', name: '悦丰楼连锁餐饮', note: '合同 HT-2026-088 · 12 家门店 · 店长 周敏（徐家汇）',
+                wo: '38', sla: '100%', trend: { f: 'Ⅰ', t: 'Ⅱ', d: 'up' }, risk: '低',
+                sub: '合同 HT-2026-088 · 12 家门店 · SLA 100% · 今晨徐家汇店鼠害急单已处置',
+                children: [
+                  { id: 'xjh', name: '徐家汇店', note: '店长 周敏 · 今晨鼠害急单 WO-260720-201 已完成',
+                    wo: '5', sla: '100%', trend: { f: 'Ⅰ', t: 'Ⅱ', d: 'up' }, risk: '低',
+                    sub: '悦丰楼 · 徐家汇店 · 店长 周敏 · 本月工单 5 · 急单处置后转入加密巡查',
+                    children: [
+                      { id: 'chen', name: '陈国栋', note: 'SH-0217 · 主责技师 · 服务该店 6 次',
+                        wo: '4', sla: '100%', trend: { f: 'Ⅰ', t: 'Ⅱ', d: 'up' }, risk: null, board: 'tech' },
+                      { id: 'lzb', name: '刘志斌', note: 'SH-0198 · 支援 · 服务该店 1 次',
+                        wo: '1', sla: '100%', trend: { f: 'Ⅰ', t: 'Ⅰ', d: 'flat' }, risk: null }
+                    ] },
+                  { id: 'cnd', name: '长宁店', note: '飞虫防制月度维护', wo: '4', sla: '100%', trend: { f: 'Ⅰ', t: 'Ⅰ', d: 'flat' }, risk: '低' },
+                  { id: 'jad', name: '静安店', note: '蟑螂防制复查通过', wo: '4', sla: '100%', trend: { f: 'Ⅱ', t: 'Ⅰ', d: 'down' }, risk: '低' },
+                  { id: 'oth', name: '其余 9 家门店 · 合计', note: '均按计划巡检', wo: '25', sla: '100%', trend: { f: 'Ⅰ', t: 'Ⅰ', d: 'flat' }, risk: '低' }
+                ] },
+              { id: 'yt', name: '云台食品厂', note: '合同 HT-2026-102 · 松江厂区 · 品控经理 郑海峰',
+                wo: '22', sla: '100%', trend: { f: 'Ⅰ', t: 'Ⅱ', d: 'up' }, risk: '低',
+                sub: '合同 HT-2026-102 · 松江厂区 · 月检执行人 陈国栋 · 库房复查单已排今日 16:00',
+                children: [
+                  { id: 'sjc', name: '松江厂区 · 生产车间', note: '7 月虫控月检已完成', wo: '10', sla: '100%', trend: { f: 'Ⅰ', t: 'Ⅰ', d: 'flat' }, risk: '低' },
+                  { id: 'sjk', name: '松江厂区 · 库房', note: '结构缝隙已封堵 · 复查单 WO-260720-115 今日 16:00', wo: '8', sla: '100%', trend: { f: 'Ⅰ', t: 'Ⅱ', d: 'up' }, risk: '低' },
+                  { id: 'bc', name: '包材车间', note: '飞虫灯检查更换', wo: '4', sla: '100%', trend: { f: 'Ⅰ', t: 'Ⅰ', d: 'flat' }, risk: '低' }
+                ] },
+              { id: 'ht', name: '华亭商务大厦', note: '合同 HT-2026-076 · 物业经理 李国强 · 8 月底到期，续约方案已发',
+                wo: '12', sla: '100%', trend: { f: 'Ⅰ', t: 'Ⅰ', d: 'flat' }, risk: '中' },
+              { id: 'rest', name: '其余客户 · 合计', note: '286 份活跃合同',
+                wo: '2,578', sla: '98.9%', trend: { f: 'Ⅰ', t: 'Ⅰ', d: 'flat' }, risk: '低' }
+            ] },
+          { id: 'hz', name: '杭州', note: '急单响应偏慢 · 已建议晚间增配待命技师', wo: '1,180', sla: '98.2%', trend: { f: 'Ⅰ', t: 'Ⅰ', d: 'flat' }, risk: '中' },
+          { id: 'su', name: '苏州', note: '', wo: '960', sla: '98.4%', trend: { f: 'Ⅰ', t: 'Ⅰ', d: 'flat' }, risk: '低' },
+          { id: 'nj', name: '南京', note: '', wo: '730', sla: '98.0%', trend: { f: 'Ⅱ', t: 'Ⅰ', d: 'down' }, risk: '低' },
+          { id: 'nb', name: '宁波', note: '', wo: '340', sla: '97.6%', trend: { f: 'Ⅰ', t: 'Ⅰ', d: 'flat' }, risk: '中' }
+        ] },
+      { id: 'south', name: '华南大区', note: '广州 / 深圳 / 厦门 等', wo: '3,420', sla: '97.8%', trend: { f: 'Ⅱ', t: 'Ⅰ', d: 'down' }, risk: '低' },
+      { id: 'north', name: '华北大区', note: '北京 / 天津 / 青岛 等', wo: '2,180', sla: '98.1%', trend: { f: 'Ⅰ', t: 'Ⅰ', d: 'flat' }, risk: '中' },
+      { id: 'west', name: '西南大区', note: '成都 / 重庆 等', wo: '1,020', sla: '97.2%', trend: { f: 'Ⅱ', t: 'Ⅱ', d: 'flat' }, risk: '中' }
+    ]
+  };
+
+  var LV_NAMES = ['L1', 'L2', 'L3', 'L4', 'L5', 'L6'];
+  var CHILD_COL = ['大区', '城市', '客户（合同）', '门店 / 厂区', '技师'];
+
+  /* ---------- L6 · 陈国栋个人看板（写死） ---------- */
+  var TECH_BOARD =
+    '<div class="bi-board">' +
+    '  <div class="bi-bhead">' +
+    '    <span class="b-lv">L6</span>' +
+    '    <div class="b-t"><b>技师个人看板 · 陈国栋</b><span>SH-0217 · 沪南一区 · PCO 中级证 · 服务 8 年</span></div>' +
+    '    <span class="b-tag">目标态示意</span>' +
+    '  </div>' +
+    '  <div class="bi-techhead">' +
+    '    <span class="t-av">陈</span>' +
+    '    <div class="t-id"><b>陈国栋</b><span>徐家汇店主责技师 · 服务该店 6 次 · 今晨急单 08:41 到场（承诺 09:00 前）</span></div>' +
+    '    <span class="t-star">🏅 本月服务之星</span>' +
+    '  </div>' +
+    '  <div class="bi-techkpis">' +
+    '    <div class="bi-tk"><b>72</b><span>本月工单（单）</span></div>' +
+    '    <div class="bi-tk"><b>100%</b><span>SLA 达标率</span></div>' +
+    '    <div class="bi-tk"><b>100%</b><span>报告自动生成率</span></div>' +
+    '    <div class="bi-tk"><b>4.9</b><span>客户好评（5 分制）</span></div>' +
+    '    <div class="bi-tk"><b>100%</b><span>语音留痕覆盖</span></div>' +
+    '  </div>' +
+    '  <div class="bi-tblwrap"><table class="bi-table">' +
+    '    <thead><tr><th>今日工单</th><th>客户 / 地点</th><th>服务内容</th><th>状态</th></tr></thead>' +
+    '    <tbody>' +
+    '      <tr><td><b>WO-260720-201</b></td><td>悦丰楼连锁餐饮 · 徐家汇店</td><td>鼠害应急处置（急单）</td><td><span class="st-done">已完成 ✓ 周敏已签 · 服务 52 分钟</span></td></tr>' +
+    '      <tr><td><b>WO-260720-202</b></td><td>云台食品厂 · 松江厂区</td><td>7 月虫控月检</td><td><span class="st-done">已完成 ✓</span></td></tr>' +
+    '      <tr><td><b>WO-260720-198</b></td><td>华亭商务大厦</td><td>鼠饵站巡查</td><td><span class="st-done">已完成 ✓</span></td></tr>' +
+    '      <tr><td><b>WO-260720-115</b></td><td>云台食品厂 · 松江库房</td><td>鼠洞封堵复查</td><td><span class="st-serv">服务中 · 16:00 开始</span></td></tr>' +
+    '    </tbody>' +
+    '  </table></div>' +
+    '  <div class="bi-bfoot">以上数据由「随行助理」语音 / 拍照自动留痕生成，技师无需手工填报；工时与绩效自动记录，虫情等级评估仅分 Ⅰ / Ⅱ / Ⅲ 级。</div>' +
+    '</div>';
+
+  /* ---------- chatBI 预设问答（随视角变化） ---------- */
+  var QA = {
+    hq: [
+      { q: '本月哪些客户虫情等级在上升？',
+        a: '本月虫情等级上升的活跃点位共 2 处：悦丰楼·徐家汇店 Ⅰ→Ⅱ（后厨鼠迹，今晨急单已上门处置，转入加密巡查）；云台食品厂·松江库房 Ⅰ→Ⅱ（结构缝隙已封堵，复查单 WO-260720-115 已排今日 16:00）。两处均处于持续控制中，其余客户点位保持平稳。',
+        chart: '<div class="m-tbl"><table><tr><th>点位</th><th>等级变化</th><th>处置状态</th></tr>' +
+               '<tr><td>悦丰楼 · 徐家汇店</td><td><span class="tr-up">Ⅰ→Ⅱ ↑</span></td><td>急单已处置 · 加密巡查</td></tr>' +
+               '<tr><td>云台食品厂 · 松江库房</td><td><span class="tr-up">Ⅰ→Ⅱ ↑</span></td><td>已封堵 · 16:00 复查</td></tr></table></div>',
+        cal: '虫情等级为点位巡查综合评估（仅分 Ⅰ / Ⅱ / Ⅲ 级），来自技师 Agent 拍照识别与巡查留痕。' },
+      { q: '华东急单响应最慢的 3 个城市？',
+        a: '华东本月急单平均响应（建单 → 技师确认出发）最慢的 3 个城市：杭州 32 分钟、南京 28 分钟、宁波 26 分钟，均在 SLA 承诺时限内；上海 18 分钟为大区最快。建议为杭州晚间时段增配 1 名待命技师。',
+        chart: '<div class="m-bars">' +
+               '<div class="mb"><span>杭州</span><i><b class="warm" style="width:100%"></b></i><em>32 分</em></div>' +
+               '<div class="mb"><span>南京</span><i><b class="warm" style="width:88%"></b></i><em>28 分</em></div>' +
+               '<div class="mb"><span>宁波</span><i><b class="warm" style="width:81%"></b></i><em>26 分</em></div>' +
+               '<div class="mb"><span>苏州</span><i><b style="width:69%"></b></i><em>22 分</em></div>' +
+               '<div class="mb"><span>上海</span><i><b style="width:56%"></b></i><em>18 分</em></div></div>',
+        cal: '急单响应 = AI 客服建单时间 → 技师企微确认出发；数据取自调度台流转留痕。' },
+      { q: '悦丰楼今年服务了多少次、SLA 达标吗？',
+        a: '悦丰楼连锁餐饮（合同 HT-2026-088 · 12 家门店）今年累计服务 246 次，SLA 达标率 100%；其中急单 5 次全部按承诺时限上门——今晨徐家汇店鼠害急单 08:41 到场（承诺 09:00 前），已完成客户签核。',
+        chart: '<div class="m-bars">' +
+               '<div class="mb"><span>2月</span><i><b style="width:80%"></b></i><em>32 次</em></div>' +
+               '<div class="mb"><span>3月</span><i><b style="width:85%"></b></i><em>34 次</em></div>' +
+               '<div class="mb"><span>4月</span><i><b style="width:90%"></b></i><em>36 次</em></div>' +
+               '<div class="mb"><span>5月</span><i><b style="width:95%"></b></i><em>38 次</em></div>' +
+               '<div class="mb"><span>6月</span><i><b style="width:100%"></b></i><em>40 次</em></div>' +
+               '<div class="mb"><span>7月</span><i><b class="warm" style="width:90%"></b></i><em>36 次</em></div></div>',
+        cal: '服务次数按完成签核的工单计；1 月 30 次未在图中展示，全年合计 246 次。' }
+    ],
+    east: [
+      { q: '华东哪些客户虫情等级在上升？',
+        a: '华东大区本月虫情等级上升点位 2 处，均在上海：悦丰楼·徐家汇店 Ⅰ→Ⅱ（今晨急单已处置，转入加密巡查）；云台食品厂·松江库房 Ⅰ→Ⅱ（已封堵，16:00 复查）。杭州、苏州、南京、宁波客户点位保持平稳。',
+        chart: '<div class="m-tbl"><table><tr><th>点位</th><th>等级变化</th><th>处置状态</th></tr>' +
+               '<tr><td>悦丰楼 · 徐家汇店</td><td><span class="tr-up">Ⅰ→Ⅱ ↑</span></td><td>急单已处置 · 加密巡查</td></tr>' +
+               '<tr><td>云台食品厂 · 松江库房</td><td><span class="tr-up">Ⅰ→Ⅱ ↑</span></td><td>已封堵 · 16:00 复查</td></tr></table></div>',
+        cal: '虫情等级为点位巡查综合评估（仅分 Ⅰ / Ⅱ / Ⅲ 级），来自技师 Agent 拍照识别与巡查留痕。' },
+      { q: '华东急单响应最慢的 3 个城市？',
+        a: '本大区本月急单平均响应（建单 → 技师确认出发）最慢的 3 个城市：杭州 32 分钟、南京 28 分钟、宁波 26 分钟，均在 SLA 承诺时限内；上海 18 分钟最快。AI 已建议为杭州晚间时段增配 1 名待命技师。',
+        chart: '<div class="m-bars">' +
+               '<div class="mb"><span>杭州</span><i><b class="warm" style="width:100%"></b></i><em>32 分</em></div>' +
+               '<div class="mb"><span>南京</span><i><b class="warm" style="width:88%"></b></i><em>28 分</em></div>' +
+               '<div class="mb"><span>宁波</span><i><b class="warm" style="width:81%"></b></i><em>26 分</em></div>' +
+               '<div class="mb"><span>苏州</span><i><b style="width:69%"></b></i><em>22 分</em></div>' +
+               '<div class="mb"><span>上海</span><i><b style="width:56%"></b></i><em>18 分</em></div></div>',
+        cal: '急单响应 = AI 客服建单时间 → 技师企微确认出发；数据取自调度台流转留痕。' },
+      { q: '悦丰楼今年服务了多少次、SLA 达标吗？',
+        a: '悦丰楼连锁餐饮（合同 HT-2026-088 · 12 家门店）今年累计服务 246 次，SLA 达标率 100%；急单 5 次全部按承诺时限上门。今晨徐家汇店急单由沪南一区 陈国栋 08:41 到场处置，已完成签核。',
+        chart: '<div class="m-bars">' +
+               '<div class="mb"><span>2月</span><i><b style="width:80%"></b></i><em>32 次</em></div>' +
+               '<div class="mb"><span>3月</span><i><b style="width:85%"></b></i><em>34 次</em></div>' +
+               '<div class="mb"><span>4月</span><i><b style="width:90%"></b></i><em>36 次</em></div>' +
+               '<div class="mb"><span>5月</span><i><b style="width:95%"></b></i><em>38 次</em></div>' +
+               '<div class="mb"><span>6月</span><i><b style="width:100%"></b></i><em>40 次</em></div>' +
+               '<div class="mb"><span>7月</span><i><b class="warm" style="width:90%"></b></i><em>36 次</em></div></div>',
+        cal: '服务次数按完成签核的工单计；1 月 30 次未在图中展示，全年合计 246 次。' }
+    ],
+    sn: [
+      { q: '沪南片区哪些点位虫情等级在上升？',
+        a: '沪南片区本月虫情等级上升点位 1 处：悦丰楼·徐家汇店 Ⅰ→Ⅱ（后厨鼠迹，今晨急单已处置并转入加密巡查，复查计划已生成）。邻区松江站的云台食品厂库房点位同步在复查跟踪中（今日 16:00）。',
+        chart: '<div class="m-tbl"><table><tr><th>点位</th><th>等级变化</th><th>处置状态</th></tr>' +
+               '<tr><td>悦丰楼 · 徐家汇店</td><td><span class="tr-up">Ⅰ→Ⅱ ↑</span></td><td>急单已处置 · 加密巡查</td></tr>' +
+               '<tr><td>云台食品厂 · 松江库房（邻区）</td><td><span class="tr-up">Ⅰ→Ⅱ ↑</span></td><td>已封堵 · 16:00 复查</td></tr></table></div>',
+        cal: '虫情等级为点位巡查综合评估（仅分 Ⅰ / Ⅱ / Ⅲ 级），来自技师 Agent 拍照识别与巡查留痕。' },
+      { q: '今天陈国栋的工单完成情况？',
+        a: '陈国栋今日 4 单：悦丰楼徐家汇店鼠害急单 WO-260720-201 已完成（服务 52 分钟，周敏店长已签核）；云台食品厂月检 WO-260720-202 已完成；华亭大厦饵站巡查 WO-260720-198 已完成；云台库房封堵复查 WO-260720-115 服务中（16:00 开始）。全部语音留痕、报告自动生成。',
+        chart: '<div class="m-tbl"><table><tr><th>工单</th><th>内容</th><th>状态</th></tr>' +
+               '<tr><td>WO-260720-201</td><td>徐家汇店 · 急单</td><td><span class="st-done">已完成 ✓</span></td></tr>' +
+               '<tr><td>WO-260720-202</td><td>云台 · 月检</td><td><span class="st-done">已完成 ✓</span></td></tr>' +
+               '<tr><td>WO-260720-198</td><td>华亭 · 饵站巡查</td><td><span class="st-done">已完成 ✓</span></td></tr>' +
+               '<tr><td>WO-260720-115</td><td>云台库房 · 复查</td><td><span class="st-serv">服务中</span></td></tr></table></div>',
+        cal: '状态取自随行 Agent 签核留痕与调度台流转，16:40 快照。' },
+      { q: '悦丰楼徐家汇店今年服务了多少次、SLA 达标吗？',
+        a: '悦丰楼·徐家汇店（合同 HT-2026-088）今年累计服务 22 次，SLA 达标率 100%。今晨鼠害急单 08:41 到场（承诺 09:00 前）；当前点位虫情等级 Ⅱ 级，处置后按加密巡查计划持续控制，下次复查已排入本周。',
+        chart: '<div class="m-bars">' +
+               '<div class="mb"><span>2月</span><i><b style="width:75%"></b></i><em>3 次</em></div>' +
+               '<div class="mb"><span>3月</span><i><b style="width:75%"></b></i><em>3 次</em></div>' +
+               '<div class="mb"><span>4月</span><i><b style="width:75%"></b></i><em>3 次</em></div>' +
+               '<div class="mb"><span>5月</span><i><b style="width:75%"></b></i><em>3 次</em></div>' +
+               '<div class="mb"><span>6月</span><i><b style="width:100%"></b></i><em>4 次</em></div>' +
+               '<div class="mb"><span>7月</span><i><b class="warm" style="width:75%"></b></i><em>3 次</em></div></div>',
+        cal: '服务次数按完成签核的工单计；1 月 3 次未在图中展示，全年合计 22 次。' }
+    ]
+  };
+
+  /* ============================================================
+     状态与渲染
+     ============================================================ */
+  var role = 'hq';
+  var path = [TREE];
+  var chatGen = 0;
+  var busy = false;
+
+  /* ---------- 工具 ---------- */
+  function findPath(ids) {
+    var node = TREE, arr = [TREE];
+    for (var i = 1; i < ids.length; i++) {
+      var kids = node.children || [];
+      for (var j = 0; j < kids.length; j++) {
+        if (kids[j].id === ids[i]) { node = kids[j]; arr.push(node); break; }
+      }
+    }
+    return arr;
+  }
+  function trendHtml(t) {
+    if (!t) return '<span class="tr-flat">—</span>';
+    if (t.d === 'flat') return '<span class="tr-flat">' + t.t + ' →</span>';
+    if (t.d === 'up') return '<span class="tr-up">' + t.f + '→' + t.t + ' ↑</span>';
+    return '<span class="tr-dn">' + t.f + '→' + t.t + ' ↓</span>';
+  }
+  function riskHtml(r) {
+    if (!r) return '<span class="tr-flat">—</span>';
+    var cls = r === '高' ? 'r-high' : (r === '中' ? 'r-mid' : 'r-low');
+    return '<span class="bi-tag ' + cls + '">' + r + '</span>';
+  }
+
+  var toastTimer = null;
+  function showToast(msg) {
+    var el = $('biToast');
+    el.textContent = msg;
+    el.classList.add('show');
+    if (toastTimer) clearTimeout(toastTimer);
+    toastTimer = setTimeout(function () { el.classList.remove('show'); }, 3000);
+  }
+
+  /* ---------- KPI ---------- */
+  function renderKpis() {
+    $('kpiGrid').innerHTML = KPIS[role].map(function (k) {
+      return '<div class="bi-kpi' + (k.hot ? ' hot' : '') + '">' +
+        '<span class="k-l">' + k.l + '</span>' +
+        '<div class="k-v">' + k.v + '<small>' + k.u + '</small></div>' +
+        '<div class="k-s">' + k.s + '</div></div>';
+    }).join('');
+  }
+
+  /* ---------- 面包屑 ---------- */
+  function renderCrumbs() {
+    var rootIdx = ROLES[role].root.length - 1;
+    var html = '';
+    for (var i = rootIdx; i < path.length; i++) {
+      if (i > rootIdx) html += '<span class="csep">›</span>';
+      var cur = (i === path.length - 1);
+      html += '<span class="bi-crumb' + (cur ? ' cur' : '') + '" data-idx="' + i + '">' + path[i].name + '</span>';
+    }
+    $('crumbs').innerHTML = html;
+    $('scopeNote').innerHTML = ROLES[role].scope;
+  }
+
+  /* ---------- 看板 ---------- */
+  function renderBoard() {
+    renderCrumbs();
+    var node = path[path.length - 1];
+    var depth = path.length - 1;
+
+    if (node.board === 'tech') {
+      $('boardZone').innerHTML = TECH_BOARD;
+      return;
+    }
+
+    var rows = (node.children || []).map(function (c, i) {
+      var can = !!(c.children || c.board);
+      return '<tr class="' + (can ? 'drill' : 'dim') + '" data-i="' + i + '">' +
+        '<td><b>' + c.name + '</b>' + (c.note ? '<span class="r-sub">' + c.note + '</span>' : '') + '</td>' +
+        '<td>' + c.wo + '</td>' +
+        '<td>' + c.sla + '</td>' +
+        '<td>' + trendHtml(c.trend) + '</td>' +
+        '<td>' + riskHtml(c.risk) + '</td>' +
+        '<td class="go">›</td></tr>';
+    }).join('');
+
+    $('boardZone').innerHTML =
+      '<div class="bi-board">' +
+      '  <div class="bi-bhead">' +
+      '    <span class="b-lv">' + LV_NAMES[depth] + '</span>' +
+      '    <div class="b-t"><b>' + node.name + '</b><span>' + (node.sub || '') + '</span></div>' +
+      '    <span class="b-tag">目标态示意</span>' +
+      '  </div>' +
+      '  <div class="bi-tblwrap"><table class="bi-table">' +
+      '    <thead><tr><th>' + CHILD_COL[depth] + '</th><th>本月工单</th><th>SLA 达标</th><th>虫情等级趋势</th><th>续约风险</th><th></th></tr></thead>' +
+      '    <tbody>' + rows + '</tbody>' +
+      '  </table></div>' +
+      '  <div class="bi-bfoot">点击高亮行继续下钻，点面包屑返回上级；灰色行为示意占位（原型仅开放示例支线：华东 → 上海 → 悦丰楼 → 徐家汇店 → 陈国栋，以及云台食品厂厂区支线）。</div>' +
+      '</div>';
+  }
+
+  /* ---------- chatBI ---------- */
+  function renderChips() {
+    $('chatChips').innerHTML = QA[role].map(function (item, i) {
+      return '<button class="bi-chip" type="button" data-i="' + i + '">' + item.q + '</button>';
+    }).join('');
+  }
+  function resetChat() {
+    chatGen++;
+    busy = false;
+    $('chatChips').classList.remove('busy');
+    var msgs = $('chatMsgs');
+    msgs.innerHTML = '';
+    var hello = document.createElement('div');
+    hello.className = 'bi-m a';
+    hello.textContent = ROLES[role].hello;
+    msgs.appendChild(hello);
+  }
+  function typeText(el, text, done) {
+    var g = chatGen;
+    var msgs = $('chatMsgs');
+    var caret = document.createElement('span');
+    caret.className = 'bi-caret';
+    var tn = document.createTextNode('');
+    el.appendChild(tn);
+    el.appendChild(caret);
+    var i = 0;
+    var timer = setInterval(function () {
+      if (g !== chatGen) { clearInterval(timer); return; }
+      i += 2;
+      if (i > text.length) i = text.length;
+      tn.data = text.slice(0, i);
+      msgs.scrollTop = msgs.scrollHeight;
+      if (i >= text.length) {
+        clearInterval(timer);
+        caret.remove();
+        done();
+      }
+    }, 22);
+  }
+  function ask(i) {
+    if (busy) return;
+    var item = QA[role][i];
+    if (!item) return;
+    var msgs = $('chatMsgs');
+
+    var q = document.createElement('div');
+    q.className = 'bi-m q';
+    q.textContent = item.q;
+    msgs.appendChild(q);
+    msgs.scrollTop = msgs.scrollHeight;
+
+    busy = true;
+    $('chatChips').classList.add('busy');
+    var g = chatGen;
+
+    setTimeout(function () {
+      if (g !== chatGen) return;
+      var a = document.createElement('div');
+      a.className = 'bi-m a';
+      var txt = document.createElement('div');
+      a.appendChild(txt);
+      msgs.appendChild(a);
+      typeText(txt, item.a, function () {
+        if (g !== chatGen) return;
+        if (item.chart) a.insertAdjacentHTML('beforeend', item.chart);
+        if (item.cal) {
+          var cal = document.createElement('div');
+          cal.className = 'm-cal';
+          cal.textContent = item.cal;
+          a.appendChild(cal);
+        }
+        msgs.scrollTop = msgs.scrollHeight;
+        busy = false;
+        $('chatChips').classList.remove('busy');
+      });
+    }, 420);
+  }
+
+  /* ---------- 角色切换 ---------- */
+  function setRole(id) {
+    if (!ROLES[id] || id === role) return;
+    role = id;
+    path = findPath(ROLES[id].root);
+    $('vRole').textContent = ROLES[id].name;
+    var btns = $('roleBar').querySelectorAll('.bi-role');
+    for (var i = 0; i < btns.length; i++) {
+      btns[i].classList.toggle('on', btns[i].getAttribute('data-role') === id);
+    }
+    renderKpis();
+    renderBoard();
+    renderChips();
+    resetChat();
+  }
+
+  /* ---------- 事件委托 ---------- */
+  $('roleBar').addEventListener('click', function (e) {
+    var btn = e.target.closest('.bi-role');
+    if (btn) setRole(btn.getAttribute('data-role'));
+  });
+
+  $('boardZone').addEventListener('click', function (e) {
+    var tr = e.target.closest('tr[data-i]');
+    if (!tr) return;
+    var node = path[path.length - 1];
+    var child = (node.children || [])[Number(tr.getAttribute('data-i'))];
+    if (!child) return;
+    if (child.children || child.board) {
+      path.push(child);
+      renderBoard();
+    } else {
+      showToast('高保真原型仅开放示例下钻支线（华东 → 上海 → 悦丰楼 → 徐家汇店 → 陈国栋）');
+    }
+  });
+
+  $('crumbs').addEventListener('click', function (e) {
+    var c = e.target.closest('.bi-crumb');
+    if (!c || c.classList.contains('cur')) return;
+    var idx = Number(c.getAttribute('data-idx'));
+    path = path.slice(0, idx + 1);
+    renderBoard();
+  });
+
+  $('chatChips').addEventListener('click', function (e) {
+    var chip = e.target.closest('.bi-chip');
+    if (chip) ask(Number(chip.getAttribute('data-i')));
+  });
+
+  function freeAsk() {
+    showToast('演示原型：自由问数将在正式版接入大语言模型，当前请点选预设问题体验');
+    $('chatInput').value = '';
+  }
+  $('chatSend').addEventListener('click', freeAsk);
+  $('chatInput').addEventListener('keydown', function (e) {
+    if (e.key === 'Enter') freeAsk();
+  });
+
+  /* ---------- 初始渲染 ---------- */
+  renderKpis();
+  renderBoard();
+  renderChips();
+  resetChat();
+})();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,716 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>场景三 · AI 工单智能调度台 | LBS 史伟莎 × 商汤 AI 现场服务原型</title>
+<link rel="stylesheet" href="assets/style.css">
+<style>
+/* ============================================================
+   dispatch.html 页面专属样式（前缀 .dp-）
+   深色调度 console：整页深藏蓝渐变，topnav / footer 页内覆盖为深色
+   ============================================================ */
+body {
+  background:
+    radial-gradient(1100px 520px at 82% -12%, rgba(26, 122, 210, .16), transparent 60%),
+    radial-gradient(900px 420px at -6% 0%, rgba(206, 74, 45, .09), transparent 55%),
+    linear-gradient(180deg, #081D3D 0%, #0A2547 46%, #061831 100%);
+  background-attachment: fixed;
+  color: #D5E3F0;
+}
+
+/* ---- 深色 topnav 覆盖 ---- */
+.topnav { background: rgba(6, 20, 40, .86); border-bottom-color: rgba(169, 212, 245, .12); }
+.topnav .brand .divider { background: rgba(169, 212, 245, .22); }
+.topnav .brand .name { color: #F1F8FD; }
+.topnav .brand .name small { color: rgba(213, 227, 240, .45); }
+.topnav nav a { color: rgba(213, 227, 240, .68); }
+.topnav nav a:hover { background: rgba(206, 74, 45, .14); color: #F6C3B6; }
+.topnav nav a.active { background: var(--teal); color: #fff; }
+.topnav nav a.active .dot { background: #FBD8CF; }
+
+/* ---- 深色页头 ---- */
+.page-head .eyebrow { color: #5AAEF0; }
+.page-head h1 { color: #F1F8FD; }
+.page-head h1 .hl { color: #6CB8F5; }
+.page-head .sub { color: rgba(213, 227, 240, .72); }
+.page-head .sub b { color: #6CB8F5; }
+
+/* console 状态条 */
+.dp-console {
+  display: flex; align-items: center; gap: 14px; flex-wrap: wrap;
+  background: rgba(255, 255, 255, .04); border: 1px solid rgba(169, 212, 245, .14);
+  border-radius: 14px; padding: 11px 18px; margin: 18px 0 24px; font-size: 12.5px;
+  color: rgba(213, 227, 240, .75);
+}
+.dp-console .live { display: flex; align-items: center; gap: 7px; font-weight: 700; color: #8CC8F7; letter-spacing: 1px; font-size: 12px; }
+.dp-console .live i { width: 8px; height: 8px; border-radius: 50%; background: #2F8FD8; animation: dpPulse 1.6s infinite; }
+@keyframes dpPulse { 0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(47, 143, 216, .55); } 50% { opacity: .55; box-shadow: 0 0 0 5px rgba(47, 143, 216, 0); } }
+.dp-console .sep { width: 1px; height: 14px; background: rgba(169, 212, 245, .2); }
+.dp-console b { color: #EEF6FD; font-weight: 600; }
+.dp-console .demo-tag {
+  margin-left: auto; background: rgba(26, 122, 210, .2); color: #6CB8F5;
+  border: 1px solid rgba(206, 74, 45, .35); border-radius: 999px;
+  padding: 3px 12px; font-size: 11.5px; font-weight: 700; letter-spacing: 1px;
+}
+@media (max-width: 720px) { .dp-console .demo-tag { margin-left: 0; } }
+
+/* ---- KPI 行 ---- */
+.dp-kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(168px, 1fr)); gap: 14px; margin-bottom: 26px; }
+.dp-kpi {
+  background: rgba(255, 255, 255, .035); border: 1px solid rgba(169, 212, 245, .13);
+  border-radius: 14px; padding: 15px 17px; position: relative; overflow: hidden;
+}
+.dp-kpi::after { content: ""; position: absolute; left: 0; top: 0; width: 100%; height: 2px; background: linear-gradient(90deg, rgba(90, 174, 240, .7), transparent 70%); }
+.dp-kpi.hot::after { background: linear-gradient(90deg, rgba(108, 184, 245, .85), transparent 70%); }
+.dp-kpi .k-l { font-size: 11.5px; color: rgba(213, 227, 240, .55); letter-spacing: .5px; }
+.dp-kpi .k-v { font-size: 28px; font-weight: 800; color: #F7FBFE; font-variant-numeric: tabular-nums; line-height: 1.35; letter-spacing: .3px; }
+.dp-kpi .k-v small { font-size: 13px; font-weight: 600; color: rgba(213, 227, 240, .55); margin-left: 2px; }
+.dp-kpi .k-s { font-size: 11px; color: #7F9CC0; margin-top: 2px; }
+.dp-kpi .k-s b { color: #6AB6F2; font-weight: 700; }
+.dp-kpi.hot .k-s b { color: #6CB8F5; }
+
+/* ---- 通用深色面板 / 区块标题 ---- */
+.dp-panel {
+  background: rgba(255, 255, 255, .035); border: 1px solid rgba(169, 212, 245, .13);
+  border-radius: 16px; padding: 22px 24px; box-shadow: 0 16px 44px rgba(0, 0, 0, .28);
+  margin-bottom: 24px;
+}
+.dp-sect { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; margin-bottom: 16px; }
+.dp-sect::before { content: ""; width: 8px; height: 8px; border-radius: 3px; background: var(--warm); flex: none; align-self: center; }
+.dp-sect b { font-size: 16.5px; color: #F1F8FD; }
+.dp-sect small { font-size: 12px; color: rgba(213, 227, 240, .48); }
+.dp-sect .star {
+  background: rgba(26, 122, 210, .2); color: #6CB8F5; border-radius: 999px;
+  font-size: 10.5px; font-weight: 700; padding: 2px 10px; letter-spacing: 1px;
+}
+
+/* ---- ★ AI 智能派单演示 ---- */
+.dp-demo { display: grid; grid-template-columns: 400px 1fr; gap: 24px; align-items: start; }
+@media (max-width: 1080px) { .dp-demo { grid-template-columns: 1fr; } }
+.dp-colhead { font-size: 12px; font-weight: 700; letter-spacing: 1.5px; color: #7F9CC0; margin-bottom: 10px; }
+.dp-colhead small { font-weight: 500; letter-spacing: 0; color: rgba(213, 227, 240, .42); margin-left: 6px; }
+
+.dp-wo {
+  border: 1px solid rgba(169, 212, 245, .15); border-left: 3px solid rgba(169, 212, 245, .25);
+  border-radius: 13px; padding: 13px 16px; background: rgba(255, 255, 255, .03);
+  cursor: pointer; transition: all .18s; margin-bottom: 12px; user-select: none;
+}
+.dp-wo:last-child { margin-bottom: 0; }
+.dp-wo:hover { border-color: rgba(90, 174, 240, .55); background: rgba(26, 122, 210, .07); }
+.dp-wo.urgent { border-left-color: #FF8B87; }
+.dp-wo.on { border-color: #5AAEF0; background: rgba(26, 122, 210, .13); box-shadow: 0 0 0 1px rgba(90, 174, 240, .45); }
+.dp-wo .wo-top { display: flex; align-items: center; gap: 8px; }
+.dp-wo .wo-top b { font-size: 13.5px; color: #F1F8FD; font-variant-numeric: tabular-nums; letter-spacing: .3px; }
+.dp-wo .wo-top .wo-pill { margin-left: auto; }
+.dp-wo .wo-cust { font-size: 13px; color: #C4D6E8; margin-top: 6px; }
+.dp-wo .wo-cust i { font-style: normal; color: rgba(213, 227, 240, .48); font-size: 11.5px; margin-left: 6px; }
+.dp-wo .wo-meta { font-size: 11.5px; color: rgba(213, 227, 240, .52); margin-top: 3px; line-height: 1.55; }
+.dp-wo .wo-meta b { color: #6CB8F5; font-weight: 600; }
+.dp-wo .wo-src { font-size: 10.5px; color: #7F9CC0; margin-top: 6px; display: flex; align-items: center; gap: 5px; }
+.dp-wo .wo-src::before { content: "⛁"; color: rgba(90, 174, 240, .6); }
+
+.wo-pill { display: inline-block; padding: 2px 10px; border-radius: 999px; font-size: 10.5px; font-weight: 700; white-space: nowrap; background: rgba(26, 122, 210, .2); color: #6CB8F5; }
+.wo-pill.ok { background: rgba(0, 161, 0, .2); color: #7BD87B; }
+
+/* AI 推荐区 */
+.dp-reco { min-height: 320px; }
+.dp-reco-head {
+  display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+  border-bottom: 1px dashed rgba(169, 212, 245, .18); padding-bottom: 11px; margin-bottom: 13px;
+}
+.dp-reco-head .ai-ic {
+  width: 30px; height: 30px; border-radius: 9px; flex: none;
+  background: linear-gradient(135deg, #1A7AD2, #0E2A4E); border: 1px solid rgba(90, 174, 240, .4);
+  display: flex; align-items: center; justify-content: center; font-size: 15px;
+}
+.dp-reco-head b { font-size: 14px; color: #F1F8FD; }
+.dp-reco-head span { font-size: 11.5px; color: rgba(213, 227, 240, .5); }
+.dp-reco-head .for { margin-left: auto; font-size: 11.5px; color: #7F9CC0; font-variant-numeric: tabular-nums; }
+.dp-reco-head .for b { color: #6CB8F5; font-size: 11.5px; }
+
+.dp-tech {
+  border: 1px solid rgba(169, 212, 245, .15); border-radius: 13px; padding: 13px 16px;
+  background: rgba(255, 255, 255, .03); cursor: pointer; transition: all .18s;
+  margin-bottom: 10px; animation: dpIn .3s ease both; user-select: none;
+}
+.dp-tech:hover { border-color: rgba(90, 174, 240, .45); }
+.dp-tech.pick { border-color: #6CB8F5; background: rgba(26, 122, 210, .13); box-shadow: 0 0 0 1px rgba(90, 174, 240, .5); }
+.dp-tech.dim { opacity: .45; pointer-events: none; }
+@keyframes dpIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+.dp-tech .t-row { display: flex; align-items: center; gap: 10px; }
+.dp-tech .t-av {
+  width: 34px; height: 34px; border-radius: 9px; flex: none; color: #fff;
+  display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 700;
+  background: linear-gradient(135deg, var(--teal), var(--ink3));
+}
+.dp-tech.pick .t-av { background: linear-gradient(135deg, var(--warm), var(--warm-d)); }
+.dp-tech .t-id b { font-size: 14px; color: #F1F8FD; }
+.dp-tech .t-id .best {
+  margin-left: 6px; font-size: 10px; font-weight: 700; color: #6CB8F5;
+  background: rgba(206, 74, 45, .16); border-radius: 999px; padding: 1px 8px; vertical-align: 1px;
+}
+.dp-tech .t-id span { display: block; font-size: 11px; color: rgba(213, 227, 240, .5); margin-top: 1px; }
+.dp-tech .t-score { margin-left: auto; text-align: right; flex: none; }
+.dp-tech .t-score .v { font-size: 23px; font-weight: 800; color: #6AB6F2; font-variant-numeric: tabular-nums; line-height: 1.15; }
+.dp-tech.pick .t-score .v { color: #6CB8F5; }
+.dp-tech .t-score .l { font-size: 10px; color: rgba(213, 227, 240, .42); }
+.dp-tech .t-bar { height: 6px; border-radius: 3px; background: rgba(255, 255, 255, .07); overflow: hidden; margin: 10px 0 9px; }
+.dp-tech .t-bar i { display: block; height: 100%; border-radius: 3px; background: linear-gradient(90deg, #1A7AD2, #5AAEF0); animation: dpGrow .7s ease both; transform-origin: left; }
+.dp-tech.pick .t-bar i { background: linear-gradient(90deg, var(--warm), var(--warm-l)); }
+@keyframes dpGrow { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+.dp-tech .t-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.dp-tech .t-chips span {
+  font-size: 11px; color: #BFE5D6; background: rgba(169, 212, 245, .09);
+  border: 1px solid rgba(169, 212, 245, .14); border-radius: 999px; padding: 2.5px 9px; line-height: 1.5;
+}
+.dp-tech .t-chips span.hot { color: #F6C3B6; background: rgba(206, 74, 45, .12); border-color: rgba(206, 74, 45, .3); }
+
+.dp-btn {
+  width: 100%; border: none; border-radius: 12px; padding: 13px 0; margin-top: 4px;
+  font-family: var(--font); font-size: 15px; font-weight: 700; letter-spacing: 2px; cursor: pointer;
+  background: linear-gradient(92deg, #CE4A2D, #B2371D); color: #fff;
+  box-shadow: 0 12px 28px rgba(206, 74, 45, .28); transition: all .18s;
+}
+.dp-btn:hover { transform: translateY(-1px); box-shadow: 0 14px 32px rgba(206, 74, 45, .36); }
+.dp-btn:active { transform: translateY(0); }
+.dp-btn.done {
+  background: rgba(0, 161, 0, .18); color: #7BD87B; cursor: default;
+  border: 1px solid rgba(0, 161, 0, .4); box-shadow: none; transform: none; letter-spacing: 1px;
+}
+.dp-hint { font-size: 11.5px; color: rgba(213, 227, 240, .48); margin-top: 10px; text-align: center; }
+.dp-hint b { color: #8CC8F7; font-weight: 600; }
+.dp-log { margin-top: 13px; display: flex; flex-direction: column; gap: 7px; }
+.dp-log div {
+  font-size: 12px; color: #9CB9D6; background: rgba(26, 122, 210, .09);
+  border-left: 2px solid #2F8FD8; padding: 7px 12px; border-radius: 0 9px 9px 0; animation: dpIn .32s ease both;
+}
+.dp-log div b { color: #DFF7EC; font-weight: 600; }
+
+/* ---- 工单池表格 ---- */
+.dp-tblwrap { overflow-x: auto; }
+.dp-table { width: 100%; border-collapse: collapse; font-size: 13px; min-width: 780px; }
+.dp-table th {
+  text-align: left; font-size: 11px; font-weight: 700; letter-spacing: 1.5px; color: #7F9CC0;
+  padding: 9px 12px; border-bottom: 1px solid rgba(169, 212, 245, .22); white-space: nowrap;
+}
+.dp-table td { padding: 10.5px 12px; border-bottom: 1px solid rgba(169, 212, 245, .08); color: #C4D6E8; white-space: nowrap; font-variant-numeric: tabular-nums; }
+.dp-table tr:last-child td { border-bottom: none; }
+.dp-table tbody tr { transition: background .15s; }
+.dp-table tbody tr:hover { background: rgba(255, 255, 255, .025); }
+.dp-table td b { color: #EEF6FD; font-weight: 600; }
+.dp-table td .sub-t { color: rgba(213, 227, 240, .45); font-size: 11.5px; }
+
+.dp-tag { display: inline-block; padding: 2px 10px; border-radius: 999px; font-size: 11px; font-weight: 600; white-space: nowrap; }
+.g-urgent  { background: rgba(217, 83, 79, .16);  color: #FF9D9A; }
+.g-plan    { background: rgba(26, 122, 210, .16); color: #6AB6F2; }
+.g-recheck { background: rgba(217, 154, 62, .16); color: #E7C078; }
+.s-wait { background: rgba(26, 122, 210, .2); color: #6CB8F5; }
+.s-sent { background: rgba(90, 174, 240, .14); color: #5AAEF0; }
+.s-way  { background: rgba(231, 192, 120, .13); color: #E7C078; }
+.s-serv { background: rgba(26, 122, 210, .2); color: #8CC8F7; }
+.s-serv::before { content: "●"; font-size: 8px; margin-right: 5px; animation: dpPulse 1.4s infinite; }
+.s-sign { background: rgba(206, 74, 45, .11); color: #F6C3B6; }
+.s-done { background: rgba(255, 255, 255, .07); color: rgba(213, 227, 240, .5); }
+
+/* ---- SLA 预警 ---- */
+.dp-alert {
+  display: flex; gap: 14px; align-items: flex-start; border-radius: 14px; padding: 15px 18px;
+  border: 1px solid rgba(217, 83, 79, .35); background: rgba(217, 83, 79, .07); margin-bottom: 12px;
+}
+.dp-alert:last-child { margin-bottom: 0; }
+.dp-alert.gold { border-color: rgba(231, 192, 120, .32); background: rgba(231, 192, 120, .06); }
+.dp-alert .a-ic {
+  width: 36px; height: 36px; border-radius: 11px; flex: none; font-size: 17px;
+  background: rgba(217, 83, 79, .15); display: flex; align-items: center; justify-content: center;
+}
+.dp-alert.gold .a-ic { background: rgba(231, 192, 120, .13); }
+.dp-alert .a-t { font-size: 13.5px; color: #F1F8FD; font-weight: 700; }
+.dp-alert .a-t .dp-tag { margin-left: 8px; vertical-align: 1px; }
+.dp-alert .a-d { font-size: 12.5px; color: rgba(213, 227, 240, .68); margin-top: 3px; line-height: 1.65; }
+.dp-alert .a-d b { color: #F6C3B6; font-weight: 600; }
+.dp-alert .a-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 9px; }
+.dp-alert .a-chips span {
+  font-size: 11px; color: #BFE5D6; background: rgba(169, 212, 245, .09);
+  border: 1px solid rgba(169, 212, 245, .16); border-radius: 999px; padding: 2.5px 10px;
+}
+.dp-alert .a-chips span.did { color: #7BD87B; border-color: rgba(0, 161, 0, .3); background: rgba(0, 161, 0, .1); }
+.dp-alert .a-chips span.did::before { content: "✓ "; }
+.dp-alert .a-res { display: none; font-size: 12px; color: #7EC0F4; margin-top: 9px; font-weight: 600; }
+.dp-alert.resolved { border-color: rgba(0, 161, 0, .35); background: rgba(0, 161, 0, .07); }
+.dp-alert.resolved .a-res { display: block; animation: dpIn .3s both; }
+
+/* ---- 调度闭环 flow（深色覆盖共享 .flow） ---- */
+.dp-panel .flow .f-step b { color: #E9F2FB; }
+.dp-panel .flow .f-step span { color: rgba(213, 227, 240, .45); }
+.dp-panel .flow .f-step .n { background: #10305A; color: #8CC8F7; border: 1px solid rgba(90, 174, 240, .35); }
+.dp-panel .flow .f-step.hot .n { background: var(--warm); color: #fff; border-color: transparent; }
+.dp-panel .flow .f-arrow { color: #6CB8F5; }
+
+/* ---- 为什么 AI 派得准 ---- */
+.dp-why { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+@media (max-width: 900px) { .dp-why { grid-template-columns: 1fr; } }
+.dp-why .w-card {
+  background: rgba(255, 255, 255, .03); border: 1px solid rgba(169, 212, 245, .13);
+  border-top: 3px solid var(--teal); border-radius: 13px; padding: 16px 18px;
+}
+.dp-why .w-card.warm { border-top-color: var(--warm); }
+.dp-why .w-card.gold { border-top-color: var(--gold); }
+.dp-why .w-ic { font-size: 20px; margin-bottom: 8px; }
+.dp-why .w-card b { display: block; font-size: 14.5px; color: #F1F8FD; margin-bottom: 5px; }
+.dp-why .w-card p { font-size: 12.5px; color: rgba(213, 227, 240, .62); line-height: 1.7; }
+.dp-why .w-card p i { font-style: normal; color: #8CC8F7; }
+
+/* ---- 深色 note / footer 覆盖 ---- */
+.dp-note {
+  font-size: 12.5px; color: rgba(213, 227, 240, .58); background: rgba(26, 122, 210, .08);
+  border: 1px dashed rgba(90, 174, 240, .28); border-radius: 10px; padding: 10px 14px; margin-top: 16px;
+}
+.dp-note b { color: #6AB6F2; }
+.site-footer { background: rgba(6, 18, 15, .7); border-top-color: rgba(169, 212, 245, .12); color: rgba(213, 227, 240, .45); }
+.site-footer b { color: rgba(213, 227, 240, .75); }
+</style>
+</head>
+<body>
+
+<header class="topnav">
+  <div class="brand">
+    <img src="assets/st_logo_white.png" alt="商汤科技">
+    <div class="divider"></div>
+    <div class="name">LBS 史伟莎 · AI 现场服务<small>SENSETIME × LBS GROUP · PROTOTYPE</small></div>
+  </div>
+  <nav>
+    <a href="index.html">方案总览</a>
+    <a href="agent_jishi.html">一线技师 Agent</a>
+    <a href="kefu.html">AI 智能客服</a>
+    <a class="active" href="dispatch.html"><span class="dot"></span>AI 工单调度</a>
+    <a href="bi.html">数据看板</a>
+  </nav>
+</header>
+
+<main class="page">
+
+  <div class="page-head">
+    <div class="eyebrow">SCENE 03 · AI DISPATCH CONSOLE</div>
+    <h1>场景三 · AI 工单智能调度 —— 「合适的工单，<span class="hl">秒级派给合适的技师</span>」</h1>
+    <p class="sub">「AI 调度中枢」基于 <b>资质 × 距离 × 路线顺延 × 客户熟悉度 × 药剂携带</b> 五维评分推荐派单，调度员一键采纳或人工改派；SLA 全程监控，风险自动升级。AI 定位是给调度员的建议与提效工具，每一次派单均可人工干预、全程留痕。</p>
+  </div>
+
+  <div class="dp-console">
+    <span class="live"><i></i>LIVE CONSOLE</span>
+    <span class="sep"></span>
+    <span>调度主管：<b>吴丽娟</b> · 华东调度中心 · 管辖 86 名技师</span>
+    <span class="sep"></span>
+    <span>2026-07-20 周一 <b>07:40</b> · 早班派单确认</span>
+    <span class="demo-tag">目标态示意</span>
+  </div>
+
+  <!-- 1. KPI 行 -->
+  <div class="dp-kpis">
+    <div class="dp-kpi">
+      <span class="k-l">今日工单</span>
+      <div class="k-v">128<small>单</small></div>
+      <div class="k-s">较上周同日 <b>+6</b></div>
+    </div>
+    <div class="dp-kpi hot">
+      <span class="k-l">AI 自动派单率</span>
+      <div class="k-v">92<small>%</small></div>
+      <div class="k-s">人工改派 <b>8%</b> · 全部留痕</div>
+    </div>
+    <div class="dp-kpi">
+      <span class="k-l">SLA 达标率</span>
+      <div class="k-v">98.5<small>%</small></div>
+      <div class="k-s">本月累计 · 急单 <b>100%</b></div>
+    </div>
+    <div class="dp-kpi">
+      <span class="k-l">平均响应时长</span>
+      <div class="k-v">18<small>分钟</small></div>
+      <div class="k-s">建单 → 派出 <b>-40%</b></div>
+    </div>
+    <div class="dp-kpi">
+      <span class="k-l">在途技师</span>
+      <div class="k-v">41<small>人</small></div>
+      <div class="k-s">服务中 <b>27</b> · 待命 18</div>
+    </div>
+  </div>
+
+  <!-- 2. ★ AI 智能派单演示 -->
+  <section class="dp-panel">
+    <div class="dp-sect">
+      <b>AI 智能派单</b>
+      <span class="star">★ 本页核心交互</span>
+      <small>点选左侧待派工单 → 查看 AI 推荐与匹配理由 → 一键派单（可点选其他技师人工改派）</small>
+    </div>
+    <div class="dp-demo">
+
+      <!-- 左：待派工单 -->
+      <div>
+        <div class="dp-colhead">待派工单 · 3<small>按优先级排序，急单置顶</small></div>
+
+        <div class="dp-wo urgent on" id="wo-201" onclick="selectWO('201')">
+          <div class="wo-top"><b>WO-260720-201</b><span class="dp-tag g-urgent">急单 ⚠</span><span class="wo-pill" id="pill-201">待派</span></div>
+          <div class="wo-cust">悦丰楼连锁餐饮 · 徐家汇店<i>周敏 店长</i></div>
+          <div class="wo-meta">鼠害应急处置 · <b>SLA 09:00 前上门</b> · 合同 HT-2026-088</div>
+          <div class="wo-src">来源：AI 客服昨夜 22:47 受理建单，预派建议已生成</div>
+        </div>
+
+        <div class="dp-wo" id="wo-202" onclick="selectWO('202')">
+          <div class="wo-top"><b>WO-260720-202</b><span class="dp-tag g-plan">计划巡检</span><span class="wo-pill" id="pill-202">待派</span></div>
+          <div class="wo-cust">云台食品厂 · 松江厂区<i>郑海峰 品控经理</i></div>
+          <div class="wo-meta">7 月虫控月检（IPM）· 预约 <b>10:30</b> · 合同 HT-2026-102</div>
+          <div class="wo-src">来源：合同周期计划，自动生成月检工单</div>
+        </div>
+
+        <div class="dp-wo" id="wo-176" onclick="selectWO('176')">
+          <div class="wo-top"><b>WO-260720-176</b><span class="dp-tag g-recheck">复查</span><span class="wo-pill" id="pill-176">待派</span></div>
+          <div class="wo-cust">金桂酒家 · 田林店（老客户）<i>蟑害防制复查</i></div>
+          <div class="wo-meta">蟑害防制效果复查 · 建议时段 <b>16:00</b> · 合同 HT-2026-067</div>
+          <div class="wo-src">来源：合同周期计划 · 上次服务后 30 天复查</div>
+        </div>
+      </div>
+
+      <!-- 右：AI 调度中枢推荐 -->
+      <div class="dp-reco">
+        <div class="dp-reco-head">
+          <div class="ai-ic">🧭</div>
+          <div><b>AI 调度中枢 · 推荐技师</b><br><span>综合评分 = 资质 × 距离 × 路线顺延 × 客户熟悉度 × 药剂携带</span></div>
+          <div class="for" id="recoFor"></div>
+        </div>
+        <div id="techList"></div>
+        <div id="btnZone"></div>
+        <div class="dp-hint" id="recoHint"></div>
+        <div class="dp-log" id="recoLog"></div>
+      </div>
+
+    </div>
+    <div class="dp-note"><b>人机协作边界：</b>AI 派单结果为推荐建议，调度员可一键采纳，也可点选任一技师人工改派；派单动作与理由全程留痕，可回溯审计。</div>
+  </section>
+
+  <!-- 3. 工单池 -->
+  <section class="dp-panel">
+    <div class="dp-sect"><b>今日工单池</b><small>华东调度中心 · 07:40 快照 · 状态实时流转（目标态示意）</small></div>
+    <div class="dp-tblwrap">
+      <table class="dp-table">
+        <thead>
+          <tr>
+            <th>工单号</th><th>客户 / 地点</th><th>类型</th><th>服务内容</th><th>预约 / SLA</th><th>技师</th><th>状态</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><b>WO-260720-201</b></td><td>悦丰楼连锁餐饮 · 徐家汇店</td>
+            <td><span class="dp-tag g-urgent">急单</span></td><td>鼠害应急处置</td>
+            <td><b>09:00 前上门</b></td><td id="tb-tech-201"><span class="sub-t">待派</span></td>
+            <td id="tb-st-201"><span class="dp-tag s-wait">待派</span></td>
+          </tr>
+          <tr>
+            <td><b>WO-260720-202</b></td><td>云台食品厂 · 松江厂区</td>
+            <td><span class="dp-tag g-plan">计划巡检</span></td><td>7 月虫控月检</td>
+            <td>10:30</td><td id="tb-tech-202"><span class="sub-t">待派</span></td>
+            <td id="tb-st-202"><span class="dp-tag s-wait">待派</span></td>
+          </tr>
+          <tr>
+            <td><b>WO-260720-176</b></td><td>金桂酒家 · 田林店</td>
+            <td><span class="dp-tag g-recheck">复查</span></td><td>蟑害防制复查</td>
+            <td>16:00</td><td id="tb-tech-176"><span class="sub-t">待派</span></td>
+            <td id="tb-st-176"><span class="dp-tag s-wait">待派</span></td>
+          </tr>
+          <tr>
+            <td><b>WO-260720-198</b></td><td>华亭商务大厦</td>
+            <td><span class="dp-tag g-plan">计划巡检</span></td><td>鼠饵站巡查</td>
+            <td>14:00</td><td>陈国栋</td>
+            <td><span class="dp-tag s-sent">已派</span></td>
+          </tr>
+          <tr>
+            <td><b>WO-260720-188</b></td><td>悦丰楼连锁餐饮 · 长宁店</td>
+            <td><span class="dp-tag g-plan">计划巡检</span></td><td>飞虫防制月度维护</td>
+            <td>09:30</td><td>马俊辉</td>
+            <td><span class="dp-tag s-way">在途</span></td>
+          </tr>
+          <tr>
+            <td><b>WO-260720-186</b></td><td>华亭商务大厦 · B 座</td>
+            <td><span class="dp-tag g-plan">计划巡检</span></td><td>公共区清洁消毒</td>
+            <td>08:30</td><td>刘志斌</td>
+            <td><span class="dp-tag s-serv">服务中</span></td>
+          </tr>
+          <tr>
+            <td><b>WO-260720-179</b></td><td>悦丰楼连锁餐饮 · 静安店</td>
+            <td><span class="dp-tag g-recheck">复查</span></td><td>蟑螂防制复查</td>
+            <td>08:00</td><td>孙倩</td>
+            <td><span class="dp-tag s-sign">待签核</span></td>
+          </tr>
+          <tr>
+            <td><b>WO-260720-165</b></td><td>华亭商务大厦 · 裙楼</td>
+            <td><span class="dp-tag g-plan">计划巡检</span></td><td>洗手间卫生服务</td>
+            <td>07:30</td><td>赵鹏</td>
+            <td><span class="dp-tag s-done">已完成</span></td>
+          </tr>
+          <tr>
+            <td><b>WO-260720-158</b></td><td>云台食品厂 · 包材车间</td>
+            <td><span class="dp-tag g-plan">计划巡检</span></td><td>飞虫灯检查更换</td>
+            <td>07:00</td><td>王海涛</td>
+            <td><span class="dp-tag s-done">已完成</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- 4. SLA 预警与自动升级 -->
+  <section class="dp-panel">
+    <div class="dp-sect"><b>SLA 预警与自动升级</b><small>AI 持续盯单，在投诉发生前处置风险</small></div>
+
+    <div class="dp-alert" id="alert-201">
+      <div class="a-ic">⏱</div>
+      <div>
+        <div class="a-t">急单 WO-260720-201 · SLA 剩 80 分钟 <span class="dp-tag g-urgent">高</span></div>
+        <div class="a-d">承诺 <b>09:00 前上门</b>（悦丰楼 · 徐家汇店），技师尚未确认出发。AI 已自动执行升级动作：</div>
+        <div class="a-chips">
+          <span class="did">企微催办提醒已发</span>
+          <span class="did">备选技师 马俊辉 进入待命</span>
+          <span class="did">已同步调度主管 吴丽娟</span>
+        </div>
+        <div class="a-res" id="alertRes-201">已处置：陈国栋 已接单，预计 08:41 到场，SLA 可达 ✓</div>
+      </div>
+    </div>
+
+    <div class="dp-alert gold">
+      <div class="a-ic">🔁</div>
+      <div>
+        <div class="a-t">华亭商务大厦 14:00 巡检 · 客户请求改期 <span class="dp-tag g-recheck">中</span></div>
+        <div class="a-d">李国强经理申请改至 <b>14:30 后</b>。AI 已试算新路线：巡查顺延至 14:30 开始，16:00 金桂酒家蟑害复查不受影响，全程仅新增在途 6 分钟。</div>
+        <div class="a-chips">
+          <span class="did">新路线已试算</span>
+          <span class="did">新时段已发送客户</span>
+          <span>待李国强经理确认</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 5. 调度闭环 -->
+  <section class="dp-panel">
+    <div class="dp-sect"><b>一单到底的调度闭环</b><small>三个场景在同一条数据链上咬合，件件有着落</small></div>
+    <div class="flow">
+      <div class="f-step"><div class="n">1</div><b>客服建单</b><span>AI 客服全渠道受理<br>自动生成结构化工单</span></div>
+      <div class="f-arrow">›</div>
+      <div class="f-step hot"><div class="n">2</div><b>AI 派单</b><span>五维评分秒级推荐<br>调度员确认或改派</span></div>
+      <div class="f-arrow">›</div>
+      <div class="f-step"><div class="n">3</div><b>技师接单在途</b><span>企微推送 · 导航<br>ETA 实时回传</span></div>
+      <div class="f-arrow">›</div>
+      <div class="f-step"><div class="n">4</div><b>现场服务</b><span>随行 Agent 语音留痕<br>拍照与点位记录</span></div>
+      <div class="f-arrow">›</div>
+      <div class="f-step"><div class="n">5</div><b>报告签核</b><span>服务报告自动生成<br>客户电子签确认</span></div>
+      <div class="f-arrow">›</div>
+      <div class="f-step"><div class="n">6</div><b>回访结案</b><span>AI 回访<br>满意度回收</span></div>
+      <div class="f-arrow">›</div>
+      <div class="f-step"><div class="n">7</div><b>数据看板</b><span>SLA / 工时 / 虫情趋势<br>沉淀经营资产</span></div>
+    </div>
+  </section>
+
+  <!-- 6. 为什么 AI 派得准 -->
+  <section class="dp-panel">
+    <div class="dp-sect"><b>为什么 AI 派得准</b><small>三个数据底座，越用越准</small></div>
+    <div class="dp-why">
+      <div class="w-card">
+        <div class="w-ic">🎓</div>
+        <b>证书资质库</b>
+        <p>700+ 持证技师档案在线：<i>PCO 资质等级</i>、鼠害 / 白蚁等专项能力、食品厂作业培训记录，急单只派给证书与场景匹配的人。</p>
+      </div>
+      <div class="w-card warm">
+        <div class="w-ic">📍</div>
+        <b>实时位置与路线</b>
+        <p>技师定位、在途工单与路况实时汇入，AI 计算<i>顺延成本</i>而不只是直线距离——顺路的那个人，往往就是最快的那个人。</p>
+      </div>
+      <div class="w-card gold">
+        <div class="w-ic">🧠</div>
+        <b>历史服务记忆</b>
+        <p>客户点位图、历次用药与虫情记录、服务过几次谁更熟，全部结构化沉淀。<i>熟客派熟人</i>，少一遍现场交底，多一分客户信任。</p>
+      </div>
+    </div>
+    <div class="dp-note"><b>目标态示意：</b>本页工单量、派单率、SLA 等经营数字均为方案目标态演示数据，非真实经营数据；药剂仅出现通用名并遵循安全规范提示。</div>
+  </section>
+
+</main>
+
+<footer class="site-footer">
+  <div class="foot-brand"><img src="assets/st_logo_white.png" alt="商汤科技"></div>
+  <b>商汤科技 · 大模型生态渠道部</b> — AI 技术底座 · 高保真交互原型（页面数据均为目标态示意，非真实经营数据）
+</footer>
+
+<script src="assets/chat.js"></script>
+<script>
+(function () {
+  'use strict';
+
+  /* ---------- 演示数据（写死） ---------- */
+  var WOS = {
+    '201': {
+      no: 'WO-260720-201',
+      brief: '悦丰楼 · 徐家汇店 鼠害应急处置',
+      techs: [
+        { name: '陈国栋', id: 'SH-0217 · 沪南一区 · 服务 8 年', score: 96, best: true,
+          chips: ['持鼠害防制 PCO 中级证', '距 2.1 km · 预计 08:41 到场', '顺延今日路线第 1 站', '服务该店 6 次 · 熟悉后厨点位', '车载溴敌隆蜡块 / 粘鼠板充足'],
+          hot: [1, 3] },
+        { name: '马俊辉', id: 'SH-0231 · 沪西二区 · 服务 5 年', score: 88,
+          chips: ['持鼠害防制 PCO 中级证', '距 3.4 km · 预计 08:52 到场', '首单在长宁 · 需绕行调整', '未服务过该店', '车载耗材充足'],
+          hot: [] },
+        { name: '刘志斌', id: 'SH-0198 · 沪南一区 · 服务 3 年', score: 79,
+          chips: ['PCO 初级证', '距 5.8 km · 早高峰在途约 35 分钟', '与 09:30 在途单存在冲突风险', '服务该店 1 次', '需回站补领鼠饵耗材'],
+          hot: [] }
+      ],
+      log: function (t) {
+        return [
+          '已推送 <b>' + t.name + '</b> 企微「随行助理」：工单详情、后厨历史点位图与导航路线已同步',
+          t.name === '陈国栋'
+            ? '已通知客户 <b>周敏店长</b>：技师预计 08:41 前到场（SLA 09:00 可达）'
+            : '已通知客户 <b>周敏店长</b>：已改派 ' + t.name + '，到场时间以技师接单确认为准（SLA 09:00 持续监控）',
+          '派单理由已留痕，可供审计回溯'
+        ];
+      },
+      assigned: null, chosen: 0
+    },
+    '202': {
+      no: 'WO-260720-202',
+      brief: '云台食品厂 · 7 月虫控月检',
+      techs: [
+        { name: '陈国栋', id: 'SH-0217 · 沪南一区 · 服务 8 年', score: 94, best: true,
+          chips: ['食品厂 IPM 作业培训合格', '悦丰楼完单后顺路 · 10:30 前可达', '连续 3 个月月检执行人', '熟悉厂区饵站点位分布', '携带月检记录与检查工具'],
+          hot: [2] },
+        { name: '孙倩', id: 'SH-0173 · 松江站 · 服务 6 年', score: 87,
+          chips: ['食品厂 IPM 作业培训合格', '距 6.2 km · 10:10 可达', '今日路线相对空闲', '服务该厂 1 次', '需补领虫情记录表'],
+          hot: [] },
+        { name: '赵鹏', id: 'SH-0244 · 沪西二区 · 服务 4 年', score: 76,
+          chips: ['PCO 中级证 · 暂无食品厂专项培训', '距 8.9 km', '下午另有华亭裙楼巡检', '未服务过该厂', '车载药剂需回站确认'],
+          hot: [] }
+      ],
+      log: function (t) {
+        return [
+          '已推送 <b>' + t.name + '</b> 企微「随行助理」：月检清单与厂区点位图已同步',
+          '已通知 <b>郑海峰品控经理</b>：技师预计 10:30 前到场'
+        ];
+      },
+      assigned: null, chosen: 0
+    },
+    '176': {
+      no: 'WO-260720-176',
+      brief: '金桂酒家 · 田林店 蟑害防制复查',
+      techs: [
+        { name: '陈国栋', id: 'SH-0217 · 沪南一区 · 服务 8 年', score: 92, best: true,
+          chips: ['持蟑害防制 PCO 中级证', '16:00 顺延为当日路线末站', '该店蟑害复查执行人 · 服务 4 次', '熟悉后厨与下水点位', '车载呋虫胺胶饵充足'],
+          hot: [1, 2] },
+        { name: '刘志斌', id: 'SH-0198 · 沪南一区 · 服务 3 年', score: 84,
+          chips: ['距该店 4.1 km', '有蟑害复查作业经验', '服务该店 1 次', 'PCO 初级证', '需同步历史点位图'],
+          hot: [] },
+        { name: '王海涛', id: 'SH-0156 · 松江站 · 服务 7 年', score: 71,
+          chips: ['15:30 后有空档', '距 9.6 km', '未服务过该店 · 需交接点位', 'PCO 中级证', '胶饵需回站领取'],
+          hot: [] }
+      ],
+      log: function (t) {
+        return [
+          '已推送 <b>' + t.name + '</b> 企微「随行助理」：该店历史点位图与上次服务记录已随单下发',
+          '复查结果将自动回写工单，同步调度主管 吴丽娟'
+        ];
+      },
+      assigned: null, chosen: 0
+    }
+  };
+
+  var curId = '201';
+
+  function $(id) { return document.getElementById(id); }
+
+  /* ---------- 渲染右侧推荐区 ---------- */
+  function render() {
+    var w = WOS[curId];
+    $('recoFor').innerHTML = '当前工单：<b>' + w.no + '</b> · ' + w.brief;
+
+    var html = '';
+    w.techs.forEach(function (t, i) {
+      var picked = w.assigned ? (w.assigned === t.name) : (w.chosen === i);
+      var cls = 'dp-tech' + (picked ? ' pick' : '') + (w.assigned && !picked ? ' dim' : '');
+      var chips = t.chips.map(function (c, ci) {
+        return '<span' + (t.hot.indexOf(ci) > -1 ? ' class="hot"' : '') + '>' + c + '</span>';
+      }).join('');
+      html +=
+        '<div class="' + cls + '" onclick="LBSDispatch.chooseTech(' + i + ')">' +
+        '  <div class="t-row">' +
+        '    <div class="t-av">' + t.name.charAt(0) + '</div>' +
+        '    <div class="t-id"><b>' + t.name + '</b>' + (t.best ? '<span class="best">推荐首选</span>' : '') +
+        '      <span>' + t.id + '</span></div>' +
+        '    <div class="t-score"><div class="v">' + t.score + '</div><div class="l">匹配分</div></div>' +
+        '  </div>' +
+        '  <div class="t-bar"><i style="width:' + t.score + '%"></i></div>' +
+        '  <div class="t-chips">' + chips + '</div>' +
+        '</div>';
+    });
+    $('techList').innerHTML = html;
+
+    if (w.assigned) {
+      $('btnZone').innerHTML = '<button class="dp-btn done" type="button">✓ 已派单 · 已推送技师企微</button>';
+      $('recoHint').innerHTML = '本单已派 <b>' + w.assigned + '</b>，状态已流转：待派 → 已派';
+      var at = w.techs.filter(function (x) { return x.name === w.assigned; })[0] || w.techs[w.chosen];
+      $('recoLog').innerHTML = w.log(at).map(function (l) { return '<div>' + l + '</div>'; }).join('');
+    } else {
+      $('btnZone').innerHTML = '<button class="dp-btn" type="button" onclick="LBSDispatch.dispatch()">⚡ AI 一键派单</button>';
+      $('recoHint').innerHTML = '默认采纳推荐首选；也可先点选其他技师<b>人工改派</b>，再派单';
+      $('recoLog').innerHTML = '';
+    }
+  }
+
+  /* ---------- 交互 ---------- */
+  function selectWO(id) {
+    curId = id;
+    ['201', '202', '176'].forEach(function (k) {
+      var card = $('wo-' + k);
+      if (card) card.classList.toggle('on', k === id);
+    });
+    render();
+  }
+
+  function chooseTech(i) {
+    var w = WOS[curId];
+    if (w.assigned) return;
+    w.chosen = i;
+    render();
+  }
+
+  function dispatch() {
+    var w = WOS[curId];
+    if (w.assigned) return;
+    var t = w.techs[w.chosen];
+    w.assigned = t.name;
+
+    /* 左侧工单卡状态流转 */
+    var pill = $('pill-' + curId);
+    if (pill) { pill.textContent = '已派 · ' + t.name; pill.classList.add('ok'); }
+
+    /* 工单池表格同步流转 */
+    var tdTech = $('tb-tech-' + curId);
+    var tdSt = $('tb-st-' + curId);
+    if (tdTech) tdTech.innerHTML = '<b>' + t.name + '</b>';
+    if (tdSt) tdSt.innerHTML = '<span class="dp-tag s-sent">已派</span>';
+
+    /* 悦丰楼急单派出后，SLA 预警标记为已处置 */
+    if (curId === '201') {
+      var alert201 = $('alert-201');
+      var res = $('alertRes-201');
+      if (alert201) alert201.classList.add('resolved');
+      if (res && t.name !== '陈国栋') {
+        res.textContent = '已处置：' + t.name + ' 已接单（人工改派），SLA 达成情况持续监控 ✓';
+      }
+    }
+    render();
+  }
+
+  /* 暴露给内联事件 */
+  window.LBSDispatch = { selectWO: selectWO, chooseTech: chooseTech, dispatch: dispatch };
+  window.selectWO = selectWO;
+
+  /* 初始：默认选中悦丰楼急单（与 AI 客服页 s1 建单为同一单） */
+  render();
+})();
+</script>
+
+</body>
+</html>

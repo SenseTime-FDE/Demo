@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>一线技师随行 Agent | LBS 史伟莎 · AI 现场服务原型</title>
+<link rel="stylesheet" href="assets/style.css">
+<style>
+  /* 本页自有：角色卡 */
+  .role-card { display: flex; gap: 14px; align-items: flex-start; margin-bottom: 16px; }
+  .role-avatar {
+    width: 52px; height: 52px; border-radius: 14px; flex: none;
+    background: linear-gradient(135deg, var(--warm), var(--warm-d));
+    color: #fff; font-size: 22px; font-weight: 800;
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: var(--shadow-sm);
+  }
+  .role-name { font-size: 16px; font-weight: 700; color: var(--ink); display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .role-meta { font-size: 12.5px; color: var(--sub); margin-top: 3px; }
+  .role-tags { display: flex; gap: 6px; margin-top: 8px; flex-wrap: wrap; }
+</style>
+</head>
+<body>
+
+<header class="topnav">
+  <div class="brand">
+    <img src="assets/st_logo.png" alt="商汤科技">
+    <div class="divider"></div>
+    <div class="name">LBS 史伟莎 · AI 现场服务<small>SENSETIME × LBS GROUP · PROTOTYPE</small></div>
+  </div>
+  <nav>
+    <a href="index.html">方案总览</a>
+    <a class="active" href="agent_jishi.html"><span class="dot"></span>一线技师 Agent</a>
+    <a href="kefu.html">AI 智能客服</a>
+    <a href="dispatch.html">AI 工单调度</a>
+    <a href="bi.html">数据看板</a>
+  </nav>
+</header>
+
+<main class="page">
+  <div class="page-head">
+    <div class="eyebrow">Scene 01 · Field Technician Agent</div>
+    <h1>场景一 · 一线技师随行 Agent：<span class="hl">一句语音</span>，工单、SOP、报告全搞定</h1>
+    <p class="sub">700+ 持证技师人手一个 AI 搭档，入口就在<b>企业微信对话框</b>——戴着手套、蹲在管井边，按住说话就能查工单、问 IPM 规程、拍照生成服务报告、上报异常、申领耗材、收工签核。<b>不装新 App、不手工填表</b>，说完的每句话自动结构化留痕。左侧手机可点击场景演示。</p>
+  </div>
+
+  <div class="split">
+    <!-- 左：手机 -->
+    <div class="phone-wrap">
+      <div id="phone-slot"></div>
+      <p class="phone-caption">▲ 可交互原型 · 点上方场景或气泡下方 <b>🎙 快捷话术</b> 切换演示（演示数据均为目标态示意）</p>
+    </div>
+
+    <!-- 右：说明 -->
+    <div>
+      <div class="panel">
+        <h3>本页主角 · 一线技师 <span class="tag gold">目标态示意</span></h3>
+        <div class="role-card">
+          <div class="role-avatar">陈</div>
+          <div>
+            <div class="role-name">陈国栋 <span class="tag gold">本月服务之星</span></div>
+            <div class="role-meta">PCO 中级证 · 沪南一区 · 工号 SH-0217 · 服务 8 年</div>
+            <div class="role-tags">
+              <span class="tag teal">鼠害防制</span>
+              <span class="tag teal">蟑害防制</span>
+              <span class="tag warm">食品厂经验</span>
+            </div>
+          </div>
+        </div>
+        <table class="mini-table">
+          <tr><th>时间</th><th>今日任务 · 2026-07-20</th><th>状态</th></tr>
+          <tr><td><b>09:00</b></td><td>悦丰楼徐家汇店 · 鼠情急单 <b>WO-260720-201</b></td><td><span class="tag warn">急单</span></td></tr>
+          <tr><td><b>10:30</b></td><td>云台食品厂松江厂区 · 月度巡检</td><td><span class="tag teal">计划</span></td></tr>
+          <tr><td><b>14:00</b></td><td>华亭商务大厦 · 饵站巡查</td><td><span class="tag teal">计划</span></td></tr>
+          <tr><td><b>16:00</b></td><td>老客户门店 · 蟑害复查</td><td><span class="tag gold">复查</span></td></tr>
+        </table>
+      </div>
+
+      <div class="panel">
+        <h3>AI 能带来什么 · 六项能力 <span class="tag gold">目标态示意</span></h3>
+        <div class="cap-grid">
+          <div class="cap warm"><div class="ic">🎙</div><b>语音交互不打断作业</b><span>戴手套、爬管井也能报，说话即操作</span></div>
+          <div class="cap"><div class="ic">📖</div><b>SOP 随问随答</b><span>IPM 规程 / 药剂安全，现场语音秒查</span></div>
+          <div class="cap warm"><div class="ic">📄</div><b>报告自动生成</b><span>拍照 + 说话即出报告，单均省约 30 分钟</span></div>
+          <div class="cap"><div class="ic">🚨</div><b>异常秒级上报</b><span>结构风险直达调度，自动生成复查工单</span></div>
+          <div class="cap warm"><div class="ic">📦</div><b>耗材一键申领</b><span>车载库存实时可见，低于安全线自动提醒</span></div>
+          <div class="cap"><div class="ic">⏱</div><b>工时自动留痕</b><span>签核 / 工时 / 绩效自动记账，零手工填表</span></div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <h3>数据闭环 · 每一单都沉淀为资产</h3>
+        <div class="flow">
+          <div class="f-step hot"><div class="n">1</div><b>现场语音 · 照片</b><span>企微按住说话 / 拍照</span></div>
+          <div class="f-arrow">→</div>
+          <div class="f-step"><div class="n">2</div><b>ASR 转写 · 图像识别</b><span>语音大模型 + 视觉识别</span></div>
+          <div class="f-arrow">→</div>
+          <div class="f-step"><div class="n">3</div><b>结构化工单数据</b><span>点位 / 药剂 / 虫情等级</span></div>
+          <div class="f-arrow">→</div>
+          <div class="f-step hot"><div class="n">4</div><b>调度台 &amp; BI</b><span>SLA 跟踪 · 客户档案</span></div>
+        </div>
+        <p class="note"><b>一条链贯穿三个场景：</b>悦丰楼急单由 AI 客服受理建单（WO-260720-201）→ AI 调度中枢派给陈国栋 → 本页随行 Agent 陪他完成现场执行与签核，全过程同一条数据链，调度主管吴丽娟实时可见。</p>
+      </div>
+
+      <div class="panel">
+        <h3>边界与合规</h3>
+        <p class="note"><b>留痕与边界：</b>所有语音经 ASR 转写留痕，服务过程可回溯；拍照仅限作业点位，不拍摄与服务无关区域；药剂仅以通用名呈现，使用以标签与操作规程为准；AI 输出定位为<b>建议与提效</b>，现场处置以持证技师判定为准。</p>
+      </div>
+    </div>
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="foot-brand"><img src="assets/st_logo.png" alt="商汤科技"></div>
+  <div><b>商汤科技 · 大模型生态渠道部</b> — AI 技术底座 · 高保真交互原型（页面数据均为目标态示意，非真实经营数据）</div>
+</footer>
+
+<script src="assets/chat.js"></script>
+<script>
+LBSChat.mount(document.getElementById('phone-slot'), {
+  contact: { name: '随行助理', corp: '@史伟莎', sub: '商汤 S-Agent · AI 技术底座' },
+  user:    { name: '陈国栋', avatar: '陈' },
+  agent:   { avatar: '莎' },
+  scenarios: [
+    {
+      id: 's1', title: '今日工单', chip: '今天有什么安排',
+      intro: '⏰ 08:02 · 出车前 · 一句话拉出今日工单与路线',
+      steps: [
+        { from: 'user', voice: '早，今天有什么安排？', dur: 3 },
+        { from: 'agent', text: '国栋早！今天 4 张工单，有一张<b>鼠情急单</b>，先给你捋一遍 👇' },
+        { from: 'agent', html: '<div class="c-card"><div class="c-head"><span class="c-ic warm">📋</span><b>今日工单 · 4 张</b><span class="tag warn">1 急单</span></div><div class="c-check"><span class="s warn">⚠</span>09:00 悦丰楼徐家汇店 · 鼠情急单</div><div class="c-check"><span class="s todo">○</span>10:30 云台食品厂 · 月度巡检</div><div class="c-check"><span class="s todo">○</span>14:00 华亭商务大厦 · 饵站巡查</div><div class="c-check"><span class="s todo">○</span>16:00 老客户门店 · 蟑害复查</div><div class="c-kv"><span>急单编号</span><b class="warm">WO-260720-201</b></div><div class="c-kv"><span>急单 SLA</span><b>今早 09:00 前上门</b></div><div class="c-foot">华东调度中心 · 吴丽娟 07:40 已确认派单</div></div>' },
+        { from: 'agent', html: '<div class="c-card"><div class="c-head"><span class="c-ic">🗺</span><b>路线建议</b><span class="tag teal">顺路</span></div><div class="c-kv"><span>首站</span><b>悦丰楼 · 约 2.1km</b></div><div class="c-kv"><span>顺序</span><b>悦丰楼→云台→华亭→复查店</b></div><div class="c-kv"><span>预计收工</span><b class="teal">17:30 前</b></div><div class="c-btns"><span class="c-btn primary">按建议导航</span><span class="c-btn ghost">自己调整</span></div><div class="c-foot">路线为 AI 建议 · 可人工调整</div></div>' },
+        { from: 'agent', text: '📦 出发前带上：<b>鼠饵站 ×4、粘鼠板 1 箱</b>。悦丰楼是鼠情急单，华亭下午还要换 3 个旧饵站。' },
+        { from: 'user', voice: '收到，粘鼠板车上还有，饵站我去库房拿。', dur: 6 },
+        { from: 'agent', text: '✅ 已备注。09:00 前到店找<b>周敏店长</b>，急单 SLA 是今早 9 点前上门，8:25 我再提醒你出发。' },
+        { from: 'agent', sys: '今日任务与路线已同步调度台 · 吴丽娟可见' }
+      ]
+    },
+    {
+      id: 's2', title: '现场SOP', chip: '鼠迹怎么处理',
+      intro: '📍 08:43 · 悦丰楼徐家汇店后厨 · WO-260720-201 已到店打卡',
+      steps: [
+        { from: 'user', voice: '到悦丰楼了，后厨洗碗间发现鼠迹，粪便还挺新，按什么流程处理？', dur: 10 },
+        { from: 'agent', text: '收到。按 <b>IPM 鼠害现场五步</b>走，卡片给你 👇' },
+        { from: 'agent', html: '<div class="c-card"><div class="c-head"><span class="c-ic">📖</span><b>IPM 鼠害现场五步</b><span class="tag teal">SOP</span></div><ol class="c-steps"><li>勘查定位：沿墙根 / 管线找活动路径与入侵点</li><li>封堵建议：缝隙记录尺寸，出具封堵建议</li><li>布放饵站：沿鼠道贴墙布放，编号固定</li><li>记录点位：拍照 + 定位，自动写入点位图</li><li>告知店长：说明风险点与配合事项</li></ol><div class="c-foot">来源：史伟莎虫控 SOP 库 · IPM 鼠害分册</div></div>' },
+        { from: 'agent', html: '<div class="c-card"><div class="c-head"><span class="c-ic warm">⚠</span><b>用药安全提示</b><span class="tag warn">必读</span></div><div class="c-kv"><span>药剂</span><b>溴敌隆蜡块（抗凝血类）</b></div><div class="c-kv"><span>布放</span><b>仅入加锁饵站 · 贴墙固定</b></div><div class="c-kv"><span>红线</span><b class="warm">避开食品接触面与明档区</b></div><div class="c-kv"><span>标识</span><b>饵站贴警示标签 + 编号</b></div><div class="c-foot">使用以药剂标签与操作规程为准</div></div>' },
+        { from: 'user', voice: '洗碗间墙角有条缝，目测老鼠钻得进去，要现场封吗？', dur: 8 },
+        { from: 'agent', text: '先拍照测量缝宽。今天做<b>记录 + 临时封堵建议</b>写进报告就行，结构性封堵要门店配合施工，别现场硬处理。' },
+        { from: 'user', voice: '明白。那我布 4 个饵站，两个贴洗碗间，两个放库房门口。', dur: 8 },
+        { from: 'agent', text: '👌 合理。每个饵站拍一张带编号的照片，我自动画进点位图。另外提醒：营业前 30 分钟避免在明档区作业。' },
+        { from: 'agent', sys: '本次问答已留痕 · 计入工单服务过程' }
+      ]
+    },
+    {
+      id: 's3', title: '拍照报告', chip: '拍照生成报告',
+      intro: '📍 10:34 · 云台食品厂松江厂区 · 月度巡检（品控经理 郑海峰）',
+      steps: [
+        { from: 'user', text: '📷 现场照片 ×3（配料间墙角 · 排水沟 · 粘蟑板）' },
+        { from: 'user', voice: '配料间墙角发现蟑迹，粘蟑板上有若虫，帮我记一下。', dur: 8 },
+        { from: 'agent', html: '<div class="c-card"><div class="c-head"><span class="c-ic">🔍</span><b>AI 图像识别</b><span class="tag teal">已识别</span></div><div class="c-kv"><span>目标</span><b>德国小蠊 · 以若虫为主</b></div><div class="c-kv"><span>蟑迹等级</span><b class="warm">Ⅱ 级（轻中度活动）</b></div><div class="c-kv"><span>位置</span><b>配料间墙角 · 排水沟沿线</b></div><div class="c-foot">识别结果供参考 · 以技师现场判定为准</div></div>' },
+        { from: 'agent', text: '识别完成。对比上月记录，该点位活动度<b>环比上升</b>，建议加布 2 张粘蟑板，并检查排水沟盖板密封。' },
+        { from: 'agent', html: '<div class="c-card"><div class="c-head"><span class="c-ic warm">📄</span><b>服务报告 · 已生成</b><span class="tag ok">自动生成</span></div><div class="c-kv"><span>点位</span><b>配料间 3 处 · 排水沟 2 处</b></div><div class="c-kv"><span>药剂</span><b>呋虫胺胶饵 · 点状施药</b></div><div class="c-kv"><span>用量</span><b>0.4g × 12 点</b></div><div class="c-kv"><span>建议</span><b class="teal">盖板密封 + 加密监测 2 周</b></div><div class="c-btns"><span class="c-btn primary">发郑经理确认</span><span class="c-btn ghost">再改一下</span></div><div class="c-foot">报告含点位图与照片 · 审计可溯</div></div>' },
+        { from: 'user', voice: '没问题，发给郑经理。', dur: 3 },
+        { from: 'agent', text: '✅ 已发送品控经理<b>郑海峰</b>并归档。下周审计要调记录，AI 客服那边随时能查到——收工不用再补文书了。' },
+        { from: 'agent', sys: '照片仅限作业点位 · 不拍摄与服务无关区域' }
+      ]
+    },
+    {
+      id: 's4', title: '异常上报', chip: '发现鼠洞上报',
+      intro: '📍 11:20 · 云台食品厂 · 原料库房（月检范围外发现）',
+      steps: [
+        { from: 'user', voice: '库房北墙靠地面有条结构缝，里面像有鼠洞，粪便和爪印都有。这在月检范围外，得上报。', dur: 13 },
+        { from: 'agent', text: '收到，这属于<b>结构性风险</b>，我按异常升级流程走 👇' },
+        { from: 'agent', html: '<div class="c-card"><div class="c-head"><span class="c-ic warm">🚨</span><b>异常上报 · 已受理</b><span class="tag warn">升级</span></div><div class="c-kv"><span>类型</span><b>结构缝隙 · 疑似鼠洞</b></div><div class="c-kv"><span>位置</span><b>原料库房北墙近地面</b></div><div class="c-kv"><span>风险</span><b class="warm">邻近原料区 · 需尽快处置</b></div><div class="c-kv"><span>建议</span><b>封堵施工 + 加密巡查 2 周</b></div><div class="c-foot">已附现场照片 3 张 · 定位留痕</div></div>' },
+        { from: 'agent', html: '<div class="c-card"><div class="c-head"><span class="c-ic">📋</span><b>复查工单 · 自动生成</b><span class="tag warm">WO-260720-115</span></div><div class="c-kv"><span>内容</span><b>缝隙复查 + 饵站加密</b></div><div class="c-kv"><span>建议时间</span><b>本周四前</b></div><div class="c-kv"><span>状态</span><b class="teal">待调度确认</b></div><div class="c-foot">已推送华东调度中心 · 吴丽娟</div></div>' },
+        { from: 'agent', text: '已同步调度主管<b>吴丽娟</b>。封堵施工需客户配合，郑经理那边由 AI 客服跟进确认时间。' },
+        { from: 'user', voice: '好。我在报告里提一句，让品控先把这排原料托盘垫高、离墙远点。', dur: 9 },
+        { from: 'agent', text: '✅ 已写入临时建议：「原料托盘垫高、离墙 30cm」。封堵完成前这个点位按<b>持续控制</b>管理，加密巡查我会按周提醒。' },
+        { from: 'agent', sys: '异常事件已写入工单流 · 调度台同步可见' }
+      ]
+    },
+    {
+      id: 's5', title: '耗材申领', chip: '粘鼠板不够了',
+      intro: '🚚 13:30 · 午后转场途中 · 一句话查库存、申耗材',
+      steps: [
+        { from: 'user', voice: '对了，粘鼠板不够了，帮我看下车上还剩多少。', dur: 6 },
+        { from: 'agent', html: '<div class="c-card"><div class="c-head"><span class="c-ic warm">📦</span><b>车载耗材 · 实时</b><span class="tag warn">低于安全线</span></div><div class="c-kv"><span>粘鼠板</span><b class="warm">剩 6 片 · 安全线 20</b></div><div class="c-kv"><span>鼠饵站</span><b>剩 5 个</b></div><div class="c-kv"><span>溴敌隆蜡块</span><b class="ok">充足</b></div><div class="c-kv"><span>粘蟑板</span><b>剩 18 张</b></div><div class="c-btns"><span class="c-btn primary">一键申领</span><span class="c-btn ghost">查领用记录</span></div><div class="c-foot">库存按扫码领用自动扣减</div></div>' },
+        { from: 'user', voice: '申领粘鼠板两箱，明早顺路去站点拿。', dur: 6 },
+        { from: 'agent', html: '<div class="c-card"><div class="c-head"><span class="c-ic">✅</span><b>申领单 · 已提交</b><span class="tag gold">审批中</span></div><div class="c-kv"><span>品项</span><b>粘鼠板 ×2 箱（100 片）</b></div><div class="c-kv"><span>领取点</span><b>沪南一区服务站</b></div><div class="c-kv"><span>领取时间</span><b>明早 8:00 前备好</b></div><div class="c-kv"><span>审批</span><b class="teal">吴丽娟 · 待确认</b></div><div class="c-foot">审批通过后企微自动通知</div></div>' },
+        { from: 'agent', text: '提交好了。按你近 30 天用量，两箱大约够 3 周，下次低于安全线我会提前提醒。' },
+        { from: 'agent', sys: '⏱ 14:05 · 吴丽娟已通过审批 · 明早可取' },
+        { from: 'agent', text: '✅ 审批通过。明早到服务站找站务领取，<b>扫码出库自动记账</b>，不用手工登记。' }
+      ]
+    },
+    {
+      id: 's6', title: '收工签核', chip: '干完了收工',
+      intro: '✍️ 上午急单签核 → 傍晚一句话收工，工时绩效自动入账',
+      steps: [
+        { from: 'agent', sys: '📍 09:35 · 悦丰楼急单服务完成 · 发起电子签核' },
+        { from: 'agent', html: '<div class="c-card"><div class="c-head"><span class="c-ic">✍️</span><b>电子签核 · WO-260720-201</b><span class="tag ok">已签</span></div><div class="c-kv"><span>服务时长</span><b>52 分钟</b></div><div class="c-kv"><span>处置</span><b>布放饵站 ×4 · 缝隙记录</b></div><div class="c-kv"><span>客户签核</span><b class="ok">周敏（店长）已签 ✓</b></div><div class="c-kv"><span>满意度</span><b class="warm">★★★★★</b></div><div class="c-foot">签核与报告实时回传调度台</div></div>' },
+        { from: 'agent', text: '周敏店长已在你手机上签字，报告同步发到店长企微。急单<b>按时闭环</b>，SLA 达标 👍' },
+        { from: 'agent', sys: '🌆 17:26 · 今日第 4 单完成' },
+        { from: 'user', voice: '今天四单都跑完了，收工。', dur: 4 },
+        { from: 'agent', html: '<div class="c-card"><div class="c-head"><span class="c-ic warm">🏁</span><b>今日收工 · 07-20</b><span class="tag warm">自动记录</span></div><div class="c-check"><span class="s done">✓</span>悦丰楼急单 · 按时闭环</div><div class="c-check"><span class="s done">✓</span>云台月检 · 报告已归档</div><div class="c-check"><span class="s done">✓</span>华亭饵站巡查 · 换补 3 个</div><div class="c-check"><span class="s done">✓</span>蟑害复查 · 完成</div><div class="c-kv"><span>有效工时</span><b>6h 40m</b></div><div class="c-kv"><span>工单积分</span><b class="warm">+38</b></div><div class="c-foot">工时绩效自动入账 · 无需手工填报</div></div>' },
+        { from: 'agent', text: '✅ 今日记录已归档。云台库房那单复查排在<b>周四</b>，到时我提醒你。路上注意安全，明早 7:40 推送新一天安排 🌙' }
+      ]
+    }
+  ]
+});
+</script>
+</body>
+</html>
