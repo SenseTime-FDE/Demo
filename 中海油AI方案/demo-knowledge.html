@@ -1,0 +1,543 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>制度 / 知识问答 RAG · Demo —— 中海油 × 商汤</title>
+<meta name="description" content="基于本单位规程/制度库的 RAG 知识问答 Demo：带出处地回答，库外即答未覆盖、绝不臆测，可溯源、可复核。">
+<link rel="stylesheet" href="assets/style.css">
+<style>
+/* ===== demo-knowledge only ===== */
+.demo-hero { position:relative; overflow:hidden; padding:52px 0 30px; background:var(--bg-0); }
+.demo-hero .bg-ocean { position:absolute; inset:0; z-index:0;
+  background:
+    radial-gradient(1000px 500px at 82% -20%, rgba(53,226,212,.16), transparent 55%),
+    radial-gradient(900px 520px at 4% 8%, rgba(59,140,255,.16), transparent 55%); }
+.demo-hero .wrap-wide { position:relative; z-index:2; }
+.demo-hero h1 { font-size:clamp(26px,3.6vw,40px); line-height:1.14; }
+.demo-hero h1 .g { background:var(--grad-cyan); -webkit-background-clip:text; background-clip:text; color:transparent; }
+.demo-hero .lead { margin-top:14px; }
+.hero-tags { display:flex; flex-wrap:wrap; gap:8px; margin-top:18px; }
+
+/* ---- RAG two-column layout ---- */
+.rag { padding:20px 0 40px; }
+.rag-grid { display:grid; grid-template-columns:340px 1fr; gap:22px; align-items:start; }
+@media (max-width: 940px){ .rag-grid { grid-template-columns:1fr; } }
+
+/* Knowledge base panel */
+.kb { background:var(--bg-card); border:1px solid var(--line); border-radius:var(--radius);
+  padding:20px; position:sticky; top:calc(var(--nav-h) + 14px); }
+@media (max-width: 940px){ .kb { position:static; } }
+.kb-title { display:flex; align-items:center; gap:9px; font-weight:800; font-size:16px; margin-bottom:14px; }
+.kb-title .ic { width:34px;height:34px;border-radius:10px;display:grid;place-items:center;font-size:17px;
+  background:rgba(53,226,212,.12); border:1px solid rgba(53,226,212,.25); }
+.kb-status { background:rgba(53,226,212,.07); border:1px solid rgba(53,226,212,.24); border-radius:14px; padding:14px 15px; margin-bottom:16px; }
+.kb-status-top { display:flex; align-items:baseline; justify-content:space-between; }
+.kb-status-top .lbl { font-size:12.5px; color:var(--text-dim); letter-spacing:.5px; }
+.kb-n { font-weight:900; font-size:26px; line-height:1; background:var(--grad-cyan); -webkit-background-clip:text; background-clip:text; color:transparent; }
+.kb-n .u { font-size:13px; -webkit-text-fill-color:var(--text-dim); }
+.kb-bar { height:6px; border-radius:6px; background:rgba(255,255,255,.08); overflow:hidden; margin:11px 0 8px; }
+.kb-bar-fill { height:100%; width:0; border-radius:6px; background:var(--grad-cyan);
+  animation:fillbar 1.4s ease .3s forwards; }
+@keyframes fillbar { to { width:100%; } }
+.kb-status-sub { font-size:11.5px; color:var(--text-mute); display:flex; align-items:center; gap:6px; }
+.kb-status-sub .dotg { width:6px;height:6px;border-radius:50%;background:var(--green); box-shadow:0 0 8px var(--green); }
+.kb-list-label { font-size:11.5px; letter-spacing:1px; color:var(--text-mute); text-transform:uppercase; margin:2px 0 10px; }
+.kb-doc { display:flex; align-items:center; gap:11px; padding:11px 12px; border-radius:12px;
+  border:1px solid var(--line); background:rgba(6,14,24,.4); margin-bottom:9px; transition:.28s; position:relative; }
+.kb-doc:hover { border-color:var(--line-strong); }
+.kb-ic { font-size:19px; flex-shrink:0; }
+.kb-meta { flex:1; min-width:0; }
+.kb-name { font-weight:700; font-size:13.5px; }
+.kb-sub { font-size:11px; color:var(--text-mute); margin-top:2px; }
+.kb-badge { font-size:11px; font-weight:800; color:var(--green); flex-shrink:0; }
+.kb-doc.cited { border-color:rgba(53,226,212,.55); background:rgba(53,226,212,.09);
+  box-shadow:0 0 0 1px rgba(53,226,212,.3), 0 8px 24px -14px rgba(53,226,212,.5); }
+.kb-doc.cited .kb-flag { opacity:1; transform:translateX(0); }
+.kb-flag { position:absolute; top:-8px; right:10px; font-size:10px; font-weight:800; letter-spacing:.5px;
+  color:#06202a; background:var(--cyan); padding:2px 7px; border-radius:20px; opacity:0; transform:translateX(6px); transition:.3s; }
+.kb-foot { margin-top:6px; font-size:11.5px; color:var(--text-mute); line-height:1.5; padding-top:12px; border-top:1px solid var(--line); }
+
+/* Chat panel */
+.qa { background:var(--bg-card); border:1px solid var(--line); border-radius:var(--radius); overflow:hidden; display:flex; flex-direction:column; min-height:560px; }
+.qa-head { display:flex; align-items:center; gap:11px; padding:16px 20px; border-bottom:1px solid var(--line); background:rgba(255,255,255,.02); }
+.qa-head .av { width:36px;height:36px;border-radius:11px;display:grid;place-items:center;font-size:18px;
+  background:var(--grad-cyan); }
+.qa-head .t { font-weight:800; font-size:15px; }
+.qa-head .s { font-size:11.5px; color:var(--text-dim); margin-top:1px; display:flex; align-items:center; gap:6px; }
+.qa-head .s .dotg { width:6px;height:6px;border-radius:50%;background:var(--green); box-shadow:0 0 8px var(--green); }
+.qa-head .mode { margin-left:auto; font-size:11px; font-weight:700; color:var(--cyan);
+  background:rgba(53,226,212,.12); border:1px solid rgba(53,226,212,.28); padding:5px 11px; border-radius:20px; }
+
+.chat-body { padding:20px; flex:1; overflow-y:auto; max-height:520px; display:flex; flex-direction:column; gap:16px; }
+
+.msg { display:flex; gap:10px; max-width:100%; }
+.msg-user { justify-content:flex-end; }
+.bubble-user { background:var(--grad-cyan); color:#06202a; font-weight:600; padding:11px 15px; border-radius:14px 14px 4px 14px; font-size:14px; max-width:82%; }
+.msg-ai .ava { width:32px;height:32px;border-radius:10px;flex-shrink:0;display:grid;place-items:center;font-size:16px;
+  background:rgba(53,226,212,.12); border:1px solid rgba(53,226,212,.25); }
+.ai-body { flex:1; min-width:0; background:rgba(6,14,24,.5); border:1px solid var(--line); border-radius:4px 14px 14px 14px; padding:14px 16px; }
+
+.retrieving { display:flex; align-items:center; gap:9px; color:var(--text-dim); font-size:13.5px; }
+.retrieving .dots { display:inline-flex; gap:4px; }
+.retrieving .dot { width:6px;height:6px;border-radius:50%;background:var(--cyan); animation:blink 1s infinite; }
+.retrieving .dot:nth-child(2){ animation-delay:.18s; } .retrieving .dot:nth-child(3){ animation-delay:.36s; }
+@keyframes blink { 0%,100%{ opacity:.25; transform:translateY(0);} 50%{ opacity:1; transform:translateY(-2px);} }
+
+.trace { font-size:12px; color:var(--text-dim); background:rgba(59,140,255,.08); border:1px solid rgba(59,140,255,.2);
+  border-radius:8px; padding:7px 11px; margin-bottom:11px; line-height:1.5; }
+.trace b { color:var(--azure); }
+.trace-miss { background:rgba(255,90,82,.08); border-color:rgba(255,90,82,.24); }
+.trace-miss b { color:var(--red); }
+
+.answer { font-size:14px; line-height:1.72; color:var(--text); white-space:pre-wrap; }
+.answer.oos-answer { color:var(--text); font-weight:600; }
+
+/* citations */
+.cites { margin-top:14px; }
+.cites-head { font-size:12px; font-weight:800; letter-spacing:.5px; color:var(--cyan); margin-bottom:9px; display:flex; align-items:center; gap:7px; }
+.cites-head .hint { font-weight:600; color:var(--text-mute); letter-spacing:0; margin-left:auto; font-size:11px; }
+.cite-card { border:1px solid var(--line-2); border-radius:12px; padding:12px 13px; margin-bottom:9px;
+  background:rgba(255,255,255,.02); animation:citeIn .4s ease both; }
+@keyframes citeIn { from{ opacity:0; transform:translateY(8px);} to{ opacity:1; transform:none; } }
+.cite-top { display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:8px; flex-wrap:wrap; }
+.cite-doc { font-weight:700; font-size:13px; color:var(--text); }
+.cite-clause { font-size:11.5px; font-weight:800; color:var(--cyan); background:rgba(53,226,212,.1);
+  border:1px solid rgba(53,226,212,.28); padding:3px 9px; border-radius:20px; white-space:nowrap; }
+.cite-quote { margin:0; font-size:12.5px; color:var(--text-2); line-height:1.65; padding:9px 12px;
+  background:rgba(6,14,24,.55); border-left:3px solid var(--cyan); border-radius:0 8px 8px 0; }
+
+/* out of scope panel */
+.oos { display:flex; gap:13px; margin-top:14px; padding:15px 16px; border-radius:14px;
+  background:linear-gradient(150deg, rgba(255,90,82,.14), rgba(255,138,61,.06)); border:1px solid rgba(255,90,82,.4);
+  animation:citeIn .4s ease both; }
+.oos-icon { font-size:26px; flex-shrink:0; line-height:1.2; }
+.oos-title { font-weight:800; font-size:14.5px; color:var(--red); margin-bottom:5px; }
+.oos-desc { font-size:12.5px; color:var(--text-2); line-height:1.65; }
+.oos-desc b { color:#fff; }
+.oos-tag { display:inline-flex; align-items:center; gap:6px; margin-top:10px; font-size:11.5px; font-weight:800;
+  color:var(--green); background:rgba(55,211,154,.12); border:1px solid rgba(55,211,154,.3); padding:4px 10px; border-radius:20px; }
+
+/* chips + input */
+.chips-zone { padding:14px 20px 8px; border-top:1px solid var(--line); }
+.chips-label { font-size:11.5px; color:var(--text-mute); letter-spacing:.5px; margin-bottom:9px; }
+.chips { display:flex; flex-wrap:wrap; gap:8px; }
+.chip { font-size:12.5px; font-weight:600; color:var(--text-2); background:rgba(255,255,255,.04);
+  border:1px solid var(--line-2); padding:8px 13px; border-radius:20px; transition:.2s; text-align:left; }
+.chip:hover { color:#fff; border-color:var(--line-strong); background:rgba(53,226,212,.1); transform:translateY(-1px); }
+.chip.oos { border-color:rgba(255,90,82,.35); color:var(--orange-2); }
+.chip.oos::before { content:"反例 "; font-weight:800; color:var(--red); }
+.chip[disabled] { opacity:.45; cursor:not-allowed; transform:none; }
+.chat-input { display:flex; align-items:center; gap:10px; padding:12px 20px 18px; }
+.chat-input .box { flex:1; display:flex; align-items:center; height:42px; padding:0 15px; border-radius:12px;
+  background:rgba(6,14,24,.5); border:1px solid var(--line-2); color:var(--text-mute); font-size:13px; }
+.chat-input .send { width:42px;height:42px;border-radius:12px;background:var(--grad-cyan);color:#06202a;
+  display:grid;place-items:center;font-size:18px;font-weight:800;border:0; flex-shrink:0; }
+
+/* how it works */
+.principle { display:grid; grid-template-columns:repeat(4,1fr); gap:16px; }
+@media (max-width:980px){ .principle { grid-template-columns:1fr 1fr; } }
+@media (max-width:520px){ .principle { grid-template-columns:1fr; } }
+.pcard { padding:22px 20px; border-radius:var(--radius); border:1px solid var(--line); background:var(--bg-card); transition:.25s; }
+.pcard:hover { transform:translateY(-4px); border-color:var(--line-strong); box-shadow:var(--shadow); }
+.pcard .pic { width:44px;height:44px;border-radius:12px;display:grid;place-items:center;font-size:21px;margin-bottom:13px; }
+.pcard.c1 .pic{ background:rgba(53,226,212,.12); border:1px solid rgba(53,226,212,.25); }
+.pcard.c2 .pic{ background:rgba(59,140,255,.12); border:1px solid rgba(59,140,255,.25); }
+.pcard.c3 .pic{ background:rgba(155,140,255,.12); border:1px solid rgba(155,140,255,.25); }
+.pcard.c4 .pic{ background:rgba(255,90,82,.12); border:1px solid rgba(255,90,82,.25); }
+.pcard h3 { font-size:16px; margin-bottom:7px; }
+.pcard p { font-size:12.8px; color:var(--text-dim); margin:0; line-height:1.6; }
+.pcard .pnum { font-size:11px; font-weight:800; letter-spacing:1px; color:var(--text-mute); }
+
+/* return bar */
+.return-bar { display:flex; align-items:center; justify-content:space-between; gap:14px; flex-wrap:wrap;
+  padding:18px 24px; margin:10px auto 46px; max-width:1360px; border-radius:16px;
+  border:1px solid var(--line); background:var(--bg-card); }
+.return-bar a { font-size:14px; font-weight:700; display:inline-flex; align-items:center; gap:8px; transition:.18s; }
+.return-bar .rb-back { color:var(--text-2); } .return-bar .rb-back:hover { color:var(--cyan); }
+.return-bar .rb-home { color:var(--cyan); } .return-bar .rb-home:hover { filter:brightness(1.15); }
+.return-bar .rb-mid { font-size:12.5px; color:var(--text-mute); }
+</style>
+</head>
+<body>
+
+<!-- ============ NAV ============ -->
+<nav class="nav">
+  <div class="wrap-wide">
+    <div class="brand">
+      <div class="logos">
+        <img src="assets/st_logo.png" class="logo-img" alt="商汤科技 SenseTime">
+      </div>
+      <span class="sub hide-mobile">制度 / 知识问答 Demo</span>
+    </div>
+    <button class="nav-toggle" aria-label="菜单">☰</button>
+    <div class="nav-links">
+      <a href="index.html">← 方案首页</a>
+      <a href="index.html#scenarios">落地场景</a>
+      <a href="index.html#security">安全可控</a>
+      <a href="demos.html" class="nav-cta">▶ Demo 列表</a>
+    </div>
+  </div>
+</nav>
+
+<!-- ============ HERO ============ -->
+<header class="demo-hero">
+  <div class="bg-ocean"></div>
+  <div class="orb orb-cyan" style="width:360px;height:360px;top:-140px;right:-60px;opacity:.4;"></div>
+  <div class="wrap-wide">
+    <div class="kicker reveal">RAG · 制度 / 知识问答 · Demo 原型</div>
+    <h1 class="reveal">问一句，<span class="g">带着出处</span>回答你 ——<br>库里没有，就直说「未覆盖」</h1>
+    <p class="lead reveal">把本单位的规程、制度、手册挂进来做成知识库：AI 先在你的资料里<b class="text-cyan">检索</b>、再<b class="text-cyan">带原文条款</b>作答，每条结论可点开复核；<b class="text-orange">超出知识库范围的问题绝不臆测</b>，直接告诉你未覆盖。</p>
+    <div class="hero-tags reveal">
+      <span class="pill">🔎 检索增强 RAG</span>
+      <span class="pill">📎 答案带出处</span>
+      <span class="pill">🧾 可溯源 · 可复核</span>
+      <span class="pill">🚫 库外不臆测 · 防幻觉</span>
+    </div>
+  </div>
+</header>
+
+<!-- ============ RAG DEMO ============ -->
+<section class="rag">
+  <div class="wrap-wide">
+    <div class="rag-grid">
+
+      <!-- LEFT: knowledge base -->
+      <aside class="kb reveal">
+        <div class="kb-title"><span class="ic">🗂️</span> 知识库</div>
+
+        <div class="kb-status">
+          <div class="kb-status-top">
+            <span class="lbl">已索引 · 向量化</span>
+            <span class="kb-n"><span data-count="5">0</span> <span class="u">篇</span></span>
+          </div>
+          <div class="kb-bar"><div class="kb-bar-fill"></div></div>
+          <div class="kb-status-sub"><span class="dotg"></span> 向量化完成 · 640 个语义片段 · 可检索</div>
+        </div>
+
+        <div class="kb-list-label">已挂载文档</div>
+
+        <div class="kb-doc" data-doc="机械设备操作规程">
+          <span class="kb-ic">📄</span>
+          <div class="kb-meta"><div class="kb-name">机械设备操作规程</div><div class="kb-sub">42 页 · 128 片段</div></div>
+          <span class="kb-badge">✓</span>
+          <span class="kb-flag">本次引用</span>
+        </div>
+        <div class="kb-doc" data-doc="海上平台HSE管理制度">
+          <span class="kb-ic">📄</span>
+          <div class="kb-meta"><div class="kb-name">海上平台 HSE 管理制度</div><div class="kb-sub">68 页 · 176 片段</div></div>
+          <span class="kb-badge">✓</span>
+          <span class="kb-flag">本次引用</span>
+        </div>
+        <div class="kb-doc" data-doc="注水系统运行手册">
+          <span class="kb-ic">📄</span>
+          <div class="kb-meta"><div class="kb-name">注水系统运行手册</div><div class="kb-sub">36 页 · 104 片段</div></div>
+          <span class="kb-badge">✓</span>
+          <span class="kb-flag">本次引用</span>
+        </div>
+        <div class="kb-doc" data-doc="应急预案汇编">
+          <span class="kb-ic">📄</span>
+          <div class="kb-meta"><div class="kb-name">应急预案汇编</div><div class="kb-sub">54 页 · 142 片段</div></div>
+          <span class="kb-badge">✓</span>
+          <span class="kb-flag">本次引用</span>
+        </div>
+        <div class="kb-doc" data-doc="设备维护保养标准">
+          <span class="kb-ic">📄</span>
+          <div class="kb-meta"><div class="kb-name">设备维护保养标准</div><div class="kb-sub">30 页 · 90 片段</div></div>
+          <span class="kb-badge">✓</span>
+          <span class="kb-flag">本次引用</span>
+        </div>
+
+        <div class="kb-foot">🔒 仅检索已挂载文档 · 答案不超出库内内容 · 数据不出内网。挂新文件即自动切片入库，问答立即可用。</div>
+      </aside>
+
+      <!-- RIGHT: chat -->
+      <div class="qa reveal">
+        <div class="qa-head">
+          <div class="av">🤖</div>
+          <div>
+            <div class="t">制度知识助手</div>
+            <div class="s"><span class="dotg"></span> 已连接知识库 · 带出处应答</div>
+          </div>
+          <span class="mode">RAG 模式</span>
+        </div>
+
+        <div class="chat-body" id="chatBody">
+          <div class="msg msg-ai">
+            <div class="ava">🤖</div>
+            <div class="ai-body">
+              <div class="answer">你好，我是制度知识助手。已挂载本单位 5 部规程 / 制度文件并完成向量化。
+点下方示例问题试试 —— 我会先检索、再带出处回答；库里没有的，我会直说「未覆盖」，绝不编造。</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="chips-zone">
+          <div class="chips-label">试试这些问题 ↓</div>
+          <div class="chips">
+            <button class="chip" data-i="0">离心泵启动前的检查步骤有哪些？</button>
+            <button class="chip" data-i="1">发现 H2S 泄漏应如何处置？</button>
+            <button class="chip" data-i="2">注水泵日常保养周期是多久？</button>
+            <button class="chip" data-i="3">平台受限空间作业进入前的强制要求？</button>
+            <button class="chip oos" data-i="4">公司去年的净利润是多少？</button>
+          </div>
+        </div>
+        <div class="chat-input">
+          <div class="box">输入你的问题，或点击上方示例…</div>
+          <button class="send" aria-label="发送">→</button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ============ HOW IT WORKS ============ -->
+<section class="section tight bg-1">
+  <div class="wrap">
+    <div class="sec-head center reveal">
+      <div class="kicker center">How it works · 背后原理</div>
+      <h2 class="h-sec">不是凭记忆答，是<span class="hl">有依据地答</span></h2>
+      <p class="lead center">四步逻辑，让每一个答案都可溯源、可复核 —— 也让「不知道」被诚实地说出来。</p>
+    </div>
+    <div class="principle">
+      <div class="pcard c1 reveal">
+        <div class="pic">🔎</div>
+        <div class="pnum">01</div>
+        <h3>RAG 检索增强</h3>
+        <p>先在你的资料里「查」，再让模型「答」。回答之前先召回相关片段，答案有据可依，而不是凭模型记忆。</p>
+      </div>
+      <div class="pcard c2 reveal">
+        <div class="pic">🧬</div>
+        <div class="pnum">02</div>
+        <h3>向量化你的文档</h3>
+        <p>规程 / 制度切成语义片段并向量化入库，按语义相近召回，不靠关键词硬匹配 —— 换个说法也能问到。</p>
+      </div>
+      <div class="pcard c3 reveal">
+        <div class="pic">📎</div>
+        <div class="pnum">03</div>
+        <h3>答案带出处可溯源</h3>
+        <p>每条结论都附《文件名》+ 条款号 + 原文片段，点开即可复核、可追责 —— 敢用、能对、说得清来处。</p>
+      </div>
+      <div class="pcard c4 reveal">
+        <div class="pic">🚫</div>
+        <div class="pnum">04</div>
+        <h3>库外即答未覆盖 · 防幻觉</h3>
+        <p>检索不到就直说「未覆盖」，绝不编造数字或条款。宁可不答，不可错答 —— 把风险挡在回答之前。</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ RETURN BAR ============ -->
+<div class="return-bar reveal">
+  <a href="demos.html" class="rb-back">← 返回 Demo 列表</a>
+  <span class="rb-mid">制度 / 知识问答 RAG · 可溯源 · 可复核 · 库外不臆测</span>
+  <a href="index.html" class="rb-home">中海油 × 商汤 · 方案首页 →</a>
+</div>
+
+<script src="assets/app.js"></script>
+<script>
+(function () {
+  'use strict';
+
+  var QA = [
+    {
+      q: '离心泵启动前的检查步骤有哪些？',
+      trace: '命中《机械设备操作规程》《注水系统运行手册》· 3 个相关片段',
+      docs: ['机械设备操作规程', '注水系统运行手册'],
+      answer:
+        '离心泵启动前应逐项完成以下检查，确认无异常后方可启动：\n' +
+        '① 阀门状态 —— 进口阀全开、出口阀关闭或微开；\n' +
+        '② 润滑 —— 检查润滑油位于视镜 1/2~2/3 之间、油质正常；\n' +
+        '③ 盘车 —— 手动盘车确认转子转动灵活、无卡涩与异响；\n' +
+        '④ 防护 —— 联轴器防护罩齐全、地脚螺栓紧固；\n' +
+        '⑤ 辅助系统 —— 冷却水、密封水投用正常。',
+      citations: [
+        { doc: '机械设备操作规程', clause: '第 4.2.3 条', text: '离心泵启动前，操作人员应确认进口阀全开、出口阀关闭，盘车检查转子转动灵活、无异常摩擦声，联轴器防护罩安装到位。' },
+        { doc: '注水系统运行手册', clause: '第 3.1.2 条', text: '启泵前须检查润滑油位处于视镜 1/2~2/3 之间，冷却水、密封水投用正常，方可执行启动操作。' }
+      ]
+    },
+    {
+      q: '发现 H2S 泄漏应如何处置？',
+      trace: '命中《海上平台HSE管理制度》《应急预案汇编》· 4 个相关片段',
+      docs: ['海上平台HSE管理制度', '应急预案汇编'],
+      answer:
+        '发现 H2S（硫化氢）泄漏，第一发现人应立即按下列步骤处置：\n' +
+        '① 防护撤离 —— 就近佩戴正压式空气呼吸器，向上风向 / 逆风撤离至安全区；\n' +
+        '② 报警通报 —— 触发气体报警，通知中控与应急指挥，启动专项应急响应；\n' +
+        '③ 消除火源 —— 泄漏区严禁使用非防爆工具、严禁明火与启停用电设备；\n' +
+        '④ 施救 —— 疑似中毒人员立即移至新鲜空气处、呼叫急救，未穿戴防护严禁进入施救；\n' +
+        '⑤ 处置 —— 由应急小组按预案实施隔离、通风与堵漏。',
+      citations: [
+        { doc: '海上平台HSE管理制度', clause: '第 6.4.1 条', text: '作业区检测到 H2S 浓度超过 10ppm 时应立即报警，人员佩戴正压式空气呼吸器并向上风向撤离，严禁在泄漏区动火。' },
+        { doc: '应急预案汇编', clause: '第 2.3 节 · 硫化氢泄漏', text: '现场发现硫化氢泄漏，第一发现人应立即报警、撤离，并启动硫化氢泄漏专项应急响应；未穿戴防护装备严禁进入泄漏区施救。' }
+      ]
+    },
+    {
+      q: '注水泵日常保养周期是多久？',
+      trace: '命中《设备维护保养标准》《注水系统运行手册》· 2 个相关片段',
+      docs: ['设备维护保养标准', '注水系统运行手册'],
+      answer:
+        '注水泵实行「日检 + 周保养 + 月度 / 500 小时全面检查」的分级周期：\n' +
+        '· 每班（日检）—— 巡检并记录振动、轴承温度、进出口压力；\n' +
+        '· 每周（周保养）—— 检查润滑、地脚螺栓紧固、机械密封泄漏情况；\n' +
+        '· 每运行 500 小时或满一个月 —— 进行一次全面保养，更换 / 补充润滑油并检测机封。',
+      citations: [
+        { doc: '设备维护保养标准', clause: '第 5.2 条', text: '注水泵日常保养以周为周期，检查轴承润滑、地脚螺栓紧固及机械密封泄漏情况，并做保养记录。' },
+        { doc: '注水系统运行手册', clause: '第 4.3.1 条', text: '注水泵每运行 500 小时或满一个月应进行一次全面保养，记录轴承温度与振动值，异常时提前安排检修。' }
+      ]
+    },
+    {
+      q: '平台受限空间作业进入前的强制要求？',
+      trace: '命中《海上平台HSE管理制度》《应急预案汇编》· 3 个相关片段',
+      docs: ['海上平台HSE管理制度', '应急预案汇编'],
+      answer:
+        '进入受限空间作业前，必须逐项落实以下强制要求，缺一不可：\n' +
+        '① 许可 —— 办理受限空间作业许可票并经审批签发；\n' +
+        '② 气体检测 —— 检测氧含量（19.5%~23.5%）、可燃气、有毒气（H2S / CO）合格；\n' +
+        '③ 能量隔离 —— 落实上锁挂签（LOTO）并强制通风；\n' +
+        '④ 监护 —— 设置专职监护人全程监护、保持通讯；\n' +
+        '⑤ 应急 —— 配备正压呼吸器、救援三脚架等应急救援装备。\n' +
+        '检测合格且许可票签发后，方可进入。',
+      citations: [
+        { doc: '海上平台HSE管理制度', clause: '第 7.1.2 条', text: '进入受限空间作业前必须办理作业许可、进行气体检测，氧含量应在 19.5%~23.5% 之间，并设专职监护人全程监护。' },
+        { doc: '应急预案汇编', clause: '第 3.5 节 · 受限空间', text: '受限空间作业须落实能量隔离与强制通风，配置正压式空气呼吸器及救援三脚架等应急装备，具备条件方可进入。' }
+      ]
+    },
+    {
+      q: '公司去年的净利润是多少？',
+      trace: '相似度低于阈值，知识库内无相关片段',
+      docs: [],
+      outOfScope: true,
+      answer: '该问题超出已挂载知识库范围 —— 知识库未覆盖，请咨询相关部门。'
+    }
+  ];
+
+  var body = document.getElementById('chatBody');
+  var chips = Array.prototype.slice.call(document.querySelectorAll('.chip[data-i]'));
+  var busy = false;
+
+  function scrollBot() { body.scrollTop = body.scrollHeight; }
+
+  function clearDocs() {
+    document.querySelectorAll('.kb-doc').forEach(function (d) { d.classList.remove('cited'); });
+  }
+  function highlightDocs(names) {
+    document.querySelectorAll('.kb-doc').forEach(function (d) {
+      if (names && names.indexOf(d.dataset.doc) > -1) d.classList.add('cited');
+    });
+  }
+
+  function addUser(text) {
+    var row = document.createElement('div');
+    row.className = 'msg msg-user';
+    var b = document.createElement('div');
+    b.className = 'bubble bubble-user';
+    b.textContent = text;
+    row.appendChild(b);
+    body.appendChild(row);
+    scrollBot();
+  }
+
+  function renderCitations(container, cits) {
+    var wrap = document.createElement('div');
+    wrap.className = 'cites';
+    var head = document.createElement('div');
+    head.className = 'cites-head';
+    head.innerHTML = '📎 引用来源 · 可溯源 <span class="hint">点开原文可复核</span>';
+    wrap.appendChild(head);
+    cits.forEach(function (c) {
+      var card = document.createElement('div');
+      card.className = 'cite-card';
+      var top = document.createElement('div');
+      top.className = 'cite-top';
+      var doc = document.createElement('span');
+      doc.className = 'cite-doc';
+      doc.textContent = '📄 《' + c.doc + '》';
+      var cl = document.createElement('span');
+      cl.className = 'cite-clause';
+      cl.textContent = c.clause;
+      top.appendChild(doc); top.appendChild(cl);
+      var q = document.createElement('blockquote');
+      q.className = 'cite-quote';
+      q.textContent = '“' + c.text + '”';
+      card.appendChild(top); card.appendChild(q);
+      wrap.appendChild(card);
+    });
+    container.appendChild(wrap);
+  }
+
+  function renderOOS(container) {
+    var box = document.createElement('div');
+    box.className = 'oos';
+    box.innerHTML =
+      '<div class="oos-icon">⛔</div>' +
+      '<div>' +
+        '<div class="oos-title">超出知识库范围 · 未覆盖</div>' +
+        '<div class="oos-desc">该问题不在已挂载的 5 部规程 / 制度文件内，涉及财务经营数据。为避免臆测，系统<b>不生成任何推测性数字</b>，请咨询财务 / 经营管理相关部门获取准确数据。</div>' +
+        '<span class="oos-tag">✓ 绝不臆测 · 库外即答未覆盖</span>' +
+      '</div>';
+    container.appendChild(box);
+  }
+
+  function ask(i) {
+    if (busy) return;
+    busy = true;
+    chips.forEach(function (c) { c.disabled = true; });
+    var item = QA[i];
+    clearDocs();
+    addUser(item.q);
+
+    // AI message shell with "retrieving..."
+    var ai = document.createElement('div');
+    ai.className = 'msg msg-ai';
+    ai.innerHTML =
+      '<div class="ava">🤖</div>' +
+      '<div class="ai-body"><div class="retrieving"><span class="dots"><span class="dot"></span><span class="dot"></span><span class="dot"></span></span> 检索知识库…</div></div>';
+    body.appendChild(ai);
+    scrollBot();
+    var aiBody = ai.querySelector('.ai-body');
+
+    setTimeout(function () {
+      aiBody.innerHTML = '';
+      // retrieval trace line
+      var trace = document.createElement('div');
+      trace.className = 'trace' + (item.outOfScope ? ' trace-miss' : '');
+      trace.innerHTML = '🔍 向量检索 → ' + (item.outOfScope ? '<b>未命中</b> · ' : '') + item.trace;
+      aiBody.appendChild(trace);
+
+      var ans = document.createElement('div');
+      ans.className = 'answer' + (item.outOfScope ? ' oos-answer' : '');
+      aiBody.appendChild(ans);
+      scrollBot();
+
+      var scrollIv = setInterval(scrollBot, 110);
+      window.CNOOC.type(ans, item.answer, 16, function () {
+        clearInterval(scrollIv);
+        if (item.outOfScope) {
+          renderOOS(aiBody);
+        } else {
+          renderCitations(aiBody, item.citations);
+          highlightDocs(item.docs);
+        }
+        scrollBot();
+        busy = false;
+        chips.forEach(function (c) { c.disabled = false; });
+      });
+    }, 950);
+  }
+
+  chips.forEach(function (ch) {
+    ch.addEventListener('click', function () { ask(parseInt(ch.dataset.i, 10)); });
+  });
+
+  // decorative send button nudges toward examples
+  var send = document.querySelector('.chat-input .send');
+  if (send) send.addEventListener('click', function () {
+    if (!busy) ask(0);
+  });
+})();
+</script>
+</body>
+</html>

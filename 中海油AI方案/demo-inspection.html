@@ -1,0 +1,780 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>设备缺陷识别 Agent · Demo —— 中海油 × 商汤</title>
+<meta name="description" content="视觉 AI 设备缺陷识别 Demo：选一张巡检照片，AI 秒级圈出缺陷位置、判类型定等级、关联历史工单、给处置建议并一键生成工单。">
+<link rel="stylesheet" href="assets/style.css">
+<style>
+/* ===== demo-inspection only —— 颜色全部取自 style.css 变量，一线现场 · 安全橙为主 accent ===== */
+
+/* ---- hero band ---- */
+.demo-hero { position:relative; overflow:hidden; padding:52px 0 30px; background:var(--bg-0); }
+.demo-hero .bg-ocean { position:absolute; inset:0; z-index:0;
+  background:
+    radial-gradient(1000px 520px at 84% -22%, rgba(255,138,61,.18), transparent 55%),
+    radial-gradient(900px 520px at 2% 6%, rgba(255,90,82,.12), transparent 55%),
+    radial-gradient(800px 560px at 55% 130%, rgba(59,140,255,.10), transparent 55%); }
+.demo-hero .wrap-wide { position:relative; z-index:2; }
+.demo-hero h1 { font-size:clamp(26px,3.6vw,40px); line-height:1.14; }
+.demo-hero h1 .g { background:var(--grad-energy); -webkit-background-clip:text; background-clip:text; color:transparent; }
+.demo-hero .lead { margin-top:14px; }
+.hero-tags { display:flex; flex-wrap:wrap; gap:8px; margin-top:18px; }
+
+/* ---- console layout ---- */
+.console-sec { padding:14px 0 40px; }
+.console { display:grid; grid-template-columns:346px 1fr; gap:22px; align-items:start; }
+@media (max-width: 980px){ .console { grid-template-columns:1fr; } }
+
+/* ---- LEFT: photo panel ---- */
+.ppanel { background:var(--bg-card); border:1px solid var(--line); border-radius:var(--radius);
+  padding:18px; position:sticky; top:calc(var(--nav-h) + 14px); }
+@media (max-width: 980px){ .ppanel { position:static; } }
+.pp-head { display:flex; align-items:center; gap:10px; font-weight:800; font-size:16px; margin-bottom:5px; }
+.pp-head .ic { width:34px;height:34px;border-radius:10px;display:grid;place-items:center;font-size:17px;
+  background:rgba(255,138,61,.14); border:1px solid rgba(255,138,61,.3); }
+.pp-sub { font-size:11.5px; color:var(--text-mute); margin:0 0 15px 44px; }
+
+.thumb-list { display:flex; flex-direction:column; gap:12px; }
+.thumb { position:relative; border:1.5px solid var(--line-2); border-radius:14px; overflow:hidden;
+  cursor:pointer; background:#08121e; transition:.22s; }
+.thumb:hover { border-color:rgba(255,138,61,.6); transform:translateY(-2px); }
+.thumb.active { border-color:var(--orange);
+  box-shadow:0 0 0 1px var(--orange), 0 14px 34px -16px rgba(255,138,61,.7); }
+.thumb-img { height:128px; position:relative; overflow:hidden; background:#08111c; }
+.thumb-img svg { width:100%; height:100%; display:block; }
+.thumb-hint { position:absolute; top:8px; left:8px; z-index:3; font-size:10px; font-weight:800;
+  letter-spacing:.4px; color:#fff; background:rgba(255,90,82,.9); padding:3px 8px; border-radius:20px;
+  box-shadow:0 4px 12px -4px rgba(255,90,82,.6); display:flex; align-items:center; gap:4px; }
+.thumb-hint .bd { width:5px;height:5px;border-radius:50%;background:#fff; animation:blink 1.3s infinite; }
+@keyframes blink { 0%,100%{opacity:1;} 50%{opacity:.3;} }
+.thumb-sel { position:absolute; top:8px; right:8px; z-index:3; font-size:10px; font-weight:800; color:#06202a;
+  background:var(--orange); padding:3px 8px; border-radius:20px; opacity:0; transform:translateX(6px); transition:.25s; }
+.thumb.active .thumb-sel { opacity:1; transform:none; }
+.thumb-cap { padding:10px 12px; display:flex; align-items:center; gap:10px; }
+.thumb-idx { width:24px;height:24px;flex-shrink:0;border-radius:8px;display:grid;place-items:center;
+  font-size:12.5px;font-weight:900; color:var(--orange-2); background:rgba(255,138,61,.14);
+  border:1px solid rgba(255,138,61,.28); }
+.thumb.active .thumb-idx { background:var(--grad-energy); color:#fff; border-color:transparent; }
+.thumb-meta { min-width:0; }
+.thumb-t { font-size:13px; font-weight:700; line-height:1.25; }
+.thumb-loc { font-size:11px; color:var(--text-mute); margin-top:2px; }
+.pp-foot { margin-top:14px; padding-top:13px; border-top:1px solid var(--line);
+  font-size:11.5px; color:var(--text-mute); line-height:1.55; }
+
+/* ---- RIGHT: result panel ---- */
+.rpanel { display:flex; flex-direction:column; gap:16px; }
+
+.viewport-card { background:var(--bg-card); border:1px solid var(--line); border-radius:var(--radius); overflow:hidden; }
+.vp-head { display:flex; align-items:center; gap:10px; padding:13px 18px; border-bottom:1px solid var(--line);
+  background:rgba(255,255,255,.02); }
+.vp-title { font-weight:800; font-size:14.5px; display:flex; align-items:center; gap:9px; }
+.vp-ic { width:30px;height:30px;border-radius:9px;display:grid;place-items:center;font-size:15px;
+  background:rgba(255,138,61,.14); border:1px solid rgba(255,138,61,.3); }
+.vp-status { margin-left:auto; font-size:11.5px; color:var(--text-dim); display:flex; align-items:center; gap:7px; }
+.vp-status .dot { width:7px;height:7px;border-radius:50%;background:var(--green); box-shadow:0 0 8px var(--green); }
+.vp-status.busy .dot { background:var(--orange); box-shadow:0 0 8px var(--orange); animation:blink 1s infinite; }
+
+.viewport { position:relative; background:#08111c; }
+.view-svg { width:100%; aspect-ratio:4/3; height:auto; display:block; }
+/* HUD corner brackets */
+.vp-corner { position:absolute; width:26px; height:26px; border:2px solid rgba(255,138,61,.55); z-index:4; pointer-events:none; }
+.vp-corner.tl { top:12px; left:12px; border-right:0; border-bottom:0; }
+.vp-corner.tr { top:12px; right:12px; border-left:0; border-bottom:0; }
+.vp-corner.bl { bottom:12px; left:12px; border-right:0; border-top:0; }
+.vp-corner.br { bottom:12px; right:12px; border-left:0; border-top:0; }
+.vp-scantint { position:absolute; inset:0; z-index:3; pointer-events:none; opacity:0;
+  background:linear-gradient(180deg, rgba(255,138,61,.12), transparent 40%, rgba(255,138,61,.12));
+  transition:.2s; }
+.viewport.analyzing .vp-scantint { opacity:1; }
+.vp-foot { display:flex; align-items:center; gap:8px; flex-wrap:wrap; padding:9px 16px;
+  border-top:1px solid var(--line); font-size:11px; color:var(--text-mute); background:rgba(6,14,24,.4); }
+.vp-foot .mono { color:var(--text-dim); }
+
+/* scan line + annotation (SVG-driven) */
+.scan { opacity:0; }
+.viewport.analyzing .scan { opacity:.95; animation:scanmove 1.05s linear infinite; }
+@keyframes scanmove { 0%{ transform:translateY(0);} 100%{ transform:translateY(300px);} }
+.anno { opacity:0; transform-box:fill-box; transform-origin:center; }
+.viewport.revealed .anno { opacity:1; animation:annoIn .55s cubic-bezier(.2,.8,.3,1); }
+@keyframes annoIn { from{ opacity:0; transform:scale(.82);} to{ opacity:1; transform:scale(1);} }
+.anno-rect { fill:rgba(255,138,61,.10); stroke:var(--orange); stroke-width:3; stroke-dasharray:9 6; }
+.viewport.revealed .anno-rect { animation:ants 18s linear infinite; }
+@keyframes ants { to { stroke-dashoffset:-320; } }
+.anno-dot { fill:var(--red); }
+.viewport.revealed .anno-dot { animation:ping 1.6s ease-out infinite; }
+@keyframes ping { 0%{ opacity:.9; r:4;} 70%{ opacity:0; r:16;} 100%{ opacity:0; r:16;} }
+.anno-core { fill:var(--red); }
+.anno-lbl-bg { fill:var(--orange); }
+.anno-lbl-tx { fill:#06202a; font-weight:800; font-size:12px; font-family:-apple-system,"PingFang SC",sans-serif; }
+
+/* ---- analyzer progress ---- */
+.analyzer { display:none; padding:15px 18px; }
+.analyzer.show { display:block; }
+.an-row { display:flex; align-items:center; justify-content:space-between; gap:12px; }
+.an-status { font-size:13px; color:var(--orange-2); display:flex; align-items:center; gap:9px; font-weight:600; }
+.an-spin { width:15px;height:15px;border:2.4px solid rgba(255,138,61,.25); border-top-color:var(--orange);
+  border-radius:50%; animation:spin .7s linear infinite; }
+@keyframes spin { to { transform:rotate(360deg); } }
+.an-pct { font-family:"SF Mono",ui-monospace,Menlo,monospace; font-weight:900; font-size:20px; color:var(--orange-2); }
+.an-bar { height:8px; border-radius:6px; background:rgba(255,255,255,.08); overflow:hidden; margin-top:11px; }
+.an-fill { height:100%; width:0; border-radius:6px; background:var(--grad-energy);
+  box-shadow:0 0 14px -2px rgba(255,138,61,.7); transition:width .1s linear; }
+
+/* ---- results ---- */
+.results { display:flex; flex-direction:column; gap:16px; }
+.r-item { opacity:0; transform:translateY(14px); }
+.r-item.in { opacity:1; transform:none; transition:opacity .5s ease, transform .5s ease; }
+
+.res-summary { display:flex; gap:12px; align-items:flex-start; padding:14px 16px; border-radius:14px;
+  background:var(--grad-frontline); border:1px solid rgba(255,138,61,.34); }
+.res-summary .rs-ic { font-size:22px; line-height:1.2; flex-shrink:0; }
+.res-summary .rs-t { font-size:13.5px; color:var(--text); line-height:1.6; }
+.res-summary .rs-t b { color:var(--orange-2); }
+
+.metrics { display:grid; grid-template-columns:1.35fr 1fr 1fr; gap:12px; }
+@media (max-width:520px){ .metrics { grid-template-columns:1fr; } }
+.metric { background:var(--bg-2); border:1px solid var(--line); border-radius:14px; padding:14px 15px; }
+.m-label { font-size:10.5px; letter-spacing:1px; text-transform:uppercase; color:var(--text-mute); margin-bottom:9px; }
+.m-defect .m-val { font-size:15.5px; font-weight:800; line-height:1.3; }
+.m-defect .m-tag { display:inline-flex; margin-top:8px; font-size:11px; font-weight:800; padding:3px 9px; border-radius:20px;
+  background:rgba(255,138,61,.14); color:var(--orange-2); border:1px solid rgba(255,138,61,.32); }
+.sev-top { display:flex; align-items:baseline; justify-content:space-between; }
+.sev-word { font-size:16px; font-weight:900; }
+.sev-word.orange { color:var(--orange-2); } .sev-word.red { color:var(--red); } .sev-word.amber { color:var(--amber); }
+.sev-pct { font-size:11px; color:var(--text-mute); font-family:"SF Mono",monospace; }
+.sev-bar { height:7px; border-radius:6px; background:rgba(255,255,255,.08); overflow:hidden; margin-top:10px; }
+.sev-fill { height:100%; width:0; border-radius:6px; transition:width .9s cubic-bezier(.2,.8,.3,1); }
+.sev-fill.orange { background:var(--grad-energy); } .sev-fill.red { background:linear-gradient(120deg,#ff8a3d,#e8443c); }
+.sev-fill.amber { background:linear-gradient(120deg,#f4c14a,#ff8a3d); }
+.sev-scale { display:flex; justify-content:space-between; margin-top:7px; font-size:9.5px; color:var(--text-mute); }
+.conf-n { font-size:30px; font-weight:900; line-height:1; background:var(--grad-energy);
+  -webkit-background-clip:text; background-clip:text; color:transparent; font-family:"SF Mono",monospace; }
+.conf-n .u { font-size:15px; }
+.conf-sub { font-size:11px; color:var(--text-dim); margin-top:8px; display:flex; align-items:center; gap:6px; }
+.conf-sub .dotg { width:6px;height:6px;border-radius:50%;background:var(--green); }
+
+.sec-card { background:var(--bg-card); border:1px solid var(--line); border-radius:var(--radius); padding:18px 20px; }
+.sec-card-h { display:flex; align-items:center; gap:9px; font-size:14px; font-weight:800; margin-bottom:14px;
+  padding-bottom:11px; border-bottom:1px solid var(--line); }
+.sec-card-h .hic { font-size:16px; }
+.sec-card-h .badge { margin-left:auto; font-size:10.5px; font-weight:800; color:var(--orange-2);
+  background:rgba(255,138,61,.13); border:1px solid rgba(255,138,61,.28); padding:3px 9px; border-radius:20px; }
+
+/* history */
+.hist-item { display:flex; gap:12px; padding:12px 14px; border:1px solid var(--line); border-radius:12px;
+  background:rgba(6,14,24,.4); margin-bottom:10px; }
+.hist-item:last-child { margin-bottom:0; }
+.hist-l { flex-shrink:0; text-align:center; }
+.hist-no { font-family:"SF Mono",monospace; font-weight:800; font-size:12.5px; color:var(--orange-2);
+  background:rgba(255,138,61,.12); border:1px solid rgba(255,138,61,.26); padding:4px 9px; border-radius:7px; white-space:nowrap; }
+.hist-date { font-size:10.5px; color:var(--text-mute); margin-top:6px; font-family:"SF Mono",monospace; }
+.hist-r { min-width:0; }
+.hist-act { font-size:13px; color:var(--text-2); line-height:1.55; }
+.hist-status { display:inline-flex; align-items:center; gap:5px; margin-top:7px; font-size:10.5px; font-weight:800;
+  color:var(--green); background:rgba(55,211,154,.12); border:1px solid rgba(55,211,154,.3); padding:2px 8px; border-radius:20px; }
+
+/* steps */
+.step { display:flex; gap:12px; margin-bottom:12px; }
+.step:last-of-type { margin-bottom:0; }
+.step-n { width:24px;height:24px;flex-shrink:0;border-radius:50%; display:grid;place-items:center;
+  font-size:12px;font-weight:900; color:#fff; background:var(--grad-energy);
+  box-shadow:0 6px 14px -6px rgba(255,138,61,.7); }
+.step-tx { font-size:13.5px; color:var(--text-2); line-height:1.6; padding-top:2px; }
+.regs { display:flex; flex-wrap:wrap; gap:8px; margin-top:16px; padding-top:14px; border-top:1px dashed var(--line-2); }
+.regs-label { width:100%; font-size:11px; color:var(--text-mute); letter-spacing:.5px; margin-bottom:2px; }
+.reg-chip { display:inline-flex; align-items:center; gap:6px; font-size:11.5px; font-weight:600; color:var(--text-2);
+  background:rgba(59,140,255,.09); border:1px solid rgba(59,140,255,.24); padding:6px 11px; border-radius:8px; }
+.reg-chip .code { font-family:"SF Mono",monospace; font-weight:800; color:var(--azure); }
+
+/* generate button + result footer */
+.gen-row { display:flex; align-items:center; gap:14px; flex-wrap:wrap; }
+.gen-btn { display:inline-flex; align-items:center; gap:10px; padding:14px 26px; border:0; border-radius:13px;
+  font-size:15px; font-weight:800; color:#fff; cursor:pointer; background:var(--grad-energy);
+  box-shadow:0 14px 32px -12px rgba(255,138,61,.7); transition:transform .16s, box-shadow .16s, filter .16s; }
+.gen-btn:hover { transform:translateY(-2px); box-shadow:0 18px 40px -12px rgba(255,138,61,.8); filter:brightness(1.05); }
+.gen-btn:active { transform:translateY(0); }
+.gen-btn.done { background:rgba(55,211,154,.16); color:var(--green); border:1px solid rgba(55,211,154,.4); box-shadow:none; cursor:default; }
+.gen-hint { font-size:12px; color:var(--text-mute); flex:1; min-width:180px; }
+
+/* toast */
+.toast { position:fixed; left:50%; bottom:26px; transform:translate(-50%,140%); z-index:200;
+  display:flex; align-items:center; gap:12px; padding:14px 20px; border-radius:14px;
+  background:linear-gradient(120deg, rgba(20,39,60,.98), rgba(12,24,38,.98)); border:1px solid rgba(55,211,154,.45);
+  box-shadow:0 24px 60px -16px rgba(0,0,0,.7); transition:transform .45s cubic-bezier(.2,.9,.3,1); max-width:90vw; }
+.toast.show { transform:translate(-50%,0); }
+.toast .tk { width:34px;height:34px;flex-shrink:0;border-radius:10px;display:grid;place-items:center;font-size:17px;
+  background:rgba(55,211,154,.16); border:1px solid rgba(55,211,154,.4); }
+.toast .tt { font-size:13.5px; font-weight:800; color:var(--text); }
+.toast .ts { font-size:11.5px; color:var(--text-dim); margin-top:2px; }
+.toast .ts b { color:var(--orange-2); font-family:"SF Mono",monospace; }
+
+/* ---- how it works ---- */
+.principle { display:grid; grid-template-columns:repeat(4,1fr); gap:16px; }
+@media (max-width:980px){ .principle { grid-template-columns:1fr 1fr; } }
+@media (max-width:520px){ .principle { grid-template-columns:1fr; } }
+.pcard { padding:22px 20px; border-radius:var(--radius); border:1px solid var(--line); background:var(--bg-card); transition:.25s; }
+.pcard:hover { transform:translateY(-4px); border-color:var(--line-strong); box-shadow:var(--shadow); }
+.pcard .pic { width:44px;height:44px;border-radius:12px;display:grid;place-items:center;font-size:21px;margin-bottom:13px; }
+.pcard.c1 .pic{ background:rgba(255,138,61,.13); border:1px solid rgba(255,138,61,.28); }
+.pcard.c2 .pic{ background:rgba(59,140,255,.12); border:1px solid rgba(59,140,255,.25); }
+.pcard.c3 .pic{ background:rgba(155,140,255,.12); border:1px solid rgba(155,140,255,.25); }
+.pcard.c4 .pic{ background:rgba(55,211,154,.12); border:1px solid rgba(55,211,154,.25); }
+.pcard .pnum { font-size:11px; font-weight:800; letter-spacing:1px; color:var(--text-mute); }
+.pcard h3 { font-size:16px; margin-bottom:7px; }
+.pcard p { font-size:12.8px; color:var(--text-dim); margin:0; line-height:1.6; }
+
+/* ---- return bar ---- */
+.return-bar { display:flex; align-items:center; justify-content:space-between; gap:14px; flex-wrap:wrap;
+  padding:18px 24px; margin:10px auto 46px; max-width:1360px; border-radius:16px;
+  border:1px solid var(--line); background:var(--bg-card); }
+.return-bar a { font-size:14px; font-weight:700; display:inline-flex; align-items:center; gap:8px; transition:.18s; }
+.return-bar .rb-back { color:var(--text-2); } .return-bar .rb-back:hover { color:var(--orange-2); }
+.return-bar .rb-home { color:var(--orange-2); } .return-bar .rb-home:hover { filter:brightness(1.15); }
+.return-bar .rb-mid { font-size:12.5px; color:var(--text-mute); }
+</style>
+</head>
+<body>
+
+<nav class="nav"><div class="wrap-wide" style="justify-content:space-between;">
+  <a class="brand" href="index.html"><div class="logos"><img src="assets/st_logo.png" class="logo-img" alt="商汤科技 SenseTime"></div><span class="sub hide-mobile">Demo 原型</span></a>
+  <div style="display:flex;gap:8px;align-items:center;"><a class="btn btn-sm btn-ghost" href="index.html">← 返回方案</a><a class="btn btn-sm btn-ghost" href="demos.html">全部 Demo</a></div>
+</div></nav>
+
+<!-- ============ HERO ============ -->
+<header class="demo-hero">
+  <div class="bg-ocean"></div>
+  <div class="orb orb-orange" style="width:360px;height:360px;top:-140px;right:-60px;opacity:.4;"></div>
+  <div class="wrap-wide">
+    <div class="kicker orange reveal">视觉 AI · 设备缺陷识别 · Demo 原型</div>
+    <h1 class="reveal">选一张巡检照片，<span class="g">AI 一眼看出缺陷</span><br>圈位置 · 定等级 · 关联工单 · 一键处置</h1>
+    <p class="lead reveal">现场巡检拍下的照片，交给 AI：先<b class="text-orange">圈出缺陷位置</b>，再判类型、定严重度、给置信度；同时<b class="text-orange">翻出同类历史工单</b>与处置办法，附上关联规程条款 —— 最后一键生成工单，直接推送到责任班组。</p>
+    <div class="hero-tags reveal">
+      <span class="pill">📸 多模态视觉识别</span>
+      <span class="pill">🎯 缺陷定位 + 分级</span>
+      <span class="pill">🗂️ 关联历史工单</span>
+      <span class="pill">🧾 处置建议 · 关联规程</span>
+      <span class="pill">🔒 数据不出内网 · 示意脱敏</span>
+    </div>
+  </div>
+</header>
+
+<!-- ============ CONSOLE ============ -->
+<section class="console-sec">
+  <div class="wrap-wide">
+    <div class="console">
+
+      <!-- LEFT: photos -->
+      <aside class="ppanel reveal">
+        <div class="pp-head"><span class="ic">📷</span> 巡检照片</div>
+        <p class="pp-sub">点击任一张照片，右侧即时识别 · 共 4 张示例</p>
+        <div class="thumb-list" id="thumbList"><!-- injected --></div>
+        <div class="pp-foot">📎 照片来自现场手机 / 巡检仪 / 固定摄像头。识别在本地内网完成，原图与结果均<b style="color:var(--text-dim)">不出内网</b>；本页为演示，数据均示意 / 脱敏。</div>
+      </aside>
+
+      <!-- RIGHT: AI result -->
+      <div class="rpanel">
+
+        <!-- viewport -->
+        <div class="viewport-card reveal">
+          <div class="vp-head">
+            <div class="vp-title"><span class="vp-ic">🛰️</span> AI 识别结果</div>
+            <div class="vp-status" id="vpStatus"><span class="dot"></span><span id="vpStatusTx">就绪</span></div>
+          </div>
+          <div class="viewport" id="viewport">
+            <svg class="view-svg" id="viewSvg" viewBox="0 0 400 300" preserveAspectRatio="xMidYMid meet"></svg>
+            <div class="vp-corner tl"></div><div class="vp-corner tr"></div>
+            <div class="vp-corner bl"></div><div class="vp-corner br"></div>
+            <div class="vp-scantint"></div>
+          </div>
+          <div class="vp-foot">
+            <span>📍 <span id="vpLoc">—</span></span>
+            <span style="margin-left:auto;" class="mono">日日新 S2 · 视觉识别引擎</span>
+            <span class="mono">· 4000×3000 · 2026-07-15</span>
+          </div>
+          <!-- analyzer -->
+          <div class="analyzer" id="analyzer">
+            <div class="an-row">
+              <div class="an-status"><span class="an-spin"></span><span id="anStatus">正在提取图像特征…</span></div>
+              <div class="an-pct" id="anPct">0%</div>
+            </div>
+            <div class="an-bar"><div class="an-fill" id="anFill"></div></div>
+          </div>
+        </div>
+
+        <!-- results -->
+        <div class="results" id="results"><!-- injected after analysis --></div>
+
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ============ HOW IT WORKS ============ -->
+<section class="section tight bg-1">
+  <div class="wrap">
+    <div class="sec-head center reveal">
+      <div class="kicker orange center">How it works · 背后原理</div>
+      <h2 class="h-sec">不是「拍照存档」，是<span class="hl" style="background:var(--grad-energy);-webkit-background-clip:text;background-clip:text;color:transparent;">看懂并给出下一步</span></h2>
+      <p class="lead center">从一张照片到一张工单，AI 走完看得懂、比得准、连得上、可复核四步 —— 让缺陷不再只是躺在相册里。</p>
+    </div>
+    <div class="principle">
+      <div class="pcard c1 reveal">
+        <div class="pic">🧠</div>
+        <div class="pnum">01</div>
+        <h3>多模态视觉识别</h3>
+        <p>日日新 S2 视觉模型直接读懂现场照片，定位锈蚀、渗漏、破损、脱落等缺陷位置与形态，画框标注、判类型。</p>
+      </div>
+      <div class="pcard c2 reveal">
+        <div class="pic">📚</div>
+        <div class="pnum">02</div>
+        <h3>缺陷知识库比对</h3>
+        <p>与设备缺陷标准库、缺陷分级规则比对，给出严重度与置信度，并挂上适用的规程 / 标准条款，判定有据。</p>
+      </div>
+      <div class="pcard c3 reveal">
+        <div class="pic">🔗</div>
+        <div class="pnum">03</div>
+        <h3>历史工单关联</h3>
+        <p>检索同设备、同类缺陷的历史工单，把「上次怎么处置、效果如何」一并调出，处置建议不用从零想。</p>
+      </div>
+      <div class="pcard c4 reveal">
+        <div class="pic">✅</div>
+        <div class="pnum">04</div>
+        <h3>结果人工复核</h3>
+        <p>识别结果与建议供巡检 / 班组长复核确认，一键生成工单并推送责任班组 —— AI 出稿、人来拍板，闭环留痕。</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ RETURN BAR ============ -->
+<div class="return-bar reveal">
+  <a href="demos.html" class="rb-back">← 返回 Demo 列表</a>
+  <span class="rb-mid">设备缺陷识别 · 圈位置 · 定等级 · 关联工单 · 一键处置</span>
+  <a href="index.html" class="rb-home">中海油 × 商汤 · 方案首页 →</a>
+</div>
+
+<!-- toast -->
+<div class="toast" id="toast">
+  <div class="tk">✅</div>
+  <div>
+    <div class="tt" id="toastT">工单已创建</div>
+    <div class="ts" id="toastS">已推送责任班组</div>
+  </div>
+</div>
+
+<script src="assets/app.js"></script>
+<script>
+(function () {
+  'use strict';
+
+  /* ============ 缺陷照片数据模型（4 张，各驱动不同识别结果）============ */
+  var PHOTOS = [
+    {
+      id: 'flange',
+      title: '管道法兰锈蚀 / 渗漏',
+      loc: '2 号平台 · 工艺管廊 B 区',
+      hint: '疑似缺陷',
+      box: { x: 148, y: 96, w: 108, h: 150, label: '锈蚀 + 渗漏' },
+      summary: '检测到工艺管线法兰连接面存在<b>片状锈蚀</b>，法兰下沿伴有<b>介质渗漏</b>痕迹，需尽快处置以防扩大。',
+      defect: '法兰连接面锈蚀伴渗漏',
+      tag: '腐蚀 / 泄漏',
+      sev: { word: '中高', cls: 'orange', pct: 78 },
+      conf: 93,
+      history: [
+        { no: 'WO-2208', date: '2026-05-12', act: '更换法兰垫片、除锈防腐处理，压力复检合格' },
+        { no: 'WO-1974', date: '2026-03-03', act: '紧固法兰螺栓并补涂防腐漆，纳入观察' }
+      ],
+      steps: [
+        '立即降低该段管线运行压力，设置警戒并做好防护隔离。',
+        '对渗漏法兰进行紧固复位，观察渗漏是否消除。',
+        '安排停输后更换法兰垫片，打磨除锈并做防腐处理。',
+        '复检合格后恢复运行，将该点纳入腐蚀重点监测。'
+      ],
+      regs: [
+        { code: 'Q/HS 4012 §6.3', name: '管线腐蚀检测与防护规定' },
+        { code: 'GB/T 30579 §7.2', name: '承压设备损伤模式识别' }
+      ],
+      newWo: 'WO-2317'
+    },
+    {
+      id: 'gauge',
+      title: '压力表读数异常',
+      loc: '1 号平台 · 计量橇 PG-207',
+      hint: '读数超限',
+      box: { x: 150, y: 64, w: 132, h: 108, label: '指针进入红区' },
+      summary: '压力表指针<b>进入红色危险区</b>，读数超出正常工况上限，需立即核实是真实超压还是仪表失准。',
+      defect: '压力读数超红区 / 超限',
+      tag: '压力异常 / 超限',
+      sev: { word: '高危', cls: 'red', pct: 92 },
+      conf: 96,
+      history: [
+        { no: 'WO-2251', date: '2026-06-01', act: '校验并更换压力表，误差回归量程内' },
+        { no: 'WO-2090', date: '2026-04-18', act: 'DCS 联锁触发泄压，核实为工况波动' }
+      ],
+      steps: [
+        '核对就地压力表与远传 / DCS 数据，判断真实超压还是仪表失准。',
+        '若为真实超压，立即启动泄压程序、通知中控调整工况。',
+        '若为仪表故障，隔离挂牌并联系仪表班组校验 / 更换。',
+        '记录异常时段工况，排查根因，闭环后销项。'
+      ],
+      regs: [
+        { code: 'Q/HS 3105 §4.5', name: '压力仪表管理规定' },
+        { code: 'TSG 21', name: '固定式压力容器安全技术监察规程' }
+      ],
+      newWo: 'WO-2318'
+    },
+    {
+      id: 'cable',
+      title: '电缆桥架破损',
+      loc: '中控楼 · 电缆夹层 3F',
+      hint: '结构破损',
+      box: { x: 150, y: 96, w: 122, h: 132, label: '桥架断裂 · 电缆外露' },
+      summary: '检测到<b>电缆桥架断裂变形</b>，破损处电缆护套外露、局部下垂，存在磨损短路隐患。',
+      defect: '桥架断裂变形、护套外露',
+      tag: '结构破损 / 外露',
+      sev: { word: '中', cls: 'amber', pct: 56 },
+      conf: 88,
+      history: [
+        { no: 'WO-2176', date: '2026-05-20', act: '更换破损桥架段、恢复盖板，绝缘复测合格' },
+        { no: 'WO-1902', date: '2026-02-11', act: '桥架防腐涂层修补并加固固定卡' }
+      ],
+      steps: [
+        '隔离受影响回路电源，防止破损处电缆受损短路。',
+        '检查外露电缆护套是否破损，必要时做绝缘电阻测试。',
+        '更换 / 加固破损桥架段，恢复盖板与固定卡。',
+        '送电前进行绝缘电阻复测，合格后恢复供电。'
+      ],
+      regs: [
+        { code: 'GB 50168', name: '电缆线路施工及验收标准' },
+        { code: 'Q/HS 5203 §5.1', name: '电缆及桥架维护规程' }
+      ],
+      newWo: 'WO-2319'
+    },
+    {
+      id: 'valve',
+      title: '阀门保温层脱落',
+      loc: '2 号平台 · 注水泵进口阀',
+      hint: '保温脱落',
+      box: { x: 232, y: 108, w: 128, h: 96, label: '保温脱落 · 金属外露' },
+      summary: '检测到阀门<b>保温外护局部脱落</b>，金属阀体外露，存在人员烫伤及冬季防冻失效风险。',
+      defect: '阀门保温外护脱落、金属外露',
+      tag: '保温脱落 / 外露',
+      sev: { word: '中低', cls: 'amber', pct: 42 },
+      conf: 90,
+      history: [
+        { no: 'WO-2133', date: '2026-05-06', act: '修复阀门保温外护铁皮并恢复伴热带' }
+      ],
+      steps: [
+        '评估脱落部位对介质保温 / 防冻及人员烫伤的影响。',
+        '临时加装防烫警示与包扎，避免人员误触高温阀体。',
+        '安排修复保温层与外护铁皮，恢复伴热（如有）。',
+        '复查保温完整性，登记入保温缺陷台账跟踪。'
+      ],
+      regs: [
+        { code: 'Q/HS 4210 §3.4', name: '设备保温与防腐管理规定' },
+        { code: 'GB 50264', name: '工业设备及管道绝热工程设计规范' }
+      ],
+      newWo: 'WO-2320'
+    }
+  ];
+
+  /* ============ 设备示意图（内联 SVG · inner 内容，缺陷可见）============ */
+  function art(id) {
+    if (id === 'flange') return ''
+      + '<defs><linearGradient id="pf_pipe" x1="0" y1="0" x2="0" y2="1">'
+      + '<stop offset="0" stop-color="#5b6b7d"/><stop offset=".5" stop-color="#93a3b5"/><stop offset="1" stop-color="#3a4653"/>'
+      + '</linearGradient></defs>'
+      + '<rect width="400" height="300" fill="#0d1826"/>'
+      + '<ellipse cx="200" cy="286" rx="250" ry="38" fill="#060f1a" opacity=".7"/>'
+      + '<rect x="0" y="122" width="182" height="60" rx="9" fill="url(#pf_pipe)"/>'
+      + '<rect x="218" y="122" width="182" height="60" rx="9" fill="url(#pf_pipe)"/>'
+      + '<rect x="0" y="131" width="400" height="7" fill="#d3dde8" opacity=".22"/>'
+      + '<rect x="174" y="96" width="18" height="112" rx="6" fill="#788899"/>'
+      + '<rect x="208" y="96" width="18" height="112" rx="6" fill="#788899"/>'
+      + '<g fill="#c6cfd9">'
+      + '<circle cx="183" cy="108" r="4.6"/><circle cx="183" cy="152" r="4.6"/><circle cx="183" cy="196" r="4.6"/>'
+      + '<circle cx="217" cy="108" r="4.6"/><circle cx="217" cy="152" r="4.6"/><circle cx="217" cy="196" r="4.6"/></g>'
+      + '<g opacity=".92">'
+      + '<path d="M176 146 q12 -20 30 -9 q14 9 5 25 q-16 11 -29 2 q-11 -8 -6 -18z" fill="#8a4a22"/>'
+      + '<ellipse cx="206" cy="171" rx="19" ry="11" fill="#a35a24" opacity=".85"/>'
+      + '<ellipse cx="190" cy="139" rx="11" ry="7.5" fill="#6d3b1c"/>'
+      + '<circle cx="212" cy="150" r="4" fill="#7a4220"/><circle cx="180" cy="168" r="3" fill="#5e3218"/>'
+      + '<circle cx="199" cy="156" r="5.5" fill="#b5651d" opacity=".7"/></g>'
+      + '<path d="M200 206 c-5 12 -7 22 1 36 c6 -11 6 -24 -1 -36z" fill="#26402f"/>'
+      + '<circle cx="200" cy="240" r="6.5" fill="#33553f"/><circle cx="198" cy="238" r="2" fill="#7fb79a" opacity=".8"/>'
+      + '<ellipse cx="202" cy="256" rx="17" ry="5" fill="#1c2e22"/>'
+      + '<ellipse cx="202" cy="255" rx="9" ry="2.4" fill="#33553f" opacity=".7"/>';
+
+    if (id === 'gauge') return ''
+      + '<rect width="400" height="300" fill="#101c2b"/>'
+      + '<ellipse cx="200" cy="288" rx="220" ry="32" fill="#08111c" opacity=".7"/>'
+      + '<rect x="184" y="205" width="32" height="82" rx="6" fill="#5c6b7c"/>'
+      + '<rect x="168" y="196" width="64" height="20" rx="4" fill="#46545f"/>'
+      + '<rect x="192" y="205" width="6" height="82" fill="#7c8b9c" opacity=".5"/>'
+      + '<circle cx="200" cy="140" r="84" fill="#26333f"/>'
+      + '<circle cx="200" cy="140" r="84" fill="none" stroke="#9aa9ba" stroke-width="7"/>'
+      + '<circle cx="200" cy="140" r="70" fill="#eef2ee"/>'
+      + '<path d="M142 140 A 58 58 0 0 1 200 82" fill="none" stroke="#2fae6b" stroke-width="10" stroke-linecap="round"/>'
+      + '<path d="M200 82 A 58 58 0 0 1 258 140" fill="none" stroke="#e23b34" stroke-width="10" stroke-linecap="round"/>'
+      + '<g stroke="#39485a" stroke-width="2">'
+      + '<line x1="200" y1="74" x2="200" y2="84"/><line x1="153" y1="94" x2="160" y2="101"/>'
+      + '<line x1="134" y1="140" x2="144" y2="140"/><line x1="247" y1="94" x2="240" y2="101"/>'
+      + '<line x1="266" y1="140" x2="256" y2="140"/><line x1="166" y1="185" x2="172" y2="178"/>'
+      + '<line x1="234" y1="185" x2="228" y2="178"/></g>'
+      + '<text x="200" y="192" text-anchor="middle" font-size="12" fill="#5f7086" font-family="SF Mono,monospace">MPa</text>'
+      + '<text x="120" y="150" font-size="10" fill="#6a7c90" font-family="SF Mono,monospace">0</text>'
+      + '<text x="270" y="150" font-size="10" fill="#c0392b" font-family="SF Mono,monospace">10</text>'
+      + '<line x1="200" y1="140" x2="245" y2="99" stroke="#c0392b" stroke-width="4.5" stroke-linecap="round"/>'
+      + '<line x1="200" y1="140" x2="186" y2="153" stroke="#c0392b" stroke-width="4.5" stroke-linecap="round"/>'
+      + '<circle cx="200" cy="140" r="9" fill="#39485a"/><circle cx="200" cy="140" r="4" fill="#eef2ee"/>'
+      + '<circle cx="200" cy="140" r="84" fill="#fff" opacity=".05"/>';
+
+    if (id === 'cable') return ''
+      + '<rect width="400" height="300" fill="#141d29"/>'
+      + '<g stroke="#1b2735" stroke-width="1"><line x1="0" y1="70" x2="400" y2="70"/><line x1="0" y1="230" x2="400" y2="230"/></g>'
+      + '<ellipse cx="200" cy="290" rx="230" ry="26" fill="#0c1520" opacity=".6"/>'
+      + '<rect x="18" y="104" width="150" height="13" rx="3" fill="#7a8a9b"/>'
+      + '<rect x="250" y="104" width="132" height="13" rx="3" fill="#7a8a9b"/>'
+      + '<rect x="18" y="178" width="364" height="13" rx="3" fill="#68788a"/>'
+      + '<path d="M168 106 L196 150 L214 150 L250 106 L250 118 L220 160 L192 160 L168 118 Z" fill="#556575"/>'
+      + '<g fill="#5a6a7b">'
+      + '<rect x="44" y="104" width="9" height="87"/><rect x="86" y="104" width="9" height="87"/><rect x="128" y="104" width="9" height="87"/>'
+      + '<rect x="272" y="104" width="9" height="87"/><rect x="314" y="104" width="9" height="87"/><rect x="356" y="104" width="9" height="87"/></g>'
+      + '<g fill="none" stroke-width="7" stroke-linecap="round">'
+      + '<path d="M24 128 C110 128 150 132 200 176 C250 132 292 128 376 128" stroke="#d2453c"/>'
+      + '<path d="M24 140 C112 140 152 146 200 192 C248 146 290 140 376 140" stroke="#e0a63a"/>'
+      + '<path d="M24 152 C114 152 156 160 200 206 C246 160 288 152 376 152" stroke="#3b8cff"/>'
+      + '<path d="M24 164 C116 164 158 172 200 214 C244 172 286 164 376 164" stroke="#8b98a6"/></g>'
+      + '<g stroke="#c9d3dd" stroke-width="1.4">'
+      + '<line x1="196" y1="176" x2="188" y2="170"/><line x1="204" y1="192" x2="212" y2="186"/>'
+      + '<line x1="200" y1="206" x2="196" y2="214"/></g>'
+      + '<circle cx="200" cy="150" r="3" fill="#ffb056" opacity=".8"/>';
+
+    /* valve */
+    return ''
+      + '<defs><linearGradient id="pv_jkt" x1="0" y1="0" x2="0" y2="1">'
+      + '<stop offset="0" stop-color="#c2ccd6"/><stop offset=".5" stop-color="#9aa6b2"/><stop offset="1" stop-color="#6f7d8b"/>'
+      + '</linearGradient></defs>'
+      + '<rect width="400" height="300" fill="#0f1a27"/>'
+      + '<ellipse cx="200" cy="286" rx="240" ry="34" fill="#08111c" opacity=".7"/>'
+      + '<rect x="0" y="130" width="132" height="52" rx="8" fill="url(#pv_jkt)"/>'
+      + '<g stroke="#5c6a78" stroke-width="2"><line x1="40" y1="130" x2="40" y2="182"/><line x1="80" y1="130" x2="80" y2="182"/></g>'
+      + '<rect x="300" y="130" width="100" height="52" rx="8" fill="url(#pv_jkt)"/>'
+      + '<g stroke="#5c6a78" stroke-width="2"><line x1="360" y1="130" x2="360" y2="182"/></g>'
+      + '<rect x="126" y="118" width="16" height="76" rx="4" fill="#7c8a98"/>'
+      + '<rect x="258" y="118" width="16" height="76" rx="4" fill="#7c8a98"/>'
+      + '<rect x="140" y="122" width="120" height="68" rx="12" fill="url(#pv_jkt)"/>'
+      + '<g stroke="#5c6a78" stroke-width="2.4"><line x1="170" y1="122" x2="170" y2="190"/><line x1="230" y1="122" x2="230" y2="190"/></g>'
+      + '<path d="M182 122 L176 96 L224 96 L218 122 Z" fill="#8794a2"/>'
+      + '<rect x="196" y="60" width="8" height="42" fill="#66747f"/>'
+      + '<circle cx="200" cy="58" r="26" fill="none" stroke="#8794a2" stroke-width="6"/>'
+      + '<g stroke="#8794a2" stroke-width="5"><line x1="176" y1="58" x2="224" y2="58"/><line x1="200" y1="34" x2="200" y2="82"/></g>'
+      + '<circle cx="200" cy="58" r="6" fill="#66747f"/>'
+      + '<path d="M238 130 L300 130 L300 176 L238 176 C246 160 246 146 238 130 Z" fill="#3a4650"/>'
+      + '<path d="M238 130 L300 130 L300 176 L238 176 C246 160 246 146 238 130 Z" fill="#2c363f" opacity=".5"/>'
+      + '<rect x="242" y="140" width="56" height="5" fill="#5a6875" opacity=".7"/>'
+      + '<path d="M300 130 C316 118 330 120 336 108 C324 112 312 116 300 122 Z" fill="#cfd8e1"/>'
+      + '<path d="M300 176 C314 184 326 182 332 192 C320 190 310 186 300 180 Z" fill="#b7c1cb"/>'
+      + '<path d="M238 130 L246 138 L240 146 L248 154 L240 162 L246 170 L238 176" fill="none" stroke="#e6ecf2" stroke-width="2.2"/>'
+      + '<circle cx="270" cy="152" r="3" fill="#ffb056" opacity=".7"/>';
+  }
+
+  /* ============ 渲染缩略图 ============ */
+  var thumbList = document.getElementById('thumbList');
+  PHOTOS.forEach(function (p, i) {
+    var el = document.createElement('div');
+    el.className = 'thumb' + (i === 0 ? ' active' : '');
+    el.dataset.i = i;
+    el.innerHTML =
+      '<div class="thumb-img">' +
+        '<span class="thumb-hint"><span class="bd"></span>' + p.hint + '</span>' +
+        '<span class="thumb-sel">✓ 已选</span>' +
+        '<svg viewBox="0 0 400 300" preserveAspectRatio="xMidYMid slice">' + art(p.id) + '</svg>' +
+      '</div>' +
+      '<div class="thumb-cap">' +
+        '<span class="thumb-idx">' + (i + 1) + '</span>' +
+        '<span class="thumb-meta"><span class="thumb-t">' + p.title + '</span>' +
+        '<span class="thumb-loc">' + p.loc + '</span></span>' +
+      '</div>';
+    el.addEventListener('click', function () { select(i); });
+    thumbList.appendChild(el);
+  });
+
+  /* ============ DOM refs ============ */
+  var viewport = document.getElementById('viewport');
+  var viewSvg  = document.getElementById('viewSvg');
+  var analyzer = document.getElementById('analyzer');
+  var anStatus = document.getElementById('anStatus');
+  var anPct    = document.getElementById('anPct');
+  var anFill   = document.getElementById('anFill');
+  var results  = document.getElementById('results');
+  var vpStatus = document.getElementById('vpStatus');
+  var vpStatusTx = document.getElementById('vpStatusTx');
+  var vpLoc    = document.getElementById('vpLoc');
+  var toast    = document.getElementById('toast');
+
+  var STEPS_TXT = ['正在提取图像特征…', '缺陷区域定位与分割…', '比对设备缺陷知识库…', '评估严重度与置信度…', '关联历史工单与规程…'];
+  var busy = false, timers = [];
+
+  function clearTimers() { timers.forEach(function (t) { clearTimeout(t); }); timers = []; }
+
+  function buildOverlay(p) {
+    var b = p.box, cx = b.x + b.w / 2, cy = b.y + b.h / 2;
+    var lw = p.box.label.length * 13 + 30;
+    var lx = b.x, ly = b.y - 24;
+    if (lx + lw > 398) lx = 398 - lw;
+    if (lx < 2) lx = 2;
+    return '' +
+      '<rect class="scan" x="0" y="0" width="400" height="3" fill="#ff8a3d"/>' +
+      '<g class="anno">' +
+        '<rect class="anno-rect" x="' + b.x + '" y="' + b.y + '" width="' + b.w + '" height="' + b.h + '" rx="7"/>' +
+        '<circle class="anno-dot" cx="' + cx + '" cy="' + cy + '" r="4"/>' +
+        '<circle class="anno-core" cx="' + cx + '" cy="' + cy + '" r="3.2"/>' +
+        '<rect class="anno-lbl-bg" x="' + lx + '" y="' + ly + '" width="' + lw + '" height="20" rx="5"/>' +
+        '<text class="anno-lbl-tx" x="' + (lx + 9) + '" y="' + (ly + 14) + '">⌖ ' + p.box.label + '</text>' +
+      '</g>';
+  }
+
+  function buildResults(p) {
+    var hist = p.history.map(function (h) {
+      return '<div class="hist-item">' +
+        '<div class="hist-l"><div class="hist-no">' + h.no + '</div><div class="hist-date">' + h.date + '</div></div>' +
+        '<div class="hist-r"><div class="hist-act">' + h.act + '</div>' +
+        '<span class="hist-status">✓ 已闭环</span></div></div>';
+    }).join('');
+
+    var steps = p.steps.map(function (s, i) {
+      return '<div class="step"><span class="step-n">' + (i + 1) + '</span><span class="step-tx">' + s + '</span></div>';
+    }).join('');
+
+    var regs = p.regs.map(function (r) {
+      return '<span class="reg-chip"><span class="code">' + r.code + '</span> ' + r.name + '</span>';
+    }).join('');
+
+    return '' +
+      '<div class="r-item"><div class="res-summary"><div class="rs-ic">⚠️</div>' +
+        '<div class="rs-t">' + p.summary + '</div></div></div>' +
+      '<div class="r-item"><div class="metrics">' +
+        '<div class="metric m-defect"><div class="m-label">缺陷类型</div>' +
+          '<div class="m-val">' + p.defect + '</div><span class="m-tag">' + p.tag + '</span></div>' +
+        '<div class="metric"><div class="m-label">严重度</div>' +
+          '<div class="sev-top"><span class="sev-word ' + p.sev.cls + '">' + p.sev.word + '</span>' +
+          '<span class="sev-pct">' + p.sev.pct + '/100</span></div>' +
+          '<div class="sev-bar"><div class="sev-fill ' + p.sev.cls + '" data-pct="' + p.sev.pct + '"></div></div>' +
+          '<div class="sev-scale"><span>低</span><span>中</span><span>高</span></div></div>' +
+        '<div class="metric"><div class="m-label">置信度</div>' +
+          '<div class="conf-n"><span class="conf-count" data-to="' + p.conf + '">0</span><span class="u">%</span></div>' +
+          '<div class="conf-sub"><span class="dotg"></span>高置信 · 建议复核</div></div>' +
+      '</div></div>' +
+      '<div class="r-item"><div class="sec-card"><div class="sec-card-h"><span class="hic">🗂️</span>关联历史工单' +
+        '<span class="badge">同类 · ' + p.history.length + ' 条</span></div>' + hist + '</div></div>' +
+      '<div class="r-item"><div class="sec-card"><div class="sec-card-h"><span class="hic">🛠️</span>处置建议' +
+        '<span class="badge">AI 生成 · 供复核</span></div>' + steps +
+        '<div class="regs"><span class="regs-label">📖 关联规程 / 标准条款</span>' + regs + '</div></div></div>' +
+      '<div class="r-item"><div class="gen-row">' +
+        '<button class="gen-btn" id="genBtn" data-wo="' + p.newWo + '">🧾 一键生成工单</button>' +
+        '<span class="gen-hint">工单将带上识别结果、处置建议与关联规程，推送至责任班组</span>' +
+      '</div></div>';
+  }
+
+  function countUp(el, to, dur) {
+    var t0 = null;
+    requestAnimationFrame(function step(ts) {
+      if (!t0) t0 = ts;
+      var pr = Math.min((ts - t0) / dur, 1), e = 1 - Math.pow(1 - pr, 3);
+      el.textContent = Math.round(to * e);
+      if (pr < 1) requestAnimationFrame(step);
+    });
+  }
+
+  function revealResults(p) {
+    results.innerHTML = buildResults(p);
+    var items = results.querySelectorAll('.r-item');
+    items.forEach(function (it, i) {
+      timers.push(setTimeout(function () { it.classList.add('in'); }, 90 + i * 140));
+    });
+    timers.push(setTimeout(function () {
+      var sev = results.querySelector('.sev-fill');
+      if (sev) sev.style.width = sev.dataset.pct + '%';
+      var c = results.querySelector('.conf-count');
+      if (c) countUp(c, parseInt(c.dataset.to, 10), 900);
+    }, 90 + items.length * 140));
+
+    var gen = document.getElementById('genBtn');
+    if (gen) gen.addEventListener('click', function () {
+      if (gen.classList.contains('done')) return;
+      gen.classList.add('done');
+      gen.innerHTML = '✅ 工单已创建 · ' + gen.dataset.wo;
+      showToast(gen.dataset.wo);
+    });
+  }
+
+  function showToast(wo) {
+    document.getElementById('toastT').textContent = '工单 #' + wo + ' 已创建';
+    document.getElementById('toastS').innerHTML = '已推送责任班组 · 单号 <b>' + wo + '</b>';
+    toast.classList.add('show');
+    clearTimeout(showToast._t);
+    showToast._t = setTimeout(function () { toast.classList.remove('show'); }, 3600);
+  }
+
+  /* ============ 选择照片 → 分析 → 揭示 ============ */
+  function select(i) {
+    if (busy) return;
+    busy = true;
+    clearTimers();
+
+    document.querySelectorAll('.thumb').forEach(function (t) {
+      t.classList.toggle('active', +t.dataset.i === i);
+    });
+
+    var p = PHOTOS[i];
+    vpLoc.textContent = p.loc + ' · ' + p.title;
+
+    viewport.classList.remove('revealed');
+    viewport.classList.add('analyzing');
+    viewSvg.innerHTML = art(p.id) + buildOverlay(p);
+
+    vpStatus.classList.add('busy');
+    vpStatusTx.textContent = '分析中…';
+    results.innerHTML = '';
+
+    analyzer.classList.add('show');
+    anFill.style.width = '0%';
+    anPct.textContent = '0%';
+    anStatus.textContent = STEPS_TXT[0];
+
+    var dur = 1500, t0 = performance.now();
+    (function tick() {
+      var pr = Math.min((performance.now() - t0) / dur, 1);
+      var pct = Math.round(pr * 100);
+      anFill.style.width = pct + '%';
+      anPct.textContent = pct + '%';
+      anStatus.textContent = STEPS_TXT[Math.min(STEPS_TXT.length - 1, Math.floor(pr * STEPS_TXT.length))];
+      if (pr < 1) { requestAnimationFrame(tick); }
+      else { finish(); }
+    })();
+
+    function finish() {
+      timers.push(setTimeout(function () {
+        analyzer.classList.remove('show');
+        viewport.classList.remove('analyzing');
+        viewport.classList.add('revealed');
+        vpStatus.classList.remove('busy');
+        vpStatusTx.textContent = '识别完成 · 发现 1 处缺陷';
+        revealResults(p);
+        busy = false;
+      }, 260));
+    }
+  }
+
+  /* auto-run photo #1 on load */
+  window.addEventListener('load', function () {
+    setTimeout(function () { select(0); }, 480);
+  });
+})();
+</script>
+</body>
+</html>

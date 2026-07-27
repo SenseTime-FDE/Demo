@@ -1,0 +1,790 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>自然语言取数 NL2SQL · Demo —— 中海油 × 商汤</title>
+<link rel="stylesheet" href="assets/style.css">
+<style>
+/* ===== demo-data (NL2SQL) only ===== */
+.demo-band { position:relative; overflow:hidden; padding:46px 0 26px; background:var(--bg-0); }
+.demo-band .bg-ocean { position:absolute; inset:0; z-index:0;
+  background:
+    radial-gradient(1000px 500px at 84% -20%, rgba(53,226,212,.16), transparent 55%),
+    radial-gradient(900px 520px at 2% 6%, rgba(59,140,255,.16), transparent 55%); }
+.demo-band .wrap { position:relative; z-index:2; }
+.demo-band h1 { font-size:clamp(26px,3.6vw,40px); line-height:1.16; }
+.demo-band h1 .g { background:var(--grad-cyan); -webkit-background-clip:text; background-clip:text; color:transparent; }
+.demo-band .lead { margin-top:14px; }
+.demo-band .lead b { color:var(--text); }
+.band-tags { display:flex; flex-wrap:wrap; gap:8px; margin-top:18px; }
+
+/* ---- interactive console ---- */
+.console { padding:8px 0 46px; }
+.panel { background:var(--bg-card); border:1px solid var(--line); border-radius:var(--radius);
+  box-shadow:var(--shadow); overflow:hidden; }
+
+/* data source bar */
+.ds-bar { display:flex; align-items:center; flex-wrap:wrap; gap:10px 14px; padding:13px 20px;
+  border-bottom:1px solid var(--line);
+  background:linear-gradient(90deg, rgba(55,211,154,.10), rgba(53,226,212,.05)); }
+.ds-dot { width:9px; height:9px; border-radius:50%; background:var(--green); box-shadow:0 0 10px var(--green);
+  animation:pulseDot 1.8s ease-in-out infinite; }
+@keyframes pulseDot { 0%,100%{ opacity:1; transform:scale(1);} 50%{ opacity:.5; transform:scale(.75);} }
+.ds-lbl { font-size:12.5px; font-weight:800; color:var(--green); letter-spacing:.3px; }
+.ds-name { font-size:13px; font-weight:700; color:var(--text); }
+.ds-name .mono { color:var(--text-2); font-size:12px; }
+.ds-tag { font-size:11px; font-weight:800; padding:3px 9px; border-radius:20px; letter-spacing:.4px;
+  background:rgba(59,140,255,.14); color:var(--azure); border:1px solid rgba(59,140,255,.32); }
+.ds-tag.ro { background:rgba(255,138,61,.13); color:var(--orange-2); border-color:rgba(255,138,61,.3); }
+.ds-meta { margin-left:auto; font-size:11.5px; color:var(--text-mute); }
+@media (max-width:640px){ .ds-meta { margin-left:0; width:100%; } }
+
+/* nl input */
+.ask { padding:20px 20px 6px; }
+.ask-label { font-size:11.5px; letter-spacing:1px; color:var(--text-mute); text-transform:uppercase; margin-bottom:10px; }
+.ask-row { display:flex; gap:10px; align-items:stretch; }
+.nl-input { flex:1; min-width:0; height:48px; padding:0 16px; border-radius:12px;
+  background:rgba(6,14,24,.55); border:1px solid var(--line-2); color:var(--text); font-size:15px;
+  font-family:inherit; transition:.2s; }
+.nl-input::placeholder { color:var(--text-mute); }
+.nl-input:focus { outline:none; border-color:var(--cyan); box-shadow:0 0 0 3px rgba(53,226,212,.14); }
+.run-btn { flex-shrink:0; height:48px; font-size:15px; }
+.run-btn[disabled] { filter:grayscale(.35) brightness(.85); cursor:default; transform:none; }
+.chips-label { font-size:11.5px; color:var(--text-mute); margin:16px 0 9px; }
+.chips { display:flex; flex-wrap:wrap; gap:8px; }
+.qchip { font-size:12.5px; font-weight:600; color:var(--text-2); background:rgba(255,255,255,.04);
+  border:1px solid var(--line-2); padding:9px 14px; border-radius:20px; transition:.2s; text-align:left; }
+.qchip .num { color:var(--cyan); font-weight:800; margin-right:6px; }
+.qchip:hover { color:#fff; border-color:var(--line-strong); background:rgba(53,226,212,.1); transform:translateY(-1px); }
+.qchip.active { border-color:var(--cyan); color:#fff; background:rgba(53,226,212,.12); box-shadow:0 0 0 1px rgba(53,226,212,.35); }
+.qchip[disabled] { opacity:.5; cursor:not-allowed; transform:none; }
+
+/* pipeline steps */
+.result { padding:6px 20px 22px; border-top:1px solid var(--line); margin-top:16px; }
+.steps { display:flex; flex-wrap:wrap; gap:8px; padding:16px 0 20px; }
+.step { display:inline-flex; align-items:center; gap:7px; font-size:12px; font-weight:700; color:var(--text-mute);
+  background:rgba(255,255,255,.03); border:1px solid var(--line); padding:7px 12px; border-radius:20px; transition:.3s; }
+.step .sd { width:16px; height:16px; border-radius:50%; display:grid; place-items:center; font-size:10px;
+  border:1.5px solid var(--text-mute); color:var(--text-mute); flex-shrink:0; box-sizing:border-box; }
+.step.active { color:var(--cyan); border-color:rgba(53,226,212,.45); background:rgba(53,226,212,.08); }
+.step.active .sd { border-color:var(--cyan); color:var(--cyan); border-top-color:transparent;
+  animation:spinDot 1s linear infinite; }
+@keyframes spinDot { to { transform:rotate(360deg); } }
+.step.done { color:var(--green); border-color:rgba(55,211,154,.4); background:rgba(55,211,154,.07); }
+.step.done .sd { border-color:var(--green); background:var(--green); color:#06202a; animation:none; }
+.step.done .sd::before { content:"✓"; }
+.step .sd .n { display:none; }
+
+/* result blocks */
+.rblock { margin-bottom:20px; }
+.rblock.hide { display:none; }
+.rlabel { display:flex; align-items:center; gap:10px; font-size:14px; font-weight:800; margin-bottom:11px; }
+.rlabel .rnum { width:23px; height:23px; border-radius:7px; display:grid; place-items:center; font-size:12px;
+  background:rgba(53,226,212,.14); color:var(--cyan); border:1px solid rgba(53,226,212,.3); flex-shrink:0; }
+.rlabel .rok { font-size:10.5px; font-weight:800; letter-spacing:.4px; color:var(--green);
+  background:rgba(55,211,154,.12); border:1px solid rgba(55,211,154,.3); padding:3px 8px; border-radius:20px; }
+.rlabel .rnote { font-size:11.5px; font-weight:600; color:var(--text-mute); margin-left:auto; }
+
+/* SQL box */
+.sqlwrap { overflow-x:auto; border-radius:12px; border:1px solid var(--line-2); background:#050e1a; }
+.sqlbox { margin:0; padding:16px 18px; font-size:12.8px; line-height:1.85; color:var(--text-2);
+  white-space:pre; min-height:46px; }
+.sqlbox .t-kw { color:var(--cyan); font-weight:700; }
+.sqlbox .t-fn { color:var(--azure); }
+.sqlbox .t-str { color:var(--amber); }
+.sqlbox .t-num { color:var(--orange-2); }
+.sqlbox .t-cmt { color:var(--text-mute); font-style:italic; }
+.caret { display:inline-block; width:7px; height:15px; background:var(--cyan); margin-left:1px;
+  vertical-align:-2px; animation:blinkc .8s steps(1) infinite; }
+@keyframes blinkc { 0%,50%{ opacity:1;} 51%,100%{ opacity:0;} }
+
+/* table */
+.tablewrap { overflow-x:auto; border-radius:12px; border:1px solid var(--line-2); }
+.rtable { width:100%; border-collapse:collapse; font-size:13px; min-width:460px; }
+.rtable thead th { text-align:left; padding:10px 14px; font-size:11.5px; font-weight:800; letter-spacing:.4px;
+  color:var(--text-dim); background:rgba(255,255,255,.03); border-bottom:1px solid var(--line-2); white-space:nowrap; }
+.rtable tbody td { padding:10px 14px; border-bottom:1px solid var(--line); color:var(--text-2); white-space:nowrap; }
+.rtable tbody tr:last-child td { border-bottom:none; }
+.rtable td.num { font-family:"SF Mono",ui-monospace,Menlo,Consolas,monospace; color:var(--text); font-variant-numeric:tabular-nums; }
+.rtable td.pos { color:var(--green); } .rtable td.neg { color:var(--orange-2); font-weight:700; }
+.rtable td.warn { color:var(--red); font-weight:700; }
+.rw { animation:rowIn .5s ease both; }
+@keyframes rowIn { from{ opacity:0; transform:translateY(6px);} to{ opacity:1; transform:none; } }
+
+/* chart */
+.legend { display:flex; flex-wrap:wrap; gap:14px; margin-bottom:6px; font-size:12px; color:var(--text-dim); }
+.legend .lg { display:inline-flex; align-items:center; gap:6px; }
+.legend .sw { width:12px; height:4px; border-radius:3px; display:inline-block; }
+.legend .sw.dash { height:0; border-top:2px dashed var(--orange-2); background:none; }
+.chartwrap { overflow-x:auto; border-radius:12px; border:1px solid var(--line); background:rgba(6,14,24,.4); padding:12px 8px; }
+.chartwrap svg { display:block; width:100%; min-width:520px; height:auto; }
+.grid-ln { stroke:var(--line); stroke-width:1; }
+.axis-ln { stroke:var(--line-2); stroke-width:1.2; }
+.ax-txt { font-size:11px; fill:var(--text-mute); font-family:inherit; }
+.ax-txt.b { fill:var(--text-dim); }
+.val-txt { font-size:11.5px; font-weight:800; font-family:"SF Mono",ui-monospace,Menlo,monospace; }
+.name-txt { font-size:11.5px; fill:var(--text-2); font-weight:600; }
+.ln { fill:none; stroke-width:2.6; stroke-linecap:round; stroke-linejoin:round;
+  stroke-dasharray:1; stroke-dashoffset:1; animation:draw 1.3s ease forwards; }
+@keyframes draw { to { stroke-dashoffset:0; } }
+.dot { opacity:0; animation:fadeIn .4s ease forwards; }
+.vlabel { opacity:0; animation:fadeIn .5s ease forwards; }
+@keyframes fadeIn { to { opacity:1; } }
+.barv { transform-box:fill-box; transform-origin:bottom; transform:scaleY(0); animation:growUp .85s cubic-bezier(.22,1,.36,1) forwards; }
+@keyframes growUp { to { transform:scaleY(1); } }
+.barh-l { transform-box:fill-box; transform-origin:left center; transform:scaleX(0); animation:growX .85s cubic-bezier(.22,1,.36,1) forwards; }
+.barh-r { transform-box:fill-box; transform-origin:right center; transform:scaleX(0); animation:growX .85s cubic-bezier(.22,1,.36,1) forwards; }
+@keyframes growX { to { transform:scaleX(1); } }
+.anom-ring { fill:none; stroke:var(--red); stroke-width:2; opacity:0; animation:ringPop .5s ease .9s forwards; }
+@keyframes ringPop { from{ opacity:0;} to{ opacity:1; } }
+
+/* conclusion */
+.concl { display:flex; gap:12px; align-items:flex-start; padding:16px 18px; border-radius:14px;
+  background:linear-gradient(140deg, rgba(53,226,212,.13), rgba(59,140,255,.05));
+  border:1px solid rgba(53,226,212,.3); animation:rowIn .55s ease both; }
+.concl .ci { font-size:22px; line-height:1.2; flex-shrink:0; }
+.concl .ct { font-size:14px; line-height:1.7; color:var(--text); }
+.concl .ct b { color:var(--cyan); }
+.anomaly { display:flex; gap:11px; align-items:flex-start; margin-top:11px; padding:13px 16px; border-radius:13px;
+  background:linear-gradient(140deg, rgba(255,138,61,.14), rgba(255,90,82,.06));
+  border:1px solid rgba(255,138,61,.4); animation:rowIn .55s ease .12s both; }
+.anomaly .ai { font-size:19px; line-height:1.2; flex-shrink:0; }
+.anomaly .at { font-size:13px; line-height:1.65; color:var(--text-2); }
+.anomaly .at b { color:var(--orange-2); }
+.anomaly .drill { display:inline-flex; align-items:center; gap:5px; margin-top:8px; font-size:11.5px; font-weight:800;
+  color:var(--orange-2); background:rgba(255,138,61,.12); border:1px solid rgba(255,138,61,.34);
+  padding:4px 11px; border-radius:20px; }
+
+.empty-hint { padding:26px 20px 34px; text-align:center; color:var(--text-mute); font-size:13px; line-height:1.7; }
+.empty-hint b { color:var(--text-2); }
+.empty-hint .eh-ic { font-size:30px; display:block; margin-bottom:8px; opacity:.7; }
+
+/* how it works */
+.principle { display:grid; grid-template-columns:repeat(4,1fr); gap:16px; }
+@media (max-width:980px){ .principle { grid-template-columns:1fr 1fr; } }
+@media (max-width:520px){ .principle { grid-template-columns:1fr; } }
+.pcard { padding:22px 20px; border-radius:var(--radius); border:1px solid var(--line); background:var(--bg-card); transition:.25s; }
+.pcard:hover { transform:translateY(-4px); border-color:var(--line-strong); box-shadow:var(--shadow); }
+.pcard .pic { width:44px; height:44px; border-radius:12px; display:grid; place-items:center; font-size:21px; margin-bottom:13px; }
+.pcard.c1 .pic { background:rgba(53,226,212,.12); border:1px solid rgba(53,226,212,.25); }
+.pcard.c2 .pic { background:rgba(59,140,255,.12); border:1px solid rgba(59,140,255,.25); }
+.pcard.c3 .pic { background:rgba(155,140,255,.12); border:1px solid rgba(155,140,255,.25); }
+.pcard.c4 .pic { background:rgba(255,138,61,.12); border:1px solid rgba(255,138,61,.25); }
+.pcard .pnum { font-size:11px; font-weight:800; letter-spacing:1px; color:var(--text-mute); }
+.pcard h3 { font-size:16px; margin:2px 0 7px; }
+.pcard p { font-size:12.8px; color:var(--text-dim); margin:0; line-height:1.6; }
+
+/* return bar */
+.return-bar { display:flex; align-items:center; justify-content:space-between; gap:14px; flex-wrap:wrap;
+  padding:18px 24px; margin:10px auto 46px; max-width:1200px; border-radius:16px;
+  border:1px solid var(--line); background:var(--bg-card); }
+.return-bar a { font-size:14px; font-weight:700; display:inline-flex; align-items:center; gap:8px; transition:.18s; }
+.return-bar .rb-back { color:var(--text-2); } .return-bar .rb-back:hover { color:var(--cyan); }
+.return-bar .rb-home { color:var(--cyan); } .return-bar .rb-home:hover { filter:brightness(1.15); }
+.return-bar .rb-mid { font-size:12.5px; color:var(--text-mute); }
+</style>
+</head>
+<body>
+<nav class="nav"><div class="wrap-wide" style="justify-content:space-between;">
+  <a class="brand" href="index.html"><div class="logos"><img src="assets/st_logo.png" class="logo-img" alt="商汤科技 SenseTime"></div><span class="sub hide-mobile">Demo 原型</span></a>
+  <div style="display:flex;gap:8px;align-items:center;"><a class="btn btn-sm btn-ghost" href="index.html">← 返回方案</a><a class="btn btn-sm btn-ghost" href="demos.html">全部 Demo</a></div>
+</div></nav>
+
+<!-- ============ BAND ============ -->
+<header class="demo-band">
+  <div class="bg-ocean"></div>
+  <div class="orb orb-cyan" style="width:340px;height:340px;top:-130px;right:-50px;opacity:.4;"></div>
+  <div class="wrap">
+    <div class="kicker reveal">NL2SQL · 自然语言取数 · Demo 原型</div>
+    <h1 class="reveal">说一句话，<span class="g">SQL 自动生成</span>、<br>数据自己跑出来</h1>
+    <p class="lead reveal">面向业务与研发 —— 把想问的用中文写出来，系统自动生成<b>可复核的 SQL</b>、连到生产运营数据仓取数，再配上贴合问题的<b>趋势图与一句话结论</b>，还会主动标出异常点。<b>不用等报表、不必会写 SQL。</b></p>
+    <div class="band-tags reveal">
+      <span class="pill">🗣 自然语言 → SQL</span>
+      <span class="pill">🔎 SQL 全程可复核</span>
+      <span class="pill">📈 自动出图 · 标异常</span>
+      <span class="pill">⏱ 可存成技能 · 定时跑</span>
+    </div>
+  </div>
+</header>
+
+<!-- ============ CONSOLE ============ -->
+<section class="console">
+  <div class="wrap">
+    <div class="panel reveal">
+
+      <!-- data source bar -->
+      <div class="ds-bar">
+        <span class="ds-dot"></span>
+        <span class="ds-lbl">数据源已连接</span>
+        <span class="ds-name">生产运营数据仓 <span class="mono">· prod_dw</span></span>
+        <span class="ds-tag ro">🔒 只读</span>
+        <span class="ds-tag">27 张表</span>
+        <span class="ds-meta">实时同步 · 仅在你的数据权限范围内可查</span>
+      </div>
+
+      <!-- ask -->
+      <div class="ask">
+        <div class="ask-label">用中文问一句 · 无需 SQL</div>
+        <div class="ask-row">
+          <input id="nlInput" class="nl-input" type="text" autocomplete="off"
+            placeholder="例如：近半年各分公司月度油气产量趋势">
+          <button id="runBtn" class="btn btn-cyan run-btn">🔍 取数</button>
+        </div>
+        <div class="chips-label">试试这些查询 ↓ 点一下即取数</div>
+        <div class="chips" id="chips">
+          <button class="qchip" data-i="0"><span class="num">1</span>近半年各分公司月度油气产量趋势</button>
+          <button class="qchip" data-i="1"><span class="num">2</span>哪个分公司产量环比下滑最快</button>
+          <button class="qchip" data-i="2"><span class="num">3</span>本年度设备缺陷按类型分布</button>
+          <button class="qchip" data-i="3"><span class="num">4</span>各平台巡检工单完成率排名</button>
+        </div>
+      </div>
+
+      <!-- empty hint -->
+      <div class="empty-hint" id="emptyHint">
+        <span class="eh-ic">📊</span>
+        选一个示例查询、或直接输入问题，点「取数」看它如何一步步<br><b>生成 SQL → 取数 → 出图 → 给结论</b>。
+      </div>
+
+      <!-- result -->
+      <div class="result" id="result" hidden>
+        <div class="steps" id="steps">
+          <span class="step" data-s="0"><span class="sd"><span class="n">1</span></span>解析语义</span>
+          <span class="step" data-s="1"><span class="sd"><span class="n">2</span></span>生成 SQL</span>
+          <span class="step" data-s="2"><span class="sd"><span class="n">3</span></span>执行查询</span>
+          <span class="step" data-s="3"><span class="sd"><span class="n">4</span></span>自动出图</span>
+          <span class="step" data-s="4"><span class="sd"><span class="n">5</span></span>生成结论</span>
+        </div>
+
+        <div class="rblock" id="b1">
+          <div class="rlabel"><span class="rnum">①</span> 生成的 SQL <span class="rok">✓ 可复核</span></div>
+          <div class="sqlwrap"><pre class="sqlbox mono" id="rSql"></pre></div>
+        </div>
+
+        <div class="rblock hide" id="b2">
+          <div class="rlabel"><span class="rnum">②</span> 取数结果 <span class="rnote" id="rNote"></span></div>
+          <div class="tablewrap"><table class="rtable" id="rTable"></table></div>
+        </div>
+
+        <div class="rblock hide" id="b3">
+          <div class="rlabel"><span class="rnum">③</span> 自动出图 <span class="rnote" id="rChartType"></span></div>
+          <div class="legend" id="rLegend"></div>
+          <div class="chartwrap" id="rChart"></div>
+        </div>
+
+        <div class="rblock hide" id="b4">
+          <div class="rlabel"><span class="rnum">④</span> 一句话结论</div>
+          <div class="concl" id="rConcl"></div>
+          <div class="anomaly" id="rAnomaly"></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ============ HOW IT WORKS ============ -->
+<section class="section tight bg-1">
+  <div class="wrap">
+    <div class="sec-head center reveal">
+      <div class="kicker center">How it works · 背后原理</div>
+      <h2 class="h-sec">让「取数」从<span class="hl">写 SQL 的活</span>，变成<span class="hl">问一句话</span></h2>
+      <p class="lead center">四步逻辑，把自然语言变成可复核的取数与可视化 —— 业务自助、研发省事，还能沉淀成定时任务。</p>
+    </div>
+    <div class="principle">
+      <div class="pcard c1 reveal">
+        <div class="pic">🗣</div>
+        <div class="pnum">01</div>
+        <h3>NL2SQL 语义解析</h3>
+        <p>理解你的中文意图，结合库表结构与业务口径，自动映射到正确的表、字段、聚合与时间范围，生成规范 SQL。</p>
+      </div>
+      <div class="pcard c2 reveal">
+        <div class="pic">🔎</div>
+        <div class="pnum">02</div>
+        <h3>自动取数 · 可复核</h3>
+        <p>生成的 SQL 全程可见、可复制、可校对，只读连接生产数据仓、权限内取数 —— 敢用，是因为每一步都摊在明面上。</p>
+      </div>
+      <div class="pcard c3 reveal">
+        <div class="pic">📈</div>
+        <div class="pnum">03</div>
+        <h3>自动出图 · 标异常</h3>
+        <p>依据数据形态自动选图（趋势 / 排名 / 分布），带坐标轴、图例与数值标签，并主动标注异常点、给出一句话结论。</p>
+      </div>
+      <div class="pcard c4 reveal">
+        <div class="pic">⏱</div>
+        <div class="pnum">04</div>
+        <h3>可存成技能 · 定时跑</h3>
+        <p>满意的查询一键存为「技能」，设定每日 / 每周自动运行，结果推送到群或看板 —— 问过一次，之后自动盯。</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ RETURN BAR ============ -->
+<div class="return-bar reveal">
+  <a href="demos.html" class="rb-back">← 返回 Demo 列表</a>
+  <span class="rb-mid">自然语言取数 NL2SQL · 生成 SQL 可复核 · 自动出图 · 可存成技能定时跑</span>
+  <a href="index.html" class="rb-home">中海油 × 商汤 · 方案首页 →</a>
+</div>
+
+<script src="assets/app.js"></script>
+<script>
+(function () {
+  'use strict';
+
+  /* ---------------- Query data ---------------- */
+  var QUERIES = [
+    /* 0 — 近半年各分公司月度油气产量趋势 */
+    {
+      q: '近半年各分公司月度油气产量趋势',
+      kw: ['趋势', '月度', '半年', '产量'],
+      sql:
+'-- 近半年各分公司月度油气产量趋势\n' +
+'SELECT company_name                       AS 分公司,\n' +
+"       DATE_TRUNC('month', prod_date)     AS 月份,\n" +
+'       ROUND(SUM(oil_gas_boe) / 1e4, 1)   AS 产量_万吨油当量\n' +
+'FROM   prod_daily_output\n' +
+"WHERE  prod_date >= DATE '2026-01-01'\n" +
+'GROUP  BY company_name, 月份\n' +
+'ORDER  BY company_name, 月份;',
+      table: {
+        note: '共 18 行 · 显示前 6 行',
+        cols: ['分公司', '月份', '产量(万吨油当量)'],
+        rows: [
+          ['深圳分公司', '2026-01', {v:'156.0', c:'num'}],
+          ['深圳分公司', '2026-06', {v:'166.0', c:'num'}],
+          ['湛江分公司', '2026-05', {v:'141.0', c:'num'}],
+          ['湛江分公司', '2026-06', {v:'130.0', c:'num warn'}],
+          ['天津分公司', '2026-05', {v:'104.0', c:'num'}],
+          ['天津分公司', '2026-06', {v:'106.0', c:'num'}]
+        ]
+      },
+      chart: {
+        type: 'multiline', legend: '油气产量（万吨油当量）· 2026 年 1—6 月', typeTag: '多分公司月度折线图',
+        months: ['1月','2月','3月','4月','5月','6月'],
+        ymin: 60, ymax: 180, ticks: [60,90,120,150,180],
+        series: [
+          { name:'深圳分公司', color:'var(--cyan)',  vals:[156,158,161,159,163,166] },
+          { name:'湛江分公司', color:'var(--orange)', vals:[128,132,135,138,141,130], anomaly:5 },
+          { name:'天津分公司', color:'var(--azure)',  vals:[95,98,96,101,104,106] }
+        ]
+      },
+      concl: '近半年三家分公司油气产量整体<b>稳中有升</b>，深圳分公司持续领跑（6 月 166 万吨油当量）。',
+      anomaly: '<b>湛江分公司</b> 6 月产量环比 <b>-7.8%</b>（141 → 130 万吨油当量），是六个月里唯一的下滑月。',
+      drill: '⚠ 建议下钻至平台 / 油田级，定位减产源头'
+    },
+
+    /* 1 — 哪个分公司产量环比下滑最快 */
+    {
+      q: '哪个分公司产量环比下滑最快',
+      kw: ['环比', '下滑', '最快'],
+      sql:
+'-- 各分公司最新月产量环比（6 月 vs 5 月）\n' +
+'WITH m AS (\n' +
+'  SELECT company_name,\n' +
+"         DATE_TRUNC('month', prod_date) AS mon,\n" +
+'         SUM(oil_gas_boe)               AS boe\n' +
+'  FROM   prod_daily_output\n' +
+'  GROUP  BY company_name, mon\n' +
+')\n' +
+'SELECT company_name AS 分公司,\n' +
+'       ROUND((boe - LAG(boe) OVER w) / LAG(boe) OVER w * 100, 1) AS 环比_pct\n' +
+'FROM   m\n' +
+'WINDOW w AS (PARTITION BY company_name ORDER BY mon)\n' +
+"QUALIFY mon = DATE '2026-06-01'\n" +
+'ORDER  BY 环比_pct ASC;',
+      table: {
+        note: '共 6 行 · 按环比升序 · 显示前 4 行',
+        cols: ['分公司', '5月(万吨)', '6月(万吨)', '环比'],
+        rows: [
+          ['湛江分公司', {v:'141.0',c:'num'}, {v:'130.0',c:'num'}, {v:'-7.8%',c:'warn'}],
+          ['渤海分公司', {v:'74.2',c:'num'},  {v:'72.4',c:'num'},  {v:'-2.4%',c:'neg'}],
+          ['南海西部', {v:'88.6',c:'num'},   {v:'89.8',c:'num'},   {v:'+1.4%',c:'pos'}],
+          ['深圳分公司', {v:'163.0',c:'num'}, {v:'166.0',c:'num'}, {v:'+1.8%',c:'pos'}]
+        ]
+      },
+      chart: {
+        type: 'diverge', legend: '6 月油气产量环比（%）· 负为下滑', typeTag: '环比条形图',
+        vmin: -8, vmax: 4, ticks: [-8,-4,0,4],
+        items: [
+          { name:'湛江分公司', v:-7.8, hl:true },
+          { name:'渤海分公司', v:-2.4 },
+          { name:'南海西部',   v:1.4 },
+          { name:'深圳分公司', v:1.8 },
+          { name:'天津分公司', v:1.9 },
+          { name:'南海东部',   v:3.2 }
+        ]
+      },
+      concl: '<b>湛江分公司</b> 6 月环比 <b>-7.8%</b>，是全部分公司中唯一显著负增长、且<b>下滑最快</b>的一家。',
+      anomaly: '湛江降幅约为次位（渤海 <b>-2.4%</b>）的 <b>3 倍</b>，明显偏离其余分公司的小幅波动区间。',
+      drill: '⚠ 建议优先下钻湛江平台 / 井组级产量，定位减产源头'
+    },
+
+    /* 2 — 本年度设备缺陷按类型分布 */
+    {
+      q: '本年度设备缺陷按类型分布',
+      kw: ['缺陷', '类型', '分布'],
+      sql:
+'-- 本年度设备缺陷按类型分布\n' +
+'SELECT defect_type                        AS 缺陷类型,\n' +
+'       COUNT(*)                           AS 缺陷数,\n' +
+'       ROUND(100.0 * COUNT(*) /\n' +
+'             SUM(COUNT(*)) OVER (), 1)     AS 占比_pct\n' +
+'FROM   equipment_defect\n' +
+"WHERE  report_date >= DATE '2026-01-01'\n" +
+'GROUP  BY defect_type\n' +
+'ORDER  BY 缺陷数 DESC;',
+      table: {
+        note: '共 6 类 · 合计 1,230 起 · 显示前 4 类',
+        cols: ['缺陷类型', '缺陷数', '占比'],
+        rows: [
+          ['密封泄漏', {v:'342',c:'num warn'}, {v:'27.8%',c:'num'}],
+          ['腐蚀减薄', {v:'268',c:'num'}, {v:'21.8%',c:'num'}],
+          ['振动异常', {v:'213',c:'num'}, {v:'17.3%',c:'num'}],
+          ['电气故障', {v:'176',c:'num'}, {v:'14.3%',c:'num'}]
+        ]
+      },
+      chart: {
+        type: 'vbar', legend: '各类型缺陷数（起）· 2026 年至今', typeTag: '类型分布柱状图',
+        ymax: 360, ticks: [0,90,180,270,360],
+        items: [
+          { name:'密封泄漏', v:342, pct:'27.8%', hl:true },
+          { name:'腐蚀减薄', v:268, pct:'21.8%' },
+          { name:'振动异常', v:213, pct:'17.3%' },
+          { name:'电气故障', v:176, pct:'14.3%' },
+          { name:'仪表失准', v:142, pct:'11.5%' },
+          { name:'其他',     v:89,  pct:'7.2%' }
+        ]
+      },
+      concl: '本年度设备缺陷合计 <b>1,230</b> 起，<b>密封泄漏</b>（27.8%）与<b>腐蚀减薄</b>（21.8%）两类合计近半（<b>49.6%</b>），是主要缺陷来源。',
+      anomaly: '密封泄漏单类即占 <b>27.8%</b>，明显高于其余类型，是治理性价比最高的一类。',
+      drill: '⚠ 建议对密封件更换周期与防腐涂层状态开展专项排查'
+    },
+
+    /* 3 — 各平台巡检工单完成率排名 */
+    {
+      q: '各平台巡检工单完成率排名',
+      kw: ['完成率', '巡检', '排名', '工单'],
+      sql:
+'-- 各平台巡检工单完成率排名\n' +
+'SELECT platform_name                      AS 平台,\n' +
+'       COUNT(*)                           AS 工单总数,\n' +
+"       SUM(status = 'DONE')               AS 已完成,\n" +
+"       ROUND(100.0 * SUM(status = 'DONE')\n" +
+'             / COUNT(*), 1)               AS 完成率_pct\n' +
+'FROM   inspection_work_order\n' +
+"WHERE  create_date >= DATE '2026-01-01'\n" +
+'GROUP  BY platform_name\n' +
+'ORDER  BY 完成率_pct DESC;',
+      table: {
+        note: '共 5 个平台 · 按完成率降序',
+        cols: ['平台', '工单总数', '已完成', '完成率'],
+        rows: [
+          ['流花 11-1', {v:'428',c:'num'}, {v:'422',c:'num'}, {v:'98.6%',c:'pos'}],
+          ['惠州 26-1', {v:'396',c:'num'}, {v:'385',c:'num'}, {v:'97.2%',c:'pos'}],
+          ['番禺 30-1', {v:'357',c:'num'}, {v:'342',c:'num'}, {v:'95.8%',c:'pos'}],
+          ['文昌 13-1', {v:'312',c:'num'}, {v:'291',c:'num'}, {v:'93.4%',c:'neg'}],
+          ['涠洲 12-1', {v:'289',c:'num'}, {v:'256',c:'num'}, {v:'88.7%',c:'warn'}]
+        ]
+      },
+      chart: {
+        type: 'hbar', legend: '巡检工单完成率（%）· 目标线 95%', typeTag: '完成率横向条形排名',
+        target: 95,
+        items: [
+          { name:'流花 11-1', v:98.6 },
+          { name:'惠州 26-1', v:97.2 },
+          { name:'番禺 30-1', v:95.8 },
+          { name:'文昌 13-1', v:93.4 },
+          { name:'涠洲 12-1', v:88.7, hl:true }
+        ]
+      },
+      concl: '5 个平台巡检工单完成率整体较高，<b>流花 11-1</b> 以 <b>98.6%</b> 居首，前三平台均达 95% 目标线。',
+      anomaly: '<b>涠洲 12-1</b> 完成率 <b>88.7%</b>，低于 95% 目标线且垫底，与首位相差近 10 个百分点。',
+      drill: '⚠ 建议下钻查看涠洲 12-1 积压工单类型与责任班组'
+    }
+  ];
+
+  /* ---------------- SQL highlighter ---------------- */
+  var KW = {SELECT:1,FROM:1,WHERE:1,GROUP:1,BY:1,ORDER:1,AS:1,AND:1,OR:1,ON:1,WITH:1,
+    OVER:1,PARTITION:1,WINDOW:1,QUALIFY:1,ASC:1,DESC:1,BETWEEN:1,DATE:1,DISTINCT:1,
+    LIMIT:1,HAVING:1,CASE:1,WHEN:1,THEN:1,ELSE:1,END:1,IN:1,NOT:1,NULL:1,JOIN:1,LEFT:1};
+  var FN = {SUM:1,COUNT:1,ROUND:1,AVG:1,MAX:1,MIN:1,DATE_TRUNC:1,LAG:1,LEAD:1,RANK:1,
+    ROW_NUMBER:1,COALESCE:1,ABS:1,CAST:1};
+  function esc(s){ return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+  function highlightSQL(code){
+    var out = '', i = 0, n = code.length;
+    while (i < n) {
+      var c = code[i];
+      if (c === '-' && code[i+1] === '-') {
+        var j = code.indexOf('\n', i); if (j < 0) j = n;
+        out += '<span class="t-cmt">' + esc(code.slice(i, j)) + '</span>'; i = j; continue;
+      }
+      if (c === "'") {
+        var j2 = i + 1; while (j2 < n && code[j2] !== "'") j2++; j2 = Math.min(j2 + 1, n);
+        out += '<span class="t-str">' + esc(code.slice(i, j2)) + '</span>'; i = j2; continue;
+      }
+      if (c >= '0' && c <= '9') {
+        var j3 = i; while (j3 < n && /[0-9._eE]/.test(code[j3])) j3++;
+        out += '<span class="t-num">' + esc(code.slice(i, j3)) + '</span>'; i = j3; continue;
+      }
+      if (/[A-Za-z_]/.test(c)) {
+        var j4 = i; while (j4 < n && /[A-Za-z0-9_]/.test(code[j4])) j4++;
+        var w = code.slice(i, j4), up = w.toUpperCase();
+        var k = j4; while (k < n && code[k] === ' ') k++;
+        if (FN[up] && code[k] === '(') out += '<span class="t-fn">' + esc(w) + '</span>';
+        else if (KW[up]) out += '<span class="t-kw">' + esc(w) + '</span>';
+        else out += esc(w);
+        i = j4; continue;
+      }
+      out += esc(c); i++;
+    }
+    return out;
+  }
+
+  /* ---------------- SVG chart builders ---------------- */
+  function svgOpen(h){ return '<svg viewBox="0 0 660 ' + h + '" xmlns="http://www.w3.org/2000/svg">'; }
+
+  function buildMultiline(ch){
+    var H=316, L=54,R=608,T=26,B=250;
+    var n=ch.months.length, ymin=ch.ymin, ymax=ch.ymax;
+    function xAt(i){ return L + i*((R-L)/(n-1)); }
+    function yAt(v){ return B - (v-ymin)/(ymax-ymin)*(B-T); }
+    var s = svgOpen(H);
+    ch.ticks.forEach(function(t){
+      var y=yAt(t);
+      s += '<line class="grid-ln" x1="'+L+'" y1="'+y.toFixed(1)+'" x2="'+R+'" y2="'+y.toFixed(1)+'"/>';
+      s += '<text class="ax-txt" x="'+(L-8)+'" y="'+(y+4).toFixed(1)+'" text-anchor="end">'+t+'</text>';
+    });
+    s += '<line class="axis-ln" x1="'+L+'" y1="'+T+'" x2="'+L+'" y2="'+B+'"/>';
+    s += '<line class="axis-ln" x1="'+L+'" y1="'+B+'" x2="'+R+'" y2="'+B+'"/>';
+    ch.months.forEach(function(m,i){
+      s += '<text class="ax-txt b" x="'+xAt(i).toFixed(1)+'" y="'+(B+20)+'" text-anchor="middle">'+m+'</text>';
+    });
+    ch.series.forEach(function(se, si){
+      var pts = se.vals.map(function(v,i){ return xAt(i).toFixed(1)+','+yAt(v).toFixed(1); }).join(' ');
+      s += '<polyline class="ln" pathLength="1" points="'+pts+'" style="stroke:'+se.color+';animation-delay:'+(si*0.18)+'s"/>';
+      se.vals.forEach(function(v,i){
+        var dl = 1.0 + si*0.18 + i*0.05;
+        s += '<circle class="dot" cx="'+xAt(i).toFixed(1)+'" cy="'+yAt(v).toFixed(1)+'" r="3.4" style="fill:'+se.color+';animation-delay:'+dl+'s"/>';
+      });
+      var lv = se.vals[n-1];
+      s += '<text class="val-txt vlabel" x="'+(xAt(n-1)+8)+'" y="'+(yAt(lv)+4).toFixed(1)+'" style="fill:'+se.color+';animation-delay:'+(1.3+si*0.18)+'s">'+lv+'</text>';
+      if (typeof se.anomaly === 'number') {
+        var ax=xAt(se.anomaly), ay=yAt(se.vals[se.anomaly]);
+        s += '<circle class="anom-ring" cx="'+ax.toFixed(1)+'" cy="'+ay.toFixed(1)+'" r="8"/>';
+        s += '<text class="val-txt vlabel" x="'+ax.toFixed(1)+'" y="'+(ay+23).toFixed(1)+'" text-anchor="middle" style="fill:var(--red);animation-delay:1.5s">▼ 6月 130</text>';
+      }
+    });
+    s += '</svg>';
+    return s;
+  }
+
+  function buildDiverge(ch){
+    var items=ch.items, rowH=36, top=18, H= top + items.length*rowH + 40;
+    var labelX=118, pL=132, pR=600, vmin=ch.vmin, vmax=ch.vmax;
+    function xAt(v){ return pL + (v-vmin)/(vmax-vmin)*(pR-pL); }
+    var zeroX=xAt(0), baseB = top + items.length*rowH;
+    var s = svgOpen(H);
+    ch.ticks.forEach(function(t){
+      var x=xAt(t);
+      s += '<line class="grid-ln" x1="'+x.toFixed(1)+'" y1="'+top+'" x2="'+x.toFixed(1)+'" y2="'+baseB+'"'+(t===0?' style="stroke:var(--line-2)"':'')+'/>';
+      s += '<text class="ax-txt" x="'+x.toFixed(1)+'" y="'+(baseB+20)+'" text-anchor="middle">'+(t>0?'+':'')+t+'%</text>';
+    });
+    items.forEach(function(it,i){
+      var cy = top + i*rowH + rowH/2;
+      var x2 = xAt(it.v), bx = Math.min(zeroX, x2), bw = Math.abs(x2 - zeroX);
+      var col = it.hl ? 'var(--red)' : (it.v < 0 ? 'var(--orange)' : 'var(--cyan)');
+      var cls = it.v < 0 ? 'barh-r' : 'barh-l';
+      s += '<text class="name-txt" x="'+labelX+'" y="'+(cy+4).toFixed(1)+'" text-anchor="end"'+(it.hl?' style="fill:var(--red);font-weight:800"':'')+'>'+it.name+'</text>';
+      s += '<rect class="'+cls+'" x="'+bx.toFixed(1)+'" y="'+(cy-9).toFixed(1)+'" width="'+bw.toFixed(1)+'" height="18" rx="4" style="fill:'+col+';animation-delay:'+(i*0.08)+'s"/>';
+      var lx = it.v < 0 ? bx - 8 : bx + bw + 8;
+      var anch = it.v < 0 ? 'end' : 'start';
+      s += '<text class="val-txt vlabel" x="'+lx.toFixed(1)+'" y="'+(cy+4).toFixed(1)+'" text-anchor="'+anch+'" style="fill:'+col+';animation-delay:'+(0.5+i*0.08)+'s">'+(it.v>0?'+':'')+it.v.toFixed(1)+'%</text>';
+    });
+    s += '</svg>';
+    return s;
+  }
+
+  function buildVBar(ch){
+    var items=ch.items, H=320, L=54,R=608,T=34,B=248, ymax=ch.ymax;
+    var band=(R-L)/items.length, barW=Math.min(band*0.5, 56);
+    function xc(i){ return L + band*(i+0.5); }
+    function yAt(v){ return B - (v/ymax)*(B-T); }
+    var s = svgOpen(H);
+    ch.ticks.forEach(function(t){
+      var y=yAt(t);
+      s += '<line class="grid-ln" x1="'+L+'" y1="'+y.toFixed(1)+'" x2="'+R+'" y2="'+y.toFixed(1)+'"/>';
+      s += '<text class="ax-txt" x="'+(L-8)+'" y="'+(y+4).toFixed(1)+'" text-anchor="end">'+t+'</text>';
+    });
+    s += '<line class="axis-ln" x1="'+L+'" y1="'+T+'" x2="'+L+'" y2="'+B+'"/>';
+    s += '<line class="axis-ln" x1="'+L+'" y1="'+B+'" x2="'+R+'" y2="'+B+'"/>';
+    items.forEach(function(it,i){
+      var x=xc(i)-barW/2, y=yAt(it.v), h=B-y;
+      var col = it.hl ? 'var(--orange)' : (i<2 ? 'var(--cyan)' : 'var(--azure)');
+      s += '<rect class="barv" x="'+x.toFixed(1)+'" y="'+y.toFixed(1)+'" width="'+barW.toFixed(1)+'" height="'+h.toFixed(1)+'" rx="5" style="fill:'+col+';animation-delay:'+(i*0.08)+'s"/>';
+      s += '<text class="val-txt vlabel" x="'+xc(i).toFixed(1)+'" y="'+(y-7).toFixed(1)+'" text-anchor="middle" style="fill:'+col+';animation-delay:'+(0.5+i*0.08)+'s">'+it.v+'</text>';
+      s += '<text class="ax-txt b" x="'+xc(i).toFixed(1)+'" y="'+(B+19)+'" text-anchor="middle">'+it.name+'</text>';
+      s += '<text class="ax-txt" x="'+xc(i).toFixed(1)+'" y="'+(B+33)+'" text-anchor="middle">'+it.pct+'</text>';
+    });
+    s += '</svg>';
+    return s;
+  }
+
+  function buildHBar(ch){
+    var items=ch.items, rowH=42, top=14, H= top + items.length*rowH + 24;
+    var labelX=96, pL=110, pR=574, target=ch.target;
+    function xAt(v){ return pL + (v/100)*(pR-pL); }
+    var s = svgOpen(H);
+    var bottomY = top + items.length*rowH;
+    var tx=xAt(target);
+    s += '<line x1="'+tx.toFixed(1)+'" y1="'+(top-2)+'" x2="'+tx.toFixed(1)+'" y2="'+bottomY+'" style="stroke:var(--orange-2);stroke-width:1.4;stroke-dasharray:5 4"/>';
+    s += '<text class="ax-txt" x="'+tx.toFixed(1)+'" y="'+(bottomY+16)+'" text-anchor="middle" style="fill:var(--orange-2);font-weight:700">目标 '+target+'%</text>';
+    items.forEach(function(it,i){
+      var cy = top + i*rowH + rowH/2;
+      var bw = xAt(it.v) - pL;
+      var col = it.hl ? 'var(--red)' : (it.v >= target ? 'var(--cyan)' : 'var(--orange)');
+      s += '<text class="name-txt" x="'+labelX+'" y="'+(cy+4).toFixed(1)+'" text-anchor="end"'+(it.hl?' style="fill:var(--red);font-weight:800"':'')+'>'+it.name+'</text>';
+      s += '<rect x="'+pL+'" y="'+(cy-11).toFixed(1)+'" width="'+(pR-pL)+'" height="22" rx="5" style="fill:rgba(255,255,255,.04)"/>';
+      s += '<rect class="barh-l" x="'+pL+'" y="'+(cy-11).toFixed(1)+'" width="'+bw.toFixed(1)+'" height="22" rx="5" style="fill:'+col+';animation-delay:'+(i*0.08)+'s"/>';
+      s += '<text class="val-txt vlabel" x="'+(xAt(it.v)+8).toFixed(1)+'" y="'+(cy+4).toFixed(1)+'" style="fill:'+col+';animation-delay:'+(0.5+i*0.08)+'s">'+it.v.toFixed(1)+'%</text>';
+    });
+    s += '</svg>';
+    return s;
+  }
+
+  function renderChart(ch){
+    if (ch.type === 'multiline') return buildMultiline(ch);
+    if (ch.type === 'diverge') return buildDiverge(ch);
+    if (ch.type === 'vbar') return buildVBar(ch);
+    if (ch.type === 'hbar') return buildHBar(ch);
+    return '';
+  }
+  function chartLegend(ch){
+    if (ch.type === 'multiline') {
+      return ch.series.map(function(se){
+        return '<span class="lg"><span class="sw" style="background:'+se.color+'"></span>'+se.name+'</span>';
+      }).join('') + '<span class="lg" style="margin-left:auto;color:var(--text-mute)">'+ch.legend+'</span>';
+    }
+    var extra = '';
+    if (ch.type === 'hbar') extra = '<span class="lg"><span class="sw dash"></span>目标线 '+ch.target+'%</span>';
+    return '<span class="lg" style="color:var(--text-dim)">'+ch.legend+'</span>' + extra;
+  }
+
+  /* ---------------- typewriter for SQL (live highlight) ---------------- */
+  function typeSQL(el, code, done){
+    var len = code.length, i = 0, step = Math.max(1, Math.round(len / 110)), speed = 16;
+    (function tick(){
+      i = Math.min(i + step, len);
+      el.innerHTML = highlightSQL(code.slice(0, i)) + (i < len ? '<span class="caret"></span>' : '');
+      if (i < len) setTimeout(tick, speed);
+      else if (done) done();
+    })();
+  }
+
+  /* ---------------- DOM refs ---------------- */
+  var input = document.getElementById('nlInput');
+  var runBtn = document.getElementById('runBtn');
+  var chips = Array.prototype.slice.call(document.querySelectorAll('.qchip'));
+  var emptyHint = document.getElementById('emptyHint');
+  var result = document.getElementById('result');
+  var stepEls = Array.prototype.slice.call(document.querySelectorAll('#steps .step'));
+  var b2 = document.getElementById('b2'), b3 = document.getElementById('b3'), b4 = document.getElementById('b4');
+  var rSql = document.getElementById('rSql'), rNote = document.getElementById('rNote');
+  var rTable = document.getElementById('rTable'), rChartType = document.getElementById('rChartType');
+  var rLegend = document.getElementById('rLegend'), rChart = document.getElementById('rChart');
+  var rConcl = document.getElementById('rConcl'), rAnomaly = document.getElementById('rAnomaly');
+  var busy = false, currentIndex = 0;
+
+  input.value = QUERIES[0].q;
+  setActiveChip(0);
+
+  function setActiveChip(i){
+    chips.forEach(function(c){ c.classList.toggle('active', parseInt(c.dataset.i,10) === i); });
+  }
+  function setStep(idx){
+    stepEls.forEach(function(el, k){
+      el.classList.remove('active','done');
+      if (k < idx) el.classList.add('done');
+      else if (k === idx) el.classList.add('active');
+    });
+  }
+  function stepsDone(){ stepEls.forEach(function(el){ el.classList.remove('active'); el.classList.add('done'); }); }
+  function lock(v){ busy = v; runBtn.disabled = v; chips.forEach(function(c){ c.disabled = v; });
+    runBtn.textContent = v ? '⏳ 取数中…' : '🔍 取数'; }
+
+  function buildTable(t){
+    var head = '<thead><tr>' + t.cols.map(function(c){ return '<th>'+c+'</th>'; }).join('') + '</tr></thead>';
+    var body = '<tbody>' + t.rows.map(function(r, ri){
+      var tds = r.map(function(cell){
+        if (cell && typeof cell === 'object') return '<td class="'+cell.c+'">'+cell.v+'</td>';
+        return '<td>'+cell+'</td>';
+      }).join('');
+      return '<tr class="rw" style="animation-delay:'+(ri*0.07)+'s">'+tds+'</tr>';
+    }).join('') + '</tbody>';
+    return head + body;
+  }
+
+  function run(i){
+    if (busy) return;
+    var Q = QUERIES[i];
+    currentIndex = i; setActiveChip(i); input.value = Q.q;
+    lock(true);
+
+    emptyHint.style.display = 'none';
+    result.hidden = false;
+    b2.classList.add('hide'); b3.classList.add('hide'); b4.classList.add('hide');
+    rSql.innerHTML = ''; rTable.innerHTML = ''; rChart.innerHTML = ''; rLegend.innerHTML = '';
+    rConcl.innerHTML = ''; rAnomaly.innerHTML = '';
+
+    setStep(0);
+    setTimeout(function(){
+      setStep(1);
+      typeSQL(rSql, Q.sql, function(){
+        setStep(2);
+        setTimeout(function(){
+          rNote.textContent = Q.table.note;
+          rTable.innerHTML = buildTable(Q.table);
+          b2.classList.remove('hide');
+          setTimeout(function(){
+            setStep(3);
+            rChartType.textContent = Q.chart.typeTag;
+            rLegend.innerHTML = chartLegend(Q.chart);
+            rChart.innerHTML = renderChart(Q.chart);
+            b3.classList.remove('hide');
+            setTimeout(function(){
+              setStep(4);
+              setTimeout(function(){
+                rConcl.innerHTML = '<span class="ci">💡</span><span class="ct">'+Q.concl+'</span>';
+                rAnomaly.innerHTML = '<span class="ai">⚠️</span><span class="at">'+Q.anomaly+
+                  '<br><span class="drill">'+Q.drill+'</span></span>';
+                b4.classList.remove('hide');
+                stepsDone();
+                lock(false);
+              }, 480);
+            }, 900);
+          }, 620);
+        }, 560);
+      });
+    }, 460);
+  }
+
+  function matchIndex(text){
+    var t = (text || '').trim();
+    for (var i = 0; i < QUERIES.length; i++) if (QUERIES[i].q === t) return i;
+    for (var j = 0; j < QUERIES.length; j++) {
+      var kws = QUERIES[j].kw, hit = 0;
+      for (var k = 0; k < kws.length; k++) if (t.indexOf(kws[k]) > -1) hit++;
+      if (hit >= 2) return j;
+    }
+    return currentIndex;
+  }
+
+  chips.forEach(function(ch){
+    ch.addEventListener('click', function(){ if (!busy) run(parseInt(ch.dataset.i, 10)); });
+  });
+  runBtn.addEventListener('click', function(){ if (!busy) run(matchIndex(input.value)); });
+  input.addEventListener('keydown', function(e){ if (e.key === 'Enter' && !busy) run(matchIndex(input.value)); });
+})();
+</script>
+</body>
+</html>

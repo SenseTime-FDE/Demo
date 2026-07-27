@@ -1,0 +1,797 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>作业票 · HSE 安全助手 Demo —— 中海油 × 商汤</title>
+<link rel="stylesheet" href="assets/style.css">
+<style>
+/* ============ demo-permit · 作业票 · HSE 安全助手（安全橙主题） ============ */
+
+/* ---- head band ---- */
+.hp-hero { position: relative; overflow: hidden; padding: 40px 0 20px; background: var(--bg-0); }
+.hp-hero .bg { position: absolute; inset: 0; z-index: 0;
+  background:
+    radial-gradient(920px 480px at 84% -12%, rgba(255,138,61,.20), transparent 55%),
+    radial-gradient(760px 460px at 2% 6%, rgba(255,90,82,.12), transparent 55%),
+    radial-gradient(680px 520px at 55% 128%, rgba(59,140,255,.08), transparent 55%); }
+.hp-hero .wrap { position: relative; z-index: 2; }
+.hp-hero h1 { font-size: clamp(25px, 3.9vw, 40px); line-height: 1.14; margin-top: 8px; }
+.hp-hero h1 .g { background: var(--grad-energy); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.hp-hero .lead { margin-top: 14px; }
+.hp-strip { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 18px; }
+.hp-strip .pill { background: rgba(255,138,61,.1); border-color: rgba(255,138,61,.28); color: var(--orange-2); }
+
+/* ---- workbench stage ---- */
+.wb { display: grid; grid-template-columns: minmax(0, 380px) minmax(0, 1fr); gap: 20px; align-items: start; }
+@media (max-width: 920px){ .wb { grid-template-columns: 1fr; } }
+
+.panel { background: var(--bg-card); border: 1px solid var(--line); border-radius: var(--radius);
+  overflow: hidden; box-shadow: var(--shadow); }
+.panel-hd { display: flex; align-items: center; gap: 10px; padding: 14px 18px;
+  border-bottom: 1px solid var(--line); background: linear-gradient(90deg, rgba(255,138,61,.07), transparent); }
+.panel-hd .ix { width: 24px; height: 24px; border-radius: 8px; display: grid; place-items: center;
+  font-size: 12px; font-weight: 900; color: var(--orange-2);
+  background: rgba(255,138,61,.14); border: 1px solid rgba(255,138,61,.35); }
+.panel-hd .t { font-size: 14.5px; font-weight: 800; letter-spacing: .3px; }
+.panel-hd .r { margin-left: auto; font-size: 11px; color: var(--text-mute);
+  background: rgba(255,255,255,.04); border: 1px solid var(--line); border-radius: 20px; padding: 3px 10px; }
+.panel-bd { padding: 18px; }
+
+/* form label */
+.f-lbl { display: flex; align-items: center; gap: 7px; font-size: 12px; font-weight: 800;
+  color: var(--text-mute); letter-spacing: 1.2px; text-transform: uppercase; margin-bottom: 11px; }
+
+/* type chips (single select) */
+.typechips { display: flex; flex-wrap: wrap; gap: 9px; }
+.tchip { display: inline-flex; align-items: center; gap: 7px; padding: 9px 13px; border-radius: 12px;
+  font-size: 13px; font-weight: 700; color: var(--text-2); background: rgba(255,255,255,.04);
+  border: 1px solid var(--line); cursor: pointer; transition: .18s; }
+.tchip .emo { font-size: 15px; line-height: 1; }
+.tchip:hover { border-color: var(--line-strong); color: #fff; transform: translateY(-1px); }
+.tchip.on { background: var(--grad-frontline); border-color: rgba(255,138,61,.55); color: var(--orange-2);
+  box-shadow: 0 8px 22px -12px rgba(255,138,61,.6); }
+
+/* description input */
+.desc-wrap { position: relative; margin-top: 20px; }
+textarea.desc { width: 100%; min-height: 96px; resize: vertical; display: block;
+  background: rgba(6,14,24,.5); border: 1px solid var(--line-2); border-radius: 14px;
+  padding: 14px 15px; color: var(--text); font-size: 14px; line-height: 1.6; font-family: inherit;
+  transition: border-color .18s, box-shadow .18s; }
+textarea.desc:focus { outline: none; border-color: rgba(255,138,61,.55); box-shadow: 0 0 0 3px rgba(255,138,61,.12); }
+textarea.desc::placeholder { color: var(--text-mute); }
+
+/* voice overlay on textarea */
+.listen-ov { position: absolute; inset: 0; border-radius: 14px; display: none; place-items: center;
+  gap: 12px; background: rgba(6,13,23,.86); backdrop-filter: blur(3px);
+  border: 1px solid rgba(255,138,61,.4); z-index: 3; }
+.listen-ov.on { display: grid; grid-auto-flow: row; align-content: center; justify-items: center; }
+.wave { display: flex; align-items: center; gap: 3px; height: 32px; padding: 6px 16px; border-radius: 20px;
+  background: rgba(255,90,82,.12); border: 1px solid rgba(255,138,61,.4); }
+.wave span { display: block; width: 3px; height: 8px; border-radius: 3px; background: var(--orange);
+  animation: wv 0.9s ease-in-out infinite; }
+@keyframes wv { 0%,100%{ transform: scaleY(.35);} 50%{ transform: scaleY(2.2);} }
+.listen-txt { font-size: 12px; font-weight: 800; color: var(--orange-2); display: flex; align-items: center; gap: 7px; }
+.listen-txt::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: var(--red); animation: rec 1s infinite; }
+@keyframes rec { 0%,100%{ opacity: 1;} 50%{ opacity: .25;} }
+
+/* action row */
+.act-row { display: flex; gap: 10px; margin-top: 14px; flex-wrap: wrap; }
+.btn-mic { background: rgba(255,255,255,.05); color: var(--text-2); border: 1px solid var(--line-2); }
+.btn-mic:hover { border-color: rgba(255,138,61,.5); color: var(--orange-2); transform: translateY(-2px); }
+.btn-gen { flex: 1 1 auto; justify-content: center; background: var(--grad-energy); color: #fff;
+  border: none; box-shadow: 0 12px 30px -10px rgba(255,90,82,.6); }
+.btn-gen:hover { filter: brightness(1.07); transform: translateY(-2px); }
+.btn-gen:disabled { opacity: .6; cursor: default; transform: none; filter: none; }
+
+.hint { margin-top: 14px; font-size: 12px; color: var(--text-dim); line-height: 1.6;
+  background: rgba(255,255,255,.03); border: 1px dashed var(--line-2); border-radius: 12px; padding: 11px 13px; }
+.hint b { color: var(--orange-2); }
+
+/* ---- right: the electronic permit ---- */
+.ticket { min-height: 460px; position: relative; }
+
+/* placeholder */
+.tk-empty { display: grid; place-items: center; text-align: center; padding: 60px 24px; min-height: 460px; }
+.tk-empty .ico { width: 62px; height: 62px; border-radius: 18px; display: grid; place-items: center;
+  font-size: 28px; margin: 0 auto 16px; background: rgba(255,138,61,.1); border: 1px solid rgba(255,138,61,.28); }
+.tk-empty .big { font-size: 16px; font-weight: 800; color: var(--text); margin-bottom: 8px; }
+.tk-empty .sm { font-size: 13px; color: var(--text-dim); max-width: 340px; line-height: 1.6; }
+
+/* generating progress */
+.gen { display: none; padding: 40px 26px; }
+.gen.on { display: block; }
+.gen .g-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+.gen .g-stat { display: flex; align-items: center; gap: 10px; font-size: 14px; font-weight: 700; color: var(--orange-2); }
+.gen .g-stat .spin { width: 15px; height: 15px; border: 2px solid rgba(255,138,61,.35);
+  border-top-color: var(--orange); border-radius: 50%; animation: spin .7s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.gen .g-pct { font-family: "SF Mono", ui-monospace, Menlo, monospace; font-weight: 800; color: var(--text); }
+.gbar { height: 9px; border-radius: 20px; background: rgba(255,255,255,.06); border: 1px solid var(--line); overflow: hidden; }
+.gbar > i { display: block; height: 100%; width: 0%; border-radius: 20px;
+  background: linear-gradient(90deg, var(--orange-2), var(--orange), var(--red));
+  box-shadow: 0 0 14px rgba(255,138,61,.6); transition: width .12s linear; }
+.gen .g-log { margin-top: 18px; display: flex; flex-direction: column; gap: 8px; }
+.gen .g-log .li { font-size: 12.5px; color: var(--text-mute); display: flex; align-items: center; gap: 9px; opacity: .3; transition: .3s; }
+.gen .g-log .li.hit { opacity: 1; color: var(--text-2); }
+.gen .g-log .li .ck { width: 16px; height: 16px; border-radius: 50%; display: grid; place-items: center;
+  font-size: 10px; color: var(--green); border: 1px solid var(--line); flex: 0 0 auto; }
+.gen .g-log .li.hit .ck { border-color: rgba(55,211,154,.5); background: rgba(55,211,154,.14); }
+
+/* ticket body */
+.tk-body { display: none; }
+.tk-body.on { display: block; }
+
+.tk-sec { padding: 18px 20px; border-bottom: 1px dashed var(--line); }
+.tk-sec:last-child { border-bottom: 0; }
+.tk-sec.reveal-in { opacity: 0; transform: translateY(10px); transition: opacity .5s ease, transform .5s ease; }
+.tk-sec.reveal-in.show { opacity: 1; transform: none; }
+
+.sec-lbl { display: flex; align-items: center; gap: 8px; font-size: 11px; font-weight: 800;
+  color: var(--text-mute); letter-spacing: 1.4px; text-transform: uppercase; margin-bottom: 13px; }
+.sec-lbl .ic { width: 20px; height: 20px; border-radius: 6px; display: grid; place-items: center; font-size: 11px;
+  background: rgba(255,138,61,.13); border: 1px solid rgba(255,138,61,.3); }
+.sec-lbl .rt { margin-left: auto; font-size: 10.5px; letter-spacing: .4px; text-transform: none; color: var(--orange-2); }
+
+/* ticket header */
+.tk-head { padding: 18px 20px; background: linear-gradient(120deg, rgba(255,138,61,.15), rgba(255,90,82,.05));
+  border-bottom: 1px solid var(--line); }
+.tk-top { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.tk-no { font-family: "SF Mono", ui-monospace, Menlo, monospace; font-size: 13.5px; font-weight: 800; color: var(--orange-2); }
+.tk-badge { font-size: 12px; font-weight: 800; padding: 4px 11px; border-radius: 20px; color: #fff;
+  background: var(--grad-energy); box-shadow: 0 6px 16px -8px rgba(255,90,82,.6); display: inline-flex; align-items: center; gap: 6px; }
+.tk-status { margin-left: auto; font-size: 11.5px; font-weight: 800; padding: 4px 11px; border-radius: 20px;
+  color: var(--amber); background: rgba(244,193,74,.14); border: 1px solid rgba(244,193,74,.38); display: inline-flex; align-items: center; gap: 6px; }
+.tk-status .d { width: 6px; height: 6px; border-radius: 50%; background: var(--amber); animation: rec 1.3s infinite; }
+.tk-ai { margin-top: 10px; font-size: 11px; color: var(--text-dim); display: inline-flex; align-items: center; gap: 6px; }
+.tk-ai b { color: var(--orange-2); }
+
+.tk-meta { display: grid; grid-template-columns: 1fr 1fr; gap: 12px 20px; margin-top: 16px; }
+@media (max-width: 480px){ .tk-meta { grid-template-columns: 1fr; } }
+.tk-meta .m .k { font-size: 11px; color: var(--text-mute); font-weight: 700; letter-spacing: .4px; }
+.tk-meta .m .v { font-size: 13.5px; color: var(--text); font-weight: 600; margin-top: 3px; }
+.tk-meta .m .v.ph { color: var(--text-mute); font-weight: 500; border-bottom: 1px dashed var(--line-strong);
+  display: inline-block; padding-bottom: 1px; letter-spacing: 2px; }
+
+/* JSA table */
+.tbl-wrap { overflow-x: auto; border: 1px solid var(--line); border-radius: 12px; }
+table.jsa { width: 100%; border-collapse: collapse; min-width: 560px; font-size: 13px; }
+table.jsa th { text-align: left; padding: 10px 13px; font-size: 11px; font-weight: 800; color: var(--text-mute);
+  letter-spacing: .6px; background: rgba(255,255,255,.03); border-bottom: 1px solid var(--line-2); white-space: nowrap; }
+table.jsa td { padding: 11px 13px; border-bottom: 1px solid var(--line); color: var(--text-2); vertical-align: top; line-height: 1.5; }
+table.jsa tr:last-child td { border-bottom: 0; }
+table.jsa td.hz { color: var(--text); font-weight: 600; min-width: 130px; }
+table.jsa td.ct { min-width: 220px; }
+.lv { display: inline-flex; align-items: center; gap: 5px; font-size: 11.5px; font-weight: 800;
+  padding: 3px 9px; border-radius: 20px; white-space: nowrap; }
+.lv::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+.lv-high { color: var(--red); background: rgba(255,90,82,.14); border: 1px solid rgba(255,90,82,.4); }
+.lv-mid { color: var(--orange-2); background: rgba(255,138,61,.14); border: 1px solid rgba(255,138,61,.4); }
+
+/* conditions checklist */
+.cond-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+@media (max-width: 560px){ .cond-grid { grid-template-columns: 1fr; } }
+.cond { display: flex; align-items: center; gap: 11px; text-align: left; width: 100%; cursor: pointer;
+  padding: 10px 12px; background: rgba(255,255,255,.03); border: 1px solid var(--line); border-radius: 11px;
+  color: var(--text-2); font-size: 13px; transition: .16s; }
+.cond:hover { border-color: var(--line-strong); }
+.cond .box { width: 20px; height: 20px; flex: 0 0 auto; border-radius: 6px; border: 1.5px solid var(--line-strong);
+  display: grid; place-items: center; font-size: 12px; color: transparent; transition: .16s; }
+.cond.on { background: rgba(55,211,154,.07); border-color: rgba(55,211,154,.35); color: var(--text); }
+.cond.on .box { background: var(--green); border-color: var(--green); color: #06202a; }
+
+/* PPE pills */
+.ppe-row { display: flex; flex-wrap: wrap; gap: 8px; }
+.ppe { display: inline-flex; align-items: center; gap: 6px; font-size: 12.5px; font-weight: 600;
+  padding: 6px 12px; border-radius: 20px; color: var(--orange-2);
+  background: rgba(255,138,61,.1); border: 1px solid rgba(255,138,61,.32); }
+
+/* clauses */
+.clause-list { display: flex; flex-direction: column; gap: 9px; }
+.clause { display: flex; gap: 11px; align-items: flex-start; padding: 10px 13px;
+  background: rgba(59,140,255,.06); border: 1px solid rgba(59,140,255,.22); border-radius: 11px; }
+.clause .cno { font-family: "SF Mono", ui-monospace, Menlo, monospace; font-size: 12px; font-weight: 800;
+  color: var(--azure); white-space: nowrap; flex: 0 0 auto; margin-top: 1px; }
+.clause .cname { font-size: 13px; color: var(--text-2); line-height: 1.5; }
+
+/* approval flow */
+.flow { display: flex; align-items: flex-start; gap: 0; }
+@media (max-width: 620px){ .flow { flex-wrap: wrap; gap: 14px 0; } }
+.fstep { flex: 1 1 0; min-width: 116px; display: flex; flex-direction: column; align-items: center;
+  text-align: center; position: relative; }
+.fstep .conn { position: absolute; top: 17px; left: 50%; width: 100%; height: 2px; background: var(--line-2); z-index: 0; }
+.fstep:last-child .conn { display: none; }
+.fstep.done .conn { background: linear-gradient(90deg, var(--green), var(--line-2)); }
+.fstep .dot { position: relative; z-index: 1; width: 36px; height: 36px; border-radius: 50%;
+  display: grid; place-items: center; font-size: 14px; font-weight: 900; background: var(--bg-2);
+  border: 2px solid var(--line-2); color: var(--text-mute); }
+.fstep.done .dot { background: rgba(55,211,154,.16); border-color: var(--green); color: var(--green); }
+.fstep.cur .dot { background: rgba(255,138,61,.16); border-color: var(--orange); color: var(--orange-2);
+  box-shadow: 0 0 0 4px rgba(255,138,61,.14); animation: cur 1.6s infinite; }
+@keyframes cur { 0%,100%{ box-shadow: 0 0 0 3px rgba(255,138,61,.16);} 50%{ box-shadow: 0 0 0 7px rgba(255,138,61,0);} }
+.fstep .fl { margin-top: 9px; font-size: 12.5px; font-weight: 800; color: var(--text); }
+.fstep.todo .fl { color: var(--text-dim); }
+.fstep .fby { margin-top: 3px; font-size: 11px; color: var(--text-mute); }
+.fstep .ftag { margin-top: 7px; font-size: 10px; font-weight: 800; padding: 2px 8px; border-radius: 20px; }
+.fstep.done .ftag { color: var(--green); background: rgba(55,211,154,.13); }
+.fstep.cur .ftag { color: var(--orange-2); background: rgba(255,138,61,.14); }
+.fstep.todo .ftag { color: var(--text-mute); background: rgba(255,255,255,.04); }
+
+/* ticket footer actions */
+.tk-acts { display: flex; gap: 10px; flex-wrap: wrap; }
+.tk-acts .btn { flex: 1 1 auto; justify-content: center; }
+
+/* ---- value band ---- */
+.val-band { border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); background: var(--bg-1); }
+.val-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; }
+@media (max-width: 760px){ .val-grid { grid-template-columns: 1fr 1fr; } }
+.vcard { text-align: center; padding: 8px 10px; }
+.vcard .vn { font-size: clamp(26px, 3.4vw, 38px); font-weight: 900; line-height: 1;
+  background: var(--grad-energy); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.vcard .vl { font-size: 13px; color: var(--text-dim); margin-top: 10px; }
+.vcard .vl b { color: var(--text-2); font-weight: 700; }
+
+/* ---- how it works ---- */
+.why-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+@media (max-width: 980px){ .why-grid { grid-template-columns: 1fr 1fr; } }
+@media (max-width: 560px){ .why-grid { grid-template-columns: 1fr; } }
+
+/* ---- back bar ---- */
+.backbar { border-top: 1px solid var(--line); background: var(--bg-1); }
+.backbar .in { max-width: var(--maxw); margin: 0 auto; padding: 18px 24px; display: flex; align-items: center;
+  justify-content: space-between; gap: 14px; flex-wrap: wrap; }
+.backbar .bb-link { font-size: 13.5px; font-weight: 700; color: var(--text-2); display: inline-flex; align-items: center; gap: 7px; transition: .18s; }
+.backbar .bb-link:hover { color: var(--orange-2); }
+.backbar .bb-mid { font-size: 12.5px; color: var(--text-mute); }
+
+/* toast */
+.toast-wrap { position: fixed; left: 50%; bottom: 30px; transform: translateX(-50%); z-index: 200;
+  width: min(92vw, 460px); }
+.toast { display: flex; align-items: flex-start; gap: 12px; background: linear-gradient(120deg,#152234,#1a2740);
+  border: 1px solid rgba(255,138,61,.4); border-left: 4px solid var(--orange); border-radius: 13px;
+  padding: 13px 16px; box-shadow: var(--shadow); opacity: 0; transform: translateY(16px); transition: .3s; }
+.toast.show { opacity: 1; transform: none; }
+.toast .ti { width: 34px; height: 34px; flex: 0 0 auto; border-radius: 9px; display: grid; place-items: center;
+  background: rgba(55,211,154,.14); border: 1px solid rgba(55,211,154,.4); font-size: 16px; }
+.toast .tb strong { display: block; font-size: 13.5px; font-weight: 800; }
+.toast .tb span { font-size: 12px; color: var(--text-dim); }
+</style>
+</head>
+<body>
+
+<nav class="nav"><div class="wrap-wide" style="justify-content:space-between;">
+  <a class="brand" href="index.html"><div class="logos"><img src="assets/st_logo.png" class="logo-img" alt="商汤科技 SenseTime"></div><span class="sub hide-mobile">Demo 原型</span></a>
+  <div style="display:flex;gap:8px;align-items:center;"><a class="btn btn-sm btn-ghost" href="index.html">← 返回方案</a><a class="btn btn-sm btn-ghost" href="demos.html">全部 Demo</a></div>
+</div></nav>
+
+<!-- ============ HEAD BAND ============ -->
+<header class="hp-hero">
+  <div class="bg"></div>
+  <div class="orb orb-orange" style="width:340px;height:340px;top:-130px;right:-80px;"></div>
+  <div class="wrap">
+    <div class="kicker orange reveal">🦺 HSE Work Permit · 一线作业许可</div>
+    <h1 class="reveal">说清作业内容，AI 秒出<span class="g">作业票 + JSA + 安规 + 审批流</span></h1>
+    <p class="lead reveal">选作业类型、描述现场作业，AI 自动生成电子作业票草稿 —— 逐条辨识危害、匹配防控措施与 PPE、比对适用安规、编排审批流并全程留痕。<b class="text-orange">机器把漏项补齐，人来签字把关。</b></p>
+    <div class="hp-strip reveal">
+      <span class="pill">🔥 五类特殊作业覆盖</span>
+      <span class="pill">⚠️ JSA 风险辨识不漏项</span>
+      <span class="pill">📚 国标 / 行标 / 企标自动比对</span>
+      <span class="pill">✍️ 电子签批 · 审批留痕</span>
+    </div>
+  </div>
+</header>
+
+<!-- ============ WORKBENCH ============ -->
+<section class="section" style="padding-top:22px;">
+  <div class="wrap">
+    <div class="wb reveal">
+
+      <!-- LEFT: input console -->
+      <div class="panel">
+        <div class="panel-hd">
+          <span class="ix">A</span>
+          <span class="t">作业信息录入</span>
+          <span class="r">现场一线</span>
+        </div>
+        <div class="panel-bd">
+
+          <div class="f-lbl">① 作业类型 · 单选</div>
+          <div class="typechips" id="typeChips">
+            <button class="tchip on" type="button" data-k="fire"><span class="emo">🔥</span>动火作业</button>
+            <button class="tchip" type="button" data-k="confined"><span class="emo">🕳️</span>受限空间</button>
+            <button class="tchip" type="button" data-k="height"><span class="emo">🏗️</span>高处作业</button>
+            <button class="tchip" type="button" data-k="electric"><span class="emo">⚡</span>电气作业</button>
+            <button class="tchip" type="button" data-k="lifting"><span class="emo">🏭</span>吊装作业</button>
+          </div>
+
+          <div class="desc-wrap">
+            <div class="f-lbl" style="margin-bottom:9px;">② 作业描述</div>
+            <textarea class="desc" id="descInput" placeholder="用一句话说清：在哪、对什么、用什么方式作业…">在2号平台管廊对DN200工艺管线进行动火焊接更换</textarea>
+            <div class="listen-ov" id="listenOv">
+              <div class="wave" id="waveBox"></div>
+              <div class="listen-txt">正在聆听现场语音…</div>
+            </div>
+          </div>
+
+          <div class="act-row">
+            <button class="btn btn-sm btn-mic" id="micBtn" type="button">🎙️ 语音输入</button>
+            <button class="btn btn-gen" id="genBtn" type="button">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2 4 14h7l-1 8 9-12h-7l1-8Z"/></svg>
+              生成作业票
+            </button>
+          </div>
+
+          <div class="hint">💡 <b>试一试：</b>切换上方作业类型，下方 JSA 风险辨识、必备条件、PPE、安规会随之更新；点「语音输入」模拟现场口述，点「生成作业票」看 AI 逐步出票。</div>
+        </div>
+      </div>
+
+      <!-- RIGHT: electronic permit -->
+      <div class="panel">
+        <div class="panel-hd">
+          <span class="ix" style="background:rgba(255,90,82,.14);border-color:rgba(255,90,82,.35);color:var(--red);">AI</span>
+          <span class="t">电子作业票 · 草稿</span>
+          <span class="r" id="engTag">HSE 安全大模型</span>
+        </div>
+
+        <div class="ticket">
+          <!-- placeholder -->
+          <div class="tk-empty" id="tkEmpty">
+            <div class="ico">📋</div>
+            <div class="big">填写作业信息，点击「生成作业票」</div>
+            <div class="sm">AI 将自动完成 危害辨识(JSA) · 防控措施 · 必备条件 · PPE 配置 · 安规比对 · 审批流编排，几秒钟出一张可签批的电子作业票。</div>
+          </div>
+
+          <!-- generating -->
+          <div class="gen" id="genBox">
+            <div class="g-row">
+              <span class="g-stat"><span class="spin"></span><span id="genStat">正在解析作业描述…</span></span>
+              <span class="g-pct" id="genPct">0%</span>
+            </div>
+            <div class="gbar"><i id="genBar"></i></div>
+            <div class="g-log" id="genLog"></div>
+          </div>
+
+          <!-- ticket body (injected) -->
+          <div class="tk-body" id="tkBody"></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ============ VALUE BAND ============ -->
+<section class="section tight val-band">
+  <div class="wrap">
+    <div class="val-grid reveal">
+      <div class="vcard"><div class="vn">70%↓</div><div class="vl">作业票<b>漏项率</b>下降</div></div>
+      <div class="vcard"><div class="vn">0</div><div class="vl">JSA <b>风险点遗漏</b></div></div>
+      <div class="vcard"><div class="vn">100%</div><div class="vl">适用<b>安规自动比对</b></div></div>
+      <div class="vcard"><div class="vn">全程</div><div class="vl">电子签批·<b>审批留痕</b></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ HOW IT WORKS ============ -->
+<section class="section bg-1">
+  <div class="wrap">
+    <div class="sec-head center reveal" style="margin-bottom:34px;">
+      <div class="kicker center orange">Under the Hood · 背后原理 / 怎么用</div>
+      <h2 class="h-sec">一句话作业描述，<span class="hl" style="background:var(--grad-energy);-webkit-background-clip:text;background-clip:text;color:transparent;">四步生成合规作业票</span></h2>
+      <p class="lead center">从读懂现场作业，到辨识危害、比对安规、守住审批闭环 —— 每一步都对齐 HSE 特殊作业管理要求。</p>
+    </div>
+    <div class="why-grid reveal">
+      <div class="card">
+        <div class="card-icon" style="background:rgba(255,138,61,.13);border-color:rgba(255,138,61,.28)">📝</div>
+        <h3 style="font-size:16px;">读懂作业 · 结构化</h3>
+        <p style="font-size:13px;">从自由文本中抽取作业类型、地点、作业对象与方式，自动填好票头要素，也支持现场语音口述录入。</p>
+      </div>
+      <div class="card">
+        <div class="card-icon" style="background:rgba(255,90,82,.13);border-color:rgba(255,90,82,.28)">⚠️</div>
+        <h3 style="font-size:16px;">JSA 危害辨识</h3>
+        <p style="font-size:13px;">结合作业类型与历史事故 / 隐患库，逐条列出危害因素、判定风险等级，并给出对应防控措施，杜绝凭经验漏项。</p>
+      </div>
+      <div class="card">
+        <div class="card-icon" style="background:rgba(59,140,255,.13);border-color:rgba(59,140,255,.28)">📚</div>
+        <h3 style="font-size:16px;">安规自动比对</h3>
+        <p style="font-size:13px;">RAG 检索国标 / 行标 / 企标与作业规程，匹配适用条款并带出条款号与名称，必备条件、PPE 逐项对标。</p>
+      </div>
+      <div class="card">
+        <div class="card-icon" style="background:rgba(55,211,154,.13);border-color:rgba(55,211,154,.28)">✍️</div>
+        <h3 style="font-size:16px;">审批留痕 · 人工把关</h3>
+        <p style="font-size:13px;">按作业等级编排审批流，AI 出稿、逐级电子签批全程留痕。机器给效率，签发权始终在人 —— 未审批不得开工。</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ BACK BAR ============ -->
+<div class="backbar">
+  <div class="in">
+    <a href="demos.html" class="bb-link">← 返回 Demo 目录</a>
+    <span class="bb-mid">作业票 · HSE 安全助手 Demo · 让每一张作业票都合规、不漏项 · 数据均为示意 / 脱敏</span>
+    <a href="index.html" class="bb-link">回到方案首页 →</a>
+  </div>
+</div>
+
+<div class="toast-wrap" id="toastWrap"></div>
+
+<script src="assets/app.js"></script>
+<script>
+(function () {
+  'use strict';
+
+  /* ============================================================
+     数据：五类特殊作业各自的 JSA / 必备条件 / PPE / 安规 / 审批
+     ============================================================ */
+  var PERMITS = {
+    fire: {
+      icon: '🔥', name: '动火作业', no: 'DH-2026-0715-1182',
+      desc: '在2号平台管廊对DN200工艺管线进行动火焊接更换',
+      loc: '2号平台 · 管廊 · DN200 工艺管线',
+      time: '2026-07-15  09:00 — 12:00',
+      applicant: '生产二队 · 李国栋',
+      jsa: [
+        ['可燃气体积聚遇明火', 'high', '动火前及作业中连续检测 LEL &lt; 10%，管线清空余料、加装盲板隔离'],
+        ['火花飞溅引燃周边可燃物', 'high', '清除半径 15m 内可燃物，铺设阻燃毯，配置足量灭火器材'],
+        ['高温灼伤 / 弧光伤害', 'mid', '穿阻燃工作服、戴焊接面屏，设置作业警戒隔离'],
+        ['管线残余介质喷溅', 'mid', '确认已泄压、置换、盲断，办理停车 / 断路交出手续'],
+        ['受限通风烟气积聚', 'mid', '设置强制通风，监测有毒有害气体浓度'],
+        ['上下交叉作业物体打击', 'mid', '错时作业、设专人监护，划定坠落半径警戒区']
+      ],
+      conds: ['气体检测合格（LEL&lt;10%）', '监火人到位并持证', '灭火器材配置到位', '动火证已办理', '周边隔离与盲断完成', '强制通风措施落实'],
+      ppe: ['🧥 阻燃工作服', '🥽 焊接面屏', '🧤 防护手套', '⛑️ 安全帽', '🥾 防砸劳保鞋', '📟 便携气体检测仪'],
+      clauses: [
+        ['GB 30871-2022', '《危险化学品企业特殊作业安全规范》—— 动火作业'],
+        ['AQ 3022-2008', '《化学品生产单位动火作业安全规范》'],
+        ['Q/HS 2.1.3', '《中海油 动火作业安全管理规定》']
+      ]
+    },
+    confined: {
+      icon: '🕳️', name: '受限空间作业', no: 'SX-2026-0715-0473',
+      desc: '进入3号平台污水舱 T-3305 内部进行清淤与防腐涂层检修',
+      loc: '3号平台 · 污水舱 · 位号 T-3305',
+      time: '2026-07-15  10:00 — 16:00',
+      applicant: '维保三队 · 王海涛',
+      jsa: [
+        ['缺氧窒息', 'high', '进入前及作业中连续检测氧含量 19.5%~23.5%，强制通风置换'],
+        ['硫化氢 / 有毒气体中毒', 'high', '检测 H₂S / CO / VOC 合格，佩戴便携报警仪，备正压式呼吸器'],
+        ['可燃气体积聚爆炸', 'high', '检测 LEL &lt; 10%，禁用非防爆工具与照明'],
+        ['人员昏迷难以施救', 'mid', '监护人不离岗，作业人系救生绳，配三脚架提升装置'],
+        ['能量意外释放 / 机械挤压', 'mid', '隔离能量源，挂牌上锁（LOTO），确认无残余能量'],
+        ['照明不足 / 触电', 'mid', '使用 12V 防爆行灯，配漏电保护装置']
+      ],
+      conds: ['气体三合一检测合格', '监护人全程在场', '通风置换到位', '隔离挂牌上锁（LOTO）', '救生绳 / 呼吸器备妥', '受限空间作业证已办'],
+      ppe: ['📟 四合一气体检测仪', '😷 正压式空气呼吸器', '🪢 全身安全带 + 救生绳', '💡 12V 防爆行灯', '🧤 防化手套', '⛑️ 安全帽'],
+      clauses: [
+        ['GB 30871-2022', '《危险化学品企业特殊作业安全规范》—— 受限空间'],
+        ['GBZ/T 205-2007', '《密闭空间作业职业危害防护规范》'],
+        ['Q/HS 2.4.1', '《中海油 受限空间作业安全管理规定》']
+      ]
+    },
+    height: {
+      icon: '🏗️', name: '高处作业', no: 'GC-2026-0715-0669',
+      desc: '在1号平台火炬臂 +60m 处更换航空障碍灯及紧固件',
+      loc: '1号平台 · 火炬臂 · 标高 +60m',
+      time: '2026-07-15  08:30 — 11:30',
+      applicant: '电仪一队 · 陈志明',
+      jsa: [
+        ['高处坠落', 'high', '全程双钩安全带高挂低用，设置生命线与水平缆绳'],
+        ['工具 / 物料坠落打击', 'high', '工具系防坠绳，下方设警戒隔离区并设专人监护'],
+        ['强风 / 恶劣海况失稳', 'mid', '作业前查气象海况，风力 ≥ 6 级立即停止作业'],
+        ['临边 / 洞口坠落', 'mid', '临边设防护栏杆，洞口盖板固定并标识'],
+        ['体力不支 / 眩晕', 'mid', '作业人员体检合格，控制单次登高作业时长'],
+        ['交叉作业 / 感应带电', 'mid', '与带电体保持安全距离，必要时停电验电']
+      ],
+      conds: ['安全带 / 生命线检查合格', '作业平台 / 脚手架验收挂牌', '气象海况符合作业条件', '工具防坠措施到位', '下方警戒隔离到位', '高处作业证已办理'],
+      ppe: ['🪢 五点式全身安全带（双大钩）', '🧗 防坠自锁器', '⛑️ 安全帽（带下颏带）', '🥾 防滑劳保鞋', '🔗 工具防坠绳', '🥽 防风护目镜'],
+      clauses: [
+        ['GB 30871-2022', '《危险化学品企业特殊作业安全规范》—— 高处作业'],
+        ['JGJ 80-2016', '《建筑施工高处作业安全技术规范》'],
+        ['Q/HS 2.6.2', '《中海油 高处作业安全管理规定》']
+      ]
+    },
+    electric: {
+      icon: '⚡', name: '电气作业', no: 'DQ-2026-0715-0355',
+      desc: '对2号平台6kV配电间 P-207 开关柜进行停电检修与试验',
+      loc: '2号平台 · 配电间 · 开关柜 P-207',
+      time: '2026-07-15  13:30 — 17:00',
+      applicant: '电气班 · 赵鹏',
+      jsa: [
+        ['触电 / 电弧灼伤', 'high', '停电、验电、挂接地线，执行工作票 + 操作票「两票制」'],
+        ['误合闸带电作业', 'high', '悬挂「禁止合闸·有人工作」标示牌，专人监护，钥匙集中管理'],
+        ['剩余电荷 / 感应电压', 'mid', '充分放电并装设临时接地线'],
+        ['误入相邻带电间隔', 'mid', '装设遮栏、悬挂标示，红布幔明确工作范围'],
+        ['电弧引燃油污 / 可燃物', 'mid', '清理油污与可燃物，配置绝缘型灭火器材']
+      ],
+      conds: ['已停电·验电·挂接地线', '工作票已签发', '「禁止合闸」标示牌已挂', '专人监护到位', '绝缘工器具检验合格', '电气作业证已办理'],
+      ppe: ['🧤 绝缘手套（经检验）', '🥾 绝缘鞋', '🧥 电弧防护服', '🖊️ 绝缘验电笔', '🥽 护目面屏', '🟨 绝缘垫'],
+      clauses: [
+        ['GB 26860-2011', '《电力安全工作规程（发电厂和变电站电气部分）》'],
+        ['DL 408-2023', '《电业安全工作规程》'],
+        ['Q/HS 2.7.4', '《中海油 电气作业安全管理规定》']
+      ]
+    },
+    lifting: {
+      icon: '🏭', name: '吊装作业', no: 'DZ-2026-0715-0208',
+      desc: '使用平台吊机对3号平台 25t 往复式压缩机进行整体吊装就位',
+      loc: '3号平台 · 生产模块 · 往复式压缩机',
+      time: '2026-07-15  09:30 — 15:00',
+      applicant: '机械大队 · 孙立群',
+      jsa: [
+        ['吊物脱钩 / 坠落打击', 'high', '核定吊索具与吊耳承载，专业司索指挥，吊物下方严禁站人'],
+        ['超载 / 倾覆', 'high', '核算负荷 ≤ 额定 80%，查吊机检验合格证与幅度载荷表'],
+        ['起重伤害 / 挤压', 'mid', '划定吊装警戒区，设专职指挥与监护'],
+        ['大风影响吊装稳定', 'mid', '风力 ≥ 5 级停止吊装，全程缓慢平稳操作'],
+        ['交叉作业干涉', 'mid', '统一指挥，暂停警戒区内其他作业']
+      ],
+      conds: ['吊机 / 吊索具检验合格', '司索 · 指挥持证上岗', '吊装方案已审批', '警戒隔离区已设置', '负荷核算合格', '吊装作业证已办理'],
+      ppe: ['⛑️ 安全帽', '🥾 防砸劳保鞋', '🦺 高可视警示背心', '🧤 防滑手套', '📻 对讲通讯设备', '🪢 防坠安全带（登高时）'],
+      clauses: [
+        ['GB 30871-2022', '《危险化学品企业特殊作业安全规范》—— 吊装作业'],
+        ['GB 6067.1-2010', '《起重机械安全规程》'],
+        ['Q/HS 2.8.1', '《中海油 吊装作业安全管理规定》']
+      ]
+    }
+  };
+
+  var GEN_STAGES = [
+    { p: 0,   t: '正在解析作业描述…',        log: '抽取作业类型 · 地点 · 对象 · 方式' },
+    { p: 22,  t: '辨识危害因素 · 生成 JSA…', log: 'JSA 风险辨识与等级判定' },
+    { p: 46,  t: '比对适用安规条款…',        log: '检索国标 / 行标 / 企标（RAG）' },
+    { p: 68,  t: '匹配必备条件与 PPE…',      log: '必备条件 + 个体防护装备核对' },
+    { p: 88,  t: '编排审批流 · 生成作业票…', log: '按作业等级编排电子审批流' }
+  ];
+
+  var $ = function (s) { return document.querySelector(s); };
+  var typeChips = $('#typeChips');
+  var descInput = $('#descInput');
+  var micBtn = $('#micBtn');
+  var genBtn = $('#genBtn');
+  var listenOv = $('#listenOv');
+  var waveBox = $('#waveBox');
+  var tkEmpty = $('#tkEmpty');
+  var genBox = $('#genBox');
+  var tkBody = $('#tkBody');
+
+  var current = 'fire';
+  var generated = false;
+  var busy = false;
+  var token = 0;
+
+  /* build wave bars */
+  (function () {
+    var html = '';
+    for (var i = 0; i < 16; i++) {
+      var dur = (0.7 + Math.random() * 0.6).toFixed(2);
+      var del = (-Math.random() * 0.9).toFixed(2);
+      html += '<span style="animation-duration:' + dur + 's;animation-delay:' + del + 's"></span>';
+    }
+    waveBox.innerHTML = html;
+  })();
+
+  /* ---- render the electronic permit ---- */
+  function renderTicket(k, animate) {
+    var p = PERMITS[k];
+
+    var jsaRows = p.jsa.map(function (r) {
+      var lv = r[1] === 'high'
+        ? '<span class="lv lv-high">高</span>'
+        : '<span class="lv lv-mid">中</span>';
+      return '<tr><td class="hz">' + r[0] + '</td><td>' + lv + '</td><td class="ct">' + r[2] + '</td></tr>';
+    }).join('');
+
+    var condCells = p.conds.map(function (c, i) {
+      return '<button class="cond on" type="button" data-c="' + i + '">' +
+        '<span class="box">✓</span><span>' + c + '</span></button>';
+    }).join('');
+
+    var ppeCells = p.ppe.map(function (x) { return '<span class="ppe">' + x + '</span>'; }).join('');
+
+    var clauseCells = p.clauses.map(function (c) {
+      return '<div class="clause"><span class="cno">' + c[0] + '</span><span class="cname">' + c[1] + '</span></div>';
+    }).join('');
+
+    var flow = [
+      { l: '作业申请', by: p.applicant, s: 'done', tag: '已提交' },
+      { l: '安全审核', by: 'HSE 监督', s: 'cur', tag: '待审核' },
+      { l: '属地负责人', by: '平台经理', s: 'todo', tag: '待处理' },
+      { l: '签发', by: '签发人', s: 'todo', tag: '待签发' }
+    ];
+    var flowCells = flow.map(function (f, i) {
+      var dot = f.s === 'done' ? '✓' : (i + 1);
+      return '<div class="fstep ' + f.s + '"><div class="conn"></div>' +
+        '<div class="dot">' + dot + '</div>' +
+        '<div class="fl">' + f.l + '</div>' +
+        '<div class="fby">' + f.by + '</div>' +
+        '<div class="ftag">' + f.tag + '</div></div>';
+    }).join('');
+
+    tkBody.innerHTML =
+      // header
+      '<div class="tk-head">' +
+      '  <div class="tk-top">' +
+      '    <span class="tk-no">' + p.no + '</span>' +
+      '    <span class="tk-badge">' + p.icon + ' ' + p.name + '</span>' +
+      '    <span class="tk-status"><span class="d"></span>待安全审核</span>' +
+      '  </div>' +
+      '  <div class="tk-ai">🤖 <b>AI 自动生成草稿</b> · 依据作业描述与适用安规 · 需人工复核签发</div>' +
+      '  <div class="tk-meta">' +
+      '    <div class="m"><div class="k">作业地点</div><div class="v">' + p.loc + '</div></div>' +
+      '    <div class="m"><div class="k">计划时间</div><div class="v">' + p.time + '</div></div>' +
+      '    <div class="m"><div class="k">申请单位 / 申请人</div><div class="v">' + p.applicant + '</div></div>' +
+      '    <div class="m"><div class="k">作业负责人 / 签字</div><div class="v ph">＿＿＿＿＿</div></div>' +
+      '  </div>' +
+      '</div>' +
+      // JSA
+      '<div class="tk-sec reveal-in">' +
+      '  <div class="sec-lbl"><span class="ic">⚠️</span>JSA 风险辨识<span class="rt">' + p.jsa.length + ' 项危害因素</span></div>' +
+      '  <div class="tbl-wrap"><table class="jsa"><thead><tr><th>危害因素</th><th>风险等级</th><th>防控措施</th></tr></thead><tbody>' +
+      jsaRows + '</tbody></table></div>' +
+      '</div>' +
+      // conditions
+      '<div class="tk-sec reveal-in">' +
+      '  <div class="sec-lbl"><span class="ic">✅</span>必备条件清单<span class="rt" id="condCount">' + p.conds.length + '/' + p.conds.length + ' 已确认</span></div>' +
+      '  <div class="cond-grid" id="condGrid">' + condCells + '</div>' +
+      '</div>' +
+      // PPE
+      '<div class="tk-sec reveal-in">' +
+      '  <div class="sec-lbl"><span class="ic">🦺</span>个体防护装备（PPE）</div>' +
+      '  <div class="ppe-row">' + ppeCells + '</div>' +
+      '</div>' +
+      // clauses
+      '<div class="tk-sec reveal-in">' +
+      '  <div class="sec-lbl"><span class="ic">📚</span>关联安规条款<span class="rt">自动比对</span></div>' +
+      '  <div class="clause-list">' + clauseCells + '</div>' +
+      '</div>' +
+      // approval flow
+      '<div class="tk-sec reveal-in">' +
+      '  <div class="sec-lbl"><span class="ic">✍️</span>审批流 · 电子签批</div>' +
+      '  <div class="flow">' + flowCells + '</div>' +
+      '</div>' +
+      // actions
+      '<div class="tk-sec reveal-in">' +
+      '  <div class="tk-acts">' +
+      '    <button class="btn btn-gen" data-act="提交安全审核" style="box-shadow:0 10px 26px -10px rgba(255,90,82,.6);">✍️ 提交安全审核</button>' +
+      '    <button class="btn btn-ghost btn-sm" data-act="导出作业票">📄 导出作业票</button>' +
+      '    <button class="btn btn-ghost btn-sm" data-act="重新生成草稿">🔄 重新生成</button>' +
+      '  </div>' +
+      '</div>';
+
+    // bind conditions toggle
+    var count = tkBody.querySelector('#condCount');
+    var total = p.conds.length;
+    tkBody.querySelectorAll('.cond').forEach(function (b) {
+      b.addEventListener('click', function () {
+        b.classList.toggle('on');
+        var n = tkBody.querySelectorAll('.cond.on').length;
+        count.textContent = n + '/' + total + ' 已确认';
+        count.style.color = (n === total) ? 'var(--green)' : 'var(--orange-2)';
+      });
+    });
+    // bind action buttons -> toast
+    tkBody.querySelectorAll('[data-act]').forEach(function (b) {
+      b.addEventListener('click', function () {
+        var a = b.getAttribute('data-act');
+        if (a === '重新生成草稿') { runGenerate(); return; }
+        toast(a === '提交安全审核' ? '✓ 已提交安全审核' : '✓ 已' + a,
+              a === '提交安全审核' ? '作业票已流转至 HSE 监督 · 审批留痕已记录（演示原型）' : '演示原型 · 数据为示意');
+      });
+    });
+
+    // reveal
+    tkEmpty.style.display = 'none';
+    genBox.classList.remove('on');
+    tkBody.classList.add('on');
+    if (animate) {
+      var secs = tkBody.querySelectorAll('.reveal-in');
+      secs.forEach(function (s, i) {
+        setTimeout(function () { s.classList.add('show'); }, 90 + i * 150);
+      });
+    } else {
+      tkBody.querySelectorAll('.reveal-in').forEach(function (s) { s.classList.add('show'); });
+    }
+  }
+
+  /* ---- generate flow with progress ---- */
+  function runGenerate() {
+    if (busy) return;
+    busy = true;
+    genBtn.disabled = true;
+    var my = ++token;
+
+    tkEmpty.style.display = 'none';
+    tkBody.classList.remove('on');
+    genBox.classList.add('on');
+
+    var bar = $('#genBar'), pct = $('#genPct'), stat = $('#genStat'), log = $('#genLog');
+    log.innerHTML = GEN_STAGES.map(function (s, i) {
+      return '<div class="li" data-i="' + i + '"><span class="ck">✓</span>' + s.log + '</div>';
+    }).join('');
+    bar.style.width = '0%'; pct.textContent = '0%';
+
+    var p = 0;
+    (function tick() {
+      if (my !== token) return;
+      p += Math.random() * 8 + 4;
+      if (p > 100) p = 100;
+      bar.style.width = p + '%';
+      pct.textContent = Math.round(p) + '%';
+      var s = GEN_STAGES[0];
+      for (var i = 0; i < GEN_STAGES.length; i++) {
+        if (p >= GEN_STAGES[i].p) { s = GEN_STAGES[i]; }
+      }
+      stat.textContent = s.t;
+      log.querySelectorAll('.li').forEach(function (li) {
+        if (p >= GEN_STAGES[+li.dataset.i].p + 6) li.classList.add('hit');
+      });
+      if (p < 100) {
+        setTimeout(tick, 95 + Math.random() * 90);
+      } else {
+        stat.textContent = '作业票已生成';
+        setTimeout(function () {
+          if (my !== token) return;
+          generated = true;
+          renderTicket(current, true);
+          busy = false;
+          genBtn.disabled = false;
+        }, 300);
+      }
+    })();
+  }
+
+  /* ---- type chips ---- */
+  typeChips.querySelectorAll('.tchip').forEach(function (c) {
+    c.addEventListener('click', function () {
+      if (busy) return;
+      var k = c.getAttribute('data-k');
+      if (k === current) return;
+      current = k;
+      typeChips.querySelectorAll('.tchip').forEach(function (x) { x.classList.remove('on'); });
+      c.classList.add('on');
+      // sync description to the selected type's sample
+      descInput.value = PERMITS[k].desc;
+      // if a ticket already exists, re-render live so 表/条件/PPE/安规 随之变
+      if (generated) renderTicket(current, true);
+    });
+  });
+
+  /* ---- voice input (simulated) ---- */
+  micBtn.addEventListener('click', function () {
+    if (busy || listenOv.classList.contains('on')) return;
+    listenOv.classList.add('on');
+    setTimeout(function () {
+      listenOv.classList.remove('on');
+      typeInto(descInput, PERMITS[current].desc, 26);
+    }, 1350);
+  });
+
+  /* ---- generate button ---- */
+  genBtn.addEventListener('click', runGenerate);
+
+  /* ---- toast ---- */
+  var toastTimer;
+  function toast(title, sub) {
+    var wrap = $('#toastWrap');
+    wrap.innerHTML = '';
+    var t = document.createElement('div');
+    t.className = 'toast';
+    t.innerHTML = '<span class="ti">✓</span><div class="tb"><strong>' + title + '</strong><span>' + (sub || '') + '</span></div>';
+    wrap.appendChild(t);
+    requestAnimationFrame(function () { t.classList.add('show'); });
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function () { t.classList.remove('show'); }, 3400);
+  }
+
+  /* ---- typewriter shim for textarea ---- */
+  function typeInto(el, text, speed) {
+    speed = speed || 22; var i = 0; el.value = '';
+    (function tk() {
+      if (i <= text.length) { el.value = text.slice(0, i); i++; setTimeout(tk, speed); }
+    })();
+  }
+
+})();
+</script>
+</body>
+</html>

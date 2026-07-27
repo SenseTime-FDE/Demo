@@ -1,0 +1,205 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>值班长 · 手机语音 Agent —— 中海油 × 商汤</title>
+<link rel="stylesheet" href="assets/style.css">
+<link rel="stylesheet" href="assets/wx.css">
+<style>
+  .role-head { padding: 30px 0 6px; }
+  .role-head .h1 { font-size: clamp(26px,3.4vw,40px); font-weight: 800; line-height: 1.18; letter-spacing: -.01em; }
+  .role-head .h1 .hl { background: var(--grad-energy); -webkit-background-clip: text; background-clip: text; color: transparent; }
+  .role-head .sub { color: var(--text-2); font-size: 15px; max-width: 900px; margin-top: 12px; }
+  .role-head .sub b { color: var(--orange-2); }
+  .role-sec { padding: 8px 0 70px; }
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <div class="wrap-wide">
+    <a class="brand" href="index.html" style="text-decoration:none;">
+      <div class="logos"><img src="assets/st_logo.png" class="logo-img" alt="商汤科技 SenseTime"></div>
+      <span class="sub hide-mobile">现场 Agent</span>
+    </a>
+    <button class="nav-toggle" aria-label="菜单">☰</button>
+    <div class="nav-links">
+      <a href="index.html">方案总览</a>
+      <a href="agent_xjunjian.html">巡检员</a>
+      <a href="agent_shebei.html">设备工程师</a>
+      <a href="agent_anquan.html">安全员</a>
+      <a href="agent_zhiban.html" class="nav-cta" style="background:var(--grad-cyan);color:#06202a;">🎛️ 值班长</a>
+      <a href="miniapp.html">现场小程序</a>
+      <a href="bi.html">生产 BI</a>
+    </div>
+  </div>
+</nav>
+
+<header class="role-sec">
+  <div class="wrap-wide">
+    <div class="role-head reveal">
+      <div class="kicker orange">Duty Manager Agent · 手机语音 · 生产调度中枢</div>
+      <div class="h1">值班长：<span class="hl">一句话调度、随口问数</span>，全平台尽在掌心</div>
+      <p class="sub">海上平台值班长 / 生产主管人手一个云端 AI 助理，入口就在<b>企业微信对话框</b> —— 班前自动生成生产早报，一句话把任务派给巡检、机务；产量、异常随口就能问；交接、日报自动汇总一键上报。<b>不用盯 DCS、不用手写日报</b>，全平台运行态势和班组指令全程结构化留痕。<span class="text-dim">左侧手机可点击场景演示。</span></p>
+      <div class="pill-row" style="margin-top:16px;">
+        <span class="pill">🎙️ 一句话调度</span>
+        <span class="pill">📊 chatBI 随口问数</span>
+        <span class="pill">🤖 Agent Team 派任务</span>
+        <span class="pill">🔒 L3 数据不出内网</span>
+      </div>
+    </div>
+
+    <div class="a-split" style="margin-top:28px;">
+      <!-- 左：手机 -->
+      <div class="phone-wrap reveal">
+        <div id="phone-slot"></div>
+        <p class="phone-caption">▲ 可交互原型 · 点上方场景或气泡下方 <b>🎙 快捷话术</b> 切换演示</p>
+      </div>
+
+      <!-- 右：说明 -->
+      <div class="reveal">
+        <div class="a-panel">
+          <h3>值班长 Agent · 六项调度能力</h3>
+          <div class="cap-grid">
+            <div class="cap warm"><div class="ic">🌅</div><b>晨会驾驶舱</b><span>班前自动出早报：产量/注水/完好率/安全天数/待办异常一屏看</span></div>
+            <div class="cap blue"><div class="ic">🤖</div><b>Agent Team 派任务</b><span>一句话拆成多条任务，自动派给巡检/机务，执行状态实时看板</span></div>
+            <div class="cap blue"><div class="ic">📊</div><b>chatBI 随口问数</b><span>「今天产量跟计划比怎么样」口语提问→数字/趋势/结论</span></div>
+            <div class="cap warm"><div class="ic">🔁</div><b>交接班汇总</b><span>收齐各岗交接，自动汇总本班异常/待办，一键移交下一班</span></div>
+            <div class="cap warm"><div class="ic">⚠️</div><b>异常派工</b><span>收到预警一句话派机务排查 + 通知相关岗位，闭环跟踪</span></div>
+            <div class="cap blue"><div class="ic">📋</div><b>生产日报</b><span>自动生成当日日报：产量/异常/工单/安全，一键上报归档</span></div>
+          </div>
+        </div>
+
+        <div class="a-panel">
+          <h3>语音调度链路 · 一句话变成一串动作</h3>
+          <div class="flow">
+            <div class="f-step hot"><div class="n">1</div><b>按住说话</b><span>企微 零学习</span></div>
+            <div class="f-arrow">→</div>
+            <div class="f-step"><div class="n">2</div><b>ASR 转写</b><span>平台噪声自适应</span></div>
+            <div class="f-arrow">→</div>
+            <div class="f-step"><div class="n">3</div><b>Agent 编排</b><span>意图识别+任务拆解</span></div>
+            <div class="f-arrow">→</div>
+            <div class="f-step"><div class="n">4</div><b>调度执行</b><span>派工/问数/汇总</span></div>
+            <div class="f-arrow">→</div>
+            <div class="f-step hot"><div class="n">5</div><b>生产库留痕</b><span>结构化→驾驶舱</span></div>
+          </div>
+          <p class="note"><b>把值班长从「盯屏幕」里解放出来：</b>不用一个个系统去点，只在企微里说一句话；派工、问数、交接、日报由 Agent 自动编排执行并结构化写库，全平台态势实时汇入晨会驾驶舱与生产 BI。</p>
+        </div>
+
+        <div class="a-panel">
+          <h3>一句话指令 · 自动编排与留痕</h3>
+          <div class="mini-scroll">
+            <table class="mini-table">
+              <tr><th>一句话指令</th><th>Agent 编排动作</th><th>落库 / 通知</th></tr>
+              <tr><td><b>安排 3# 泵复查</b></td><td>生成任务 → 派巡检员 · 设时限</td><td>工单库 + 企微通知</td></tr>
+              <tr><td><b>今天产量对比计划</b></td><td>调 chatBI 聚合实时/计划数据</td><td>L3 内网只读 · 不落库</td></tr>
+              <tr><td><b>1# 发电机派机务排查</b></td><td>建工单 + 通知机务/中控</td><td>工单闭环 · 状态回传</td></tr>
+              <tr><td><b>汇总本班交接</b></td><td>收各岗记录 → 结构化汇总</td><td>交接单 + 生产日报</td></tr>
+            </table>
+          </div>
+          <p class="note"><b>安全底座：</b>值班长指令经本地 Agent 网关统一鉴权、按岗位派发、全程留痕；产量/工艺等 L3 生产数据全程不出内网，仅本地 Agent 只读，默认不训练不留存。</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<footer class="footer">
+  <div class="wrap">
+    <div class="bottom" style="border:0;padding-top:0;">
+      <span>© 2026 商汤科技 SenseTime · 大模型事业群 —— 为中海油信息科技定制 · 高保真交互原型</span>
+      <span>页面数据均为示意 / 脱敏，非真实生产数据</span>
+    </div>
+  </div>
+</footer>
+
+<script src="assets/app.js"></script>
+<script src="assets/chat.js"></script>
+<script>
+HYChat.mount(document.getElementById('phone-slot'), {
+  contact: { name: 'S-Agent 值班长 助手', corp: '@中海油·渤海', sub: '企业微信 · 商汤 AI 技术底座' },
+  agent: { name: 'S-Agent 值班长 助手', avatar: '汕' },
+  user: { name: '魏振生', avatar: '魏' },
+  scenarios: [
+    {
+      id: 'dashboard', title: '晨会驾驶舱', chip: '看今日早报',
+      intro: '早班前自动生成生产早报，产量/注水/完好率/安全天数/待办异常一屏掌握 —— 晨会直接用',
+      steps: [
+        { from: 'agent', sys: '⏰ 07:20 · 生产早报自动送达 · A 平台' },
+        { from: 'agent', html: '<div class="c-card"><div class="c-head"><span class="c-ic warm">🌅</span><b>今日生产早报 · A 平台</b><span class="tag tag-orange">早班</span></div><div class="c-kv"><span>原油产量</span><b class="teal">4,860 桶/日</b></div><div class="c-kv"><span>天然气</span><b>18.6 万方/日</b></div><div class="c-kv"><span>注水量</span><b>6,200 m³/日</b></div><div class="c-kv"><span>设备完好率</span><b class="ok">96.8%</b></div><div class="c-kv"><span>安全生产</span><b class="teal">连续 386 天</b></div><div class="c-foot">数据来源：生产实时库 · 截至 07:00</div></div>' },
+        { from: 'agent', html: '<div class="c-card"><div class="c-head"><span class="c-ic blue">📊</span><b>产量完成 · 对比日计划</b><span class="tag tag-cyan">chatBI</span></div><div class="c-bars"><div class="b-row"><span>原油</span><span class="b-track"><span class="b-fill warm" style="width:97%"></span></span><span class="b-val">97.2%</span></div><div class="b-row"><span>天然气</span><span class="b-track"><span class="b-fill" style="width:101%"></span></span><span class="b-val">101%</span></div><div class="b-row"><span>注水</span><span class="b-track"><span class="b-fill" style="width:99%"></span></span><span class="b-val">99%</span></div></div><div class="c-foot">原油小幅欠产，与 3# 注水泵异常相关</div></div>' },
+        { from: 'agent', html: '<div class="c-card"><div class="c-head"><span class="c-ic warm">⚠️</span><b>待办与异常汇总</b><span class="tag tag-orange">需关注</span></div><div class="c-check"><span class="s warn">⚠</span>3# 注水泵：出口压力偏低（昨班遗留）</div><div class="c-check"><span class="s warn">⚠</span>1# 发电机：负荷持续偏高 &gt;85%</div><div class="c-check"><span class="s todo">○</span>管廊 K7 保温整改 HD-0918：限今日闭环</div><div class="c-check"><span class="s done">✓</span>火气 / 消防系统：探头全部正常</div><div class="c-foot">异常 2 项 · 待办 1 项 · 已按优先级排序</div></div>' },
+        { from: 'user', voice: '早会就用这个，重点讲一下两个异常，待办也过一遍。', dur: 6 },
+        { from: 'agent', text: '✅ 已把「3# 注水泵、1# 发电机、K7 保温」标为晨会重点。散会后你说一句「派任务」，我就把跟进工作分下去 💪' }
+      ]
+    },
+    {
+      id: 'dispatch', title: 'Agent Team 派任务', chip: '一句话派任务',
+      intro: '一句话说要干的事，Agent 自动拆成多条任务派给巡检 / 机务，执行状态实时看板',
+      steps: [
+        { from: 'user', voice: '安排今天两件事：3号注水泵出口压力复查，让巡检员盯着；管廊K7保温整改让机务今天下班前完成。', dur: 11 },
+        { from: 'agent', text: '收到 ✓ 已拆成 2 条任务，派给对应岗位 👇' },
+        { from: 'agent', html: '<div class="c-card"><div class="c-head"><span class="c-ic blue">🤖</span><b>任务① · 已派巡检员</b><span class="tag tag-blue">已下发</span></div><div class="c-kv"><span>内容</span><b>3# 注水泵出口压力复查</b></div><div class="c-kv"><span>负责人</span><b>张国栋（巡检）</b></div><div class="c-kv"><span>时限</span><b class="warm">今日 10:00 前</b></div><div class="c-foot">已推送至张国栋企微 · 到点位自动打卡留痕</div></div>' },
+        { from: 'agent', html: '<div class="c-card"><div class="c-head"><span class="c-ic warm">🔧</span><b>任务② · 已派机务</b><span class="tag tag-orange">已下发</span></div><div class="c-kv"><span>内容</span><b>管廊 K7 段保温整改</b></div><div class="c-kv"><span>负责人</span><b>李伟（机务）</b></div><div class="c-kv"><span>时限</span><b class="warm">今日 18:00 前</b></div><div class="c-foot">关联隐患整改单 HD-0918 · 完成即闭环</div></div>' },
+        { from: 'agent', html: '<div class="c-card"><div class="c-head"><span class="c-ic">📋</span><b>执行状态看板</b><span class="tag tag-cyan">实时</span></div><div class="c-check"><span class="s todo">○</span>任务① 3# 泵复查 · 待接单</div><div class="c-check"><span class="s todo">○</span>任务② K7 保温整改 · 待接单</div><div class="c-foot">接单 / 完成状态实时回传 · 逾期自动升级提醒</div></div>' },
+        { from: 'user', voice: '好，谁逾期了提醒我。', dur: 3 },
+        { from: 'agent', text: '✅ 两条任务已下发。接单和完成我会实时同步到看板，任何一条逾期都会第一时间升级提醒到你 🔔' },
+        { from: 'agent', sys: '任务编排 · 派发 · 状态跟踪已写入生产数据库' }
+      ]
+    },
+    {
+      id: 'chatbi', title: 'chatBI 随口问数', chip: '问产量问异常',
+      intro: '口语提问，秒出数字、趋势和结论 —— 不用回中控、不用翻 DCS 和报表',
+      steps: [
+        { from: 'user', voice: '今天原油产量跟计划比怎么样？', dur: 4 },
+        { from: 'agent', html: '<div class="c-card"><div class="c-head"><span class="c-ic blue">📊</span><b>原油产量 · 对比日计划</b><span class="tag tag-blue">生产数据</span></div><div class="c-big"><div class="v warm">97.2%</div><div class="l">日计划完成率 · 4,860 / 5,000 桶</div></div><div class="c-bars"><div class="b-row"><span>实际</span><span class="b-track"><span class="b-fill warm" style="width:97%"></span></span><span class="b-val">4,860</span></div><div class="b-row"><span>计划</span><span class="b-track"><span class="b-fill" style="width:100%"></span></span><span class="b-val">5,000</span></div></div><div class="c-kv"><span>结论</span><b class="warn">小幅欠产 · 主因 3# 注水泵降量</b></div><div class="c-foot">数据来源：生产实时库（L3 · 内网只读）</div></div>' },
+        { from: 'user', voice: '那哪个系统近期异常最多？', dur: 4 },
+        { from: 'agent', html: '<div class="c-card"><div class="c-head"><span class="c-ic warm">⚠️</span><b>近 7 日异常分布 · 按系统</b><span class="tag tag-orange">chatBI</span></div><div class="c-bars"><div class="b-row"><span>注水系统</span><span class="b-track"><span class="b-fill warm" style="width:100%"></span></span><span class="b-val">5 次</span></div><div class="b-row"><span>发电系统</span><span class="b-track"><span class="b-fill" style="width:60%"></span></span><span class="b-val">3 次</span></div><div class="b-row"><span>分离系统</span><span class="b-track"><span class="b-fill" style="width:20%"></span></span><span class="b-val">1 次</span></div></div><div class="c-kv"><span>结论</span><b class="warn">注水系统异常最多，建议专项排查</b></div><div class="c-foot">口语问数 · 自动聚合 · 结论可追溯</div></div>' },
+        { from: 'user', voice: '把注水系统这条记下来，晨会讲。', dur: 3 },
+        { from: 'agent', text: '✅ 已记入晨会要点：「注水系统近 7 日异常最多（5 次），安排专项排查」。要不要现在就派个任务给机务做次专项检查？' }
+      ]
+    },
+    {
+      id: 'handover', title: '交接班汇总', chip: '汇总本班交接',
+      intro: '各岗交接自动收齐，汇总成本班异常 / 待办清单，一键移交下一班',
+      steps: [
+        { from: 'agent', text: '魏班，到交接点了，巡检、机务、中控、安全四个岗的交接我都收齐了，汇总给你 👇' },
+        { from: 'agent', html: '<div class="c-card"><div class="c-head"><span class="c-ic warm">📝</span><b>本班交接汇总 · A 平台早班</b><span class="tag tag-green">自动生成</span></div><div class="c-kv"><span>收齐岗位</span><b>巡检 / 机务 / 中控 / 安全 · 4 岗</b></div><div class="c-check"><span class="s warn">⚠</span>3# 注水泵机封泄漏 · 已派机务 · 临时隔离（待复位）</div><div class="c-check"><span class="s warn">⚠</span>1# 发电机负荷偏高 · 需下一班重点关注</div><div class="c-check"><span class="s todo">○</span>管廊 K7 保温整改 HD-0918 · 限今日</div><div class="c-check"><span class="s done">✓</span>火气 / 消防系统 · 全部正常</div><div class="c-check"><span class="s done">✓</span>产量 / 注水 · 基本达标</div><div class="c-btns"><span class="c-btn primary">🎙 说「提交」移交</span><span class="c-btn ghost">改一下</span></div><div class="c-foot">异常 2 项 · 待办 1 项 · 移交晚班值班长</div></div>' },
+        { from: 'user', voice: '挺全的，1号发电机那条标成红色重点，提交。', dur: 5 },
+        { from: 'agent', text: '✅ 已把「1# 发电机负荷偏高」置为红色重点。本班交接单已移交晚班值班长赵刚，他已确认接收；内容同步汇入今日生产日报。辛苦啦 🌟' },
+        { from: 'agent', sys: '交接汇总 · 移交下一班已留痕，进入生产交接台账' }
+      ]
+    },
+    {
+      id: 'alarm', title: '异常派工', chip: '派机务排查',
+      intro: '收到生产预警，一句话派机务排查 + 通知相关岗位 —— 处置全程闭环跟踪',
+      steps: [
+        { from: 'agent', sys: '🚨 09:12 · 生产预警触发 · 1# 发电机' },
+        { from: 'agent', html: '<div class="c-card"><div class="c-head"><span class="c-ic warm">⚠️</span><b>生产预警 · 1# 发电机</b><span class="tag tag-orange">中风险</span></div><div class="c-kv"><span>现象</span><b class="warn">负荷持续偏高 &gt;85%</b></div><div class="c-kv"><span>持续时长</span><b>已 3 小时</b></div><div class="c-kv"><span>建议</span><b>派机务排查 · 关注机组温度</b></div><div class="c-foot">来源：生产实时库 · 负荷阈值触发</div></div>' },
+        { from: 'user', voice: '派机务去查1号发电机负荷偏高，带上测振和测温，再通知中控先降降负荷。', dur: 9 },
+        { from: 'agent', text: '收到 ✓ 已派工并通知相关岗位 👇' },
+        { from: 'agent', html: '<div class="c-card"><div class="c-head"><span class="c-ic blue">🔧</span><b>派工单 · 已下发</b><span class="tag tag-blue">WO-2341</span></div><div class="c-kv"><span>事项</span><b>1# 发电机负荷偏高排查</b></div><div class="c-kv"><span>负责人</span><b>李伟（机务）· 带测振/测温</b></div><div class="c-kv"><span>联动通知</span><b class="teal">中控 · 申请降负荷已知会</b></div><div class="c-check"><span class="s todo">○</span>机务接单 · 待回传</div><div class="c-foot">处置结果回传后自动更新本班异常台账</div></div>' },
+        { from: 'user', voice: '好，结果回来第一时间告诉我。', dur: 3 },
+        { from: 'agent', text: '✅ WO-2341 已派李伟，中控已把机组负荷降到 78%，预警解除。李伟排查结果一回传，我立刻同步给你 💪' },
+        { from: 'agent', sys: '异常派工 · 通知 · 处置跟踪已写入生产数据库' }
+      ]
+    },
+    {
+      id: 'report', title: '生产日报', chip: '生成生产日报',
+      intro: '一句话让 Agent 自动汇总当日生产日报：产量 / 异常 / 工单 / 安全，一键上报',
+      steps: [
+        { from: 'user', voice: '帮我生成今天的生产日报。', dur: 3 },
+        { from: 'agent', text: '好的魏班，今日生产数据、异常、工单、安全都已汇总 👇' },
+        { from: 'agent', html: '<div class="c-card"><div class="c-head"><span class="c-ic blue">📋</span><b>A 平台生产日报 · 2026-07-15</b><span class="tag tag-cyan">自动汇总</span></div><div class="c-kv"><span>原油产量</span><b class="teal">4,860 桶（计划 5,000 · 97.2%）</b></div><div class="c-kv"><span>天然气</span><b>18.6 万方 · 达标</b></div><div class="c-kv"><span>注水量</span><b>6,200 m³</b></div><div class="c-kv"><span>平台运行</span><b class="ok">总体平稳</b></div><div class="c-foot">口径与生产 BI 一致 · 可直接调阅明细</div></div>' },
+        { from: 'agent', html: '<div class="c-card"><div class="c-head"><span class="c-ic warm">⚠️</span><b>异常 · 工单 · 安全</b><span class="tag tag-orange">当日</span></div><div class="c-check"><span class="s warn">⚠</span>异常 2 项：3# 注水泵泄漏、1# 发电机负荷偏高</div><div class="c-check"><span class="s done">✓</span>工单 3 张：WO-2317 / WO-2341 处置中，HD-0918 整改中</div><div class="c-check"><span class="s done">✓</span>安全：连续 386 天 · 全天无 HSE 事件</div><div class="c-btns"><span class="c-btn primary">🎙 说「上报」提交</span><span class="c-btn ghost">改一下</span></div><div class="c-foot">上报后同步作业区生产例会 · 抄送晚班</div></div>' },
+        { from: 'user', voice: '没问题，上报。', dur: 2 },
+        { from: 'agent', text: '✅ 今日生产日报已上报作业区，抄送晚班值班长赵刚。数据已归档生产 BI，晨会 / 例会随时可调阅 📊 辛苦啦～' },
+        { from: 'agent', sys: '生产日报 · 上报 · 归档已完成' }
+      ]
+    }
+  ]
+});
+</script>
+</body>
+</html>

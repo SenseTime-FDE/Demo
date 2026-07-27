@@ -1,0 +1,202 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>安全员 · 手机语音 Agent —— 中海油 × 商汤</title>
+<link rel="stylesheet" href="assets/style.css">
+<link rel="stylesheet" href="assets/wx.css">
+<style>
+  .role-head { padding: 30px 0 6px; }
+  .role-head .h1 { font-size: clamp(26px,3.4vw,40px); font-weight: 800; line-height: 1.18; letter-spacing: -.01em; }
+  .role-head .h1 .hl { background: var(--grad-energy); -webkit-background-clip: text; background-clip: text; color: transparent; }
+  .role-head .sub { color: var(--text-2); font-size: 15px; max-width: 900px; margin-top: 12px; }
+  .role-head .sub b { color: var(--orange-2); }
+  .role-sec { padding: 8px 0 70px; }
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <div class="wrap-wide">
+    <a class="brand" href="index.html" style="text-decoration:none;">
+      <div class="logos"><img src="assets/st_logo.png" class="logo-img" alt="商汤科技 SenseTime"></div>
+      <span class="sub hide-mobile">现场 Agent</span>
+    </a>
+    <button class="nav-toggle" aria-label="菜单">☰</button>
+    <div class="nav-links">
+      <a href="index.html">方案总览</a>
+      <a href="agent_xjunjian.html">巡检员</a>
+      <a href="agent_shebei.html">设备工程师</a>
+      <a href="agent_anquan.html" class="nav-cta" style="background:var(--grad-cyan);color:#06202a;">🦺 安全员</a>
+      <a href="agent_zhiban.html">值班长</a>
+      <a href="miniapp.html">现场小程序</a>
+      <a href="bi.html">生产 BI</a>
+    </div>
+  </div>
+</nav>
+
+<header class="role-sec">
+  <div class="wrap-wide">
+    <div class="role-head reveal">
+      <div class="kicker orange">HSE Agent · 手机语音 · 作业安全管控</div>
+      <div class="h1">安全员：<span class="hl">作业票、安规、隐患</span>，说一句就闭环</div>
+      <p class="sub">海上平台安全员 / HSE 人手一个云端 AI 助理，入口就在<b>企业微信对话框 / 防爆手机</b> —— 按住说话即可办作业票、做 JSA、查安规、报隐患、走应急、做班前交底。<b>不装新 App、不填纸质票</b>，每一道作业许可与整改动作自动结构化写入 HSE 台账，全程可审计。<span class="text-dim">左侧手机可点击场景演示。</span></p>
+      <div class="pill-row" style="margin-top:16px;">
+        <span class="pill">🎙️ 语音办票免手填</span>
+        <span class="pill">📱 企微 / 防爆手机</span>
+        <span class="pill">🔒 L3 数据不出内网</span>
+        <span class="pill">⛓️ 隐患→整改闭环</span>
+      </div>
+    </div>
+
+    <div class="a-split" style="margin-top:28px;">
+      <!-- 左：手机 -->
+      <div class="phone-wrap reveal">
+        <div id="phone-slot"></div>
+        <p class="phone-caption">▲ 可交互原型 · 点上方场景或气泡下方 <b>🎙 快捷话术</b> 切换演示</p>
+      </div>
+
+      <!-- 右：说明 -->
+      <div class="reveal">
+        <div class="a-panel">
+          <h3>安全员 Agent · 六项作业安全能力</h3>
+          <div class="cap-grid">
+            <div class="cap warm"><div class="ic">🔥</div><b>作业票办理</b><span>语音报作业内容，AI 判定类型/风险，自动生成许可票草稿+审批流</span></div>
+            <div class="cap"><div class="ic">🧩</div><b>JSA 风险辨识</b><span>逐步骤拆解作业，列出风险点、后果与防控措施</span></div>
+            <div class="cap"><div class="ic">📖</div><b>安规问答</b><span>RAG 检索安全规程，受限空间/动火等强制要求秒答带出处</span></div>
+            <div class="cap warm"><div class="ic">⚠️</div><b>隐患闭环</b><span>随手报隐患→分类、比对安规、生成整改单 HD 编号并跟踪</span></div>
+            <div class="cap warm"><div class="ic">🚨</div><b>应急处置</b><span>报警情景一句话，推送疏散/切断/上报/监测步骤+联动应急小组</span></div>
+            <div class="cap blue"><div class="ic">📋</div><b>安全交底</b><span>一键生成班前安全交底：作业清单、风险提示、PPE、集合点</span></div>
+          </div>
+        </div>
+
+        <div class="a-panel">
+          <h3>语音交互链路 · 每一道许可都留痕可追</h3>
+          <div class="flow">
+            <div class="f-step hot"><div class="n">1</div><b>按住说话</b><span>企微/防爆机 零学习</span></div>
+            <div class="f-arrow">→</div>
+            <div class="f-step"><div class="n">2</div><b>ASR 转写</b><span>甲板风噪自适应</span></div>
+            <div class="f-arrow">→</div>
+            <div class="f-step"><div class="n">3</div><b>Agent 理解</b><span>作业识别+安规匹配</span></div>
+            <div class="f-arrow">→</div>
+            <div class="f-step"><div class="n">4</div><b>业务执行</b><span>作业票/整改单/应急</span></div>
+            <div class="f-arrow">→</div>
+            <div class="f-step hot"><div class="n">5</div><b>HSE 台账留痕</b><span>结构化→BI 看板</span></div>
+          </div>
+          <p class="note"><b>合规不靠背，靠随手一句：</b>安全员不需要「填系统」，只是在企微里说话；作业许可、JSA、隐患整改、应急处置全过程被 Agent 自动结构化写入 HSE 台账，喂给安全看板与生产 BI，到期未闭环自动升级。</p>
+        </div>
+
+        <div class="a-panel">
+          <h3>数据分级与安全（L3 作业/安全数据 · 不出内网）</h3>
+          <div class="mini-scroll">
+            <table class="mini-table">
+              <tr><th>数据类型</th><th>典型内容</th><th>处理方式</th></tr>
+              <tr><td><b>作业许可</b></td><td>动火/受限空间/高处/吊装作业票</td><td>本地结构化留痕 · 审计可追溯</td></tr>
+              <tr><td><b>安全规程</b></td><td>安规、JSA 库、应急预案（内部制度）</td><td>L2 脱敏后可云端检索</td></tr>
+              <tr><td><b>隐患整改</b></td><td>隐患台账、整改单、复查记录</td><td>本地结构化留痕 · 闭环跟踪</td></tr>
+              <tr><td><b>报警/应急</b></td><td>火气报警、气体检测、应急处置</td><td>L3 内网域 · 仅本地 Agent 可读</td></tr>
+            </table>
+          </div>
+          <p class="note"><b>安全底座：</b>本地 Agent 网关统一编排、按数据等级路由、全程留痕；作业/工艺/报警数据全程不出内网，默认不训练不留存。</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<footer class="footer">
+  <div class="wrap">
+    <div class="bottom" style="border:0;padding-top:0;">
+      <span>© 2026 商汤科技 SenseTime · 大模型事业群 —— 为中海油信息科技定制 · 高保真交互原型</span>
+      <span>页面数据均为示意 / 脱敏，非真实生产数据</span>
+    </div>
+  </div>
+</footer>
+
+<script src="assets/app.js"></script>
+<script src="assets/chat.js"></script>
+<script>
+HYChat.mount(document.getElementById('phone-slot'), {
+  contact: { name: 'S-Agent 安全员 助手', corp: '@中海油·渤海', sub: '企业微信 · 商汤 AI 技术底座' },
+  agent: { name: 'S-Agent 安全员 助手', avatar: '汕' },
+  user: { name: '李文星', avatar: '李' },
+  scenarios: [
+    {
+      id: 'permit', title: '办作业票', chip: '办动火作业票',
+      intro: '语音报作业内容 —— AI 判定作业类型/风险等级，自动生成作业票草稿与审批流',
+      steps: [
+        { from: 'user', voice: '2号平台管廊要动火焊接，更换一段DN200的注水管线，今天下午作业。', dur: 9 },
+        { from: 'agent', text: '收到 ✓ 已按作业内容判定作业类型与风险等级 👇' },
+        { from: 'agent', html: '<div class="c-card"><div class="c-head"><span class="c-ic warm">🔥</span><b>作业票草稿 · 动火作业</b><span class="tag tag-orange">高风险</span></div><div class="c-kv"><span>作业内容</span><b>2#平台管廊 · DN200 注水管线更换焊接</b></div><div class="c-kv"><span>作业类型</span><b class="warm">一级动火（管廊受限区域）</b></div><div class="c-kv"><span>主要风险</span><b class="warn">可燃气 · 高处 · 相邻受限空间</b></div><div class="c-check"><span class="s todo">○</span>需气体检测：动火前 + 作业中每 2h 复检</div><div class="c-check"><span class="s todo">○</span>需配专职监火人 · 配备灭火器材</div><div class="c-check"><span class="s todo">○</span>相邻工艺管线需隔离、盲板/吹扫置换合格</div><div class="c-foot">依据作业内容自动匹配《动火作业管理规定》</div></div>' },
+        { from: 'agent', html: '<div class="c-card"><div class="c-head"><span class="c-ic blue">🦺</span><b>PPE 清单 · 关联安规</b></div><div class="c-kv"><span>PPE</span><b>阻燃工作服 · 焊接面罩 · 防护手套 · 安全带</b></div><div class="c-kv"><span>关联安规</span><b class="teal">HSE-011 动火作业管理</b></div><div class="c-kv"><span></span><b class="teal">HSE-023 受限空间进入</b></div><div class="c-foot">来源：安全规程库 · 已核对现行版本</div></div>' },
+        { from: 'agent', html: '<div class="c-card"><div class="c-head"><span class="c-ic">🧾</span><b>审批流 · 待安全审核</b><span class="tag tag-cyan">作业许可</span></div><div class="c-kv"><span>作业票号</span><b>DH-2026-0715-02</b></div><div class="c-kv"><span>作业时段</span><b>今日 14:00–17:00</b></div><ol class="c-steps"><li>申请人：李文星 ✓</li><li>属地负责人会签</li><li class="warn">安全监督审核（当前节点）</li><li>平台经理签发</li></ol><div class="c-btns"><span class="c-btn primary">🎙 说「提交审核」</span><span class="c-btn ghost">改一下</span></div><div class="c-foot">签发前作业不得开始 · 全程留痕可追溯</div></div>' },
+        { from: 'user', voice: '提交审核，监火人安排消防班老王，气体检测让化验室先测一遍。', dur: 7 },
+        { from: 'agent', text: '✅ 作业票 DH-2026-0715-02 已提交安全监督审核。监火人「王建军」已登记，气体检测任务已派化验室，检测合格并签发后方可动火 ⚠️' },
+        { from: 'agent', sys: '作业票办理全过程已写入 HSE 作业许可台账' }
+      ]
+    },
+    {
+      id: 'reg', title: '查安规', chip: '问安全规程',
+      intro: 'RAG 检索安全规程，强制要求秒级回答 · 带条款出处',
+      steps: [
+        { from: 'user', voice: '受限空间进入前，强制要求有哪些？', dur: 4 },
+        { from: 'agent', text: '好的李工，受限空间作业<b>进入前强制要求</b>如下 👇' },
+        { from: 'agent', html: '<div class="c-card"><div class="c-head"><span class="c-ic">📖</span><b>受限空间进入前 · 强制要求</b><span class="tag tag-cyan">安规库</span></div><ol class="c-steps"><li>办理受限空间进入作业票，未办票不得进入</li><li>可靠隔离/置换/清洗，挂牌上锁（LOTO）</li><li>气体检测合格：O₂ 19.5%~23.5%、可燃气 &lt;10%LEL、H₂S &lt;10ppm</li><li>设专职监护人，全程守护、保持通讯</li><li>配备通风、应急救援器材与逃生装备</li></ol><div class="c-foot">来源：《受限空间作业管理规定》HSE-023 第 5 章 · 已核</div></div>' },
+        { from: 'user', voice: '如果气体检测不合格能不能强通风后进去？', dur: 4 },
+        { from: 'agent', text: '<b>检测不合格严禁进入</b>。应持续机械通风并再次检测，各项指标全部合格且稳定后方可进入；作业中需连续或定时监测。口诀：<b>不检测、不进入，不合格、不作业</b>。' },
+        { from: 'agent', sys: '本次问答已计入个人技能画像 · 受限空间 +1' }
+      ]
+    },
+    {
+      id: 'hazard', title: '报隐患', chip: '报安全隐患',
+      intro: '拍照/语音报隐患 → AI 分类、比对安规、生成整改单 HD 编号并跟踪闭环',
+      steps: [
+        { from: 'user', voice: '一层甲板消防泵房这里，两个灭火器压力表都在红区，旁边应急照明灯也不亮。', dur: 8 },
+        { from: 'agent', text: '收到 ✓ 已识别为隐患，正在分类比对安规 👇' },
+        { from: 'agent', html: '<div class="c-card"><div class="c-head"><span class="c-ic warm">⚠️</span><b>隐患识别 · 整改单草稿</b><span class="tag tag-orange">较大隐患</span></div><div class="c-kv"><span>隐患类别</span><b class="warm">消防设施 · 应急设施失效</b></div><div class="c-kv"><span>位置</span><b>一层甲板 · 消防泵房</b></div><div class="c-kv"><span>关联安规</span><b class="teal">HSE-036 消防器材管理</b></div><div class="c-kv"><span>建议措施</span><b>更换失效灭火器 · 修复应急照明</b></div><div class="c-btns"><span class="c-btn primary">提交整改单</span><span class="c-btn">加急上报</span></div><div class="c-foot">提交后进入隐患闭环 · 到期未整改自动升级</div></div>' },
+        { from: 'user', voice: '提交，消防设施属于要害，标加急。', dur: 4 },
+        { from: 'agent', text: '✅ 整改单 HD-2026-0715 已提交属地负责人并标记加急，限期 2 天闭环，抄送平台经理与安全监督。闭环前每天我提醒你复查一次 🔁' },
+        { from: 'agent', sys: '隐患上报 → 整改 → 复查全过程留痕 · 进入 HSE 闭环台账' }
+      ]
+    },
+    {
+      id: 'emergency', title: '应急处置', chip: '可燃气报警处置',
+      intro: '报警情景一句话 —— AI 按预案推送疏散/切断/上报/监测步骤，并联动应急小组',
+      steps: [
+        { from: 'user', voice: '生产区可燃气报警器报警了，现场有轻微气味，应该怎么处置？', dur: 6 },
+        { from: 'agent', text: '⚠️ 已进入应急处置，按<b>可燃气泄漏应急预案</b>执行，请立即按下列步骤动作 👇' },
+        { from: 'agent', html: '<div class="c-card"><div class="c-head"><span class="c-ic warm">🚨</span><b>可燃气泄漏 · 应急处置步骤</b><span class="tag tag-orange">立即执行</span></div><ol class="c-steps"><li>组织人员向<b>上风向</b>撤离至应急集合点，清点人数</li><li>立即停止一切动火、切断非防爆电源与点火源</li><li>上报中控与应急指挥，启动区域气体报警广播</li><li>持续便携式气体检测，划定警戒区、严禁进入</li><li>视浓度隔离泄漏源、准备工艺紧急关断（ESD）</li></ol><div class="c-foot">依据《可燃气体泄漏应急预案》EP-004 · 就近撤离优先</div></div>' },
+        { from: 'agent', html: '<div class="c-card"><div class="c-head"><span class="c-ic blue">📟</span><b>应急小组已联动</b><span class="tag tag-blue">通知已发</span></div><div class="c-check"><span class="s done">✓</span>中控值班：已接收报警位号 GD-2#-07</div><div class="c-check"><span class="s done">✓</span>应急指挥 / 消防班：已推送到岗提醒</div><div class="c-check"><span class="s done">✓</span>医疗急救 / 直升机待命：已置于待命</div><div class="c-btns"><span class="c-btn primary">🎙 说「已撤离上报」</span><span class="c-btn">呼叫应急指挥</span></div><div class="c-foot">应急联动 · 处置动作实时留痕</div></div>' },
+        { from: 'user', voice: '现场人员已全部撤到应急集合点并清点完毕，已上报中控。', dur: 6 },
+        { from: 'agent', text: '✅ 已同步中控与应急指挥：人员到齐、无失联。检测数据我持续给你回传，浓度降至安全值并解除前，警戒区保持封闭 🛡️' },
+        { from: 'agent', sys: '应急处置全过程已留痕 · 进入应急事件台账' }
+      ]
+    },
+    {
+      id: 'brief', title: '安全交底', chip: '生成班前交底',
+      intro: '一键生成今日作业安全交底：作业清单、风险提示、PPE、应急集合点',
+      steps: [
+        { from: 'agent', sys: '⏰ 07:30 · 早班安全交底自动生成' },
+        { from: 'agent', html: '<div class="c-card"><div class="c-head"><span class="c-ic blue">📋</span><b>今日作业安全交底 · A 平台</b><span class="tag tag-green">自动生成</span></div><div class="c-check"><span class="s warn">⚠</span>动火：2#管廊 DN200 管线焊接（DH-...02，14:00 起）</div><div class="c-check"><span class="s warn">⚠</span>受限空间：3#分离器内部清理（需监护+检测）</div><div class="c-check"><span class="s todo">○</span>高处：钻井平台照明检修（需双钩安全带）</div><div class="c-foot">作业清单来源：今日已批作业票 3 张</div></div>' },
+        { from: 'agent', html: '<div class="c-card"><div class="c-head"><span class="c-ic warm">🦺</span><b>风险提示 · PPE · 集合点</b></div><div class="c-kv"><span>今日天气</span><b class="warn">阵风 7 级 · 高处作业收工阈值</b></div><div class="c-kv"><span>重点风险</span><b class="warm">动火交叉作业 · 受限空间气体</b></div><div class="c-kv"><span>强制 PPE</span><b>阻燃服 · 安全帽 · 安全带 · 便携检测仪</b></div><div class="c-kv"><span>应急集合点</span><b class="teal">直升机甲板上风向 · 救生艇站</b></div><div class="c-btns"><span class="c-btn primary">发班组群交底</span><span class="c-btn ghost">改一下</span></div><div class="c-foot">发出后需班组成员逐一确认签收</div></div>' },
+        { from: 'user', voice: '发群里，重点强调动火和受限空间不能同时干，风大了高处停。', dur: 7 },
+        { from: 'agent', text: '✅ 交底已发 A 平台班组群，已置顶「动火与受限空间避免交叉作业」「7 级风高处停工」两条红线。签收情况我实时回报你 🌟' }
+      ]
+    },
+    {
+      id: 'risk', title: '风险随手查', chip: '查高处作业风险',
+      intro: '一句话查作业风险点与防控措施 —— 现场随手做辨识、做交底',
+      steps: [
+        { from: 'user', voice: '高处作业主要有哪些风险点？防控怎么做？', dur: 5 },
+        { from: 'agent', text: '好的李工，海上平台<b>高处作业</b>风险点与防控如下 👇' },
+        { from: 'agent', html: '<div class="c-card"><div class="c-head"><span class="c-ic">🧩</span><b>高处作业 · 风险清单与防控</b><span class="tag tag-cyan">JSA 库</span></div><div class="c-check"><span class="s warn">⚠</span>人员坠落 → 安全带高挂低用、双钩交替、系挂点可靠</div><div class="c-check"><span class="s warn">⚠</span>物体/工器具坠落 → 工具防坠绳、下方设警戒隔离</div><div class="c-check"><span class="s warn">⚠</span>临边/洞口 → 防护栏、盖板、洞口警示到位</div><div class="c-check"><span class="s warn">⚠</span>海上大风/湿滑 → 6 级风、雨雪、结冰停止高处作业</div><div class="c-check"><span class="s todo">○</span>交叉作业 → 与动火/吊装错时，专人监护</div><div class="c-foot">来源：《高处作业安全规定》HSE-018 · JSA 模板</div></div>' },
+        { from: 'user', voice: '把这个发到今天照明检修那组，做个针对性交底。', dur: 5 },
+        { from: 'agent', text: '✅ 已发至「钻井平台照明检修」作业组，并结合今日 7 级阵风加了红字提醒：<b>风力超阈值立即停工撤离</b>。已计入该作业 JSA 交底记录。' }
+      ]
+    }
+  ]
+});
+</script>
+</body>
+</html>

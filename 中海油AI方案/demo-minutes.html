@@ -1,0 +1,721 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>会议纪要 Demo · 录音进去、纪要决议待办邮件出来 —— 中海油 × 商汤</title>
+<meta name="description" content="把一段会议录音丢进去，AI 秒出结构化纪要、决议事项、责任到人的待办清单，以及可一键发送的跟进邮件草稿 —— 散会即成稿。">
+<link rel="stylesheet" href="assets/style.css">
+<style>
+/* ============ demo-minutes · 会议纪要（潮汐青 / 海油蓝 · 办公研发） ============ */
+
+/* ---- header band ---- */
+.mm-hero { position: relative; overflow: hidden; padding: 44px 0 26px; background: var(--bg-0); }
+.mm-hero .bg { position:absolute; inset:0; z-index:0;
+  background:
+    radial-gradient(1000px 520px at 84% -12%, rgba(53,226,212,.18), transparent 55%),
+    radial-gradient(820px 500px at 2% 4%, rgba(59,140,255,.14), transparent 55%),
+    radial-gradient(760px 520px at 50% 132%, rgba(155,140,255,.08), transparent 55%); }
+.mm-hero .wrap { position: relative; z-index: 2; }
+.mm-hero h1 { font-size: clamp(27px, 4.4vw, 44px); line-height: 1.1; margin-top: 8px; }
+.mm-hero h1 .g { background: var(--grad-cyan); -webkit-background-clip:text; background-clip:text; color:transparent; }
+.mm-hero .lead { margin-top: 14px; }
+.mm-hero .pill-row { margin-top: 20px; }
+.mm-hero .pill.hi { border-color: rgba(53,226,212,.4); color: var(--cyan); background: rgba(53,226,212,.08); }
+
+/* ---- stage: input (left) + output (right) ---- */
+.mm-stage { display:grid; grid-template-columns: 384px 1fr; gap: 26px; align-items:start; }
+@media (max-width: 940px){ .mm-stage { grid-template-columns: 1fr; } }
+
+/* input card */
+.mm-input { position: sticky; top: 84px; padding: 22px; }
+@media (max-width: 940px){ .mm-input { position: static; } }
+.mm-label { font-size: 12px; font-weight: 800; letter-spacing:.5px; color: var(--text-dim);
+  text-transform: uppercase; margin: 0 0 8px; display:flex; align-items:center; gap:7px; }
+.mm-label:not(:first-child){ margin-top: 18px; }
+.mm-title-in, .mm-bg-in {
+  width:100%; background: rgba(6,14,24,.5); border:1px solid var(--line-2); border-radius: 12px;
+  color: var(--text); font-family: inherit; font-size: 14px; padding: 12px 13px; transition:.2s; resize:none; }
+.mm-title-in:focus, .mm-bg-in:focus { outline:none; border-color: rgba(53,226,212,.55); box-shadow: 0 0 0 3px rgba(53,226,212,.12); }
+.mm-bg-in { line-height:1.6; min-height: 108px; }
+
+/* recording card */
+.mm-rec { margin-top: 10px; background: linear-gradient(150deg, rgba(53,226,212,.10), rgba(59,140,255,.05));
+  border:1px solid rgba(53,226,212,.26); border-radius: 14px; padding: 13px 14px; }
+.mm-rec-top { display:flex; align-items:center; gap:11px; }
+.mm-play { flex-shrink:0; width:40px; height:40px; border-radius:50%; border:none; display:grid; place-items:center;
+  font-size:15px; color:#06202a; background: var(--grad-cyan); box-shadow: 0 8px 20px -8px rgba(53,226,212,.6);
+  transition: transform .12s, filter .2s; }
+.mm-play:hover { filter: brightness(1.08); }
+.mm-play:active { transform: scale(.92); }
+.mm-wave { flex:1; display:flex; align-items:center; gap:2px; height:42px; overflow:hidden; position:relative; }
+.mm-wave span { flex:1; min-width:2px; height:100%; background: linear-gradient(180deg, var(--cyan), var(--azure));
+  border-radius:2px; opacity:.55; transform: scaleY(.6); transform-origin:center; }
+.mm-wave.playing span { animation: mmWv 1s ease-in-out infinite; opacity:.85; }
+@keyframes mmWv { 0%,100%{ transform: scaleY(.4);} 50%{ transform: scaleY(1);} }
+.mm-needle { position:absolute; top:-2px; bottom:-2px; width:2px; left:0; background: var(--red);
+  box-shadow: 0 0 8px var(--red); opacity:0; border-radius:2px; }
+.mm-wave.playing .mm-needle { opacity:1; animation: mmNeedle 6s linear infinite; }
+@keyframes mmNeedle { from{ left:0; } to{ left:100%; } }
+.mm-time { flex-shrink:0; font-size:12px; color: var(--text-2); font-weight:700; letter-spacing:.3px; }
+.mm-time b { color: var(--cyan); }
+.mm-rec-meta { display:flex; align-items:center; gap:8px; margin-top:11px; font-size:12px; color: var(--text-dim); }
+.mm-filetag { display:inline-flex; align-items:center; gap:5px; font-weight:700; color: var(--cyan);
+  background: rgba(53,226,212,.12); border:1px solid rgba(53,226,212,.28); border-radius:20px; padding:3px 9px; font-size:11px; }
+.mm-fname { font-family: "SF Mono", ui-monospace, Menlo, monospace; font-size:11.5px; color: var(--text-mute);
+  overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+
+/* io buttons */
+.mm-io-btns { display:flex; gap:9px; margin-top:13px; }
+.mm-io-btns .btn { flex:1; justify-content:center; }
+.mm-gen { width:100%; justify-content:center; margin-top:6px; font-size:15px; padding:14px; }
+.mm-gen.is-busy { opacity:.7; pointer-events:none; }
+.mm-hint { margin-top:12px; font-size:11.5px; color: var(--text-mute); line-height:1.6;
+  border-top:1px dashed var(--line-2); padding-top:11px; }
+.mm-hint b { color: var(--cyan); }
+
+/* ---- output column ---- */
+.mm-output { min-height: 460px; position: relative; }
+
+/* empty state */
+.mm-empty { border:1px dashed var(--line-2); border-radius: var(--radius); padding: 60px 30px; text-align:center;
+  background: rgba(255,255,255,.015); }
+.mm-empty .em-ic { font-size:44px; margin-bottom:14px; opacity:.9; }
+.mm-empty h3 { font-size:18px; margin-bottom:8px; }
+.mm-empty p { color: var(--text-dim); font-size:13.5px; max-width: 360px; margin: 0 auto; line-height:1.6; }
+.mm-empty .em-flow { display:flex; align-items:center; justify-content:center; gap:9px; flex-wrap:wrap; margin-top:20px; }
+.mm-empty .em-flow span { font-size:12px; font-weight:700; color: var(--text-2);
+  background: rgba(255,255,255,.04); border:1px solid var(--line); border-radius:20px; padding:6px 12px; }
+.mm-empty .em-flow i { color: var(--text-mute); font-style:normal; }
+
+/* progress */
+.mm-prog { background: var(--bg-card); border:1px solid var(--line-strong); border-radius: var(--radius);
+  padding: 30px 28px; box-shadow: var(--shadow); }
+.mm-prog-steps { display:flex; align-items:center; justify-content:center; gap:10px; flex-wrap:wrap; margin-bottom:22px; }
+.mm-step { font-size:13px; font-weight:800; color: var(--text-mute); display:inline-flex; align-items:center; gap:6px;
+  padding:8px 14px; border-radius:22px; border:1px solid var(--line-2); background: rgba(255,255,255,.03); transition:.3s; }
+.mm-step.active { color: var(--cyan); border-color: rgba(53,226,212,.5); background: rgba(53,226,212,.12);
+  box-shadow: 0 0 22px -8px rgba(53,226,212,.6); }
+.mm-step.done { color: var(--green); border-color: rgba(55,211,154,.4); background: rgba(55,211,154,.1); }
+.mm-arrow { color: var(--text-mute); font-weight:700; }
+.mm-prog-bar { height:8px; border-radius:20px; background: rgba(255,255,255,.06); overflow:hidden; }
+.mm-prog-bar span { display:block; height:100%; width:0; border-radius:20px; background: var(--grad-cyan);
+  box-shadow: 0 0 14px -2px rgba(53,226,212,.7); transition: width .1s linear; }
+.mm-prog-meta { display:flex; justify-content:space-between; align-items:center; margin-top:12px; font-size:12.5px; }
+.mm-prog-meta #mmProgLabel { color: var(--text-2); font-weight:600; }
+.mm-prog-meta #mmProgPct { color: var(--cyan); font-weight:800; font-variant-numeric: tabular-nums; }
+
+/* result blocks */
+.mm-result { display:flex; flex-direction:column; gap:18px; }
+.mm-block { background: var(--bg-card); border:1px solid var(--line); border-radius: var(--radius); padding: 22px 22px;
+  opacity:0; transform: translateY(20px); transition: opacity .6s ease, transform .6s ease; }
+.mm-block.in { opacity:1; transform:none; }
+.mm-blk-head { display:flex; align-items:center; gap:11px; margin-bottom:16px; }
+.mm-blk-ic { width:36px; height:36px; border-radius:11px; display:grid; place-items:center; font-size:18px; flex-shrink:0;
+  background: rgba(53,226,212,.12); border:1px solid rgba(53,226,212,.26); }
+.mm-blk-head h3 { font-size:17px; }
+.mm-model-badge { margin-left:auto; font-size:11px; font-weight:800; letter-spacing:.3px; padding:4px 11px; border-radius:20px;
+  background: linear-gradient(120deg, rgba(244,193,74,.18), rgba(255,90,82,.14)); color: var(--amber);
+  border:1px solid rgba(244,193,74,.4); display:inline-flex; align-items:center; gap:5px; white-space:nowrap; }
+.mm-auto { margin-left:auto; font-size:11px; font-weight:700; color: var(--text-dim);
+  background: rgba(255,255,255,.04); border:1px solid var(--line-2); border-radius:20px; padding:4px 10px; }
+
+/* overview */
+.mm-overview { color: var(--text-2); font-size:14px; line-height:1.65; margin:0 0 16px; min-height: 22px; }
+.mm-overview b { color: var(--cyan); }
+.mm-overview .cur, .mm-subject .cur { display:inline-block; width:8px; height:15px; background: var(--cyan); margin-left:2px;
+  vertical-align:-2px; animation: mmBlink 1s steps(1) infinite; }
+@keyframes mmBlink { 50%{ opacity:0; } }
+.mm-stats { display:grid; grid-template-columns: repeat(4,1fr); gap:12px; margin-bottom:16px; }
+@media (max-width: 520px){ .mm-stats { grid-template-columns: repeat(2,1fr); } }
+.mm-stats .stat { background: rgba(255,255,255,.02); border:1px solid var(--line); border-radius:13px; padding:14px 8px; }
+.mm-stats .stat .n { font-size: clamp(22px,3vw,30px); }
+.mm-stats .stat .l { font-size:12px; margin-top:6px; }
+.mm-speakers { display:flex; flex-wrap:wrap; gap:8px; }
+.mm-spk { font-size:12px; color: var(--text-2); background: rgba(59,140,255,.09); border:1px solid rgba(59,140,255,.24);
+  border-radius:20px; padding:5px 11px; display:inline-flex; align-items:center; gap:6px; }
+.mm-spk .dot { width:8px; height:8px; border-radius:50%; }
+
+/* minutes topics */
+.mm-topics { display:flex; flex-direction:column; gap:14px; }
+.mm-topic { border:1px solid var(--line); border-radius:14px; padding:15px 16px; background: rgba(255,255,255,.015);
+  opacity:0; transform: translateY(12px); transition: opacity .5s ease, transform .5s ease; }
+.mm-block.in .mm-topic { opacity:1; transform:none; }
+.mm-block.in .mm-topic:nth-child(1){ transition-delay:.10s; }
+.mm-block.in .mm-topic:nth-child(2){ transition-delay:.22s; }
+.mm-block.in .mm-topic:nth-child(3){ transition-delay:.34s; }
+.mm-topic-h { display:flex; align-items:center; gap:10px; margin-bottom:12px; }
+.mm-topic-n { font-size:11px; font-weight:800; letter-spacing:.5px; color: var(--cyan); flex-shrink:0;
+  background: rgba(53,226,212,.12); border:1px solid rgba(53,226,212,.3); border-radius:8px; padding:4px 9px; }
+.mm-topic-h b { font-size:15px; color: var(--text); }
+.mm-sub { font-size:11.5px; font-weight:800; letter-spacing:1px; color: var(--text-mute); text-transform:uppercase; margin-bottom:7px; }
+.mm-points { margin:0 0 12px; padding:0; list-style:none; display:flex; flex-direction:column; gap:7px; }
+.mm-points li { position:relative; padding-left:18px; font-size:13.5px; color: var(--text-2); line-height:1.55; }
+.mm-points li::before { content:""; position:absolute; left:2px; top:8px; width:6px; height:6px; border-radius:50%;
+  background: var(--azure); }
+.mm-concl { display:flex; gap:8px; align-items:flex-start; background: rgba(53,226,212,.07);
+  border-left:3px solid var(--cyan); border-radius:0 10px 10px 0; padding:10px 13px; font-size:13.5px; color: var(--text); line-height:1.55; }
+.mm-concl-tag { flex-shrink:0; font-size:11px; font-weight:800; color:#06202a; background: var(--cyan);
+  border-radius:6px; padding:2px 7px; margin-top:1px; }
+.mm-concl b { color: var(--cyan); }
+
+/* decisions */
+.mm-decisions { margin:0; padding:0; list-style:none; counter-reset: d; display:flex; flex-direction:column; gap:10px; }
+.mm-decisions li { position:relative; padding:12px 14px 12px 46px; border:1px solid var(--line); border-radius:12px;
+  background: rgba(255,255,255,.015); font-size:13.5px; color: var(--text); line-height:1.55;
+  counter-increment: d; opacity:0; transform: translateY(10px); transition: opacity .5s ease, transform .5s ease; }
+.mm-block.in .mm-decisions li { opacity:1; transform:none; }
+.mm-block.in .mm-decisions li:nth-child(1){ transition-delay:.06s; }
+.mm-block.in .mm-decisions li:nth-child(2){ transition-delay:.14s; }
+.mm-block.in .mm-decisions li:nth-child(3){ transition-delay:.22s; }
+.mm-block.in .mm-decisions li:nth-child(4){ transition-delay:.30s; }
+.mm-decisions li::before { content: counter(d); position:absolute; left:12px; top:11px; width:24px; height:24px;
+  border-radius:8px; display:grid; place-items:center; font-size:12.5px; font-weight:900; color:#06202a;
+  background: var(--grad-cyan); box-shadow: 0 6px 14px -6px rgba(53,226,212,.6); }
+.mm-decisions li b { color: var(--cyan); font-weight:700; }
+
+/* todo table */
+.mm-table-wrap { overflow-x:auto; border:1px solid var(--line); border-radius:12px; }
+.mm-table { width:100%; border-collapse:collapse; font-size:13px; min-width: 560px; }
+.mm-table th, .mm-table td { padding:11px 14px; text-align:left; border-bottom:1px solid var(--line); vertical-align:middle; }
+.mm-table thead th { background: rgba(53,226,212,.09); color: var(--text); font-weight:800; font-size:12.5px; white-space:nowrap; }
+.mm-table tbody tr { transition: background .18s; opacity:0; transform: translateY(8px); }
+.mm-table tbody tr.rin { opacity:1; transform:none; transition: opacity .5s ease, transform .5s ease; }
+.mm-table tbody tr:hover { background: rgba(53,226,212,.05); }
+.mm-table tbody tr:last-child td { border-bottom:none; }
+.mm-task { color: var(--text); font-weight:600; }
+.mm-owner { display:inline-flex; align-items:center; gap:8px; white-space:nowrap; }
+.mm-owner b { color: var(--text-2); font-weight:700; }
+.mm-assign { font-size:11.5px; font-weight:700; color: var(--azure); background: rgba(59,140,255,.1);
+  border:1px dashed rgba(59,140,255,.4); border-radius:20px; padding:3px 10px; transition:.18s; white-space:nowrap; }
+.mm-assign:hover { background: rgba(59,140,255,.18); border-style:solid; }
+.mm-assign.assigned { color: var(--green); background: rgba(55,211,154,.12); border:1px solid rgba(55,211,154,.34); }
+.mm-due { font-family: "SF Mono", ui-monospace, Menlo, monospace; font-size:12.5px; color: var(--text-2); white-space:nowrap; }
+.tag-mute { display:inline-block; font-size:11px; font-weight:700; padding:4px 10px; border-radius:20px;
+  background: rgba(255,255,255,.05); color: var(--text-dim); border:1px solid var(--line-2); white-space:nowrap; }
+
+/* email card */
+.mm-email { border:1px solid var(--line-2); border-radius:14px; overflow:hidden; background: rgba(6,14,24,.4); }
+.mm-eml-row { display:flex; gap:12px; padding:11px 15px; border-bottom:1px solid var(--line); font-size:13px; }
+.mm-eml-row .k { flex-shrink:0; width:52px; color: var(--text-mute); font-weight:700; }
+.mm-eml-row .v { color: var(--text); flex:1; line-height:1.5; }
+.mm-eml-row .v .to-chip { display:inline-block; font-size:12px; background: rgba(59,140,255,.1);
+  border:1px solid rgba(59,140,255,.26); border-radius:20px; padding:2px 9px; margin:2px 4px 2px 0; color: var(--text-2); }
+.mm-subject { font-weight:700; color: var(--text); min-height:19px; }
+.mm-eml-body { padding:15px; font-size:12.8px; color: var(--text-2); line-height:1.75; white-space:pre-wrap;
+  font-family: -apple-system, "PingFang SC", sans-serif; }
+.mm-eml-body b { color: var(--text); }
+.mm-eml-acts { display:flex; gap:9px; padding:13px 15px; border-top:1px solid var(--line); background: rgba(255,255,255,.02); }
+
+/* toast */
+.mm-toast { position: fixed; left:50%; bottom:26px; transform: translate(-50%, 14px);
+  background: rgba(10,20,32,.96); border:1px solid var(--line-strong); color: var(--text);
+  font-size:13px; font-weight:700; padding:11px 20px; border-radius:24px; box-shadow: var(--shadow);
+  opacity:0; pointer-events:none; transition:.25s; z-index:200; white-space:nowrap; }
+.mm-toast.show { opacity:1; transform: translate(-50%,0); }
+
+/* 背后原理 grid */
+.why-grid { display:grid; grid-template-columns: repeat(4,1fr); gap:16px; }
+@media (max-width: 980px){ .why-grid { grid-template-columns: 1fr 1fr; } }
+@media (max-width: 560px){ .why-grid { grid-template-columns: 1fr; } }
+.why-grid .card h3 { font-size:16px; }
+.why-grid .card p { font-size:13px; }
+
+/* back bar */
+.backbar { border-top:1px solid var(--line); background: var(--bg-1); }
+.backbar .in { max-width: var(--maxw); margin:0 auto; padding: 20px 24px; display:flex; align-items:center;
+  justify-content:space-between; gap:14px; flex-wrap:wrap; }
+.backbar .bb-link { font-size:13.5px; font-weight:700; color: var(--text-2); display:inline-flex; align-items:center; gap:7px; transition:.18s; }
+.backbar .bb-link:hover { color: var(--cyan); }
+.backbar .bb-mid { font-size:12.5px; color: var(--text-mute); text-align:center; }
+</style>
+</head>
+<body>
+<nav class="nav"><div class="wrap-wide" style="justify-content:space-between;">
+  <a class="brand" href="index.html"><div class="logos"><img src="assets/st_logo.png" class="logo-img" alt="商汤科技 SenseTime"></div><span class="sub hide-mobile">Demo 原型</span></a>
+  <div style="display:flex;gap:8px;align-items:center;"><a class="btn btn-sm btn-ghost" href="index.html">← 返回方案</a><a class="btn btn-sm btn-ghost" href="demos.html">全部 Demo</a></div>
+</div></nav>
+
+<!-- ============ HEADER BAND ============ -->
+<header class="mm-hero">
+  <div class="bg"></div>
+  <div class="orb orb-cyan" style="width:340px;height:340px;top:-130px;right:-70px;"></div>
+  <div class="wrap">
+    <div class="kicker blue reveal">🎙️ Meeting Minutes · 会议纪要</div>
+    <h1 class="reveal">录音进去，<span class="g">纪要、决议、待办、邮件出来</span></h1>
+    <p class="lead reveal">一段会议录音丢进去，AI 先转写、分说话人，再抽取要点与决议，把待办<b class="text-cyan">责任到人</b>，最后汇总成一封可一键发送的跟进邮件 —— 散会即成稿，不再靠手记。</p>
+    <div class="pill-row reveal">
+      <span class="pill hi">🎧 语音转写 · 说话人区分</span>
+      <span class="pill">📋 结构化纪要 · 议题分节</span>
+      <span class="pill">📌 待办到人 · 带时限</span>
+      <span class="pill">✉️ 跟进邮件 · 一键发送</span>
+    </div>
+  </div>
+</header>
+
+<!-- ============ STAGE ============ -->
+<section class="section" style="padding-top:26px;">
+  <div class="wrap-wide">
+    <div class="mm-stage reveal">
+
+      <!-- ===== INPUT (left) ===== -->
+      <div class="card mm-input">
+        <div class="mm-label">📅 会议主题</div>
+        <input class="mm-title-in" id="mmTitle" value="XX平台数字化推进周会" spellcheck="false">
+
+        <div class="mm-label">🎙️ 会议录音</div>
+        <div class="mm-rec">
+          <div class="mm-rec-top">
+            <button class="mm-play" id="mmPlay" aria-label="播放录音">▶</button>
+            <div class="mm-wave" id="mmWave"></div>
+            <span class="mm-time"><b id="mmElapsed">00:00</b> / 58:24</span>
+          </div>
+          <div class="mm-rec-meta">
+            <span class="mm-filetag">🎧 录音</span>
+            <span class="mm-fname">数字化推进周会_20260715.m4a</span>
+          </div>
+        </div>
+        <div class="mm-io-btns">
+          <button class="btn btn-sm btn-ghost" id="mmUpload">⬆ 上传录音</button>
+          <button class="btn btn-sm btn-ghost" id="mmExample">📝 用示例</button>
+        </div>
+
+        <div class="mm-label">🗂️ 会议背景 / 参会人</div>
+        <textarea class="mm-bg-in" id="mmBg" spellcheck="false">参会：信息科技部、生产运营部、设备管理部、商汤 FDE 团队。围绕「数字化平台三期建设、移动巡检系统上线、AI 试点推进」三项议程，明确本月里程碑与责任分工。</textarea>
+
+        <button class="btn btn-cyan mm-gen" id="mmGen">✨ 生成纪要</button>
+        <div class="mm-hint">💡 <b>演示提示：</b>点「✨ 生成纪要」即模拟「转写中 → 分析中」，右侧分模块产出纪要 / 决议 / 待办 / 邮件；点「📝 用示例」可直接一键生成。</div>
+      </div>
+
+      <!-- ===== OUTPUT (right) ===== -->
+      <div class="mm-output">
+
+        <!-- empty state -->
+        <div class="mm-empty" id="mmEmpty">
+          <div class="em-ic">📝</div>
+          <h3>纪要将在这里实时产出</h3>
+          <p>左侧点「✨ 生成纪要」，AI 会把这段录音变成结构化的纪要、决议、待办与跟进邮件。</p>
+          <div class="em-flow">
+            <span>🎧 转写</span><i>→</i><span>📋 纪要</span><i>→</i><span>✅ 决议</span><i>→</i><span>📌 待办</span><i>→</i><span>✉️ 邮件</span>
+          </div>
+        </div>
+
+        <!-- progress -->
+        <div class="mm-prog" id="mmProg" hidden>
+          <div class="mm-prog-steps">
+            <span class="mm-step" data-step="transcribe">🎧 语音转写</span>
+            <span class="mm-arrow">→</span>
+            <span class="mm-step" data-step="analyze">🧠 智能分析</span>
+            <span class="mm-arrow">→</span>
+            <span class="mm-step" data-step="compose">📝 生成纪要</span>
+          </div>
+          <div class="mm-prog-bar"><span id="mmProgFill"></span></div>
+          <div class="mm-prog-meta"><span id="mmProgLabel">正在识别语音…</span><span id="mmProgPct">0%</span></div>
+        </div>
+
+        <!-- result -->
+        <div class="mm-result" id="mmResult" hidden>
+
+          <!-- ① 转写概览 -->
+          <div class="mm-block">
+            <div class="mm-blk-head">
+              <span class="mm-blk-ic">🎧</span>
+              <h3>转写概览</h3>
+              <span class="mm-model-badge">✦ 日日新 S2 旗舰</span>
+            </div>
+            <p class="mm-overview" id="mmOverview"></p>
+            <div class="mm-stats">
+              <div class="stat"><div class="n">58:24</div><div class="l">录音时长</div></div>
+              <div class="stat"><div class="n">4</div><div class="l">识别发言人</div></div>
+              <div class="stat"><div class="n">1.2万</div><div class="l">转写字数</div></div>
+              <div class="stat"><div class="n">3</div><div class="l">议题分节</div></div>
+            </div>
+            <div class="mm-speakers">
+              <span class="mm-spk"><span class="dot" style="background:var(--cyan)"></span>S1 · 信息科技部（主持）</span>
+              <span class="mm-spk"><span class="dot" style="background:var(--azure)"></span>S2 · 生产运营部</span>
+              <span class="mm-spk"><span class="dot" style="background:var(--orange)"></span>S3 · 设备管理部</span>
+              <span class="mm-spk"><span class="dot" style="background:var(--violet)"></span>S4 · 商汤 FDE</span>
+            </div>
+          </div>
+
+          <!-- ② 结构化纪要 -->
+          <div class="mm-block">
+            <div class="mm-blk-head"><span class="mm-blk-ic">📋</span><h3>结构化纪要</h3></div>
+            <div class="mm-topics">
+
+              <div class="mm-topic">
+                <div class="mm-topic-h"><span class="mm-topic-n">议题 01</span><b>数字化平台三期建设进度</b></div>
+                <div class="mm-sub">要点</div>
+                <ul class="mm-points">
+                  <li>三期主体功能已完成 78%，数据中台联调进入尾声。</li>
+                  <li>与生产实时数据库对接存在字段口径不一致，影响取数准确性。</li>
+                  <li>UAT 测试因用例不足计划推迟一周。</li>
+                </ul>
+                <div class="mm-concl"><span class="mm-concl-tag">结论</span><span>三期整体延后一周，<b>8 月 15 日</b>进入 UAT；字段口径由数据组本周内对齐。</span></div>
+              </div>
+
+              <div class="mm-topic">
+                <div class="mm-topic-h"><span class="mm-topic-n">议题 02</span><b>移动巡检系统上线</b></div>
+                <div class="mm-sub">要点</div>
+                <ul class="mm-points">
+                  <li>巡检 APP 完成现场试用，一线反馈「语音报缺陷」体验好。</li>
+                  <li>离线模式在弱网平台的稳定性仍需验证。</li>
+                  <li>需补充防爆手机适配与账号权限分级。</li>
+                </ul>
+                <div class="mm-concl"><span class="mm-concl-tag">结论</span><span>巡检 APP 定于 <b>8 月</b>在 2 个平台试点上线，先行验证离线与防爆终端。</span></div>
+              </div>
+
+              <div class="mm-topic">
+                <div class="mm-topic-h"><span class="mm-topic-n">议题 03</span><b>AI 试点推进</b></div>
+                <div class="mm-sub">要点</div>
+                <ul class="mm-points">
+                  <li>设备缺陷识别、知识问答两个场景完成 POC。</li>
+                  <li>缺陷识别准确率达标，知识库覆盖率待提升。</li>
+                  <li>数据分级与内网部署方案已通过安全评审。</li>
+                </ul>
+                <div class="mm-concl"><span class="mm-concl-tag">结论</span><span>AI 试点扩大到<b>设备管理与 HSE</b>两个部门，Q3 形成可复制模板。</span></div>
+              </div>
+
+            </div>
+          </div>
+
+          <!-- ③ 决议事项 -->
+          <div class="mm-block">
+            <div class="mm-blk-head"><span class="mm-blk-ic">✅</span><h3>决议事项</h3></div>
+            <ol class="mm-decisions">
+              <li>巡检 APP <b>8 月</b>在蓬莱 19-3、渤中 19-6 两个平台试点上线，先行验证离线与防爆终端。</li>
+              <li>数字化平台三期 UAT 推迟至 <b>8 月 15 日</b>，生产数据库字段口径本周内完成对齐。</li>
+              <li>AI 试点扩大至<b>设备管理、HSE</b> 两个部门，Q3 产出可复制落地模板。</li>
+              <li>知识库覆盖率纳入月度考核，目标由当前 <b>62%</b> 提升至 <b>85%</b>。</li>
+            </ol>
+          </div>
+
+          <!-- ④ 待办清单 -->
+          <div class="mm-block">
+            <div class="mm-blk-head"><span class="mm-blk-ic">📌</span><h3>待办清单 · 责任到人</h3>
+              <span class="mm-auto">点「指派」落实到具体责任人</span></div>
+            <div class="mm-table-wrap">
+              <table class="mm-table">
+                <thead><tr><th>事项</th><th>责任人</th><th>时限</th><th>状态</th></tr></thead>
+                <tbody>
+                  <tr>
+                    <td class="mm-task">对齐生产数据库字段口径</td>
+                    <td><span class="mm-owner"><b>数据组</b><button class="mm-assign" data-pool="陈工,李工,周工">＋ 指派</button></span></td>
+                    <td class="mm-due">07-19</td>
+                    <td><span class="tag-blue">进行中</span></td>
+                  </tr>
+                  <tr>
+                    <td class="mm-task">补充 UAT 测试用例</td>
+                    <td><span class="mm-owner"><b>测试组</b><button class="mm-assign" data-pool="王工,赵工,孙工">＋ 指派</button></span></td>
+                    <td class="mm-due">07-22</td>
+                    <td><span class="tag-mute">待启动</span></td>
+                  </tr>
+                  <tr>
+                    <td class="mm-task">巡检 APP 弱网离线压测</td>
+                    <td><span class="mm-owner"><b>研发组</b><button class="mm-assign" data-pool="吴工,郑工,冯工">＋ 指派</button></span></td>
+                    <td class="mm-due">07-25</td>
+                    <td><span class="tag-mute">待启动</span></td>
+                  </tr>
+                  <tr>
+                    <td class="mm-task">采购防爆手机试点终端（20 台）</td>
+                    <td><span class="mm-owner"><b>设备管理部</b><button class="mm-assign" data-pool="马工,黄工,徐工">＋ 指派</button></span></td>
+                    <td class="mm-due">07-28</td>
+                    <td><span class="tag-mute">待启动</span></td>
+                  </tr>
+                  <tr>
+                    <td class="mm-task">扩充设备知识库文档</td>
+                    <td><span class="mm-owner"><b>知识组</b><button class="mm-assign" data-pool="何工,罗工,高工">＋ 指派</button></span></td>
+                    <td class="mm-due">08-05</td>
+                    <td><span class="tag-blue">进行中</span></td>
+                  </tr>
+                  <tr>
+                    <td class="mm-task">AI 试点部门对接方案</td>
+                    <td><span class="mm-owner"><b>商汤 FDE</b><button class="mm-assign" data-pool="Kevin,Lucy,Ryan">＋ 指派</button></span></td>
+                    <td class="mm-due">07-20</td>
+                    <td><span class="tag-green">已排期</span></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- ⑤ 跟进邮件草稿 -->
+          <div class="mm-block" data-email>
+            <div class="mm-blk-head"><span class="mm-blk-ic">✉️</span><h3>跟进邮件草稿</h3>
+              <span class="mm-auto">自动汇总决议 + 待办</span></div>
+            <div class="mm-email">
+              <div class="mm-eml-row"><span class="k">收件人</span><span class="v">
+                <span class="to-chip">信息科技部</span><span class="to-chip">生产运营部</span><span class="to-chip">设备管理部</span><span class="to-chip">商汤 FDE 团队</span>
+              </span></div>
+              <div class="mm-eml-row"><span class="k">主 题</span><span class="v mm-subject" id="mmSubject"></span></div>
+              <div class="mm-eml-body" id="mmBody">各位好：
+
+现将「XX平台数字化推进周会」（2026-07-15）的会议纪要与决议、待办同步如下，请对照跟进：
+
+<b>【决议事项】</b>
+1. 巡检 APP 8 月在蓬莱 19-3、渤中 19-6 两个平台试点上线，先行验证离线与防爆终端。
+2. 数字化平台三期 UAT 推迟至 8 月 15 日，字段口径本周内完成对齐。
+3. AI 试点扩大至设备管理、HSE 两个部门，Q3 产出可复制落地模板。
+4. 知识库覆盖率纳入月度考核，目标由 62% 提升至 85%。
+
+<b>【关键待办】</b>
+· 对齐生产数据库字段口径 —— 数据组，07-19
+· 补充 UAT 测试用例 —— 测试组，07-22
+· 巡检 APP 弱网离线压测 —— 研发组，07-25
+· 采购防爆手机试点终端 —— 设备管理部，07-28
+
+请各责任人于时限前反馈进展，下周周会同步。
+
+信息科技部
+2026-07-15</div>
+              <div class="mm-eml-acts">
+                <button class="btn btn-sm btn-ghost" id="mmCopy">📋 复制</button>
+                <button class="btn btn-sm btn-primary" id="mmSend">✉ 发送（演示）</button>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ============ 背后原理 ============ -->
+<section class="section bg-1" style="padding-top:56px;">
+  <div class="wrap">
+    <div class="sec-head center reveal" style="margin-bottom:34px;">
+      <div class="kicker center blue">Under the Hood · 背后原理</div>
+      <h2 class="h-sec">从一段录音到一封邮件，<span class="hl">四步跑通</span></h2>
+      <p class="lead center">听清每个人在说什么，判断谁负责什么，再把决议与待办落到人、汇成邮件 —— 每一步都可复核、可追溯。</p>
+    </div>
+    <div class="why-grid reveal">
+      <div class="card">
+        <div class="card-icon">🎧</div>
+        <h3>语音转写 ASR</h3>
+        <p>会议室远场、口音、专业术语（井号、设备号、平台名）都能准确转写，长会议全程逐字成稿，可回看比对。</p>
+      </div>
+      <div class="card">
+        <div class="card-icon" style="background:rgba(59,140,255,.13);border-color:rgba(59,140,255,.28)">🗣️</div>
+        <h3>说话人区分</h3>
+        <p>自动分离并标注不同发言人（S1/S2…），可对齐到部门与姓名，谁说了什么一目了然，便于责任归属。</p>
+      </div>
+      <div class="card">
+        <div class="card-icon" style="background:rgba(244,193,74,.13);border-color:rgba(244,193,74,.30)">🧠</div>
+        <h3>要点 · 决议抽取</h3>
+        <p>日日新 S2 按议题归纳要点、识别结论与决议，去口水、留干货，结构化成议题 / 要点 / 结论三段式纪要。</p>
+      </div>
+      <div class="card">
+        <div class="card-icon" style="background:rgba(155,140,255,.13);border-color:rgba(155,140,255,.28)">📌</div>
+        <h3>待办到人 + 邮件</h3>
+        <p>自动识别「谁、做什么、何时完成」，生成责任到人的待办表，并汇总成跟进邮件草稿，一键分发、闭环跟踪。</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ BACK BAR ============ -->
+<div class="backbar">
+  <div class="in">
+    <a href="demos.html" class="bb-link">← 返回 Demo 目录</a>
+    <span class="bb-mid">会议纪要 Demo · 散会即成稿 · 数据均为示意 / 脱敏</span>
+    <a href="index.html" class="bb-link">回到方案首页 →</a>
+  </div>
+</div>
+
+<!-- toast -->
+<div class="mm-toast" id="mmToast"></div>
+
+<script src="assets/app.js"></script>
+<script>
+(function () {
+  'use strict';
+  var $ = function (s, r) { return (r || document).querySelector(s); };
+  var $$ = function (s, r) { return Array.prototype.slice.call((r || document).querySelectorAll(s)); };
+  var wait = function (ms) { return new Promise(function (r) { setTimeout(r, ms); }); };
+
+  /* ---------- waveform ---------- */
+  var wave = $('#mmWave');
+  (function () {
+    var n = 56, html = '';
+    for (var i = 0; i < n; i++) {
+      var base = Math.abs(Math.sin(i * 0.55)) * 0.55 + Math.random() * 0.4;
+      var sc = (0.32 + base * 0.68).toFixed(2);
+      var del = (-Math.random() * 1).toFixed(2);
+      html += '<span style="transform:scaleY(' + sc + ');animation-delay:' + del + 's"></span>';
+    }
+    html += '<i class="mm-needle"></i>';
+    wave.innerHTML = html;
+  })();
+
+  /* ---------- play toggle (cosmetic) ---------- */
+  var playBtn = $('#mmPlay'), elapsed = $('#mmElapsed'), playing = false, secs = 0, tick = null;
+  function fmt(s) { var m = Math.floor(s / 60), r = s % 60; return (m < 10 ? '0' : '') + m + ':' + (r < 10 ? '0' : '') + r; }
+  playBtn.addEventListener('click', function () {
+    playing = !playing;
+    wave.classList.toggle('playing', playing);
+    playBtn.textContent = playing ? '⏸' : '▶';
+    if (playing) {
+      tick = setInterval(function () { secs = (secs + 1) % (58 * 60 + 25); elapsed.textContent = fmt(secs); }, 1000);
+    } else { clearInterval(tick); }
+  });
+
+  /* ---------- toast ---------- */
+  var toast = $('#mmToast'), toastT = null;
+  function showToast(msg) {
+    toast.textContent = msg; toast.classList.add('show');
+    clearTimeout(toastT); toastT = setTimeout(function () { toast.classList.remove('show'); }, 1900);
+  }
+
+  /* ---------- assign owners ---------- */
+  $$('.mm-assign').forEach(function (b) {
+    b.addEventListener('click', function () {
+      var pool = (b.dataset.pool || '张工,李工,王工').split(',');
+      b.textContent = '✓ ' + pool[Math.floor(Math.random() * pool.length)];
+      b.classList.add('assigned');
+      showToast('已指派责任人（演示）');
+    });
+  });
+
+  /* ---------- generate flow ---------- */
+  var genBtn = $('#mmGen'), empty = $('#mmEmpty'), prog = $('#mmProg'), result = $('#mmResult');
+  var fill = $('#mmProgFill'), pct = $('#mmProgPct'), progLabel = $('#mmProgLabel');
+  var running = false;
+
+  var overviewText = '识别 4 位发言人 · 时长 58:24 · 约 1.2 万字 —— 已自动划分 3 个议题，抽取 4 项决议与 6 条待办。';
+  var subjectText = '【会议纪要】XX平台数字化推进周会（2026-07-15）· 决议 4 项 / 待办 6 条';
+
+  function setStep(name) {
+    var order = { transcribe: 0, analyze: 1, compose: 2 };
+    $$('.mm-step').forEach(function (s) {
+      var k = s.dataset.step;
+      s.classList.remove('active', 'done');
+      if (order[k] < order[name]) s.classList.add('done');
+      else if (k === name) s.classList.add('active');
+    });
+  }
+
+  function animateBar(from, to, ms, label) {
+    progLabel.textContent = label;
+    return new Promise(function (res) {
+      var t0 = null;
+      function step(t) {
+        if (!t0) t0 = t;
+        var p = Math.min((t - t0) / ms, 1), v = from + (to - from) * p;
+        fill.style.width = v + '%'; pct.textContent = Math.round(v) + '%';
+        if (p < 1) requestAnimationFrame(step); else res();
+      }
+      requestAnimationFrame(step);
+    });
+  }
+
+  function typeInto(el, text, speed) {
+    return new Promise(function (res) {
+      var i = 0; el.textContent = '';
+      (function t() {
+        if (i <= text.length) {
+          el.innerHTML = text.slice(0, i) + '<span class="cur"></span>';
+          i++; setTimeout(t, speed);
+        } else { el.textContent = text; res(); }
+      })();
+    });
+  }
+
+  async function generate() {
+    if (running) return;
+    running = true;
+    genBtn.classList.add('is-busy');
+    genBtn.innerHTML = '⏳ 处理中…';
+
+    // reset
+    empty.hidden = true;
+    result.hidden = true;
+    $$('.mm-block', result).forEach(function (b) { b.classList.remove('in'); });
+    $$('.mm-table tbody tr', result).forEach(function (tr) { tr.classList.remove('rin'); });
+    $('#mmOverview').textContent = '';
+    $('#mmSubject').textContent = '';
+    fill.style.width = '0%'; pct.textContent = '0%';
+    prog.hidden = false;
+
+    // phase 1: transcribe
+    setStep('transcribe');
+    await animateBar(0, 56, 1500, '正在识别语音、区分说话人…');
+    await wait(160);
+    // phase 2: analyze
+    setStep('analyze');
+    await animateBar(56, 90, 1200, '正在抽取要点、决议与待办…');
+    // phase 3: compose
+    setStep('compose');
+    await animateBar(90, 100, 600, '正在汇总纪要与跟进邮件…');
+    $$('.mm-step').forEach(function (s) { if (s.dataset.step === 'compose') { s.classList.remove('active'); s.classList.add('done'); } });
+    await wait(300);
+
+    prog.hidden = true;
+    result.hidden = false;
+
+    // reveal blocks in sequence
+    var blocks = $$('.mm-block', result);
+    for (var i = 0; i < blocks.length; i++) {
+      blocks[i].classList.add('in');
+      if (i === 0) typeInto($('#mmOverview'), overviewText, 20);
+      if (blocks[i].hasAttribute('data-email')) typeInto($('#mmSubject'), subjectText, 22);
+      // stagger todo rows when the todo block appears
+      if (blocks[i].querySelector('.mm-table')) {
+        (function (blk) {
+          $$('.mm-table tbody tr', blk).forEach(function (tr, ri) {
+            setTimeout(function () { tr.classList.add('rin'); }, 120 + ri * 90);
+          });
+        })(blocks[i]);
+      }
+      await wait(380);
+    }
+
+    genBtn.classList.remove('is-busy');
+    genBtn.innerHTML = '↻ 重新生成';
+    running = false;
+  }
+
+  genBtn.addEventListener('click', generate);
+
+  /* 用示例 —— 一键生成 */
+  $('#mmExample').addEventListener('click', function () {
+    if (running) return;
+    $('#mmTitle').value = 'XX平台数字化推进周会';
+    generate();
+  });
+
+  /* 上传录音 —— 演示提示 */
+  $('#mmUpload').addEventListener('click', function () {
+    showToast('演示原型：请点「📝 用示例」载入示例录音');
+  });
+
+  /* 复制邮件 */
+  $('#mmCopy').addEventListener('click', function () {
+    var subject = $('#mmSubject').textContent || subjectText;
+    var to = '信息科技部、生产运营部、设备管理部、商汤 FDE 团队';
+    var body = $('#mmBody').textContent;
+    var full = '收件人：' + to + '\n主题：' + subject + '\n\n' + body;
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(full).then(function () { showToast('✓ 邮件已复制到剪贴板'); },
+        function () { showToast('✓ 邮件内容已生成（复制未授权）'); });
+    } else {
+      try {
+        var ta = document.createElement('textarea'); ta.value = full; document.body.appendChild(ta);
+        ta.select(); document.execCommand('copy'); document.body.removeChild(ta);
+        showToast('✓ 邮件已复制到剪贴板');
+      } catch (e) { showToast('✓ 邮件内容已生成'); }
+    }
+  });
+
+  /* 发送（演示） */
+  $('#mmSend').addEventListener('click', function () {
+    if (this.dataset.sent) return;
+    this.dataset.sent = '1';
+    this.innerHTML = '✓ 已发送';
+    showToast('✓ 已发送给 4 个收件人（演示）');
+  });
+})();
+</script>
+</body>
+</html>

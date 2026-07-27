@@ -1,0 +1,497 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>合同审核 · 三模型对比 Demo —— 中海油 × 商汤</title>
+<meta name="description" content="同一份脱敏采购合同 + 同一提示词，豆包 / DeepSeek / 日日新 S2 旗舰同题对比：条款抽取、风险识别、引用出处、幻觉控制四维度一眼看清差距（示意）。">
+<link rel="stylesheet" href="assets/style.css">
+<style>
+/* ===== demo-contract only ===== */
+.demo-hero { position:relative; overflow:hidden; padding:52px 0 26px; background:var(--bg-0); }
+.demo-hero .bg-ocean { position:absolute; inset:0; z-index:0;
+  background:
+    radial-gradient(1000px 520px at 82% -20%, rgba(53,226,212,.16), transparent 55%),
+    radial-gradient(880px 520px at 4% 6%, rgba(59,140,255,.15), transparent 55%),
+    radial-gradient(700px 420px at 100% 120%, rgba(255,90,82,.10), transparent 55%); }
+.demo-hero .wrap-wide { position:relative; z-index:2; }
+.demo-hero h1 { font-size:clamp(26px,3.6vw,40px); line-height:1.14; }
+.demo-hero h1 .g { background:var(--grad-cyan); -webkit-background-clip:text; background-clip:text; color:transparent; }
+.demo-hero h1 .r { color:var(--red); }
+.demo-hero .lead { margin-top:14px; }
+.hero-tags { display:flex; flex-wrap:wrap; gap:8px; margin-top:18px; }
+
+/* ---- stage wrapper ---- */
+.stage { padding:6px 0 40px; }
+
+/* ---- contract snippet card ---- */
+.contract { background:var(--bg-card); border:1px solid var(--line); border-radius:var(--radius); padding:20px 22px; }
+.doc-head { display:flex; align-items:center; gap:11px; margin-bottom:16px; flex-wrap:wrap; }
+.doc-head .ic { width:36px;height:36px;border-radius:11px;display:grid;place-items:center;font-size:18px;
+  background:rgba(59,140,255,.12); border:1px solid rgba(59,140,255,.28); }
+.doc-head .t { font-weight:800; font-size:16px; }
+.doc-head .s { font-size:11.5px; color:var(--text-dim); margin-top:1px; }
+.doc-head .flags { margin-left:auto; display:flex; gap:7px; flex-wrap:wrap; }
+.clauses { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+@media (max-width:760px){ .clauses { grid-template-columns:1fr; } }
+.clause { display:flex; gap:11px; padding:12px 13px; border:1px solid var(--line); border-radius:12px;
+  background:rgba(6,14,24,.38); }
+.clause:last-child { grid-column:1 / -1; }
+.clause .cno { flex-shrink:0; align-self:flex-start; font-size:11.5px; font-weight:800; letter-spacing:.3px;
+  color:var(--cyan); background:rgba(53,226,212,.1); border:1px solid rgba(53,226,212,.28);
+  padding:4px 9px; border-radius:8px; white-space:nowrap; }
+.clause .cbody { min-width:0; }
+.clause .ctitle { font-weight:800; font-size:13.5px; color:var(--text); }
+.clause .ctext { font-size:12.5px; color:var(--text-dim); line-height:1.55; margin-top:3px; }
+
+/* ---- prompt bar + run ---- */
+.promptbar { display:flex; align-items:center; gap:16px; flex-wrap:wrap; margin-top:16px;
+  padding:15px 18px; border:1px solid var(--line-strong); border-radius:14px;
+  background:linear-gradient(150deg, rgba(53,226,212,.09), rgba(59,140,255,.04)); }
+.promptbar .pmeta { flex:1; min-width:220px; }
+.promptbar .plabel { font-size:11px; font-weight:800; letter-spacing:1px; color:var(--cyan); text-transform:uppercase; margin-bottom:6px; }
+.promptbar .ptext { font-size:13px; color:var(--text); line-height:1.55; }
+.promptbar .ptext .q { color:var(--text-mute); }
+.run-btn { display:inline-flex; align-items:center; gap:9px; border:0; cursor:pointer; white-space:nowrap;
+  padding:14px 24px; border-radius:13px; font-weight:800; font-size:15px; color:#06202a;
+  background:var(--grad-cyan); box-shadow:0 14px 34px -12px rgba(53,226,212,.55); transition:transform .16s, filter .16s, opacity .16s; }
+.run-btn:hover { transform:translateY(-2px); filter:brightness(1.06); }
+.run-btn:active { transform:translateY(0); }
+.run-btn:disabled { cursor:progress; opacity:.85; transform:none; }
+
+/* ---- arena ---- */
+.arena { margin-top:20px; }
+.arena-empty { border:1.5px dashed var(--line-2); border-radius:16px; padding:44px 24px; text-align:center; }
+.arena-empty .big { font-size:32px; margin-bottom:10px; opacity:.7; }
+.arena-empty .txt { color:var(--text-dim); font-size:14px; line-height:1.7; }
+.arena-empty .txt b { color:var(--text-2); }
+
+.cols { display:grid; grid-template-columns:repeat(3,1fr); gap:14px; }
+@media (max-width:860px){ .cols { grid-template-columns:1fr; } }
+
+.mcol { background:var(--bg-card); border:1px solid var(--line); border-radius:16px; overflow:hidden;
+  display:flex; flex-direction:column; position:relative; transition:border-color .3s, box-shadow .3s; }
+.mcol.star { border:1.5px solid rgba(255,90,82,.55);
+  box-shadow:0 0 0 1px rgba(255,90,82,.22), 0 20px 54px -26px rgba(255,90,82,.55); }
+.mcol.win { animation:winpulse 1.3s ease 1; }
+@keyframes winpulse { 0%{ box-shadow:0 0 0 1px rgba(255,90,82,.22), 0 0 0 0 rgba(244,193,74,.55); }
+  40%{ box-shadow:0 0 0 1px rgba(255,90,82,.4), 0 0 0 12px rgba(244,193,74,0); }
+  100%{ box-shadow:0 0 0 1px rgba(255,90,82,.22), 0 20px 54px -26px rgba(255,90,82,.55); } }
+
+/* running scan line */
+.mcol.running::after { content:""; position:absolute; left:0; right:0; top:0; height:2px; z-index:4;
+  background:linear-gradient(90deg, transparent, var(--cyan), transparent);
+  animation:scan 1.1s linear infinite; }
+.mcol.star.running::after { background:linear-gradient(90deg, transparent, var(--amber), var(--red), transparent); }
+@keyframes scan { 0%{ transform:translateX(-40%); opacity:.2; } 50%{ opacity:1; } 100%{ transform:translateX(40%); opacity:.2; } }
+
+.mcol-head { padding:15px 15px 13px; border-bottom:1px solid var(--line); position:relative; }
+.mcol.star .mcol-head { background:linear-gradient(150deg, rgba(255,90,82,.14), rgba(244,193,74,.05)); }
+.gold-badge { position:absolute; top:12px; right:12px; font-size:10.5px; font-weight:900; letter-spacing:.4px;
+  color:#241800; background:linear-gradient(120deg,#ffd873,#f4c14a); padding:4px 9px; border-radius:20px;
+  box-shadow:0 6px 16px -6px rgba(244,193,74,.7); }
+.mcol-name { font-weight:800; font-size:15px; display:flex; align-items:center; gap:7px; }
+.mcol.star .mcol-name { color:#fff; }
+.mcol-sub { font-size:11.5px; color:var(--text-dim); margin-top:4px; }
+.mcol-status { display:inline-flex; align-items:center; gap:7px; margin-top:11px;
+  font-size:11px; font-weight:800; letter-spacing:.3px; padding:4px 10px; border-radius:20px;
+  color:var(--text-mute); background:rgba(255,255,255,.05); border:1px solid var(--line-2); }
+.mcol-status.running { color:var(--cyan); background:rgba(53,226,212,.1); border-color:rgba(53,226,212,.3); }
+.mcol-status.done { color:var(--green); background:rgba(55,211,154,.12); border-color:rgba(55,211,154,.32); }
+.mcol-status.done.star { color:#241800; background:linear-gradient(120deg,#ffd873,#f4c14a); border-color:transparent; }
+.dots-run { display:inline-flex; gap:3px; }
+.dots-run i { width:5px;height:5px;border-radius:50%;background:currentColor; opacity:.4; animation:blink 1s infinite; }
+.dots-run i:nth-child(2){ animation-delay:.16s; } .dots-run i:nth-child(3){ animation-delay:.32s; }
+@keyframes blink { 0%,100%{ opacity:.25; transform:translateY(0);} 50%{ opacity:1; transform:translateY(-2px);} }
+
+.mcol-prog { height:4px; background:rgba(255,255,255,.07); }
+.mcol-prog i { display:block; height:100%; width:0; background:var(--grad-cyan); transition:width .45s ease; }
+.mcol.star .mcol-prog i { background:linear-gradient(90deg,var(--amber),var(--red)); }
+
+.mcol-body { display:flex; flex-direction:column; }
+.dim { padding:12px 15px; border-bottom:1px solid var(--line); min-height:84px;
+  display:flex; flex-direction:column; justify-content:center; gap:8px;
+  opacity:0; transform:translateY(10px); transition:opacity .45s ease, transform .45s ease; }
+.dim.in { opacity:1; transform:none; }
+.dim-name { font-size:10.5px; font-weight:800; letter-spacing:1px; color:var(--text-mute); }
+.dim-row { display:flex; align-items:flex-start; gap:10px; }
+.vd { width:26px;height:26px;flex-shrink:0;border-radius:8px;display:grid;place-items:center;font-weight:900;font-size:15px; line-height:1; }
+.vd-pass { color:var(--green); background:rgba(55,211,154,.14); border:1px solid rgba(55,211,154,.42); }
+.vd-good { color:var(--azure); background:rgba(59,140,255,.14); border:1px solid rgba(59,140,255,.42); }
+.vd-warn { color:var(--amber); background:rgba(244,193,74,.15); border:1px solid rgba(244,193,74,.42); }
+.vd-fail { color:var(--red);  background:rgba(255,90,82,.14); border:1px solid rgba(255,90,82,.42); }
+.dim-desc { font-size:12.5px; color:var(--text-2); line-height:1.5; }
+.mcol.star .dim-desc { color:var(--text); }
+
+/* S2 conclusion (expandable) */
+.concl { padding:14px 15px; border-top:1px solid rgba(255,90,82,.28); background:linear-gradient(180deg, rgba(255,90,82,.05), transparent); }
+.concl-toggle { width:100%; display:flex; align-items:center; justify-content:space-between; gap:8px;
+  border:1px solid rgba(244,193,74,.4); background:rgba(244,193,74,.08); color:var(--amber);
+  font-weight:800; font-size:12.5px; padding:11px 13px; border-radius:11px; cursor:pointer; transition:.18s; }
+.concl-toggle:disabled { opacity:.4; cursor:not-allowed; }
+.concl-toggle.ready:not(:disabled):hover { background:rgba(244,193,74,.16); }
+.concl-toggle.ready { box-shadow:0 0 0 1px rgba(244,193,74,.25); }
+.concl-body { display:none; margin-top:12px; }
+.concl-body.open { display:block; animation:citeIn .35s ease both; }
+@keyframes citeIn { from{ opacity:0; transform:translateY(8px);} to{ opacity:1; transform:none; } }
+.risk { border:1px solid var(--line-2); border-radius:12px; padding:11px 12px; margin-bottom:9px; background:rgba(6,14,24,.42); }
+.risk-top { display:flex; align-items:center; gap:7px; flex-wrap:wrap; margin-bottom:7px; }
+.risk-lv { font-size:10.5px; font-weight:900; letter-spacing:.3px; padding:3px 8px; border-radius:20px; white-space:nowrap; }
+.risk-lv.high { color:var(--red); background:rgba(255,90,82,.14); border:1px solid rgba(255,90,82,.4); }
+.risk-lv.mid { color:var(--orange-2); background:rgba(255,138,61,.14); border:1px solid rgba(255,138,61,.4); }
+.risk-lv.low { color:var(--green); background:rgba(55,211,154,.13); border:1px solid rgba(55,211,154,.38); }
+.risk-name { font-weight:800; font-size:13px; }
+.clause-tag { font-size:10.5px; font-weight:800; color:var(--cyan); background:rgba(53,226,212,.1);
+  border:1px solid rgba(53,226,212,.3); padding:2px 7px; border-radius:7px; white-space:nowrap; }
+.risk-text { font-size:12px; color:var(--text-2); line-height:1.6; }
+.concl-foot { margin-top:4px; font-size:11.5px; font-weight:700; color:var(--green); line-height:1.7; }
+
+/* verdict note */
+.verdict-note { margin-top:20px; padding:20px 22px; border-radius:16px; border:1px solid var(--line);
+  background:linear-gradient(150deg, rgba(255,90,82,.08), rgba(244,193,74,.03));
+  opacity:0; transform:translateY(12px); transition:opacity .5s ease, transform .5s ease; }
+.verdict-note.show { opacity:1; transform:none; }
+.verdict-note .vh { font-weight:800; font-size:16px; margin-bottom:8px; display:flex; align-items:center; gap:9px; flex-wrap:wrap; }
+.verdict-note .vp { font-size:13px; color:var(--text-2); line-height:1.7; }
+.verdict-note .vp b { color:var(--red); }
+.gap-chips { display:flex; flex-wrap:wrap; gap:9px; margin-top:14px; }
+.gap-chip { display:inline-flex; align-items:center; gap:8px; padding:8px 14px; border-radius:12px;
+  font-size:12.5px; font-weight:700; background:rgba(255,90,82,.08); border:1px solid rgba(255,90,82,.3); color:var(--text); }
+.gap-chip .k { font-size:15px; font-weight:900; color:var(--amber); }
+
+/* how it works */
+.principle { display:grid; grid-template-columns:repeat(4,1fr); gap:16px; }
+@media (max-width:980px){ .principle { grid-template-columns:1fr 1fr; } }
+@media (max-width:520px){ .principle { grid-template-columns:1fr; } }
+.pcard { padding:22px 20px; border-radius:var(--radius); border:1px solid var(--line); background:var(--bg-card); transition:.25s; }
+.pcard:hover { transform:translateY(-4px); border-color:var(--line-strong); box-shadow:var(--shadow); }
+.pcard .pic { width:44px;height:44px;border-radius:12px;display:grid;place-items:center;font-size:21px;margin-bottom:13px; }
+.pcard.c1 .pic{ background:rgba(53,226,212,.12); border:1px solid rgba(53,226,212,.25); }
+.pcard.c2 .pic{ background:rgba(59,140,255,.12); border:1px solid rgba(59,140,255,.25); }
+.pcard.c3 .pic{ background:rgba(244,193,74,.12); border:1px solid rgba(244,193,74,.28); }
+.pcard.c4 .pic{ background:rgba(255,90,82,.12); border:1px solid rgba(255,90,82,.25); }
+.pcard .pnum { font-size:11px; font-weight:800; letter-spacing:1px; color:var(--text-mute); }
+.pcard h3 { font-size:16px; margin:5px 0 7px; }
+.pcard p { font-size:12.8px; color:var(--text-dim); margin:0; line-height:1.6; }
+
+/* return bar */
+.return-bar { display:flex; align-items:center; justify-content:space-between; gap:14px; flex-wrap:wrap;
+  padding:18px 24px; margin:10px auto 46px; max-width:1360px; border-radius:16px;
+  border:1px solid var(--line); background:var(--bg-card); }
+.return-bar a { font-size:14px; font-weight:700; display:inline-flex; align-items:center; gap:8px; transition:.18s; }
+.return-bar .rb-back { color:var(--text-2); } .return-bar .rb-back:hover { color:var(--cyan); }
+.return-bar .rb-home { color:var(--cyan); } .return-bar .rb-home:hover { filter:brightness(1.15); }
+.return-bar .rb-mid { font-size:12.5px; color:var(--text-mute); text-align:center; }
+</style>
+</head>
+<body>
+<nav class="nav"><div class="wrap-wide" style="justify-content:space-between;">
+  <a class="brand" href="index.html"><div class="logos"><img src="assets/st_logo.png" class="logo-img" alt="商汤科技 SenseTime"></div><span class="sub hide-mobile">Demo 原型</span></a>
+  <div style="display:flex;gap:8px;align-items:center;"><a class="btn btn-sm btn-ghost" href="index.html">← 返回方案</a><a class="btn btn-sm btn-ghost" href="demos.html">全部 Demo</a></div>
+</div></nav>
+
+<!-- ============ HERO / DEMO HEAD BAND ============ -->
+<header class="demo-hero">
+  <div class="bg-ocean"></div>
+  <div class="orb orb-cyan" style="width:340px;height:340px;top:-140px;right:-40px;opacity:.35;"></div>
+  <div class="wrap-wide">
+    <div class="kicker reveal">Demo · 合同审核 · 三模型对比</div>
+    <h1 class="reveal">同一份合同、同一道题 —— <span class="g">三模型同台</span>，<br>差距在 <span class="r">「全 · 准 · 带出处」</span> 一眼可见</h1>
+    <p class="lead reveal">拿一份<b class="text-cyan">脱敏采购合同</b>与一条<b class="text-cyan">相同提示词</b>，让豆包、DeepSeek、<b class="text-red">日日新 S2 旗舰</b>同题开跑；四个维度 —— 条款抽取、风险识别、引用出处、幻觉控制 —— 谁全、谁准、谁能把结论落回原文条款，摆在一起就清楚了。<span class="text-dim">（对比为示意，结果以现场实测为准）</span></p>
+    <div class="hero-tags reveal">
+      <span class="pill">🏢 办公 / 研发场景</span>
+      <span class="pill">📄 长文档合同审核</span>
+      <span class="pill">🔬 三模型同题对比</span>
+      <span class="pill">⭐ 主角：日日新 S2 旗舰</span>
+    </div>
+  </div>
+</header>
+
+<!-- ============ INTERACTIVE STAGE ============ -->
+<section class="stage">
+  <div class="wrap-wide">
+
+    <!-- contract snippet -->
+    <div class="contract reveal">
+      <div class="doc-head">
+        <span class="ic">📄</span>
+        <div>
+          <div class="t">采购合同片段（脱敏）</div>
+          <div class="s">《货物采购合同》· 送三模型审阅的同一份原文</div>
+        </div>
+        <div class="flags">
+          <span class="tag-green" style="font-size:11px;font-weight:700;padding:4px 9px;border-radius:20px;">已脱敏</span>
+          <span class="tag-blue" style="font-size:11px;font-weight:700;padding:4px 9px;border-radius:20px;">5 条关键条款</span>
+        </div>
+      </div>
+      <div class="clauses">
+        <div class="clause">
+          <span class="cno">第 3.1 条</span>
+          <div class="cbody"><div class="ctitle">交货期</div>
+            <div class="ctext">卖方应于合同生效后 45 日内将货物运抵买方指定交货地点，并完成安装调试。</div></div>
+        </div>
+        <div class="clause">
+          <span class="cno">第 5.2 条</span>
+          <div class="cbody"><div class="ctitle">质保</div>
+            <div class="ctext">质保期为验收合格之日起 12 个月，期内因产品质量问题由卖方免费维修或更换。</div></div>
+        </div>
+        <div class="clause">
+          <span class="cno">第 6.1 条</span>
+          <div class="cbody"><div class="ctitle">付款</div>
+            <div class="ctext">签订后 7 个工作日内付 30% 预付款；验收合格后 30 日内付 65%；余 5% 为质保金。</div></div>
+        </div>
+        <div class="clause">
+          <span class="cno">第 8.3 条</span>
+          <div class="cbody"><div class="ctitle">违约金</div>
+            <div class="ctext">卖方逾期交货，每延迟一日按合同总额 0.5% 支付违约金，累计不超过合同总额 10%。</div></div>
+        </div>
+        <div class="clause">
+          <span class="cno">第 9.2 条</span>
+          <div class="cbody"><div class="ctitle">验收</div>
+            <div class="ctext">买方应在到货后 10 个工作日内完成验收；逾期未提出书面异议的，视为验收合格。</div></div>
+        </div>
+      </div>
+
+      <!-- prompt bar + run -->
+      <div class="promptbar">
+        <div class="pmeta">
+          <div class="plabel">▍统一提示词</div>
+          <div class="ptext"><span class="q">「</span>按审查清单抽取条款、识别风险，并逐条标注原文出处。<span class="q">」</span></div>
+        </div>
+        <button class="run-btn" id="runBtn">▶ 三模型同时开跑</button>
+      </div>
+    </div>
+
+    <!-- arena -->
+    <div class="arena reveal">
+      <div class="arena-empty" id="arenaEmpty">
+        <div class="big">⚖️</div>
+        <div class="txt">点击 <b>「▶ 三模型同时开跑」</b>，同一份合同 + 同一提示词，<b>豆包 / DeepSeek / 日日新 S2 旗舰</b> 同题对比逐行揭示。</div>
+      </div>
+      <div class="cols" id="cols" style="display:none;"></div>
+    </div>
+
+    <!-- verdict note -->
+    <div class="verdict-note" id="verdictNote">
+      <div class="vh">🏁 一眼看清：主角赢在 <span class="text-red">全 · 准 · 带出处</span></div>
+      <div class="vp">三模型同题对比仅为示意，<b>结果以现场实测为准</b>。真正拉开差距的，是能不能把每一条结论落回原文 —— <b>日日新 S2 旗舰</b>逐条对齐审查清单（不漏细项）、对义务/违约/兜底分级标注（更准）、每条结论回指原文条款号（带出处），拿不准就直说「原文未约定」，绝不编造条款号。</div>
+      <div class="gap-chips">
+        <span class="gap-chip"><span class="k">全</span> 逐条对齐清单，细项不漏</span>
+        <span class="gap-chip"><span class="k">准</span> 义务/违约/兜底，分级标注</span>
+        <span class="gap-chip"><span class="k">带出处</span> 每条回指原文条款号</span>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ============ HOW IT WORKS ============ -->
+<section class="section tight bg-1">
+  <div class="wrap">
+    <div class="sec-head center reveal">
+      <div class="kicker center">How it works · 为什么长合同它更稳</div>
+      <h2 class="h-sec">不是「聊得好」，是<span class="hl">审得全、说得清来处</span></h2>
+      <p class="lead center">合同审核不看谁话多，看谁不漏、谁能被复核。S2 旗舰把四件事做扎实。</p>
+    </div>
+    <div class="principle">
+      <div class="pcard c1 reveal">
+        <div class="pic">📚</div><div class="pnum">01</div>
+        <h3>长文档不截断</h3>
+        <p>超长上下文，整份合同一次读入，不切段、不丢信息 —— 通用助手常因长度受限而漏读后段细项。</p>
+      </div>
+      <div class="pcard c2 reveal">
+        <div class="pic">🧾</div><div class="pnum">02</div>
+        <h3>审查清单驱动</h3>
+        <p>预置企业审查清单（付款/违约/质保/验收/保密…），逐条对齐去抽取，而非自由发挥，细项不漏。</p>
+      </div>
+      <div class="pcard c3 reveal">
+        <div class="pic">📎</div><div class="pnum">03</div>
+        <h3>每条结论带出处</h3>
+        <p>结论回指原文条款号，法务一点即复核 —— 敢用、能对、说得清来处，而不是一段笼统概述。</p>
+      </div>
+      <div class="pcard c4 reveal">
+        <div class="pic">🚫</div><div class="pnum">04</div>
+        <h3>拿不准就说没有</h3>
+        <p>原文未约定的，明确标注「原文未约定」，绝不编造不存在的条款号 —— 把幻觉挡在结论之前。</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ RETURN BAR ============ -->
+<div class="return-bar reveal">
+  <a href="demos.html" class="rb-back">← 返回 Demo 列表</a>
+  <span class="rb-mid">合同审核 · 三模型同题对比 · 差距在「全 · 准 · 带出处」一眼可见（示意）</span>
+  <a href="index.html" class="rb-home">中海油 × 商汤 · 方案首页 →</a>
+</div>
+
+<script src="assets/app.js"></script>
+<script>
+(function () {
+  'use strict';
+
+  var DIMS = ['条款抽取', '风险识别', '引用出处', '幻觉控制'];
+  var VD = {
+    pass: { i: '✓', c: 'vd-pass' },
+    good: { i: '○', c: 'vd-good' },
+    warn: { i: '△', c: 'vd-warn' },
+    fail: { i: '✕', c: 'vd-fail' }
+  };
+
+  var MODELS = [
+    { key: 'doubao', name: '豆包', sub: '通用对话助手', emoji: '💬',
+      dims: [
+        { v: 'warn', t: '覆盖主干，长合同易漏细项' },
+        { v: 'warn', t: '常见风险能提示，深层义务易遗漏' },
+        { v: 'fail', t: '多为概述，较少逐条定位' },
+        { v: 'warn', t: '偶发引用不存在的条款号' }
+      ] },
+    { key: 'deepseek', name: 'DeepSeek', sub: '开源推理模型', emoji: '🧩',
+      dims: [
+        { v: 'warn', t: '推理强，格式稳定性一般' },
+        { v: 'good', t: '逻辑推演好，需多轮引导' },
+        { v: 'warn', t: '可给位置，偶有偏移' },
+        { v: 'warn', t: '长文需自建校验' }
+      ] },
+    { key: 's2', name: '日日新 S2 旗舰', sub: '长文档 · 企业级', emoji: '⭐', star: true,
+      dims: [
+        { v: 'pass', t: '逐条对齐审查清单，细项不漏' },
+        { v: 'pass', t: '义务 / 违约 / 兜底，分级标注' },
+        { v: 'pass', t: '每条结论标注原文条款号' },
+        { v: 'pass', t: '拿不准明确说「原文未约定」' }
+      ] }
+  ];
+
+  var RISKS = [
+    { lvl: 'high', name: '权利义务不对等', clauses: ['第 8.3 条', '第 6.1 条'],
+      text: '合同仅约定卖方逾期交货违约金（上限 10%），未设买方逾期付款的对等违约责任，双方责任失衡，建议补充买方付款违约条款。' },
+    { lvl: 'mid', name: '质保金比例偏低', clauses: ['第 6.1 条', '第 5.2 条'],
+      text: '质保金仅 5%，相对 12 个月质保期的风险敞口偏低，建议提高至 10% 并约定与质保期届满挂钩解付。' },
+    { lvl: 'low', name: '验收留痕不足', clauses: ['第 9.2 条'],
+      text: '「逾期未提出异议视为验收合格」未强制书面验收单据，建议补充书面验收报告要求，便于事后追溯。' }
+  ];
+
+  var cols = document.getElementById('cols');
+  var runBtn = document.getElementById('runBtn');
+  var arenaEmpty = document.getElementById('arenaEmpty');
+  var verdictNote = document.getElementById('verdictNote');
+  var running = false;
+
+  /* ---- build columns once ---- */
+  function conclHtml() {
+    var cards = RISKS.map(function (r) {
+      var tags = r.clauses.map(function (c) { return '<span class="clause-tag">📎 ' + c + '</span>'; }).join('');
+      var lvTxt = { high: '高风险', mid: '中风险', low: '低风险' }[r.lvl];
+      return '<div class="risk">' +
+        '<div class="risk-top"><span class="risk-lv ' + r.lvl + '">' + lvTxt + '</span>' +
+        '<span class="risk-name">' + r.name + '</span>' + tags + '</div>' +
+        '<div class="risk-text">' + r.text + '</div></div>';
+    }).join('');
+    return '<div class="concl">' +
+      '<button class="concl-toggle" id="conclToggle" disabled>' +
+        '<span>▸ 展开 S2 审查结论示例</span><span>🔎</span></button>' +
+      '<div class="concl-body" id="conclBody">' + cards +
+        '<div class="concl-foot">✓ 抽取 5/5 条款　✓ 识别 3 项风险　✓ 全部带原文出处</div>' +
+      '</div></div>';
+  }
+
+  MODELS.forEach(function (m) {
+    var col = document.createElement('div');
+    col.className = 'mcol' + (m.star ? ' star' : '');
+    col.dataset.k = m.key;
+    var dimsHtml = m.dims.map(function (d, i) {
+      var vd = VD[d.v];
+      return '<div class="dim" data-d="' + i + '">' +
+        '<div class="dim-name">' + DIMS[i] + '</div>' +
+        '<div class="dim-row"><span class="vd ' + vd.c + '">' + vd.i + '</span>' +
+        '<span class="dim-desc">' + d.t + '</span></div></div>';
+    }).join('');
+    col.innerHTML =
+      '<div class="mcol-head">' +
+        (m.star ? '<span class="gold-badge">★ 本场主角</span>' : '') +
+        '<div class="mcol-name">' + m.emoji + ' ' + m.name + '</div>' +
+        '<div class="mcol-sub">' + m.sub + '</div>' +
+        '<div class="mcol-status" data-k="' + m.key + '">待命</div>' +
+      '</div>' +
+      '<div class="mcol-prog"><i data-k="' + m.key + '"></i></div>' +
+      '<div class="mcol-body">' + dimsHtml + (m.star ? conclHtml() : '') + '</div>';
+    cols.appendChild(col);
+  });
+
+  function statusEl(k) { return cols.querySelector('.mcol-status[data-k="' + k + '"]'); }
+  function progEl(k) { return cols.querySelector('.mcol-prog i[data-k="' + k + '"]'); }
+  function colEl(k) { return cols.querySelector('.mcol[data-k="' + k + '"]'); }
+
+  function setStatus(k, html, cls) {
+    var el = statusEl(k);
+    el.className = 'mcol-status ' + (cls || '');
+    el.innerHTML = html;
+  }
+
+  var RUN_DOTS = '<span class="dots-run"><i></i><i></i><i></i></span> 跑动中…';
+
+  function run() {
+    if (running) return;
+    running = true;
+    runBtn.disabled = true;
+    runBtn.innerHTML = '⏳ 三模型跑动中…';
+    arenaEmpty.style.display = 'none';
+    cols.style.display = '';
+    verdictNote.classList.remove('show');
+
+    // reset all
+    cols.querySelectorAll('.dim').forEach(function (d) { d.classList.remove('in'); });
+    MODELS.forEach(function (m) {
+      colEl(m.key).classList.add('running');
+      colEl(m.key).classList.remove('win');
+      setStatus(m.key, RUN_DOTS, 'running');
+      progEl(m.key).style.width = '0%';
+    });
+    var toggle = document.getElementById('conclToggle');
+    var body = document.getElementById('conclBody');
+    toggle.disabled = true; toggle.classList.remove('ready');
+    body.classList.remove('open');
+    toggle.querySelector('span').textContent = '▸ 展开 S2 审查结论示例';
+
+    // reveal row by row across all three columns
+    var d = 0;
+    function tick() {
+      cols.querySelectorAll('.dim[data-d="' + d + '"]').forEach(function (el) { el.classList.add('in'); });
+      MODELS.forEach(function (m) { progEl(m.key).style.width = ((d + 1) * 25) + '%'; });
+      d++;
+      if (d < 4) setTimeout(tick, 470);
+      else setTimeout(finish, 580);
+    }
+    setTimeout(tick, 520);
+
+    function finish() {
+      MODELS.forEach(function (m) {
+        colEl(m.key).classList.remove('running');
+        progEl(m.key).style.width = '100%';
+        if (m.star) setStatus(m.key, '✓ 完成 · 最优', 'done star');
+        else setStatus(m.key, '✓ 完成', 'done');
+      });
+      colEl('s2').classList.add('win');
+      toggle.disabled = false;
+      toggle.classList.add('ready');
+      verdictNote.classList.add('show');
+      runBtn.disabled = false;
+      runBtn.innerHTML = '↻ 重新开跑';
+      running = false;
+    }
+  }
+
+  runBtn.addEventListener('click', run);
+
+  // S2 conclusion expand / collapse
+  cols.addEventListener('click', function (e) {
+    var t = e.target.closest('.concl-toggle');
+    if (!t || t.disabled) return;
+    var body = document.getElementById('conclBody');
+    var open = body.classList.toggle('open');
+    t.querySelector('span').textContent = (open ? '▾ 收起' : '▸ 展开') + ' S2 审查结论示例';
+  });
+})();
+</script>
+</body>
+</html>

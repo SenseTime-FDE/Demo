@@ -1,0 +1,199 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>巡检员 · 手机语音 Agent —— 中海油 × 商汤</title>
+<link rel="stylesheet" href="assets/style.css">
+<link rel="stylesheet" href="assets/wx.css">
+<style>
+  .role-head { padding: 30px 0 6px; }
+  .role-head .h1 { font-size: clamp(26px,3.4vw,40px); font-weight: 800; line-height: 1.18; letter-spacing: -.01em; }
+  .role-head .h1 .hl { background: var(--grad-energy); -webkit-background-clip: text; background-clip: text; color: transparent; }
+  .role-head .sub { color: var(--text-2); font-size: 15px; max-width: 900px; margin-top: 12px; }
+  .role-head .sub b { color: var(--orange-2); }
+  .role-sec { padding: 8px 0 70px; }
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <div class="wrap-wide">
+    <a class="brand" href="index.html" style="text-decoration:none;">
+      <div class="logos"><img src="assets/st_logo.png" class="logo-img" alt="商汤科技 SenseTime"></div>
+      <span class="sub hide-mobile">现场 Agent</span>
+    </a>
+    <button class="nav-toggle" aria-label="菜单">☰</button>
+    <div class="nav-links">
+      <a href="index.html">方案总览</a>
+      <a href="agent_xjunjian.html" class="nav-cta" style="background:var(--grad-energy);">🛠️ 巡检员</a>
+      <a href="agent_shebei.html">设备工程师</a>
+      <a href="agent_anquan.html">安全员</a>
+      <a href="agent_zhiban.html">值班长</a>
+      <a href="miniapp.html">现场小程序</a>
+      <a href="bi.html">生产 BI</a>
+    </div>
+  </div>
+</nav>
+
+<header class="role-sec">
+  <div class="wrap-wide">
+    <div class="role-head reveal">
+      <div class="kicker orange">Inspector Agent · 手机语音 · 一线现场</div>
+      <div class="h1">巡检员：<span class="hl">戴着手套、一句话</span>，缺陷规程都搞定</div>
+      <p class="sub">海上平台巡检员人手一个云端 AI 助理，入口就在<b>企业微信对话框 / 防爆手机</b> —— 按住说话即可报缺陷、查规程、报隐患、交接班；班前自动推送今日巡检路线与重点。<b>不装新 App、不掏纸笔</b>，说完的每句话自动结构化写入生产数据库。<span class="text-dim">左侧手机可点击场景演示。</span></p>
+      <div class="pill-row" style="margin-top:16px;">
+        <span class="pill">🎙️ 语音免手输</span>
+        <span class="pill">📱 企微 / 防爆手机</span>
+        <span class="pill">🔒 L3 数据不出内网</span>
+        <span class="pill">⛓️ 缺陷→工单闭环</span>
+      </div>
+    </div>
+
+    <div class="a-split" style="margin-top:28px;">
+      <!-- 左：手机 -->
+      <div class="phone-wrap reveal">
+        <div id="phone-slot"></div>
+        <p class="phone-caption">▲ 可交互原型 · 点上方场景或气泡下方 <b>🎙 快捷话术</b> 切换演示</p>
+      </div>
+
+      <!-- 右：说明 -->
+      <div class="reveal">
+        <div class="a-panel">
+          <h3>巡检员 Agent · 五项现场能力</h3>
+          <div class="cap-grid">
+            <div class="cap warm"><div class="ic">📸</div><b>缺陷上报</b><span>拍照+语音，AI 识别缺陷类型/等级、关联历史、自动建工单</span></div>
+            <div class="cap"><div class="ic">📖</div><b>规程秒查</b><span>RAG 检索规程手册，操作步骤语音秒答、带条款出处</span></div>
+            <div class="cap warm"><div class="ic">⚠️</div><b>隐患闭环</b><span>随手报隐患→分类、比对安规、生成整改单并跟踪</span></div>
+            <div class="cap"><div class="ic">🔁</div><b>语音交接班</b><span>口述当班情况，自动结构化成交接记录 + 生产日报</span></div>
+            <div class="cap warm"><div class="ic">📋</div><b>班前推送</b><span>每日推送巡检路线、重点关注设备、天气与作业提醒</span></div>
+            <div class="cap blue"><div class="ic">🔎</div><b>随手问数</b><span>「3号泵出口压力多少」一句话查实时参数与趋势</span></div>
+          </div>
+        </div>
+
+        <div class="a-panel">
+          <h3>语音交互链路 · 每句话都变成生产数据</h3>
+          <div class="flow">
+            <div class="f-step hot"><div class="n">1</div><b>按住说话</b><span>企微/防爆机 零学习</span></div>
+            <div class="f-arrow">→</div>
+            <div class="f-step"><div class="n">2</div><b>ASR 转写</b><span>机泵噪声自适应</span></div>
+            <div class="f-arrow">→</div>
+            <div class="f-step"><div class="n">3</div><b>Agent 理解</b><span>意图识别+工具调用</span></div>
+            <div class="f-arrow">→</div>
+            <div class="f-step"><div class="n">4</div><b>业务执行</b><span>建单/检索/查参数</span></div>
+            <div class="f-arrow">→</div>
+            <div class="f-step hot"><div class="n">5</div><b>生产库留痕</b><span>结构化→BI 看板</span></div>
+          </div>
+          <p class="note"><b>顺手一步，经验变资产：</b>巡检员不需要「用系统」，只是在企微里说话；缺陷、隐患、交接、参数全过程被 Agent 自动结构化写库，喂给班组看板与生产 BI。</p>
+        </div>
+
+        <div class="a-panel">
+          <h3>数据分级与安全（L3 生产数据 · 不出内网）</h3>
+          <div class="mini-scroll">
+            <table class="mini-table">
+              <tr><th>数据类型</th><th>典型内容</th><th>处理方式</th></tr>
+              <tr><td><b>设备缺陷</b></td><td>渗漏/腐蚀/振动异常、位置、图像</td><td>内网本地模型识别 · 不出域</td></tr>
+              <tr><td><b>规程手册</b></td><td>操作规程、设备手册（内部制度）</td><td>L2 脱敏后可云端检索</td></tr>
+              <tr><td><b>交接/日报</b></td><td>当班设备状态、异常、待办</td><td>本地结构化留痕 · 审计可追溯</td></tr>
+              <tr><td><b>实时参数</b></td><td>压力/温度/流量（生产运行数据）</td><td>L3 内网域 · 仅本地 Agent 可读</td></tr>
+            </table>
+          </div>
+          <p class="note"><b>安全底座：</b>本地 Agent 网关统一编排、按数据等级路由、全程留痕；生产/工艺数据全程不出内网，默认不训练不留存。</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<footer class="footer">
+  <div class="wrap">
+    <div class="bottom" style="border:0;padding-top:0;">
+      <span>© 2026 商汤科技 SenseTime · 大模型事业群 —— 为中海油信息科技定制 · 高保真交互原型</span>
+      <span>页面数据均为示意 / 脱敏，非真实生产数据</span>
+    </div>
+  </div>
+</footer>
+
+<script src="assets/app.js"></script>
+<script src="assets/chat.js"></script>
+<script>
+HYChat.mount(document.getElementById('phone-slot'), {
+  contact: { name: 'S-Agent 现场助手', corp: '@中海油·渤海', sub: '企业微信 · 商汤 AI 技术底座' },
+  agent: { name: 'S-Agent 现场助手', avatar: '汕' },
+  user: { name: '张国栋', avatar: '张' },
+  scenarios: [
+    {
+      id: 'push', title: '班前推送', chip: '看今日推送',
+      intro: '每天班前自动推送巡检路线、重点设备与作业提醒 —— 不用问，该知道的都推给你',
+      steps: [
+        { from: 'agent', sys: '⏰ 07:40 · 早班巡检推送自动送达' },
+        { from: 'agent', html: '<div class="c-card"><div class="c-head"><span class="c-ic warm">🧭</span><b>今日巡检路线 · A 平台生产区</b><span class="tag tag-orange">早班</span></div><div class="c-check"><span class="s todo">○</span>注水泵区：1#/2#/3# 泵、出口管汇</div><div class="c-check"><span class="s todo">○</span>分离器区：三相分离器、液位/压力</div><div class="c-check"><span class="s todo">○</span>火气系统：可燃气探头 12 只</div><div class="c-check"><span class="s todo">○</span>公用系统：仪表风、发电机组</div><div class="c-foot">按路线走到点位说一声即自动打卡留痕</div></div>' },
+        { from: 'agent', html: '<div class="c-card"><div class="c-head"><span class="c-ic">⚠️</span><b>重点关注 · 昨班遗留</b></div><div class="c-kv"><span>3# 注水泵</span><b class="warn">出口压力偏低，需复查</b></div><div class="c-kv"><span>2# 分离器</span><b class="warm">液位计昨报波动</b></div><div class="c-kv"><span>今日天气</span><b>阵风 6 级 · 甲板湿滑注意</b></div><div class="c-foot">重点点位已在路线中置顶 · 到点我会再提醒</div></div>' },
+        { from: 'user', voice: '收到，先去注水泵区，重点看 3 号泵。', dur: 5 },
+        { from: 'agent', text: '✅ 已记入今日重点。到 3# 泵时我会把昨班压力曲线和处置建议一起推给你 💪' }
+      ]
+    },
+    {
+      id: 'defect', title: '报缺陷', chip: '报设备缺陷',
+      intro: '看到渗漏/腐蚀/异响，拍照+语音一说 —— AI 识别缺陷、关联历史、自动建工单',
+      steps: [
+        { from: 'user', voice: '3号注水泵出口法兰有渗漏，机封那里在滴油，出口压力从12降到9兆帕。', dur: 9 },
+        { from: 'agent', text: '收到 ✓ 已结合你拍的照片和实时参数分析 👇' },
+        { from: 'agent', html: '<div class="c-card"><div class="c-head"><span class="c-ic warm">📸</span><b>缺陷识别结果</b><span class="tag tag-orange">中高风险</span></div><div class="c-kv"><span>设备位号</span><b>P-1203B 3# 注水泵</b></div><div class="c-kv"><span>缺陷类型</span><b class="warm">出口法兰密封面渗漏 · 机封泄漏</b></div><div class="c-kv"><span>严重度</span><b class="warn">中高 · 压力降 25%</b></div><div class="c-kv"><span>视觉置信度</span><b class="teal">93%</b></div><div class="c-foot">多模态视觉识别 + 实时参数交叉验证</div></div>' },
+        { from: 'agent', html: '<div class="c-card"><div class="c-head"><span class="c-ic">🗂️</span><b>关联历史处置</b></div><div class="c-note">#WO-2314（2025-11）同泵机封泄漏 → 更换机封+紧固法兰螺栓，处置后运行正常 214 天。<br>建议参照该工单处置。</div><div class="c-foot">知识来源：设备台账 · 同类工单库</div></div>' },
+        { from: 'agent', html: '<div class="c-card"><div class="c-head"><span class="c-ic blue">🧾</span><b>已生成维修工单草稿</b><span class="tag tag-blue">待派工</span></div><div class="c-kv"><span>工单号</span><b>WO-2317</b></div><div class="c-kv"><span>建议措施</span><b>更换机封 · 紧固法兰</b></div><div class="c-kv"><span>所需备件</span><b>机封 ×1（库存 3）</b></div><div class="c-btns"><span class="c-btn primary">🎙 说「派工」下发</span><span class="c-btn ghost">改一下</span></div><div class="c-foot">派工后同步机务班组与值班长</div></div>' },
+        { from: 'user', voice: '派工，通知机务班，我先做临时隔离。', dur: 5 },
+        { from: 'agent', text: '✅ WO-2317 已派机务班，值班长已知会。临时隔离步骤我推给你了，注意先泄压再操作 ⚠️' },
+        { from: 'agent', sys: '缺陷上报 · 工单 · 隔离动作已写入生产数据库' }
+      ]
+    },
+    {
+      id: 'sop', title: '查规程', chip: '问操作规程',
+      intro: 'RAG 检索规程手册，语音提问秒级回答 · 带条款出处',
+      steps: [
+        { from: 'user', voice: '离心泵启动前要做哪些检查？', dur: 4 },
+        { from: 'agent', text: '好的国栋，离心泵<b>启动前检查</b>要点如下 👇' },
+        { from: 'agent', html: '<div class="c-card"><div class="c-head"><span class="c-ic">📖</span><b>离心泵启动前检查 · SOP</b><span class="tag tag-cyan">规程库</span></div><ol class="c-steps"><li>盘车 2-3 圈，确认转子无卡涩</li><li>检查润滑油位在视镜 1/2~2/3</li><li>确认进口阀全开、出口阀微开</li><li>检查机封冲洗液、冷却水通畅</li><li>确认联轴器防护罩到位、地脚紧固</li></ol><div class="c-foot">来源：《机械设备操作规程》第 4.2.3 条 · 已核</div></div>' },
+        { from: 'user', voice: '如果盘车盘不动呢？', dur: 3 },
+        { from: 'agent', text: '<b>禁止强行启动</b>。可能是抱轴/异物/长期停机锈死 —— 报机务处理，并按「设备缺陷」上报给我，我同步值班长。口诀：<b>盘不动，不硬启</b>。' },
+        { from: 'agent', sys: '本次问答已计入个人技能画像 · 泵类操作 +1' }
+      ]
+    },
+    {
+      id: 'hazard', title: '报隐患', chip: '报安全隐患',
+      intro: '拍照/语音报隐患 → AI 分类、比对安规、生成整改单并跟踪闭环',
+      steps: [
+        { from: 'user', voice: '二层甲板管廊这里有一处保温层脱落，露出的管线在冒白汽，旁边通道还有点滑。', dur: 9 },
+        { from: 'agent', text: '收到 ✓ 已识别为隐患，正在分类比对安规 👇' },
+        { from: 'agent', html: '<div class="c-card"><div class="c-head"><span class="c-ic warm">⚠️</span><b>隐患识别 · 整改单草稿</b><span class="tag tag-orange">一般隐患</span></div><div class="c-kv"><span>隐患类别</span><b class="warm">设备设施 · 保温脱落/介质外漏</b></div><div class="c-kv"><span>位置</span><b>二层甲板 · 管廊 K7 段</b></div><div class="c-kv"><span>关联安规</span><b class="teal">HSE-042 保温防护</b></div><div class="c-kv"><span>建议措施</span><b>隔离警示 · 补保温 · 查漏点</b></div><div class="c-btns"><span class="c-btn primary">提交整改单</span><span class="c-btn">加急上报</span></div><div class="c-foot">提交后进入隐患闭环 · 到期未整改自动升级</div></div>' },
+        { from: 'user', voice: '提交，通道湿滑先加个警示牌。', dur: 4 },
+        { from: 'agent', text: '✅ 整改单 HD-0918 已提交属地负责人，限期 3 天闭环。已同步「通道防滑警示」提醒，闭环前每天我提醒你复查一次 🔁' },
+        { from: 'agent', sys: '隐患上报 → 整改 → 复查全过程留痕 · 进入 HSE 闭环台账' }
+      ]
+    },
+    {
+      id: 'handover', title: '交接班', chip: '交语音班',
+      intro: '说一段当班情况，自动结构化成交接记录 + 生产日报',
+      steps: [
+        { from: 'agent', text: '国栋，到交接时间了，说一段今天的情况给我就行～' },
+        { from: 'user', voice: '3号注水泵机封泄漏已派机务处理，做了临时隔离；二层管廊保温脱落报了整改单；1号发电机负荷偏高需要下一班关注；其余设备运行正常，火气系统探头全部正常。', dur: 22 },
+        { from: 'agent', html: '<div class="c-card"><div class="c-head"><span class="c-ic warm">📝</span><b>交接班记录 · 已结构化</b><span class="tag tag-green">自动生成</span></div><div class="c-check"><span class="s warn">⚠</span>3# 注水泵：机封泄漏 · 已派机务 · 临时隔离（待复位）</div><div class="c-check"><span class="s warn">⚠</span>管廊 K7：保温脱落 · 整改单 HD-0918（限 3 天）</div><div class="c-check"><span class="s todo">○</span>1# 发电机：负荷偏高 · 请下一班重点关注</div><div class="c-check"><span class="s done">✓</span>火气系统：探头 12 只全部正常</div><div class="c-check"><span class="s done">✓</span>其余设备：运行正常</div><div class="c-btns"><span class="c-btn primary">确认提交</span><span class="c-btn ghost">改一下</span></div><div class="c-foot">入库 → 下一班交接单 · 自动汇入生产日报</div></div>' },
+        { from: 'user', voice: '没问题，提交。', dur: 2 },
+        { from: 'agent', text: '✅ 交接记录已提交，下一班张伟已收到；今日生产日报已自动汇总 2 项异常、1 项关注。辛苦啦 🌟' }
+      ]
+    },
+    {
+      id: 'ask', title: '随手问数', chip: '问设备参数',
+      intro: '一句话查实时参数与趋势 —— 不用回中控、不用翻 DCS',
+      steps: [
+        { from: 'user', voice: '1号发电机现在负荷多少？跟昨天比怎么样？', dur: 5 },
+        { from: 'agent', html: '<div class="c-card"><div class="c-head"><span class="c-ic blue">📟</span><b>1# 发电机 · 实时</b><span class="tag tag-blue">生产数据</span></div><div class="c-big"><div class="v warm">88%</div><div class="l">当前负荷率 · 环比昨日 ↑6%</div></div><div class="c-bars"><div class="b-row"><span>今日均值</span><span class="b-track"><span class="b-fill warm" style="width:85%"></span></span><span class="b-val">85%</span></div><div class="b-row"><span>昨日均值</span><span class="b-track"><span class="b-fill" style="width:79%"></span></span><span class="b-val">79%</span></div></div><div class="c-kv"><span>提示</span><b class="warn">连续 3h >85%，建议排查</b></div><div class="c-foot">数据来源：生产实时库（L3 · 内网只读）</div></div>' },
+        { from: 'user', voice: '帮我把这个记进交接重点。', dur: 3 },
+        { from: 'agent', text: '✅ 已加入今日交接重点：「1# 发电机负荷持续偏高，请下一班关注」。' }
+      ]
+    }
+  ]
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,282 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Demo 原型中心 · 中海油 × 商汤 —— 不看步骤、只看效果</title>
+<meta name="description" content="8 个可点击 AI Demo 原型：海上一线的手机语音、企业小程序、设备缺陷识别、作业票·HSE；职能研发的知识问答、自然语言取数、合同三模型对比、会议纪要。输入什么，秒级得到什么。">
+<link rel="stylesheet" href="assets/style.css">
+<style>
+/* ===== demos-center only styles ===== */
+
+/* hero */
+.dhero { position: relative; overflow: hidden; padding: 74px 0 46px; background: var(--bg-0); }
+.dhero .bg { position:absolute; inset:0; z-index:0;
+  background:
+    radial-gradient(1100px 560px at 82% -8%, rgba(18,165,150,.20), transparent 55%),
+    radial-gradient(900px 560px at 4% 6%, rgba(255,138,61,.12), transparent 55%),
+    radial-gradient(900px 620px at 50% 128%, rgba(59,140,255,.12), transparent 55%); }
+.dhero .wrap { position: relative; z-index: 2; }
+.dhero h1 { font-size: clamp(30px, 5vw, 54px); line-height: 1.08; letter-spacing: -.02em; max-width: 780px; }
+.dhero h1 .g { background: linear-gradient(100deg,#35e2d4,#58aaff 55%,#3b8cff); -webkit-background-clip:text; background-clip:text; color:transparent; }
+.dhero .sub { color: var(--text-2); font-size: clamp(15px,1.7vw,19px); margin-top: 18px; max-width: 620px; }
+.dhero .pill-row { margin-top: 26px; }
+.dhero .pill.hi { border-color: rgba(255,138,61,.4); color: var(--orange-2); background: rgba(255,138,61,.08); }
+
+/* group header */
+.ghead { display:flex; align-items:flex-end; justify-content:space-between; gap:20px; flex-wrap:wrap; margin-bottom: 30px; }
+.ghead h2 { font-size: clamp(23px,3vw,34px); }
+.ghead h2 .hl { -webkit-background-clip:text; background-clip:text; color:transparent; }
+.ghead h2.orange .hl { background: var(--grad-energy); -webkit-background-clip:text; background-clip:text; color:transparent; }
+.ghead h2.blue .hl { background: var(--grad-cyan); -webkit-background-clip:text; background-clip:text; color:transparent; }
+.ghead .gsub { color: var(--text-dim); font-size: 14px; margin-top: 8px; max-width: 560px; }
+.gcount { display:inline-flex; align-items:center; gap:8px; font-size:12.5px; font-weight:700; color:var(--text-2);
+  padding:8px 14px; border-radius:22px; border:1px solid var(--line-2); background:rgba(255,255,255,.03); white-space:nowrap; }
+
+/* gallery grid */
+.gallery { display:grid; gap: 20px; grid-template-columns: repeat(4,1fr); }
+@media (max-width: 1080px){ .gallery { grid-template-columns: repeat(2,1fr); } }
+@media (max-width: 560px){ .gallery { grid-template-columns: 1fr; } }
+
+/* demo card */
+.dcard { display:flex; flex-direction:column; overflow:hidden; min-height: 236px; }
+.dcard > * { position: relative; z-index: 1; }
+.dcard .tag { top: 20px; right: 20px; z-index: 2; }
+.dcard-ic { width:56px; height:56px; font-size:28px; border-radius:16px; display:grid; place-items:center;
+  margin-bottom: 15px; background: rgba(53,226,212,.12); border:1px solid rgba(53,226,212,.25); transition:.25s; }
+.dcard.orange .dcard-ic { background: rgba(255,138,61,.13); border-color: rgba(255,138,61,.30); }
+.dcard.blue   .dcard-ic { background: rgba(59,140,255,.13); border-color: rgba(59,140,255,.30); }
+.dcard.cyan   .dcard-ic { background: rgba(53,226,212,.13); border-color: rgba(53,226,212,.30); }
+.dcard:hover .dcard-ic { transform: translateY(-2px) scale(1.04); }
+.d-eyebrow { font-size:11px; letter-spacing:1.6px; color: var(--text-mute); font-weight:800; margin-bottom:6px; }
+.dcard h3 { font-size: 18.5px; margin-bottom: 8px; }
+.dcard p { font-size: 13.5px; color: var(--text-dim); margin:0; flex:1; line-height:1.55; }
+.dcard .open { margin-top: 16px; font-size: 13px; font-weight: 800; display:inline-flex; align-items:center; gap:7px; transition:.2s; }
+.dcard .open svg { width:15px; height:15px; transition:.2s; }
+.dcard:hover .open svg { transform: translateX(4px); }
+.dcard.orange .open { color: var(--orange-2); }
+.dcard.blue   .open { color: var(--azure); }
+.dcard.cyan   .open { color: var(--cyan); }
+.dcard.orange:hover { border-color: rgba(255,138,61,.42); }
+.dcard.blue:hover   { border-color: rgba(59,140,255,.42); }
+.dcard.cyan:hover   { border-color: rgba(53,226,212,.42); }
+/* accent glow */
+.dcard::after { content:""; position:absolute; top:-46px; right:-46px; width:150px; height:150px; border-radius:50%;
+  filter: blur(48px); opacity:0; transition:.3s; pointer-events:none; z-index:0; }
+.dcard.orange::after { background: radial-gradient(circle, rgba(255,138,61,.55), transparent 70%); }
+.dcard.blue::after   { background: radial-gradient(circle, rgba(59,140,255,.55), transparent 70%); }
+.dcard.cyan::after   { background: radial-gradient(circle, rgba(53,226,212,.55), transparent 70%); }
+.dcard:hover::after { opacity: .5; }
+
+/* CTA band (local — index defines its own) */
+.cta-band { position:relative; overflow:hidden; border-radius: var(--radius-lg); padding: 52px 44px; text-align:center;
+  background: var(--grad-ocean); border:1px solid rgba(255,255,255,.12); }
+.cta-band h2 { font-size: clamp(23px,3vw,34px); color:#fff; }
+.cta-band p { color: rgba(255,255,255,.88); max-width: 660px; margin: 14px auto 0; }
+.cta-band .row { display:flex; gap:14px; justify-content:center; flex-wrap:wrap; margin-top: 28px; }
+.cta-band .btn-ghost { border-color: rgba(255,255,255,.5); color:#fff; background: rgba(255,255,255,.08); }
+@media (max-width: 620px){ .cta-band { padding: 40px 22px; } }
+</style>
+</head>
+<body>
+
+<!-- ============ NAV ============ -->
+<nav class="nav"><div class="wrap-wide" style="justify-content:space-between;">
+  <a class="brand" href="index.html"><div class="logos"><img src="assets/st_logo.png" class="logo-img" alt="商汤科技 SenseTime"></div><span class="sub hide-mobile">Demo 原型</span></a>
+  <div style="display:flex;gap:8px;align-items:center;"><a class="btn btn-sm btn-ghost" href="index.html">← 返回方案</a><a class="btn btn-sm btn-ghost" href="demos.html">全部 Demo</a></div>
+</div></nav>
+
+<!-- ============ HERO ============ -->
+<header class="dhero">
+  <div class="bg"></div>
+  <div class="orb orb-cyan" style="width:360px;height:360px;top:-120px;right:-60px;"></div>
+  <div class="orb orb-orange" style="width:320px;height:320px;bottom:-160px;left:-100px;"></div>
+  <div class="wrap">
+    <div class="kicker orange reveal">See It Work · Demo 原型</div>
+    <h1 class="reveal">不看步骤、<span class="g">只看效果</span></h1>
+    <p class="sub reveal">输入什么 → 秒级得到什么，这些现场都能演示。挑一个点开，看 AI 怎么把一句话、一张照片，变成结构化的工单、答案、报表与纪要。</p>
+    <div class="pill-row reveal">
+      <span class="pill hi">🧪 8 个可点原型</span>
+      <span class="pill">★ 现场可演示</span>
+      <span class="pill">🗺️ 覆盖 一线 · 职能 · 研发</span>
+      <span class="pill">🔒 数据均为示意 / 脱敏</span>
+    </div>
+  </div>
+</header>
+
+<!-- ============ GROUP 1 · 一线现场 ============ -->
+<section class="section tight bg-1">
+  <div class="wrap-wide">
+    <div class="ghead reveal">
+      <div>
+        <div class="kicker orange">Frontline · 海上一线</div>
+        <h2 class="orange">戴着手套、在噪声里，<span class="hl">一句话就能用</span></h2>
+        <p class="gsub">拍一张、说一句，现场秒级出结构化结果 —— 手机语音与小程序把 Agent 送到平台上，这是最难、也最见差异化的一环。</p>
+      </div>
+      <span class="gcount">🛠️ 4 个一线原型</span>
+    </div>
+
+    <div class="gallery">
+      <a class="card dcard orange reveal" href="demo-voice.html">
+        <span class="tag tag-orange">手机语音</span>
+        <div class="dcard-ic">🎙️</div>
+        <div class="d-eyebrow mono">DEMO 01</div>
+        <h3>手机语音助手</h3>
+        <p>一句话唤起，现场报缺陷、查规程、开作业票 —— 免手输、免打字，说完即得结构化结果。</p>
+        <span class="open">▶ 打开 Demo
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+        </span>
+      </a>
+
+      <a class="card dcard orange reveal" href="demo-miniprogram.html">
+        <span class="tag tag-orange">小程序</span>
+        <div class="dcard-ic">📱</div>
+        <div class="d-eyebrow mono">DEMO 02</div>
+        <h3>企业小程序</h3>
+        <p>扫码即用、零安装，拍照上报 + 设备问答 + 作业票 —— 一线员工人手可及的现场入口。</p>
+        <span class="open">▶ 打开 Demo
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+        </span>
+      </a>
+
+      <a class="card dcard orange reveal" href="demo-inspection.html">
+        <span class="tag tag-orange">视觉 AI</span>
+        <div class="dcard-ic">📸</div>
+        <div class="d-eyebrow mono">DEMO 03</div>
+        <h3>设备缺陷识别</h3>
+        <p>拍照识别缺陷类型 / 等级，关联历史处置、一键生成工单 —— 渗漏、腐蚀、松动，看一眼就分级。</p>
+        <span class="open">▶ 打开 Demo
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+        </span>
+      </a>
+
+      <a class="card dcard orange reveal" href="demo-permit.html">
+        <span class="tag tag-orange">安全</span>
+        <div class="dcard-ic">📋</div>
+        <div class="d-eyebrow mono">DEMO 04</div>
+        <h3>作业票 · HSE 助手</h3>
+        <p>说明作业内容，自动出作业票草稿 + JSA 风险 + 安规比对 —— 动火 / 受限空间 / 高处作业不漏项。</p>
+        <span class="open">▶ 打开 Demo
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+        </span>
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- ============ GROUP 2 · 职能研发 ============ -->
+<section class="section tight bg-grad">
+  <div class="wrap-wide">
+    <div class="ghead reveal">
+      <div>
+        <div class="kicker blue">Office &amp; R&amp;D · 职能研发</div>
+        <h2 class="blue">把日常的查、取、审、记，<span class="hl">交给 AI</span></h2>
+        <p class="gsub">法务财务、科技研发，人人用得上 —— 带出处、可复核、绝不臆造。桌面即开，问一句、说一句就有结果。</p>
+      </div>
+      <span class="gcount">🏢 4 个职能 / 研发原型</span>
+    </div>
+
+    <div class="gallery">
+      <a class="card dcard cyan reveal" href="demo-knowledge.html">
+        <span class="tag tag-cyan">RAG</span>
+        <div class="dcard-ic">🔎</div>
+        <div class="d-eyebrow mono">DEMO 05</div>
+        <h3>制度 / 知识问答</h3>
+        <p>基于你的规程库，带出处地答，绝不臆造 —— 库里没有就说「未覆盖」，每条结论都能点回原文。</p>
+        <span class="open">▶ 打开 Demo
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+        </span>
+      </a>
+
+      <a class="card dcard blue reveal" href="demo-data.html">
+        <span class="tag tag-blue">NL2SQL</span>
+        <div class="dcard-ic">📊</div>
+        <div class="d-eyebrow mono">DEMO 06</div>
+        <h3>自然语言取数</h3>
+        <p>说句话出 SQL、取数、趋势图 + 一句话结论，不用排期 —— 结果可复核，取数不再等开发。</p>
+        <span class="open">▶ 打开 Demo
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+        </span>
+      </a>
+
+      <a class="card dcard cyan reveal" href="demo-contract.html">
+        <span class="tag tag-red">三模型</span>
+        <div class="dcard-ic">📄</div>
+        <div class="d-eyebrow mono">DEMO 07</div>
+        <h3>合同审核 · 三模型对比</h3>
+        <p>同一份合同，豆包 / DeepSeek / 日日新 S2 见真章 —— 逐条对齐审查清单，谁抓得准一目了然。</p>
+        <span class="open">▶ 打开 Demo
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+        </span>
+      </a>
+
+      <a class="card dcard blue reveal" href="demo-minutes.html">
+        <span class="tag tag-blue">语音纪要</span>
+        <div class="dcard-ic">📝</div>
+        <div class="d-eyebrow mono">DEMO 08</div>
+        <h3>会议纪要</h3>
+        <p>录音进去，纪要 + 决议 + 待办到人 + 跟进邮件出来 —— 散会即成稿，责任人自动落到位。</p>
+        <span class="open">▶ 打开 Demo
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+        </span>
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- ============ CTA BAND ============ -->
+<section class="section">
+  <div class="wrap">
+    <div class="cta-band reveal">
+      <div class="orb orb-cyan" style="width:300px;height:300px;top:-100px;right:-40px;opacity:.35;"></div>
+      <h2>Demo 好看，落地更关键</h2>
+      <p>这 8 个原型背后，是一整套数据分级、私有可控、FDE 陪跑的落地方案。看完效果，回到方案里看看它怎么在中海油安全跑起来。</p>
+      <div class="row">
+        <a href="index.html" class="btn" style="background:#fff;color:#0a3a6b;font-size:15px;">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" style="width:18px;height:18px;"><path d="M19 12H5M11 18l-6-6 6-6"/></svg>
+          返回方案总览
+        </a>
+        <a href="index.html#scenarios" class="btn btn-ghost" style="font-size:15px;">从场景版图找起 →</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ FOOTER ============ -->
+<footer class="footer" id="contact">
+  <div class="wrap">
+    <div class="cols">
+      <div>
+        <div class="brand" style="margin-bottom:14px;">
+          <div class="logos">
+            <img src="assets/st_logo.png" class="logo-img" alt="商汤科技 SenseTime">
+          </div>
+        </div>
+        <p style="max-width:340px;">8 个可点击 Demo 原型 —— 海上一线的语音、小程序、缺陷识别、作业票，与职能研发的知识问答、取数、合同对比、会议纪要。输入什么，秒级得到什么。</p>
+        <p style="color:var(--text-mute);margin-top:12px;">商汤科技 · 大模型事业群</p>
+      </div>
+      <div>
+        <h4>一线现场</h4>
+        <a href="demo-voice.html">🎙️ 手机语音助手</a>
+        <a href="demo-miniprogram.html">📱 企业小程序</a>
+        <a href="demo-inspection.html">📸 设备缺陷识别</a>
+        <a href="demo-permit.html">📋 作业票 · HSE 助手</a>
+      </div>
+      <div>
+        <h4>职能 / 研发</h4>
+        <a href="demo-knowledge.html">🔎 制度 / 知识问答</a>
+        <a href="demo-data.html">📊 自然语言取数</a>
+        <a href="demo-contract.html">📄 合同审核 · 三模型</a>
+        <a href="demo-minutes.html">📝 会议纪要</a>
+      </div>
+    </div>
+    <div class="bottom">
+      <span>© 2026 商汤科技 SenseTime · 大模型事业群 —— 为中海油信息科技定制</span>
+      <span>本站为方案演示原型，数据均为示意 / 脱敏</span>
+    </div>
+  </div>
+</footer>
+
+<script src="assets/app.js"></script>
+</body>
+</html>

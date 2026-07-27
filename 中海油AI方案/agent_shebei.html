@@ -1,0 +1,200 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>设备工程师 · 手机语音 Agent —— 中海油 × 商汤</title>
+<link rel="stylesheet" href="assets/style.css">
+<link rel="stylesheet" href="assets/wx.css">
+<style>
+  .role-head { padding: 30px 0 6px; }
+  .role-head .h1 { font-size: clamp(26px,3.4vw,40px); font-weight: 800; line-height: 1.18; letter-spacing: -.01em; }
+  .role-head .h1 .hl { background: var(--grad-energy); -webkit-background-clip: text; background-clip: text; color: transparent; }
+  .role-head .sub { color: var(--text-2); font-size: 15px; max-width: 900px; margin-top: 12px; }
+  .role-head .sub b { color: var(--orange-2); }
+  .role-sec { padding: 8px 0 70px; }
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <div class="wrap-wide">
+    <a class="brand" href="index.html" style="text-decoration:none;">
+      <div class="logos"><img src="assets/st_logo.png" class="logo-img" alt="商汤科技 SenseTime"></div>
+      <span class="sub hide-mobile">现场 Agent</span>
+    </a>
+    <button class="nav-toggle" aria-label="菜单">☰</button>
+    <div class="nav-links">
+      <a href="index.html">方案总览</a>
+      <a href="agent_xjunjian.html">巡检员</a>
+      <a href="agent_shebei.html" class="nav-cta" style="background:var(--grad-cyan);color:#06202a;">🔧 设备工程师</a>
+      <a href="agent_anquan.html">安全员</a>
+      <a href="agent_zhiban.html">值班长</a>
+      <a href="miniapp.html">现场小程序</a>
+      <a href="bi.html">生产 BI</a>
+    </div>
+  </div>
+</nav>
+
+<header class="role-sec">
+  <div class="wrap-wide">
+    <div class="role-head reveal">
+      <div class="kicker orange">Equipment Engineer · 手机语音 · 机务机组</div>
+      <div class="h1">设备工程师：<span class="hl">故障诊断、维修手册</span>，一句话到手</div>
+      <p class="sub">海上平台机务/设备工程师人手一个云端 AI 助理，入口就在<b>企业微信对话框 / 防爆手机</b> —— 按住说话即可诊断故障、查维修手册、申领备件、回单闭环；每日自动推送今日工单与设备健康预警。<b>不装新 App、不翻厚手册</b>，说完的每句话自动结构化写入设备台账与健康档案。<span class="text-dim">左侧手机可点击场景演示。</span></p>
+      <div class="pill-row" style="margin-top:16px;">
+        <span class="pill">🎙️ 语音免手输</span>
+        <span class="pill">🩺 故障树诊断</span>
+        <span class="pill">📖 维修手册 RAG</span>
+        <span class="pill">📈 预测性维护</span>
+        <span class="pill">🔒 L3 数据不出内网</span>
+      </div>
+    </div>
+
+    <div class="a-split" style="margin-top:28px;">
+      <!-- 左：手机 -->
+      <div class="phone-wrap reveal">
+        <div id="phone-slot"></div>
+        <p class="phone-caption">▲ 可交互原型 · 点上方场景或气泡下方 <b>🎙 快捷话术</b> 切换演示</p>
+      </div>
+
+      <!-- 右：说明 -->
+      <div class="reveal">
+        <div class="a-panel">
+          <h3>设备工程师 Agent · 六项机务能力</h3>
+          <div class="cap-grid">
+            <div class="cap warm"><div class="ic">🩺</div><b>故障诊断</b><span>语音描述症状/拍铭牌，AI 给故障树、原因排序与处置步骤</span></div>
+            <div class="cap"><div class="ic">📖</div><b>维修手册秒查</b><span>RAG 检索机组手册/规程，步骤条款语音秒答、带出处</span></div>
+            <div class="cap warm"><div class="ic">📦</div><b>备件库存申领</b><span>一句话查库存/在途，卡片直接申领、发起补货</span></div>
+            <div class="cap"><div class="ic">🔁</div><b>工单闭环</b><span>完工语音回单，自动结构化完工记录、试运参数、关工单</span></div>
+            <div class="cap warm"><div class="ic">📈</div><b>预测性维护</b><span>振动/温度趋势建模，故障前预警并给检修建议</span></div>
+            <div class="cap blue"><div class="ic">🔎</div><b>设备健康问数</b><span>「1号压缩机振动趋势」一句话查健康档案与曲线</span></div>
+          </div>
+        </div>
+
+        <div class="a-panel">
+          <h3>语音交互链路 · 每句话都变成设备资产</h3>
+          <div class="flow">
+            <div class="f-step hot"><div class="n">1</div><b>按住说话</b><span>企微/防爆机 零学习</span></div>
+            <div class="f-arrow">→</div>
+            <div class="f-step"><div class="n">2</div><b>ASR 转写</b><span>机组噪声自适应</span></div>
+            <div class="f-arrow">→</div>
+            <div class="f-step"><div class="n">3</div><b>Agent 理解</b><span>故障树+知识检索</span></div>
+            <div class="f-arrow">→</div>
+            <div class="f-step"><div class="n">4</div><b>业务执行</b><span>诊断/建单/查备件</span></div>
+            <div class="f-arrow">→</div>
+            <div class="f-step hot"><div class="n">5</div><b>档案留痕</b><span>台账+健康档案</span></div>
+          </div>
+          <p class="note"><b>顺手一步，经验变资产：</b>设备工程师不需要「用系统」，只是在企微里说话；诊断、维修、备件、闭环全过程被 Agent 自动结构化写入设备台账与健康档案，喂给预测性维护模型与生产 BI。</p>
+        </div>
+
+        <div class="a-panel">
+          <h3>关键动设备 · 在线健康监测（预测性维护底座）</h3>
+          <div class="mini-scroll">
+            <table class="mini-table">
+              <tr><th>关键设备</th><th>监测参数</th><th>当前状态</th><th>处置</th></tr>
+              <tr><td><b>1# 主压缩机</b></td><td>二级出口温度 / 振动</td><td>温度 118℃ · 有异响</td><td>诊断中 · 待建单</td></tr>
+              <tr><td><b>2# 注水泵</b></td><td>振动烈度</td><td>4.2 mm/s · 7 日↑趋势</td><td>预警 · 预测性维护</td></tr>
+              <tr><td><b>透平发电机组</b></td><td>滑油温度 / 换油周期</td><td>距下次换油约 2800h</td><td>计划内 · 在监</td></tr>
+              <tr><td><b>3# 外输泵</b></td><td>机封 / 出口压力</td><td>12.0 MPa · 正常</td><td>正常在监</td></tr>
+            </table>
+          </div>
+          <p class="note"><b>预测性维护：</b>在线监测振动/温度/压力等趋势，模型识别早期劣化征兆并在故障前预警；生产/工艺与设备运行数据全程 L3 内网只读、不出域，默认不训练不留存。</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<footer class="footer">
+  <div class="wrap">
+    <div class="bottom" style="border:0;padding-top:0;">
+      <span>© 2026 商汤科技 SenseTime · 大模型事业群 —— 为中海油信息科技定制 · 高保真交互原型</span>
+      <span>页面数据均为示意 / 脱敏，非真实生产数据</span>
+    </div>
+  </div>
+</footer>
+
+<script src="assets/app.js"></script>
+<script src="assets/chat.js"></script>
+<script>
+HYChat.mount(document.getElementById('phone-slot'), {
+  contact: { name: 'S-Agent 设备工程师助手', corp: '@中海油·渤海', sub: '企业微信 · 商汤 AI 技术底座' },
+  agent: { name: 'S-Agent 设备工程师助手', avatar: '汕' },
+  user: { name: '王海洋', avatar: '王' },
+  scenarios: [
+    {
+      id: 'push', title: '每日待办', chip: '看今日待办',
+      intro: '每天班前自动推送今日工单待办与设备健康预警 —— 不用查，该处理的都推给你',
+      steps: [
+        { from: 'agent', sys: '⏰ 07:30 · 机务早班工作推送自动送达' },
+        { from: 'agent', html: '<div class="c-card"><div class="c-head"><span class="c-ic warm">🧾</span><b>今日工单待办 · 机务</b><span class="tag tag-orange">3 单</span></div><div class="c-check"><span class="s todo">○</span>WO-2317：3# 注水泵机封更换（高）</div><div class="c-check"><span class="s todo">○</span>WO-2320：1# 主压缩机滤芯更换（中）</div><div class="c-check"><span class="s todo">○</span>WO-2321：透平机组滑油取样送检（低）</div><div class="c-foot">按优先级排序 · 完工语音回单即自动闭环</div></div>' },
+        { from: 'agent', html: '<div class="c-card"><div class="c-head"><span class="c-ic">📈</span><b>设备健康预警 · 预测性维护</b><span class="tag tag-orange">1 项趋势预警</span></div><div class="c-kv"><span>2# 注水泵</span><b class="warn">振动烈度 7 日上升 3.1→4.2 mm/s</b></div><div class="c-kv"><span>模型研判</span><b class="warm">轴承早期磨损征兆 · 建议 2 周内排检</b></div><div class="c-kv"><span>1# 主压缩机</span><b class="warn">二级出口温度偏高，需关注</b></div><div class="c-foot">来源：在线监测系统 · 振动/温度趋势模型</div></div>' },
+        { from: 'user', voice: '先把2号泵振动这个看一下，帮我拉一下它这周的趋势。', dur: 5 },
+        { from: 'agent', text: '好的王工，2# 注水泵振动趋势我调出来了，稍后在「设备健康问数」里给你详细曲线。今天三单我按优先级排好了，WO-2317 机封备件在库，可直接开工 💪' }
+      ]
+    },
+    {
+      id: 'diag', title: '故障诊断', chip: '报设备故障',
+      intro: '语音描述症状或拍铭牌 —— AI 给故障树、可能原因排序、处置步骤、所需备件与 MEL 条件',
+      steps: [
+        { from: 'user', voice: '1号主压缩机二级出口温度偏高，报到118度了，还有点异响，我拍了铭牌你看下。', dur: 8 },
+        { from: 'agent', text: '收到 ✓ 铭牌已识别为 <b>1# 主压缩机（型号 MCL-1002）</b>，结合实时参数做诊断 👇' },
+        { from: 'agent', html: '<div class="c-card"><div class="c-head"><span class="c-ic warm">🩺</span><b>故障诊断 · 可能原因排序</b><span class="tag tag-orange">中高风险</span></div><div class="c-kv"><span>设备位号</span><b>K-1001 1# 主压缩机</b></div><div class="c-kv"><span>症状</span><b class="warm">二级出口温度 118℃ · 异响</b></div><div class="c-check"><span class="s warn">⚠</span>① 二级冷却器结垢 / 冷却水不足 · 置信 61%</div><div class="c-check"><span class="s warn">⚠</span>② 二级入口阀片损坏 / 回流 · 置信 24%</div><div class="c-check"><span class="s todo">○</span>③ 联轴器 / 轴承异常致异响 · 置信 15%</div><div class="c-foot">基于故障树 + 实时参数 + 同型机历史工单</div></div>' },
+        { from: 'agent', html: '<div class="c-card"><div class="c-head"><span class="c-ic blue">🧭</span><b>建议处置步骤</b><span class="tag tag-blue">SOP 对齐</span></div><ol class="c-steps"><li>核查二级冷却水进出口温差、流量是否达标</li><li>检查冷却器差压，判断是否结垢堵塞</li><li>复听异响并定位（阀室 / 机身 / 联轴器）</li><li>温度持续 >120℃ 时，按 MEL 降负荷至 80% 运行</li><li>确认后开维修工单，冷却器需停机清洗</li></ol><div class="c-foot">来源：《压缩机操作规程》4.5 · MEL 条目 K-1001-03</div></div>' },
+        { from: 'agent', html: '<div class="c-card"><div class="c-head"><span class="c-ic">📦</span><b>所需备件 & MEL 提示</b><span class="tag tag-cyan">待建单</span></div><div class="c-kv"><span>预估备件</span><b>冷却器清洗包 ×1 · 二级阀片组 ×1（备用）</b></div><div class="c-kv"><span>MEL 条件</span><b class="warn">可降负荷续运 72h，超期须停机处理</b></div><div class="c-btns"><span class="c-btn primary">🎙 说「建单」</span><span class="c-btn">先降负荷</span><span class="c-btn ghost">改一下</span></div><div class="c-foot">建单后同步值班长与生产 BI</div></div>' },
+        { from: 'user', voice: '先降负荷到80%，建个工单查冷却器，通知值班长。', dur: 5 },
+        { from: 'agent', text: '✅ 已建 <b>WO-2322</b>（查二级冷却器），值班长已知会；已按 MEL 记录降负荷至 80%、72h 倒计时启动。异响建议这班内复听一次，有变化随时报我 ⚠️' },
+        { from: 'agent', sys: '故障诊断 · 建单 · MEL 降负荷动作已写入设备台账' }
+      ]
+    },
+    {
+      id: 'manual', title: '查维修手册', chip: '问维修手册',
+      intro: 'RAG 检索机组维修手册，语音提问秒级回答 · 带条款与出处',
+      steps: [
+        { from: 'user', voice: '透平机组的滑油多久换一次？换油步骤是什么？', dur: 4 },
+        { from: 'agent', text: '好的王工，透平机组<b>滑油更换周期与步骤</b>如下 👇' },
+        { from: 'agent', html: '<div class="c-card"><div class="c-head"><span class="c-ic">📖</span><b>透平机组滑油更换 · 手册</b><span class="tag tag-cyan">手册库</span></div><div class="c-kv"><span>换油周期</span><b class="teal">运行 8000h 或 12 个月，先到为准</b></div><div class="c-kv"><span>油质抽检</span><b>每 2000h 取样化验，超标提前换</b></div><ol class="c-steps"><li>停机泄压，待机组降温至安全温度</li><li>排放旧油并取样留档，清洗油箱与滤网</li><li>更换滑油滤芯，检查油冷器</li><li>加注指定牌号新油至视镜 2/3</li><li>油循环冲洗、化验合格后方可启机</li></ol><div class="c-foot">来源：《透平机组维护手册》6.3 换油规程 · 已核</div></div>' },
+        { from: 'user', voice: '加什么牌号的油？现在运行多久了？', dur: 3 },
+        { from: 'agent', text: '按手册用 <b>ISO VG 32 汽轮机油（透平油）</b>，禁止不同牌号混用；本机组上次 2025-12 换油，累计运行约 5200h，距下次换油约 2800h。来源：手册 6.3.2 + 设备台账。' },
+        { from: 'agent', sys: '本次问答已计入个人技能画像 · 机组维护 +1' }
+      ]
+    },
+    {
+      id: 'spare', title: '备件库存', chip: '查备件库存',
+      intro: '一句话查库存/在途，卡片直接申领、发起补货',
+      steps: [
+        { from: 'user', voice: '3号泵的机封还有几个库存？', dur: 3 },
+        { from: 'agent', html: '<div class="c-card"><div class="c-head"><span class="c-ic">📦</span><b>备件库存 · 机械密封</b><span class="tag tag-cyan">物资台账</span></div><div class="c-kv"><span>备件</span><b>3# 泵机封 · 型号 M74D-45</b></div><div class="c-kv"><span>平台库存</span><b class="warn">2 套（低于安全库存 3）</b></div><div class="c-kv"><span>在途补货</span><b class="teal">4 套 · 预计 8/22 到平台</b></div><div class="c-kv"><span>近 3 月消耗</span><b>3 套</b></div><div class="c-btns"><span class="c-btn primary">🎙 说「申领」</span><span class="c-btn blue">发起补货</span></div><div class="c-foot">来源：物资管理系统（L3 · 内网只读）</div></div>' },
+        { from: 'user', voice: '给WO-2317申领1套，再发起补货2套。', dur: 5 },
+        { from: 'agent', text: '✅ 已为 <b>WO-2317</b> 申领机封 ×1（待库管出库）；补货申请 ×2 已提交采购，达到安全库存后自动提醒。当前可用库存降至 1 套 📦' },
+        { from: 'agent', sys: '备件申领 · 补货申请已写入物资台账' }
+      ]
+    },
+    {
+      id: 'close', title: '工单闭环', chip: '完工回单',
+      intro: '完工语音回单，自动结构化成完工记录 + 试运参数并关闭工单',
+      steps: [
+        { from: 'agent', text: '王工，WO-2317 机封更换完工了吗？完工回单说给我就行～' },
+        { from: 'user', voice: 'WO-2317三号注水泵机封已经更换完成，试运行30分钟正常，出口压力恢复到12兆帕，振动0.8毫米每秒，无泄漏。', dur: 12 },
+        { from: 'agent', html: '<div class="c-card"><div class="c-head"><span class="c-ic warm">✅</span><b>工单完工记录 · 已结构化</b><span class="tag tag-green">已完工</span></div><div class="c-kv"><span>工单</span><b>WO-2317 · 3# 注水泵机封更换</b></div><div class="c-kv"><span>处置</span><b>更换机械密封 M74D-45 ×1</b></div><div class="c-check"><span class="s done">✓</span>试运行 30min 正常 · 无泄漏</div><div class="c-check"><span class="s done">✓</span>出口压力 12.0 MPa（恢复正常）</div><div class="c-check"><span class="s done">✓</span>振动 0.8 mm/s（良好）</div><div class="c-btns"><span class="c-btn primary">确认关闭工单</span><span class="c-btn ghost">改一下</span></div><div class="c-foot">关闭后回写设备台账 · 更新机封更换履历</div></div>' },
+        { from: 'user', voice: '确认，关闭工单。', dur: 2 },
+        { from: 'agent', text: '✅ WO-2317 已关闭，试运参数已归档；3# 泵机封履历更新（本次寿命重新计时）。备件库存已同步扣减，辛苦王工 🌟' },
+        { from: 'agent', sys: '工单闭环 · 完工记录与试运参数已写入设备健康档案' }
+      ]
+    },
+    {
+      id: 'health', title: '健康问数', chip: '问设备健康',
+      intro: '一句话查设备健康趋势 —— 直接看曲线，附预测性维护建议',
+      steps: [
+        { from: 'user', voice: '1号主压缩机这周的振动趋势怎么样？', dur: 4 },
+        { from: 'agent', html: '<div class="c-card"><div class="c-head"><span class="c-ic blue">📈</span><b>1# 主压缩机 · 振动趋势（7 日）</b><span class="tag tag-blue">在线监测</span></div><div class="c-big"><div class="v warm">4.6</div><div class="l">当前振动烈度 mm/s · 环比上周 ↑12%</div></div><div class="c-bars"><div class="b-row"><span>周一</span><span class="b-track"><span class="b-fill" style="width:62%"></span></span><span class="b-val">3.9</span></div><div class="b-row"><span>周三</span><span class="b-track"><span class="b-fill" style="width:70%"></span></span><span class="b-val">4.2</span></div><div class="b-row"><span>周五</span><span class="b-track"><span class="b-fill warm" style="width:78%"></span></span><span class="b-val">4.4</span></div><div class="b-row"><span>今日</span><span class="b-track"><span class="b-fill warm" style="width:82%"></span></span><span class="b-val">4.6</span></div></div><div class="c-kv"><span>预测性维护</span><b class="warn">按趋势 ~10 天将达报警值 5.6，建议排检</b></div><div class="c-foot">来源：在线监测 · 振动趋势预测模型</div></div>' },
+        { from: 'user', voice: '把它加到下次检修计划，重点查联轴器和轴承。', dur: 5 },
+        { from: 'agent', text: '✅ 已加入下次检修计划（重点：联轴器对中 + 轴承状态），并挂到 1# 主压缩机健康档案；达报警值前 3 天我会再提醒你 🔁' }
+      ]
+    }
+  ]
+});
+</script>
+</body>
+</html>

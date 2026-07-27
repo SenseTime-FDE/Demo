@@ -1,0 +1,814 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>中海油 × 商汤 · AI 应用方案 —— 让 AI 用进油气生产每一天</title>
+<meta name="description" content="面向中海油信息科技的 AI 落地方案：一线现场 Agent、手机语音接入、小程序、通用职能与科技研发场景，安全可控 + FDE 陪跑。">
+<link rel="stylesheet" href="assets/style.css">
+<style>
+/* ===== index-only styles ===== */
+/* hero */
+.hero { position: relative; overflow: hidden; padding: 74px 0 88px; background: var(--bg-0); }
+.hero .bg-ocean { position:absolute; inset:0; z-index:0;
+  background:
+    radial-gradient(1200px 600px at 78% -5%, rgba(18,165,150,.22), transparent 55%),
+    radial-gradient(1000px 620px at 8% 8%, rgba(30,95,214,.22), transparent 55%),
+    radial-gradient(900px 700px at 50% 120%, rgba(255,138,61,.10), transparent 55%);
+}
+.hero-grid { position:relative; z-index:2; display:grid; grid-template-columns: 1.08fr .92fr; gap: 40px; align-items:center; }
+.hero h1 { font-size: clamp(32px, 5vw, 58px); line-height:1.08; letter-spacing:-.02em; }
+.hero h1 .g { background: linear-gradient(100deg,#35e2d4,#58aaff 55%,#3b8cff); -webkit-background-clip:text; background-clip:text; color:transparent; }
+.hero .tagline { font-size: clamp(15px,1.8vw,19px); color: var(--text-2); margin-top: 20px; max-width: 560px; }
+.hero .who { display:inline-flex; align-items:center; gap:10px; margin-bottom:22px; padding:8px 14px 8px 8px;
+  border:1px solid var(--line-2); border-radius: 40px; background: rgba(255,255,255,.03); font-size:13px; color:var(--text-2); }
+.hero .who b { color:#fff; }
+.hero-cta { display:flex; gap:12px; flex-wrap:wrap; margin-top: 30px; }
+.hero-stats { display:flex; gap: 30px; margin-top: 40px; flex-wrap:wrap; }
+.hero-stats .n { font-size: 30px; font-weight:900; background: var(--grad-cyan); -webkit-background-clip:text; background-clip:text; color:transparent; }
+.hero-stats .l { font-size:12.5px; color: var(--text-dim); margin-top: 3px; }
+.hero-visual { position: relative; }
+@media (max-width: 940px){ .hero-grid { grid-template-columns: 1fr; } .hero-visual { max-width: 460px; margin: 8px auto 0; } }
+
+/* three lanes scenario */
+.lanes { display:grid; grid-template-columns: repeat(3,1fr); gap: 20px; align-items:start; }
+@media (max-width: 980px){ .lanes { grid-template-columns: 1fr; } }
+.lane { border-radius: var(--radius-lg); padding: 26px 22px; border:1px solid var(--line); position:relative; overflow:hidden; }
+.lane.frontline { background: var(--grad-frontline); border-color: rgba(255,138,61,.28); }
+.lane.office { background: var(--grad-office); border-color: rgba(59,140,255,.24); }
+.lane.tech { background: var(--grad-tech); border-color: rgba(155,140,255,.24); }
+.lane-head { display:flex; align-items:center; gap:12px; margin-bottom:6px; }
+.lane-head .ic { width:44px;height:44px;border-radius:13px;display:grid;place-items:center;font-size:22px; }
+.lane.frontline .ic { background: rgba(255,138,61,.16); border:1px solid rgba(255,138,61,.35); }
+.lane.office .ic { background: rgba(59,140,255,.16); border:1px solid rgba(59,140,255,.35); }
+.lane.tech .ic { background: rgba(155,140,255,.16); border:1px solid rgba(155,140,255,.35); }
+.lane h3 { font-size: 20px; }
+.lane .lane-sub { color: var(--text-dim); font-size: 13px; margin: 2px 0 16px; }
+.scitem { background: rgba(6,14,24,.5); border:1px solid var(--line); border-radius: 14px; padding: 14px 15px; margin-bottom:10px; transition:.2s; }
+.scitem:hover { border-color: var(--line-strong); transform: translateX(3px); }
+.scitem .st-top { display:flex; align-items:center; justify-content:space-between; gap:8px; }
+.scitem .st-name { font-weight:700; font-size:14.5px; display:flex; align-items:center; gap:8px; }
+.scitem .st-name .emo { font-size:16px; }
+.scitem .st-metric { font-size:12px; font-weight:800; padding:2px 8px; border-radius: 20px; white-space:nowrap; }
+.m-orange { background: rgba(255,138,61,.16); color: var(--orange-2); }
+.m-blue { background: rgba(59,140,255,.16); color: var(--azure); }
+.m-violet { background: rgba(155,140,255,.16); color: var(--violet); }
+.scitem .st-desc { color: var(--text-dim); font-size: 12.5px; margin-top:6px; line-height:1.5; }
+.lane-foot { margin-top: 14px; font-size:12px; color: var(--text-mute); display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+.lane-badge { display:inline-flex; align-items:center; gap:5px; font-size:11px; font-weight:700; padding:4px 9px; border-radius:20px; }
+.lb-orange { background: rgba(255,138,61,.16); color: var(--orange-2); border:1px solid rgba(255,138,61,.3); }
+
+/* pillars */
+.pillars { display:grid; grid-template-columns: repeat(3,1fr); gap: 18px; }
+@media (max-width: 860px){ .pillars { grid-template-columns:1fr; } }
+.pillar { padding: 26px; border-radius: var(--radius); border:1px solid var(--line); background: var(--bg-card); position:relative; }
+.pillar .pn { font-size:12px; font-weight:800; letter-spacing:1.5px; color: var(--cyan); }
+.pillar h3 { font-size:20px; margin:10px 0 8px; }
+.pillar p { color: var(--text-dim); font-size:14px; margin:0; }
+.pillar .big { position:absolute; top:14px; right:20px; font-size:44px; opacity:.16; font-weight:900; }
+
+/* levels timeline */
+.levels { display:grid; grid-template-columns: repeat(4,1fr); gap: 14px; counter-reset: lv; }
+@media (max-width: 860px){ .levels { grid-template-columns: repeat(2,1fr); } }
+.level { padding: 20px 18px; border-radius: 14px; border:1px solid var(--line); background: rgba(255,255,255,.02); position:relative; }
+.level .lv { font-size:12px; font-weight:800; color: var(--amber); letter-spacing:1px; }
+.level h4 { font-size: 16px; margin: 8px 0 6px; }
+.level p { color: var(--text-dim); font-size: 12.5px; margin: 0; }
+
+/* access methods */
+.access { display:grid; grid-template-columns: repeat(3,1fr); gap: 18px; }
+@media (max-width: 980px){ .access { grid-template-columns: 1fr 1fr; } }
+@media (max-width: 620px){ .access { grid-template-columns: 1fr; } }
+.acc { padding: 24px; border-radius: var(--radius); border:1px solid var(--line); background: var(--bg-card); transition:.25s; display:flex; flex-direction:column; }
+.acc:hover { transform: translateY(-4px); border-color: var(--line-strong); box-shadow: var(--shadow); }
+.acc.feature { border-color: rgba(255,138,61,.35); background: linear-gradient(160deg, rgba(255,138,61,.1), rgba(12,24,38,.7)); }
+.acc .ai { font-size: 30px; margin-bottom: 14px; }
+.acc h3 { font-size: 18px; display:flex; align-items:center; gap:8px; }
+.acc .en { font-size: 11.5px; color: var(--text-mute); letter-spacing:.5px; font-weight:600; }
+.acc p { color: var(--text-dim); font-size:13.5px; flex:1; }
+.acc .try { margin-top: 14px; font-size:13px; font-weight:700; color: var(--cyan); display:inline-flex; align-items:center; gap:6px; }
+.acc.feature .try { color: var(--orange-2); }
+
+/* security table */
+.sec-table { width:100%; border-collapse: separate; border-spacing:0; font-size:13.5px; overflow:hidden; border-radius: var(--radius); border:1px solid var(--line); }
+.sec-table th, .sec-table td { padding: 14px 16px; text-align:left; border-bottom:1px solid var(--line); vertical-align: top; }
+.sec-table thead th { background: rgba(255,255,255,.04); font-size:12.5px; color: var(--text-2); letter-spacing:.5px; }
+.sec-table tbody tr:last-child td { border-bottom:0; }
+.sec-table .lvl { font-weight:800; white-space:nowrap; }
+.sec-table td small { color: var(--text-mute); font-size:12px; }
+.badge-domain { font-weight:700; font-size:12px; padding:3px 9px; border-radius: 20px; white-space:nowrap; }
+.bd-yes { background: rgba(55,211,154,.14); color: var(--green); }
+.bd-mask { background: rgba(244,193,74,.14); color: var(--amber); }
+.bd-no { background: rgba(59,140,255,.14); color: var(--azure); }
+.bd-ban { background: rgba(255,90,82,.14); color: var(--red); }
+.l1{color:var(--green)}.l2{color:var(--amber)}.l3{color:var(--azure)}.l4{color:var(--red)}
+@media (max-width: 760px){ .sec-scroll { overflow-x:auto; } .sec-table { min-width: 640px; } }
+
+/* capability stack */
+.stack { display:grid; gap: 12px; }
+.layer { display:grid; grid-template-columns: 200px 1fr; gap: 20px; align-items:center; padding: 20px 22px; border-radius: var(--radius); border:1px solid var(--line); background: var(--bg-card); }
+.layer .lh { font-weight:800; font-size:16px; display:flex; align-items:center; gap:10px; }
+.layer .lh .ic { width:38px;height:38px;border-radius:11px;display:grid;place-items:center;font-size:19px; background: rgba(53,226,212,.12); border:1px solid rgba(53,226,212,.25); }
+.layer .items { display:flex; flex-wrap:wrap; gap:8px; }
+@media (max-width: 760px){ .layer { grid-template-columns: 1fr; gap: 12px; } }
+
+/* FDE steps */
+.steps { display:grid; grid-template-columns: repeat(6,1fr); gap: 10px; }
+@media (max-width: 980px){ .steps { grid-template-columns: repeat(3,1fr); } }
+@media (max-width: 560px){ .steps { grid-template-columns: repeat(2,1fr); } }
+.step { padding: 18px 14px; border-radius: 14px; border:1px solid var(--line); background: rgba(255,255,255,.02); text-align:center; }
+.step .sn { width:32px;height:32px;border-radius:50%; background: var(--grad-cta); color:#fff; font-weight:800; display:grid; place-items:center; margin:0 auto 10px; font-size:14px; }
+.step h4 { font-size:14.5px; margin-bottom:5px; }
+.step p { font-size:12px; color: var(--text-dim); margin:0; }
+
+/* value 3col */
+.tri { display:grid; grid-template-columns: repeat(3,1fr); gap:18px; }
+@media (max-width: 860px){ .tri { grid-template-columns:1fr; } }
+
+/* CTA band */
+.cta-band { position:relative; overflow:hidden; border-radius: var(--radius-lg); padding: 54px 44px; text-align:center;
+  background: var(--grad-ocean); border:1px solid rgba(255,255,255,.12); }
+.cta-band h2 { font-size: clamp(24px,3.2vw,36px); color:#fff; }
+.cta-band p { color: rgba(255,255,255,.86); max-width: 640px; margin: 14px auto 0; }
+.cta-band .row { display:flex; gap:14px; justify-content:center; flex-wrap:wrap; margin-top: 28px; }
+.cta-band .btn-ghost { border-color: rgba(255,255,255,.5); color:#fff; background: rgba(255,255,255,.08); }
+
+/* two-col text */
+.split { display:grid; grid-template-columns: 1fr 1fr; gap: 40px; align-items:center; }
+@media (max-width: 900px){ .split { grid-template-columns:1fr; } }
+.concern { display:flex; gap:12px; padding: 14px 0; border-bottom:1px solid var(--line); }
+.concern:last-child{border-bottom:0;}
+.concern .ck { color: var(--cyan); font-size:18px; flex-shrink:0; margin-top:2px; }
+.concern b { display:block; font-size:15px; margin-bottom:3px; }
+.concern span { color: var(--text-dim); font-size:13px; }
+
+/* prototype tour */
+.ix-tour { display:grid; grid-template-columns: repeat(3,1fr); gap: 20px; }
+@media (max-width: 960px){ .ix-tour { grid-template-columns: 1fr 1fr; } }
+@media (max-width: 620px){ .ix-tour { grid-template-columns: 1fr; } }
+.ix-tcard { display:block; background: var(--bg-card); border:1px solid var(--line); border-radius: var(--radius-lg); padding: 14px 14px 18px; transition:.25s; overflow:hidden; }
+.ix-tcard:hover { transform: translateY(-5px); box-shadow: var(--shadow); }
+.ix-tcard.frontline:hover { border-color: rgba(255,138,61,.42); }
+.ix-tcard.office:hover { border-color: rgba(53,226,212,.42); }
+.ix-tcard .t-shot { position:relative; width:100%; aspect-ratio: 16/10; border-radius: 14px; overflow:hidden; background: var(--bg-0); border:1px solid var(--line); margin-bottom:14px; }
+.ix-tcard .t-shot iframe { width:1440px; height:900px; border:0; transform-origin: 0 0; pointer-events:none; display:block; }
+.ix-tcard .t-shot::before { content:""; position:absolute; inset:0; z-index:1; } /* 罩住 iframe，保证整卡可点 */
+.ix-tcard .t-shot::after { content:"点击进入 →"; position:absolute; z-index:2; left:0; right:0; bottom:0; padding:20px 12px 10px; font-size:12px; font-weight:700; color:#fff;
+  background: linear-gradient(transparent, rgba(6,13,23,.82)); opacity:0; transition:.2s; text-align:right; }
+.ix-tcard:hover .t-shot::after { opacity:1; }
+.ix-tcard .t-top { display:flex; align-items:center; gap:10px; margin-bottom:8px; }
+.ix-tcard .t-top .ic { font-size:22px; }
+.ix-tcard .t-top b { font-size:17px; color:var(--text); }
+.ix-tcard .t-top .arr { margin-left:auto; color: var(--orange); font-weight:800; font-size:17px; transition: transform .18s; }
+.ix-tcard.office .t-top .arr { color: var(--cyan); }
+.ix-tcard:hover .t-top .arr { transform: translateX(4px); }
+.ix-tcard p { color: var(--text-dim); font-size:13px; margin:0 0 12px; line-height:1.55; }
+.ix-tcard .t-tags { display:flex; flex-wrap:wrap; gap:6px; }
+.ix-tcard .t-tags .tag { font-size:11px; font-weight:700; padding:3px 9px; border-radius:20px; }
+a.pill { transition:.15s; }
+a.pill:hover { border-color: var(--line-strong); color:#fff; background: rgba(255,255,255,.08); }
+</style>
+</head>
+<body>
+
+<!-- ============ NAV ============ -->
+<nav class="nav">
+  <div class="wrap-wide">
+    <div class="brand">
+      <div class="logos">
+        <img src="assets/st_logo.png" class="logo-img" alt="商汤科技 SenseTime">
+      </div>
+      <span class="sub hide-mobile">AI 应用方案</span>
+    </div>
+    <button class="nav-toggle" aria-label="菜单">☰</button>
+    <div class="nav-links">
+      <a href="#why">为什么</a>
+      <a href="#howto">用好 AI</a>
+      <a href="#scenarios">落地场景</a>
+      <a href="#access">接入方式</a>
+      <a href="#security">安全可控</a>
+      <a href="#capability">商汤能力</a>
+      <a href="#fde">FDE 陪跑</a>
+      <a href="#tour" class="nav-cta">▶ 原型体验</a>
+    </div>
+  </div>
+</nav>
+
+<!-- ============ HERO ============ -->
+<header class="hero">
+  <div class="bg-ocean"></div>
+  <div class="orb orb-cyan" style="width:420px;height:420px;top:-120px;right:-80px;"></div>
+  <div class="orb orb-blue" style="width:380px;height:380px;bottom:-160px;left:-120px;"></div>
+  <div class="wrap">
+    <div class="hero-grid">
+      <div>
+        <div class="who reveal">
+          <span class="logo-chip logo-cnooc" style="font-size:11px;">中海油信息科技</span>
+          <span>走进商汤 · 2026 人工智能创新周</span>
+        </div>
+        <h1 class="reveal">不讲 AI 的 ABC ——<br><span class="g">让 AI 用进油气生产每一天</span></h1>
+        <p class="tagline reveal">从海上平台的一线巡检，到机关的法务财务，再到科技团队的研发运维 —— 一份为中海油量身设计的 AI 落地方案：<b class="text-orange">手机语音、小程序，现场也能用上 Agent</b>；数据分级、私有可控，安全放心落地。</p>
+        <div class="hero-cta reveal">
+          <a href="#scenarios" class="btn btn-primary">看落地场景
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+          </a>
+          <a href="#tour" class="btn btn-ghost">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+            体验交互原型
+          </a>
+        </div>
+        <div class="hero-stats reveal">
+          <div><div class="n"><span data-count="3">0</span></div><div class="l">场景大类 · 一线/职能/研发</div></div>
+          <div><div class="n"><span data-count="20">0</span>+</div><div class="l">高频岗位场景</div></div>
+          <div><div class="n"><span data-count="8">0</span></div><div class="l">可点击 Demo 原型</div></div>
+          <div><div class="n">L1–L4</div><div class="l">数据分级 · 私有可控</div></div>
+        </div>
+      </div>
+      <div class="hero-visual reveal">
+        <!-- offshore platform + AI overlay SVG -->
+        <svg viewBox="0 0 520 480" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;filter:drop-shadow(0 30px 60px rgba(0,0,0,.5));">
+          <defs>
+            <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0" stop-color="#0b2138"/><stop offset="1" stop-color="#06111f"/>
+            </linearGradient>
+            <linearGradient id="sea" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0" stop-color="#0d6b8e"/><stop offset="1" stop-color="#072b3f"/>
+            </linearGradient>
+            <linearGradient id="rig" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0" stop-color="#2a4a68"/><stop offset="1" stop-color="#12293f"/>
+            </linearGradient>
+            <linearGradient id="beam" x1="0" y1="0" x2="1" y2="0">
+              <stop offset="0" stop-color="#35e2d4" stop-opacity="0"/><stop offset="1" stop-color="#35e2d4" stop-opacity=".9"/>
+            </linearGradient>
+          </defs>
+          <rect width="520" height="480" rx="24" fill="url(#sky)"/>
+          <!-- stars/data dots -->
+          <g fill="#35e2d4" opacity=".5">
+            <circle cx="60" cy="50" r="1.6"/><circle cx="120" cy="90" r="1.2"/><circle cx="420" cy="60" r="1.6"/>
+            <circle cx="470" cy="120" r="1.2"/><circle cx="380" cy="40" r="1.2"/><circle cx="90" cy="150" r="1.2"/>
+          </g>
+          <!-- sea -->
+          <path d="M0 330 Q130 312 260 330 T520 330 V480 H0 Z" fill="url(#sea)" opacity=".95"/>
+          <g stroke="#7fe3d8" stroke-width="1.5" opacity=".22" fill="none">
+            <path d="M0 360 Q130 348 260 360 T520 360"/>
+            <path d="M0 392 Q130 380 260 392 T520 392"/>
+            <path d="M0 424 Q130 414 260 424 T520 424"/>
+          </g>
+          <!-- platform legs -->
+          <g stroke="url(#rig)" stroke-width="12" opacity=".95">
+            <line x1="180" y1="300" x2="165" y2="430"/>
+            <line x1="330" y1="300" x2="345" y2="430"/>
+            <line x1="230" y1="300" x2="222" y2="430"/>
+            <line x1="285" y1="300" x2="292" y2="430"/>
+          </g>
+          <g stroke="#1a3550" stroke-width="4" opacity=".7">
+            <line x1="180" y1="340" x2="330" y2="340"/><line x1="175" y1="385" x2="340" y2="385"/>
+            <line x1="180" y1="300" x2="285" y2="360"/><line x1="330" y1="300" x2="230" y2="360"/>
+          </g>
+          <!-- deck -->
+          <rect x="150" y="256" width="220" height="48" rx="8" fill="url(#rig)" stroke="#3a5f82" stroke-width="1.5"/>
+          <rect x="176" y="212" width="80" height="46" rx="6" fill="#1c3a56" stroke="#3a5f82"/>
+          <rect x="270" y="196" width="70" height="62" rx="6" fill="#22456a" stroke="#3a5f82"/>
+          <!-- derrick tower -->
+          <path d="M300 196 L288 120 L332 120 L320 196 Z" fill="none" stroke="#3a5f82" stroke-width="3"/>
+          <line x1="292" y1="160" x2="328" y2="160" stroke="#3a5f82" stroke-width="2"/>
+          <line x1="296" y1="138" x2="324" y2="138" stroke="#3a5f82" stroke-width="2"/>
+          <path d="M288 120 L310 96 L332 120" fill="none" stroke="#3a5f82" stroke-width="3"/>
+          <!-- flare -->
+          <circle cx="200" cy="150" r="10" fill="#ff8a3d" opacity=".9"/>
+          <circle cx="200" cy="150" r="18" fill="#ff8a3d" opacity=".22"/>
+          <!-- AI scan beam from top -->
+          <circle cx="310" cy="96" r="6" fill="#35e2d4"/>
+          <path d="M310 96 L470 180 L470 96 Z" fill="url(#beam)" opacity=".28"/>
+          <!-- floating AI cards -->
+          <g font-family="sans-serif">
+            <rect x="372" y="150" width="118" height="30" rx="8" fill="#0e2033" stroke="#35e2d4" stroke-opacity=".5"/>
+            <circle cx="388" cy="165" r="5" fill="#35e2d4"/>
+            <text x="400" y="169" fill="#cfeef0" font-size="11">缺陷识别 ✓</text>
+            <rect x="392" y="196" width="118" height="30" rx="8" fill="#0e2033" stroke="#ff8a3d" stroke-opacity=".5"/>
+            <circle cx="408" cy="211" r="5" fill="#ff8a3d"/>
+            <text x="420" y="215" fill="#ffd9bd" font-size="11">作业票草稿</text>
+            <rect x="360" y="242" width="118" height="30" rx="8" fill="#0e2033" stroke="#58aaff" stroke-opacity=".5"/>
+            <circle cx="376" cy="257" r="5" fill="#58aaff"/>
+            <text x="388" y="261" fill="#cfe1ff" font-size="11">规程秒查 ⚡</text>
+          </g>
+          <!-- worker with phone (voice) -->
+          <g transform="translate(120,250)">
+            <circle cx="10" cy="0" r="9" fill="#ffb056"/>
+            <rect x="1" y="10" width="18" height="26" rx="7" fill="#ff8a3d"/>
+            <rect x="24" y="6" width="12" height="20" rx="3" fill="#0e2033" stroke="#35e2d4"/>
+            <path d="M28 30 q6 6 0 12" stroke="#35e2d4" stroke-width="2" fill="none" opacity=".8"/>
+            <path d="M32 27 q10 9 0 18" stroke="#35e2d4" stroke-width="2" fill="none" opacity=".5"/>
+          </g>
+        </svg>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- ============ WHY ============ -->
+<section class="section bg-1" id="why">
+  <div class="wrap">
+    <div class="split">
+      <div class="reveal">
+        <div class="kicker">Why now · 为什么是现在</div>
+        <h2 class="h-sec">你们不缺工具 ——<br>缺的是<span class="hl">把 AI 用出价值</span>的方法</h2>
+        <p class="lead">中海油信息科技带 58 位科创与业务骨干走进商汤，交流议题聚焦「私有化离线大模型、内网安全部署、数据合规、涉密场景 AI 安全、生产运营落地」。这份方案，正面回答你们最关心的每一件事 —— 并把重点放在<b class="text-orange">如何让海上一线、机关职能、科技团队都真正用起来</b>。</p>
+        <div class="pill-row mt24">
+          <span class="pill">🛢️ 海上平台生产运营</span>
+          <span class="pill">🔒 数据不出域 · 私有化</span>
+          <span class="pill">📋 DCMM · 数据全生命周期</span>
+          <span class="pill">🧭 从科技部门高频切入</span>
+        </div>
+      </div>
+      <div class="card reveal" style="padding:28px;">
+        <div class="kicker blue">你们最关心的，我们逐条回答</div>
+        <div class="concern"><span class="ck">✓</span><div><b>私有化 / 离线大模型</b><span>轻量·专用模型内网部署，生产/涉密数据全程不出域</span></div></div>
+        <div class="concern"><span class="ck">✓</span><div><b>内网安全部署</b><span>本地 Agent 网关统一编排、策略路由、全程留痕，IT 看得懂管得住</span></div></div>
+        <div class="concern"><span class="ck">✓</span><div><b>数据合规 · 分级管控</b><span>L1–L4 数据分级 + 部署矩阵，什么能进 AI 一目了然</span></div></div>
+        <div class="concern"><span class="ck">✓</span><div><b>一线现场落地</b><span>手机语音、小程序，戴着手套、在平台上也能唤起 Agent</span></div></div>
+        <div class="concern"><span class="ck">✓</span><div><b>不锁定既有投入</b><span>Agent 开放，你现有的系统照用，商汤只供底层 Token</span></div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ HOW TO USE AI WELL ============ -->
+<section class="section bg-grad" id="howto">
+  <div class="wrap">
+    <div class="sec-head center reveal">
+      <div class="kicker center">Use AI Well · 用好 AI 的方式</div>
+      <h2 class="h-sec">同样的模型，有人用出 <span class="hl">10 倍价值</span></h2>
+      <p class="lead center">差别就在三根支柱 —— 选对 Agent、选对模型、养成习惯；再让 AI 从「一次性问答」进到「日常自动跑」。</p>
+    </div>
+    <div class="pillars">
+      <div class="pillar reveal"><span class="big">01</span><div class="pn">支柱 01 · 工具</div><h3>选对 Agent</h3><p>住在哪、干什么 —— 浏览器 / 桌面 / 云端，按场景选顺手的那个，而不是纠结哪个「最强」。</p></div>
+      <div class="pillar reveal"><span class="big">02</span><div class="pn">支柱 02 · 底座</div><h3>选对模型</h3><p>能力与安全的天花板 —— 云端旗舰要能力，本地专用保安全，按数据等级动态取用。</p></div>
+      <div class="pillar reveal"><span class="big">03</span><div class="pn">支柱 03 · 人</div><h3>养成习惯</h3><p>说清楚、问明白、守主场 —— AI 干活、人做判断，靠每天用养成，不靠记笔记。</p></div>
+    </div>
+
+    <div class="mt40 reveal">
+      <div class="center" style="margin-bottom:22px;">
+        <span class="pill">让 AI 进流程 · 从「问一次」到「自动跑」</span>
+      </div>
+      <div class="levels">
+        <div class="level"><div class="lv">Lv.1</div><h4>一次性问答</h4><p>想到才问，用完即走。门槛最低，但每次从头说。</p></div>
+        <div class="level"><div class="lv">Lv.2</div><h4>沉淀成技能</h4><p>把常用提示词存成 Skill，一键复用，团队共享。</p></div>
+        <div class="level"><div class="lv">Lv.3</div><h4>串成工作流</h4><p>读文档 → 抽数据 → 出报告，多步自动一条龙。</p></div>
+        <div class="level"><div class="lv">Lv.4</div><h4>定时自动跑</h4><p>每天早上自动生成晨报、舆情摘要，到点就有。</p></div>
+      </div>
+      <p class="center text-dim mt24" style="font-size:13.5px;max-width:760px;margin-left:auto;margin-right:auto;">落地建议：先从 Lv.1 / Lv.2 全员铺开，再由科技 / 效能团队把高频场景做成 Lv.3 / Lv.4 自动化 —— 个人提效沉淀为组织资产。</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============ SCENARIOS (centerpiece) ============ -->
+<section class="section bg-1" id="scenarios">
+  <div class="wrap-wide">
+    <div class="sec-head center reveal">
+      <div class="kicker center orange">Where AI Lands · 落地场景版图</div>
+      <h2 class="h-sec">三条线，覆盖中海油<span class="hl">从海上到机关</span>的每天</h2>
+      <p class="lead center">通用职能人人可用，科技研发最高频，而真正的差异化 —— 是把 Agent 送到<b class="text-orange">海上平台的一线现场</b>：戴着手套、在噪声里，一句话就能用。</p>
+    </div>
+
+    <div class="lanes">
+      <!-- FRONTLINE -->
+      <div class="lane frontline reveal">
+        <div class="lane-head">
+          <div class="ic">🛠️</div>
+          <div><h3>一线现场 <span class="lane-badge lb-orange">重点</span></h3></div>
+        </div>
+        <div class="lane-sub">海上平台 · 油气田生产一线 —— 手机语音 + 小程序，现场即用</div>
+
+        <div class="scitem">
+          <div class="st-top"><span class="st-name"><span class="emo">📸</span>现场巡检上报</span><span class="st-metric m-orange">快 5 倍</span></div>
+          <div class="st-desc">看到渗漏/腐蚀，拍照+语音一说 → AI 识别缺陷类型与等级、自动填巡检记录、关联历史处置、生成工单。</div>
+        </div>
+        <div class="scitem">
+          <div class="st-top"><span class="st-name"><span class="emo">🔧</span>设备故障诊断</span><span class="st-metric m-orange">7×24</span></div>
+          <div class="st-desc">设备报警，语音描述症状或拍铭牌 → 秒查维修手册，给故障树、处置步骤、所需备件。</div>
+        </div>
+        <div class="scitem">
+          <div class="st-top"><span class="st-name"><span class="emo">📋</span>作业票 · JSA</span><span class="st-metric m-orange">漏项↓70%</span></div>
+          <div class="st-desc">动火/受限空间/高处作业，语音说明任务 → 自动生成作业票草稿、识别风险点、比对安规、提示 PPE。</div>
+        </div>
+        <div class="scitem">
+          <div class="st-top"><span class="st-name"><span class="emo">🔁</span>交接班日志</span><span class="st-metric m-orange">省 80%</span></div>
+          <div class="st-desc">值班语音口述当班事件 → AI 结构化成交接记录（设备状态/异常/待办），自动生成生产日报。</div>
+        </div>
+        <div class="scitem">
+          <div class="st-top"><span class="st-name"><span class="emo">⚠️</span>HSE 隐患排查</span><span class="st-metric m-orange">闭环</span></div>
+          <div class="st-desc">拍隐患/语音上报 → 分类、关联安规条款、生成整改单并跟踪闭环。</div>
+        </div>
+        <div class="scitem">
+          <div class="st-top"><span class="st-name"><span class="emo">📖</span>规程/手册秒查</span><span class="st-metric m-orange">快 10 倍</span></div>
+          <div class="st-desc">"XX 设备启动步骤" 语音一问，直接给条款、出处与操作步骤，不用翻上千页规程。</div>
+        </div>
+        <div class="lane-foot">
+          <span class="lane-badge lb-orange">🎙️ 手机语音</span>
+          <span class="lane-badge lb-orange">📱 小程序</span>
+          <span>防爆手机 / 对讲机可接入</span>
+        </div>
+      </div>
+
+      <!-- OFFICE -->
+      <div class="lane office reveal">
+        <div class="lane-head">
+          <div class="ic">🏢</div>
+          <div><h3>通用职能</h3></div>
+        </div>
+        <div class="lane-sub">法务 · 财务 · 采购 · 综合办公 —— 不分岗位，人人都用得上</div>
+
+        <div class="scitem"><div class="st-top"><span class="st-name"><span class="emo">📝</span>会议纪要</span><span class="st-metric m-blue">省 80%</span></div><div class="st-desc">录音进去，结构化纪要 + 决议 + 待办到人 + 跟进邮件草稿全出来。</div></div>
+        <div class="scitem"><div class="st-top"><span class="st-name"><span class="emo">📄</span>合同 / 法务审核</span><span class="st-metric m-blue">带出处</span></div><div class="st-desc">脱敏合同拖进去，逐条对齐审查清单、义务/违约分级标注、每条标原文条款号。</div></div>
+        <div class="scitem"><div class="st-top"><span class="st-name"><span class="emo">💰</span>财务分析 / 报销审核</span><span class="st-metric m-blue">分钟级</span></div><div class="st-desc">报表/流水汇总出比率分析与结论初稿；报销单据自动核对政策、标疑点。</div></div>
+        <div class="scitem"><div class="st-top"><span class="st-name"><span class="emo">📊</span>自然语言取数</span><span class="st-metric m-blue">不排期</span></div><div class="st-desc">说句话，自动生成 SQL、取数、出趋势图 + 一句话结论，结果可复核。</div></div>
+        <div class="scitem"><div class="st-top"><span class="st-name"><span class="emo">🔎</span>制度 / 知识问答</span><span class="st-metric m-blue">秒级</span></div><div class="st-desc">挂到本单位制度库，问一句带出处地答，库里没有就说「未覆盖」，绝不编。</div></div>
+        <div class="scitem"><div class="st-top"><span class="st-name"><span class="emo">📚</span>长文速读</span><span class="st-metric m-blue">快 10 倍</span></div><div class="st-desc">几十页研报/招标文件读成一页要点 + 关键数据表 + 风险提示。</div></div>
+        <div class="lane-foot"><span class="lane-badge" style="background:rgba(59,140,255,.16);color:var(--azure);border:1px solid rgba(59,140,255,.3)">💻 桌面 Sowork</span><span class="lane-badge" style="background:rgba(59,140,255,.16);color:var(--azure);border:1px solid rgba(59,140,255,.3)">🌐 浏览器 S-Agent</span></div>
+      </div>
+
+      <!-- TECH -->
+      <div class="lane tech reveal">
+        <div class="lane-head">
+          <div class="ic">⚙️</div>
+          <div><h3>科技研发</h3></div>
+        </div>
+        <div class="lane-sub">数字技术 · 工业互联网 · 网络安全 · 研发中心 —— 用得最高频、最高量</div>
+
+        <div class="scitem"><div class="st-top"><span class="st-name"><span class="emo">⌨️</span>代码生成 / 补全</span><span class="st-metric m-violet">快 5 倍</span></div><div class="st-desc">按需求与规范生成代码、补全接口、写注释与单测，接现有研发流水线。</div></div>
+        <div class="scitem"><div class="st-top"><span class="st-name"><span class="emo">🛡️</span>代码审计 / 安全研判</span><span class="st-metric m-violet">省 70%</span></div><div class="st-desc">百万行代码待审 → 自动审出坏味道、安全漏洞、规范问题并给改法；安全事件研判辅助。</div></div>
+        <div class="scitem"><div class="st-top"><span class="st-name"><span class="emo">🐞</span>单测 / 缺陷定位</span><span class="st-metric m-violet">分钟级</span></div><div class="st-desc">贴报错 + 代码，圈出问题服务与那行代码、还原调用链、给根因与回滚建议。</div></div>
+        <div class="scitem"><div class="st-top"><span class="st-name"><span class="emo">📟</span>智能运维 AIOps</span><span class="st-metric m-violet">7×24</span></div><div class="st-desc">日均数万告警、PB 级日志 → 告警降噪、根因定位、处置建议，半夜也能止血。</div></div>
+        <div class="scitem"><div class="st-top"><span class="st-name"><span class="emo">🗄️</span>取数报表 / NL2SQL</span><span class="st-metric m-violet">自助</span></div><div class="st-desc">日均取数上千次、报表长尾无穷 → 自然语言转 SQL、自助取数与报表自动生成。</div></div>
+        <div class="scitem"><div class="st-top"><span class="st-name"><span class="emo">🧩</span>需求→设计→原型</span><span class="st-metric m-violet">全链路</span></div><div class="st-desc">真实需求文档一条龙：需求质检 → 功能分解 → 原型流程图 → 设计文档 → Demo 原型直出。</div></div>
+        <div class="lane-foot"><span class="lane-badge" style="background:rgba(155,140,255,.16);color:var(--violet);border:1px solid rgba(155,140,255,.3)">☁️ 云端 S-Design 编排</span><span class="lane-badge" style="background:rgba(155,140,255,.16);color:var(--violet);border:1px solid rgba(155,140,255,.3)">🔧 MCP 接系统</span></div>
+      </div>
+    </div>
+
+    <div class="center mt40 reveal">
+      <a href="#tour" class="btn btn-primary">这些场景，现在就点开看效果
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- ============ ACCESS METHODS ============ -->
+<section class="section bg-grad" id="access">
+  <div class="wrap">
+    <div class="sec-head center reveal">
+      <div class="kicker center orange">Access · 接入方式</div>
+      <h2 class="h-sec">一线也能用上 Agent ——<span class="hl">五种入口，按人按岗</span></h2>
+      <p class="lead center">同一个助理、同一套安全底座，按使用场景选入口。<b class="text-orange">现场戴手套、在噪声里，靠手机语音和小程序就能唤起 Agent</b>，不用回办公室、不用装重客户端。</p>
+    </div>
+    <div class="access">
+      <a class="acc feature reveal" href="agent_xjunjian.html">
+        <div class="ai">🎙️</div>
+        <h3>手机语音接入 <span class="lane-badge lb-orange">一线首选</span></h3>
+        <div class="en">Mobile Voice</div>
+        <p>一句话唤起，免手输、免打字。防爆手机 / 对讲机可集成；现场巡检、报缺陷、查规程、开作业票，说完即得结构化结果。</p>
+        <span class="try">▶ 体验语音 Demo</span>
+      </a>
+      <a class="acc feature reveal" href="miniapp.html">
+        <div class="ai">📱</div>
+        <h3>企业小程序 <span class="lane-badge lb-orange">扫码即用</span></h3>
+        <div class="en">Mini Program</div>
+        <p>微信 / 企业微信小程序，扫码即用、零安装。拍照上报、设备问答、作业票、知识库，一线员工人手可及。</p>
+        <span class="try">▶ 体验小程序 Demo</span>
+      </a>
+      <a class="acc reveal" href="#tour">
+        <div class="ai">💻</div>
+        <h3>桌面 Sowork</h3>
+        <div class="en">Desktop · 日常主力</div>
+        <p>Mac / Windows / Linux 全覆盖。丰富 Agent + Skills，接你的文件、定时任务、多频道 —— 机关职能的日常主力工作台。</p>
+        <span class="try">了解更多 →</span>
+      </a>
+      <a class="acc reveal" href="#tour">
+        <div class="ai">🌐</div>
+        <h3>浏览器 S-Agent</h3>
+        <div class="en">Browser · 即开即用</div>
+        <p>打开浏览器即用、零安装，尝鲜第一站。适合轻量临时任务，先体验起来、快速验证。</p>
+        <span class="try">了解更多 →</span>
+      </a>
+      <a class="acc reveal" href="#tour">
+        <div class="ai">☁️</div>
+        <h3>云端 S-Design</h3>
+        <div class="en">Orchestration · 流程编排</div>
+        <p>把多个 Agent 编排成业务流程，可复用模板、沉淀团队资产 —— 科技团队做企业级落地与治理。</p>
+        <span class="try">了解更多 →</span>
+      </a>
+      <div class="acc reveal" style="background:linear-gradient(160deg,rgba(53,226,212,.08),rgba(12,24,38,.7));border-color:rgba(53,226,212,.3);">
+        <div class="ai">🔐</div>
+        <h3>统一入口 · 一个底座</h3>
+        <div class="en">One Gateway</div>
+        <p>五种入口背后是同一个本地 Agent 网关：统一身份权限、按数据等级分流本地 / 云端、全程审计留痕。</p>
+        <span class="try" style="color:var(--cyan)">见「安全可控」↓</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ PROTOTYPE TOUR ============ -->
+<section class="section bg-1" id="tour">
+  <div class="wrap-wide">
+    <div class="sec-head center reveal">
+      <div class="kicker center orange">Prototype Tour · 原型导览</div>
+      <h2 class="h-sec">不止讲方案 —— <span class="hl">六个可交互原型，点卡片进入</span></h2>
+      <p class="lead center">四个一线角色 Agent 都能在手机壳里点场景演示企微语音交互；现场小程序与生产 BI 可点击操作。卡片是<b class="text-orange">实时缩略预览</b>（同源 iframe 实时渲染），点开即是完整原型。</p>
+    </div>
+
+    <div class="ix-tour reveal">
+      <a class="ix-tcard frontline" href="agent_xjunjian.html">
+        <div class="t-shot" data-src="agent_xjunjian.html" data-scroll="360"></div>
+        <div class="t-top"><span class="ic">🛠️</span><b>巡检员 Agent</b><span class="arr">→</span></div>
+        <p>戴着手套一句话报缺陷、查规程、报隐患、交接班 —— 说完自动结构化入生产库。</p>
+        <div class="t-tags"><span class="tag tag-orange">语音报缺陷</span><span class="tag tag-cyan">规程秒查</span><span class="tag tag-orange">隐患闭环</span></div>
+      </a>
+      <a class="ix-tcard frontline" href="agent_shebei.html">
+        <div class="t-shot" data-src="agent_shebei.html" data-scroll="360"></div>
+        <div class="t-top"><span class="ic">🔧</span><b>设备工程师 Agent</b><span class="arr">→</span></div>
+        <p>语音故障诊断给故障树与处置步骤、维修手册秒查、备件申领、工单闭环、预测性维护。</p>
+        <div class="t-tags"><span class="tag tag-orange">故障诊断</span><span class="tag tag-cyan">维修手册</span><span class="tag tag-blue">备件工单</span></div>
+      </a>
+      <a class="ix-tcard frontline" href="agent_anquan.html">
+        <div class="t-shot" data-src="agent_anquan.html" data-scroll="360"></div>
+        <div class="t-top"><span class="ic">⚠️</span><b>安全员 HSE Agent</b><span class="arr">→</span></div>
+        <p>说明作业内容自动出作业票草稿+JSA 风险辨识+安规比对+PPE，隐患闭环、应急处置。</p>
+        <div class="t-tags"><span class="tag tag-orange">作业票 JSA</span><span class="tag tag-cyan">安规问答</span><span class="tag tag-red">应急处置</span></div>
+      </a>
+      <a class="ix-tcard frontline" href="agent_zhiban.html">
+        <div class="t-shot" data-src="agent_zhiban.html" data-scroll="360"></div>
+        <div class="t-top"><span class="ic">🧭</span><b>值班长 Agent</b><span class="arr">→</span></div>
+        <p>晨会驾驶舱、Agent Team 一句话派任务看执行、chatBI 随口问数、交接汇总、生产日报。</p>
+        <div class="t-tags"><span class="tag tag-cyan">晨会驾驶舱</span><span class="tag tag-orange">派任务</span><span class="tag tag-blue">chatBI</span></div>
+      </a>
+      <a class="ix-tcard office" href="miniapp.html">
+        <div class="t-shot" data-src="miniapp.html" data-scroll="300"></div>
+        <div class="t-top"><span class="ic">📱</span><b>现场小程序</b><span class="arr">→</span></div>
+        <p>微信 / 企业微信小程序，扫码即用零安装：拍照上报、设备问答、作业票、知识库，一线人手可及。</p>
+        <div class="t-tags"><span class="tag tag-orange">扫码即用</span><span class="tag tag-cyan">拍照上报</span><span class="tag tag-blue">工单查询</span></div>
+      </a>
+      <a class="ix-tcard office" href="bi.html">
+        <div class="t-shot" data-src="bi.html" data-scroll="120"></div>
+        <div class="t-top"><span class="ic">📊</span><b>生产经营 BI</b><span class="arr">→</span></div>
+        <p>集团 → 分公司 → 平台 → 班组多级下钻，角色登录看不同视角，chatBI 一句话问任意口径。</p>
+        <div class="t-tags"><span class="tag tag-cyan">多级下钻</span><span class="tag tag-blue">角色登录</span><span class="tag tag-orange">chatBI</span></div>
+      </a>
+    </div>
+
+    <div class="center mt32 reveal">
+      <span class="text-dim" style="font-size:13px;">通用职能 / 研发能力速览：</span>
+      <div class="pill-row" style="justify-content:center;margin-top:12px;">
+        <a href="demo-knowledge.html" class="pill">🔎 制度知识问答 RAG</a>
+        <a href="demo-contract.html" class="pill">📄 合同审核·三模型对比</a>
+        <a href="demo-data.html" class="pill">📊 自然语言取数</a>
+        <a href="demo-minutes.html" class="pill">📝 会议纪要</a>
+        <a href="demo-inspection.html" class="pill">📸 设备缺陷视觉识别</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ SECURITY ============ -->
+<section class="section bg-1" id="security">
+  <div class="wrap">
+    <div class="sec-head center reveal">
+      <div class="kicker center blue">Security & Compliance · 安全可控</div>
+      <h2 class="h-sec">用 AI 之前先问一句：<span class="hl">这是什么级别的数据？</span></h2>
+      <p class="lead center">这是每个人都要建立的肌肉记忆。数据分级 + 本地/云端按需部署，才能让生产、涉密数据放心用 AI —— 正面回应你们最关心的合规底线。</p>
+    </div>
+
+    <div class="sec-scroll reveal">
+      <table class="sec-table">
+        <thead>
+          <tr><th style="width:130px;">数据等级</th><th>典型业务例子（中海油视角）</th><th>模型怎么用 · 在哪算</th><th style="width:110px;">能否出域</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="lvl l1">L1 · 公开</td>
+            <td>公开标准/规程手册、对外宣传、已公开公告研报<br><small>可自由使用</small></td>
+            <td>云端更强模型（S2 旗舰）直接处理，本地编排</td>
+            <td><span class="badge-domain bd-yes">可上云</span></td>
+          </tr>
+          <tr>
+            <td class="lvl l2">L2 · 内部</td>
+            <td>内部制度/流程/模板、一般经营与工作资料<br><small>脱敏后谨慎用</small></td>
+            <td>敏感字段脱敏后上云端，或本地模型处理</td>
+            <td><span class="badge-domain bd-mask">脱敏后</span></td>
+          </tr>
+          <tr>
+            <td class="lvl l3">L3 · 敏感</td>
+            <td>海上生产/钻井/工艺数据、员工信息、经营敏感<br><small>仅私有化环境</small></td>
+            <td>仅本地部署的轻量/专用模型，数据不出内网</td>
+            <td><span class="badge-domain bd-no">不出域</span></td>
+          </tr>
+          <tr>
+            <td class="lvl l4">L4 · 核心</td>
+            <td>油气储量核心参数、国家秘密、关基核心数据<br><small>禁止接入 AI</small></td>
+            <td>人工 / 物理隔离处理，不接入任何 AI</td>
+            <td><span class="badge-domain bd-ban">禁用</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="grid mt40 reveal" style="grid-template-columns: 1.2fr 1fr; gap:24px;">
+      <div class="card">
+        <div class="kicker">安全架构 · 一个入口、两条算路、三道防线</div>
+        <div style="display:flex;flex-direction:column;gap:10px;margin-top:10px;">
+          <div style="padding:14px 16px;border-radius:12px;background:rgba(59,140,255,.1);border:1px solid rgba(59,140,255,.28);">
+            <b>① 统一入口</b> <span class="text-dim" style="font-size:13px;">用户 / 岗位 / 身份与权限 —— 谁能用什么模型、访问哪些数据，先在这里按岗授权</span>
+          </div>
+          <div class="center text-mute">↓</div>
+          <div style="padding:14px 16px;border-radius:12px;background:rgba(53,226,212,.1);border:1px solid rgba(53,226,212,.28);">
+            <b>② 本地 Agent 网关</b> <span class="text-dim" style="font-size:13px;">统一编排 · 敏感字段脱敏 · 按数据等级策略路由 · 全程留痕</span>
+          </div>
+          <div class="center text-mute">↓ 分流 ↓</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+            <div style="padding:12px 14px;border-radius:12px;background:rgba(255,90,82,.08);border:1px solid rgba(255,90,82,.22);font-size:12.5px;"><b class="text-red">内网域 L3+</b><br><span class="text-dim">本地轻量/专用模型，数据全程不出内网</span></div>
+            <div style="padding:12px 14px;border-radius:12px;background:rgba(59,140,255,.08);border:1px solid rgba(59,140,255,.22);font-size:12.5px;"><b class="text-blue">云端 L1–L2</b><br><span class="text-dim">脱敏后交 S2 旗舰，能力最强免运维</span></div>
+          </div>
+          <div style="padding:12px 16px;border-radius:12px;background:rgba(255,255,255,.03);border:1px solid var(--line);font-size:12.5px;">
+            <b>③ 治理与审计</b> <span class="text-dim">审计留痕（谁·何时·用了什么数据）· 默认不训练不留存业务数据 · 重要产出人工复核</span>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="kicker orange">一句话判断法</div>
+        <p style="font-size:16px;line-height:1.7;color:var(--text-2);margin:8px 0 0;">"这条信息要是登在公开网站上，会不会出问题？"</p>
+        <p style="font-size:15px;color:var(--text);margin:14px 0;">—— 会，就<b class="text-red">绝不往 AI 里贴</b>。拿不准，按高一级处理。</p>
+        <hr class="divider" style="margin:14px 0;">
+        <p class="text-dim" style="font-size:13px;margin:0;"><b class="text-cyan">部署原则：</b>Agent / 场景 / 助理可定制、可私有化；模型不为单客户私有化旗舰，而是按等级在「本地模型 / 云端旗舰」间动态选择 —— 不用在「要能力」和「要安全」之间二选一。</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ CAPABILITY ============ -->
+<section class="section bg-grad" id="capability">
+  <div class="wrap">
+    <div class="sec-head center reveal">
+      <div class="kicker center">What SenseTime Brings · 商汤能力与价值</div>
+      <h2 class="h-sec">从算力到落地，<span class="hl">一条完整的 AI 能力栈</span></h2>
+      <p class="lead center">国内少见同时握有「算力 + 自研多模态大模型 + Agent 生态 + 落地服务」四层能力的厂商 —— 按需取用、灵活组合、开放不锁定。</p>
+    </div>
+    <div class="stack reveal">
+      <div class="layer">
+        <div class="lh"><div class="ic">🤝</div>落地服务层</div>
+        <div class="items"><span class="pill">FDE 前置部署工程师驻场陪跑</span><span class="pill">场景共建</span><span class="pill">培训赋能</span><span class="pill">对「用起来」负责</span></div>
+      </div>
+      <div class="layer">
+        <div class="lh"><div class="ic">🧠</div>Agent · 应用层</div>
+        <div class="items"><span class="pill">Sowork 桌面端</span><span class="pill">S-Agent 浏览器端</span><span class="pill">S-Design 云端编排</span><span class="pill">技能 Skill</span><span class="pill">知识库 RAG</span><span class="pill">MCP 工具连接</span></div>
+      </div>
+      <div class="layer">
+        <div class="lh"><div class="ic">✨</div>模型层 · 日日新</div>
+        <div class="items"><span class="pill">S2 旗舰大模型</span><span class="pill">多模态（语言/视觉/语音）</span><span class="pill">可私有化轻量 / 专用模型</span></div>
+      </div>
+      <div class="layer">
+        <div class="lh"><div class="ic">⚡</div>算力层 · SenseCore</div>
+        <div class="items"><span class="pill">自建大装置算力底座</span><span class="pill">训练与推理一体</span><span class="pill">支撑云端与本地部署</span><span class="pill">已适配国产化算力</span></div>
+      </div>
+    </div>
+
+    <div class="grid mt40 reveal" style="grid-template-columns: repeat(4,1fr);gap:16px;">
+      <div class="card" style="padding:22px;"><div class="card-icon" style="background:rgba(53,226,212,.12);">🔗</div><h3 style="font-size:16px;">全栈闭环</h3><p style="font-size:13px;">算力+自研大模型+Agent+落地服务，国内少见完整闭环。</p></div>
+      <div class="card" style="padding:22px;"><div class="card-icon" style="background:rgba(59,140,255,.12);border-color:rgba(59,140,255,.25)">🎚️</div><h3 style="font-size:16px;">按级搭配</h3><p style="font-size:13px;">云端旗舰 + 可本地私有化专用模型，按数据等级灵活组合。</p></div>
+      <div class="card" style="padding:22px;"><div class="card-icon" style="background:rgba(155,140,255,.12);border-color:rgba(155,140,255,.25)">🔓</div><h3 style="font-size:16px;">开放不锁定</h3><p style="font-size:13px;">Agent 深度定制、助理可私有化，接现有 Agent，底层只供 Token Plan。</p></div>
+      <div class="card" style="padding:22px;"><div class="card-icon" style="background:rgba(255,138,61,.12);border-color:rgba(255,138,61,.25)">🏃</div><h3 style="font-size:16px;">FDE 陪跑</h3><p style="font-size:13px;">前置部署工程师驻场，对用起来、用得好负责到底。</p></div>
+    </div>
+
+    <div class="card mt24 reveal" style="text-align:center;border-color:rgba(53,226,212,.28);background:linear-gradient(160deg,rgba(53,226,212,.08),rgba(12,24,38,.7));">
+      <div class="kicker center">Token Plan · 开放不锁定</div>
+      <p style="font-size:16px;max-width:820px;margin:0 auto;color:var(--text-2);">你现有的 Agent 照用 —— 商汤只供底层 <b class="text-cyan">Token Plan</b>：<b>一份接入</b>（多模型一个 Key）· <b>按量计费</b>（用多少付多少）· <b>云端 + 本地</b>（旗舰 + 可私有化）。科技团队自主选型，业务侧沿用顺手的工具，保护已有投入、平滑演进。</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============ FDE ============ -->
+<section class="section bg-1" id="fde">
+  <div class="wrap">
+    <div class="sec-head center reveal">
+      <div class="kicker center orange">Deploy With You · FDE 服务价值</div>
+      <h2 class="h-sec">让 AI 真正落地的关键一环 ——<span class="hl">住在你身边的落地工程师</span></h2>
+      <p class="lead center">Forward Deployed Engineer 前置部署工程师 —— 不是交付完就走的乙方，而是驻场陪你把 AI 用起来的人。买了模型 ≠ 用起来。</p>
+    </div>
+
+    <div class="tri reveal">
+      <div class="card"><div class="tag tag-orange">甲方 · 客户</div><h3 style="font-size:17px;">买了模型 ≠ 用起来</h3><p style="font-size:13.5px;">把 AI 真正落到岗位见效果、接现有系统守住数据安全、还把团队教会 —— 投入不打水漂。</p></div>
+      <div class="card"><div class="tag tag-red">乙方 · 商汤</div><h3 style="font-size:17px;">护城河与长期粘性</h3><p style="font-size:13.5px;">对「用起来」负责 → 续费、扩场景；把能力差异变成服务壁垒，一次性交付变长期陪跑。</p></div>
+      <div class="card"><div class="tag tag-cyan">投资方</div><h3 style="font-size:17px;">可持续可复制增长</h3><p style="font-size:13.5px;">落地驱动真实消耗与续费，可量化 ROI、可复制的增长飞轮 —— 从「卖 API」升级为「交付价值」。</p></div>
+    </div>
+
+    <div class="mt40 reveal">
+      <div class="center" style="margin-bottom:20px;"><span class="pill">六步陪跑 · 从选场景到用出习惯</span></div>
+      <div class="steps">
+        <div class="step"><div class="sn">1</div><h4>场景诊断</h4><p>选高频高量、可量化、立刻见效的场景</p></div>
+        <div class="step"><div class="sn">2</div><h4>选型验证</h4><p>按场景选模型、做 PoC，用数据验证</p></div>
+        <div class="step"><div class="sn">3</div><h4>搭建集成</h4><p>现场搭助理、接知识库与系统（RAG/MCP）</p></div>
+        <div class="step"><div class="sn">4</div><h4>安全治理</h4><p>数据分级、私有化部署、护栏与审计</p></div>
+        <div class="step"><div class="sn">5</div><h4>陪跑赋能</h4><p>驻场带教，把使用变成习惯</p></div>
+        <div class="step"><div class="sn">6</div><h4>规模沉淀</h4><p>复制到相邻岗位，沉淀组织资产</p></div>
+      </div>
+      <p class="center text-dim mt24" style="font-size:13.5px;max-width:800px;margin-left:auto;margin-right:auto;">FDE 定位 = <b class="text-orange">客户成功</b>。考核的不是「交付验收」，而是你的真实使用量与业务效果 —— 用起来、用得好、续得下去，才算 FDE 成功。边界清晰：不替你做业务决策拍板、不碰未授权数据、不锁定你只能用商汤；更深的需求走付费定制。</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============ CTA ============ -->
+<section class="section">
+  <div class="wrap">
+    <div class="cta-band reveal">
+      <div class="orb orb-cyan" style="width:300px;height:300px;top:-100px;right:-40px;opacity:.35;"></div>
+      <h2>选一个最痛的场景 —— 两周把它跑出效果</h2>
+      <p>致中海油信息科技团队：你们不缺工具，缺的是把它用出价值的方法与陪你跑的人。从今天起，选一个高频高量场景，我们一起两周做出成效。</p>
+      <div class="row">
+        <a href="#tour" class="btn btn-ghost" style="font-size:15px;">
+          <svg viewBox="0 0 24 24" fill="currentColor" style="width:18px;height:18px;"><path d="M8 5v14l11-7z"/></svg>
+          进入原型体验
+        </a>
+        <a href="#contact" class="btn" style="background:#fff;color:#0a3a6b;font-size:15px;">扫码留资 · 一起选场景</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ FOOTER ============ -->
+<footer class="footer" id="contact">
+  <div class="wrap">
+    <div class="cols">
+      <div>
+        <div class="brand" style="margin-bottom:14px;">
+          <div class="logos">
+            <img src="assets/st_logo.png" class="logo-img" alt="商汤科技 SenseTime">
+          </div>
+        </div>
+        <p style="max-width:340px;">面向中海油信息科技的 AI 应用落地方案 —— 一线现场 Agent、手机语音、小程序，通用职能与科技研发全覆盖，安全可控 + FDE 陪跑。</p>
+        <p style="color:var(--text-mute);margin-top:12px;">商汤科技 · 大模型事业群</p>
+      </div>
+      <div>
+        <h4>方案导览</h4>
+        <a href="#why">为什么是现在</a>
+        <a href="#howto">用好 AI 的方式</a>
+        <a href="#scenarios">落地场景版图</a>
+        <a href="#access">接入方式</a>
+        <a href="#security">安全可控</a>
+        <a href="#tour">原型导览</a>
+      </div>
+      <div id="qr-col">
+        <h4>联系交流</h4>
+        <div style="display:flex;gap:16px;align-items:center;">
+          <div class="qr"></div>
+          <div>
+            <p style="margin-bottom:6px;color:var(--text-2);">扫码留资</p>
+            <p style="font-size:12px;">一起选场景，<br>把 AI 跑起来</p>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="bottom">
+      <span>© 2026 商汤科技 SenseTime · 大模型事业群 —— 为中海油信息科技定制</span>
+      <span>本站为方案演示原型，数据均为示意 / 脱敏</span>
+    </div>
+  </div>
+</footer>
+
+<script src="assets/app.js"></script>
+<script>
+/* 原型导览 · 实时缩略预览：同源 iframe + transform 缩放（peihu/fdeway 同款技巧）
+   http 服务下自动隐藏缩略图内导航/页脚并滚到代表位置；file:// 打开时优雅降级 */
+(function () {
+  var shots = document.querySelectorAll('.t-shot');
+  var fitters = [];
+  shots.forEach(function (shot) {
+    var ifr = document.createElement('iframe');
+    ifr.src = shot.dataset.src;
+    ifr.setAttribute('tabindex', '-1');
+    ifr.setAttribute('aria-hidden', 'true');
+    ifr.setAttribute('scrolling', 'no');
+    ifr.loading = 'lazy';
+    var fit = function () {
+      var scale = shot.clientWidth / 1440;
+      ifr.style.transform = 'scale(' + scale + ')';
+      ifr.style.height = (shot.clientHeight / scale) + 'px';
+    };
+    fitters.push(fit);
+    ifr.addEventListener('load', function () {
+      try {
+        var d = ifr.contentDocument;
+        var nav = d.querySelector('.nav'); if (nav) nav.style.display = 'none';
+        var foot = d.querySelector('.footer'); if (foot) foot.style.display = 'none';
+        d.querySelectorAll('.reveal').forEach(function (e) { e.classList.add('in'); });
+        d.documentElement.style.scrollBehavior = 'auto';
+        ifr.contentWindow.scrollTo(0, parseInt(shot.dataset.scroll || '0', 10));
+      } catch (e) { /* file:// 跨 frame 受限，保持默认视图 */ }
+    });
+    shot.appendChild(ifr);
+    fit();
+  });
+  window.addEventListener('resize', function () { fitters.forEach(function (f) { f(); }); });
+})();
+</script>
+</body>
+</html>
