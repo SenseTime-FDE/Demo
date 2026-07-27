@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>新媒体运营 Agent · 热点雷达与一稿多态 | 报社 AI 原型</title>
+<link rel="stylesheet" href="assets/style.css">
+<style>
+/* ---- agent_xinmeiti 页面专属样式（前缀 xmt-） ---- */
+.xmt-strip { display: flex; gap: 14px; flex-wrap: wrap; align-items: stretch; margin: -6px 0 28px; }
+.xmt-stat {
+  background: var(--white); border: 1px solid var(--line); border-radius: 12px;
+  padding: 10px 18px 11px; box-shadow: var(--shadow-sm); min-width: 158px;
+}
+.xmt-stat .k { font-size: 11px; color: var(--muted); display: flex; align-items: center; gap: 6px; white-space: nowrap; }
+.xmt-stat .v { font-size: 19px; font-weight: 800; color: var(--ink); font-variant-numeric: tabular-nums; margin-top: 2px; }
+.xmt-stat .v small { font-size: 11px; color: var(--muted); font-weight: 500; margin-left: 4px; }
+.xmt-stat .v .up { color: var(--ok); font-size: 12px; font-weight: 700; margin-left: 4px; }
+.xmt-live { width: 7px; height: 7px; border-radius: 50%; background: var(--ok); flex: none; animation: xmtPulse 1.6s ease-in-out infinite; }
+@keyframes xmtPulse { 0%, 100% { opacity: 1; } 50% { opacity: .25; } }
+.xmt-strip-note { align-self: center; font-size: 11px; color: var(--muted); line-height: 1.5; max-width: 200px; }
+.xmt-strip-note b { color: var(--warm-d); }
+/* 窄屏单列时取消手机吸顶，避免覆盖后续面板（宽屏不受影响） */
+@media (max-width: 1080px) { .phone-wrap { position: static; } }
+</style>
+</head>
+<body>
+
+<header class="topnav">
+  <div class="brand">
+    <img src="assets/st_logo.png" alt="商汤科技">
+    <span class="divider"></span>
+    <span class="name">报社 AI · 一线 Agent 与社会价值运营<small>PRESS AI · FRONTLINE AGENTS</small></span>
+  </div>
+  <nav>
+    <a href="index.html">方案总览</a>
+    <a href="agent_jizhe.html">记者 Agent</a>
+    <a href="agent_bianji.html">编辑 Agent</a>
+    <a href="agent_xinmeiti.html" class="active"><span class="dot"></span>新媒体 Agent</a>
+    <a href="agent_faxing.html">发行·社区 Agent</a>
+    <a href="miniapp.html">读者小程序</a>
+    <a href="bi.html">双看板</a>
+  </nav>
+</header>
+
+<main class="page">
+  <div class="page-head">
+    <div class="eyebrow">New Media Agent · One Story, Many Forms</div>
+    <h1>新媒体运营 Agent：<span class="hl">一稿多态批量产内容</span>，传播数据回流双看板</h1>
+    <p class="sub">新媒体部不再一篇一篇搬运改写——长在企业微信里的 Agent 把<b>热点雷达 → 一稿多态 → 终审核签 → 多平台分发 → 数据回流</b>做成流水线：同一篇经把关的报纸稿，由 SenseAudio-S2 旗舰大模型改写成公众号、短视频脚本、海报文案多种形态，<b>未经编辑核签发不出去</b>；传播数据跨渠道去重后同源写入<b>经营 × 社会价值双看板</b>。左侧手机是新媒体运营编辑<b>周敏</b>与 Agent 的企业微信对话，点上方场景可交互演示。</p>
+  </div>
+
+  <div class="xmt-strip">
+    <div class="xmt-stat"><div class="k"><span class="xmt-live"></span>今日全网去重触达</div><div class="v">15.6 万<small>人 · 同人多端计 1 次</small></div></div>
+    <div class="xmt-stat"><div class="k"><span class="xmt-live"></span>一稿多态今日产出</div><div class="v">12<small>篇源稿 · 41 个形态版本</small></div></div>
+    <div class="xmt-stat"><div class="k"><span class="xmt-live"></span>评论区待处置</div><div class="v">66<small>条 · 已自动分级</small></div></div>
+    <div class="xmt-stat"><div class="k"><span class="xmt-live"></span>本周矩阵粉丝净增</div><div class="v">+1.2 万<small>人 · 质量口径单列</small></div></div>
+    <div class="xmt-strip-note">▲ 后台 Agent <b>自动归集去重</b>，每周一 9:00 推涨粉周报（全部数字为示意口径）</div>
+  </div>
+
+  <div class="split">
+    <!-- 左：手机 -->
+    <div class="phone-wrap">
+      <div id="phone-slot"></div>
+      <p class="phone-caption">▲ 可交互原型 · 点上方场景或气泡下方 <b>🎙 快捷话术</b> 切换演示</p>
+    </div>
+
+    <!-- 右：说明 -->
+    <div>
+      <div class="panel">
+        <h3>新媒体运营 · 六个核心场景</h3>
+        <div class="cap-grid">
+          <div class="cap warm"><div class="ic">📡</div><b>热点雷达</b><span>全网热点 × 本报定位匹配，谣言冒头即预警，权威解读抢窗口</span></div>
+          <div class="cap"><div class="ic">🪄</div><b>一稿多态</b><span>报纸稿一键生成公众号 + 短视频脚本 + 海报文案，核签后分发</span></div>
+          <div class="cap warm"><div class="ic">💬</div><b>评论分级处置</b><span>四级分流：常规互动 / 咨询求助 / 谣言线索 / 高危求助</span></div>
+          <div class="cap"><div class="ic">📈</div><b>传播复盘</b><span>跨平台归集去重，到达-理解双指标自动进绩效底稿</span></div>
+          <div class="cap warm"><div class="ic">🗓</div><b>发布排期</b><span>多平台一张表，应急权威信息插队首发、时限倒计时</span></div>
+          <div class="cap"><div class="ic">📣</div><b>涨粉周报</b><span>数量 + 质量双口径，经营版与社会价值版同源生成</span></div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <h3>一稿多态流水线 · 一鱼多吃，签章即凭证</h3>
+        <div class="flow">
+          <div class="f-step"><div class="n">1</div><b>报纸源稿</b><span>已经三审三校终审签发</span></div>
+          <div class="f-arrow">→</div>
+          <div class="f-step"><div class="n">2</div><b>AI 多形态改写</b><span>SenseAudio-S2 出公众号 / 短视频脚本 / 海报文案初稿</span></div>
+          <div class="f-arrow">→</div>
+          <div class="f-step hot"><div class="n">3</div><b>编辑终审核签</b><span>发布链路技术性卡死在此环节</span></div>
+          <div class="f-arrow">→</div>
+          <div class="f-step"><div class="n">4</div><b>多平台分发</b><span>按排期分发，AI 生成内容依法标识</span></div>
+          <div class="f-arrow">→</div>
+          <div class="f-step hot"><div class="n">5</div><b>数据回流</b><span>跨渠道去重回流，次日自动复盘</span></div>
+        </div>
+        <p class="note"><b>一鱼多吃：</b>同一篇经把关的内容，还可延伸出干部版 / 企业版 / 群众版 / 银发有声版（SenseAudio-V2 语音大模型多方言合成）等可售 SKU——边际成本趋零，而<b>「人类终审签章」成为对外授权与计费凭证</b>：卖的不是内容，是把关。</p>
+      </div>
+
+      <div class="panel">
+        <h3>数据回流 · 直通经营 × 社会价值双看板</h3>
+        <div class="cap-grid">
+          <div class="cap"><div class="ic">🔁</div><b>跨渠道去重</b><span>同人多端计 1 次，去重规则写入合同附件，不注水</span></div>
+          <div class="cap warm"><div class="ic">🎯</div><b>到达-理解双指标</b><span>完读 / 完播率 + 文末一题快测正确率，银发语音完播单列</span></div>
+          <div class="cap"><div class="ic">⏱</div><b>时间戳自动打点</b><span>首发取平台回执、辟谣计时取监测告警，不可人工回填</span></div>
+          <div class="cap warm"><div class="ic">🧾</div><b>绩效底稿自动生成</b><span>按月归集，年终汇成社会价值年报与审计底稿</span></div>
+        </div>
+        <p class="note"><b>为什么这很值钱：</b>权威信息有效触达率、辟谣响应时效、政策解读双指标都是 <b>SVI 结算口径</b>——Agent 在流程里顺手打点留痕，取证成本趋零，新媒体部的日常运营数据第一次直接变成对主管部门的<b>结算依据</b>。</p>
+      </div>
+
+      <div class="panel">
+        <h3>全程合规 · 红线内建为系统规则</h3>
+        <table class="mini-table">
+          <tr><th>红线</th><th>系统落地</th><th>机制</th></tr>
+          <tr><td><b>AI 不替代终审</b></td><td>AI 只出初稿，未经编辑核签发布链路技术性卡死；AI 生成内容依法标识留痕</td><td><span class="tag warm">核签卡点</span></td></tr>
+          <tr><td><b>不碰采编导向</b></td><td>按效结算只挂钩时效 / 闭环率 / 触达等流程性指标，绝不挂钩报道内容与倾向</td><td><span class="tag teal">指标隔离</span></td></tr>
+          <tr><td><b>数据不可注水</b></td><td>跨渠道去重口径入合同附件，时间戳不可回填，估计值标注「示意口径」</td><td><span class="tag gold">三源核验</span></td></tr>
+          <tr><td><b>高危求助保护</b></td><td>评论区家暴等高危求助只识别分流直连专责，明细不留存、不进任何看板</td><td><span class="tag warn">只分流</span></td></tr>
+          <tr><td><b>敏感数据边界</b></td><td>评论个人信息脱敏聚合，严禁广告定向；专业领域内容由具资质编辑终审</td><td><span class="tag ok">脱敏聚合</span></td></tr>
+        </table>
+        <p class="note"><b>合规不是口号，是代码：</b>核签卡点、AI 标识、去重规则、高危分流全部内建在分发与回流引擎里——未核签内容发不出去、超时工单自动标红留因，运营想违规系统也不放行。宁可数字难看，不可数字可疑。</p>
+      </div>
+    </div>
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="foot-brand"><img src="assets/st_logo.png" alt="商汤科技"></div>
+  <div><b>商汤科技 · 大模型生态渠道部</b> — AI 技术底座 · 高保真交互原型（页面数据均为目标态示意口径，非真实经营数据；客户报社名仅作定制示例）</div>
+</footer>
+
+<script src="assets/chat.js"></script>
+<script>
+BaoChat.mount(document.getElementById('phone-slot'), {
+  contact: { name: '新媒体运营 Agent', corp: '@报社新媒体中心', sub: '企业微信 · 日日新大模型 · 商汤 AI 技术底座' },
+  agent: { name: '新媒体运营 Agent', avatar: '媒' },
+  user: { name: '周敏', avatar: '周' },
+  scenarios: [
+    {
+      id: 'leida', title: '热点雷达', chip: '看今早热点雷达',
+      intro: '每日 7:30 Agent 主动推热点雷达：全网热点 × 本报定位匹配，谣言冒头即预警',
+      steps: [
+        { from: 'agent', html: '<div class="c-card"><div class="c-head"><span class="c-ic warm">📡</span><b>热点雷达 · 今晨扫描</b><span class="tag warm">每日 7:30</span></div><div class="c-kv"><span>① 延迟退休实施细则</span><b class="warm">政策热点 · 匹配度高</b></div><div class="c-kv"><span>② 网传「自来水异味」</span><b class="teal">谣言冒头 · 待核证</b></div><div class="c-kv"><span>③ 社区养老服务新规</span><b>民生热点 · 本报有存量</b></div><div class="c-kv"><span>竞品动作</span><b>同城 2 家已发快讯</b></div><div class="c-foot">全网监测 + 本报定位匹配 · 示意口径</div></div>' },
+        { from: 'user', voice: '第一个热点，本报有没有权威解读的切入点？', dur: 6 },
+        { from: 'agent', text: '已检索报社知识库（复用已建知识库当燃料）：本报近三年刊发相关报道 <b>17 篇</b>，含政策原文口径与专家署名稿，权威解读窗口在<b>今天上午</b>——建议如下 👇' },
+        { from: 'agent', html: '<div class="c-card"><div class="c-head"><span class="c-ic">💡</span><b>选题建议 · 延迟退休细则</b><span class="tag teal">知识库溯源</span></div><div class="c-kv"><span>切入角度</span><b>「三类人怎么办」分人群解读</b></div><div class="c-kv"><span>可引用存量</span><b class="teal">本报报道 3 篇 · 带溯源链接</b></div><div class="c-kv"><span>建议形态</span><b>图文 + 60″短视频 + 银发语音版</b></div><div class="c-kv"><span>分层版本</span><b class="warm">干部 / 企业 / 群众 / 银发四版</b></div><div class="c-btns"><span class="c-btn primary">🎙 说「立项」即报选题</span><span class="c-btn ghost">换角度</span></div><div class="c-foot">SenseAudio-S2 检索归纳 · 供编辑部决策参考</div></div>' },
+        { from: 'user', voice: '立项，报今天选题会。谣言那条盯紧，一确认就走辟谣流程。', dur: 8 },
+        { from: 'agent', text: '✅ 选题已推送值班主编报题单，<b>是否立项由编辑部决定</b>。「自来水异味」已挂辟谣监测：线索一经确认即触发辟谣响应计时——计时起点取监测告警时间戳，<b>不可人工回填</b>，直接对接 SVI 辟谣响应时效口径。' },
+        { from: 'agent', sys: '报题单已推送值班主编 · 谣言线索监测中 · 全程留痕' }
+      ]
+    },
+    {
+      id: 'yigao', title: '一稿多态', chip: '报纸稿一稿多态',
+      intro: '同一篇经终审的报纸稿，AI 一键生成公众号版 + 短视频脚本 + 海报文案，核签后才可发布',
+      steps: [
+        { from: 'user', voice: '今天头版《社区养老服务新规落地》，做一稿多态：公众号、短视频、海报都要。', dur: 9 },
+        { from: 'agent', text: '收到。源稿已完成三审三校终审签发，SenseAudio-S2 旗舰大模型开始多形态改写，预计 3 分钟出全套初稿 👇' },
+        { from: 'agent', html: '<div class="c-card"><div class="c-head"><span class="c-ic">📰</span><b>形态① 公众号版</b><span class="tag teal">AI 初稿</span></div><div class="c-kv"><span>标题 A</span><b>新规落了地，家里老人能享哪些实惠？</b></div><div class="c-kv"><span>标题 B</span><b class="warm">3 个变化，关系每个有老人的家庭</b></div><div class="c-kv"><span>导语</span><b>按完读优化重写 · 1,680 字</b></div><div class="c-kv"><span>银发大字版</span><b class="ok">已同步生成 ✓</b></div><div class="c-foot">AI 生成初稿 · 已标注 · 待编辑核签</div></div>' },
+        { from: 'agent', html: '<div class="c-card"><div class="c-head"><span class="c-ic warm">🎬</span><b>形态② 短视频脚本 60″</b><span class="tag teal">AI 初稿</span></div><ul class="c-steps"><li>开场钩子 8″：「明年起，社区里这三件事不一样了」</li><li>主体 40″：新规三个变化，每条配现场画面建议</li><li>结尾 12″：引导关注 + 报纸原文溯源二维码</li></ul><div class="c-kv"><span>口播稿</span><b class="teal">SenseAudio-V2 数字人口播可选</b></div><div class="c-foot">AI 生成初稿 · 已标注 · 待编辑核签</div></div>' },
+        { from: 'agent', html: '<div class="c-card"><div class="c-head"><span class="c-ic">🖼</span><b>形态③ 海报文案</b><span class="tag teal">AI 初稿</span></div><div class="c-kv"><span>主标语</span><b>养老不离社区，服务送到楼下</b></div><div class="c-kv"><span>副文案</span><b>新规三问三答 · 一图看懂</b></div><div class="c-kv"><span>版脚</span><b class="teal">报头署名 + 原文二维码位</b></div><div class="c-btns"><span class="c-btn primary">🎙 说「送审」提交核签</span><span class="c-btn ghost">退回重写</span></div><div class="c-foot">AI 生成初稿 · 已标注 · 待编辑核签</div></div>' },
+        { from: 'user', voice: '公众号标题用 B，其他没问题，全部送审。', dur: 6 },
+        { from: 'agent', text: '✅ 已按标题 B 定稿送审值班编辑。提醒：三个形态均已标注「AI 生成初稿」，<b>未经核签发布链路技术性卡死</b>；核签通过后每个版本携带编辑部终审签章标识——同一份把关，多个出口，签章即对外授权与计费凭证。' },
+        { from: 'agent', sys: 'AI 出初稿 → 编辑终审核签 → 排期分发 · 签章留痕' }
+      ]
+    },
+    {
+      id: 'pinglun', title: '评论分级处置', chip: '处理评论区',
+      intro: '全平台评论聚合分四级：常规互动 / 咨询求助 / 谣言线索 / 高危求助——高危只分流不留存',
+      steps: [
+        { from: 'agent', html: '<div class="c-card"><div class="c-head"><span class="c-ic warm">💬</span><b>评论区晨报 · 已分级</b><span class="tag warm">四级处置</span></div><div class="c-kv"><span>昨夜新增评论</span><b>1,284 条 · 全平台聚合</b></div><div class="c-check"><span class="s done">L1</span>常规互动 1,218 条 · 回复建议已生成，待确认</div><div class="c-check"><span class="s todo">L2</span>咨询求助 62 条 · 待转办问政通道</div><div class="c-check"><span class="s warn">L3</span>疑似谣言线索 3 条 · 待核证</div><div class="c-check"><span class="s warn">L4</span>高危求助 1 条 · 已直连专责干部</div><div class="c-foot">SenseAudio-S2 分级 · 处置需人工确认 · 示意口径</div></div>' },
+        { from: 'user', voice: 'L2 那些求助都是什么类型？转到问政通道去。', dur: 6 },
+        { from: 'agent', html: '<div class="c-card"><div class="c-head"><span class="c-ic">📮</span><b>L2 咨询求助 · 转办</b><span class="tag teal">问政通道</span></div><div class="c-kv"><span>养老服务申请流程</span><b>28 条</b></div><div class="c-kv"><span>报销政策咨询</span><b>21 条</b></div><div class="c-kv"><span>其他民生诉求</span><b>13 条</b></div><div class="c-kv"><span>闭环口径</span><b class="warm">受理—转办—督办—回应—回访</b></div><div class="c-btns"><span class="c-btn primary">🎙 说「转办」建工单</span></div><div class="c-foot">缺一环不计入闭环件 · 未闭环不计费</div></div>' },
+        { from: 'user', voice: '转办。L3 的谣言线索给我看一下。', dur: 5 },
+        { from: 'agent', html: '<div class="c-card"><div class="c-head"><span class="c-ic warm">🚨</span><b>L3 谣言线索 · 待核证</b><span class="tag warn">扩散中</span></div><div class="c-kv"><span>线索内容</span><b>「保健品可替代降压药」</b></div><div class="c-kv"><span>扩散情况</span><b class="warm">3 平台 47 条 · 老年用户集中</b></div><div class="c-kv"><span>建议动作</span><b>触发医疗辟谣专项</b></div><div class="c-kv"><span>终审要求</span><b class="teal">具执业资质医学编辑核签</b></div><div class="c-foot">计时起点=监测告警时间戳 · 不可回填</div></div>' },
+        { from: 'agent', text: 'L4 那条高危求助（疑似家暴）已按红线处置：Agent <b>只做识别与分流</b>，直连维权专责干部与 12338 体系——<b>不出具意见、明细不留存、不进任何看板</b>。' },
+        { from: 'user', voice: '好，按这个办。L1 的回复我抽查十条再放。', dur: 6 },
+        { from: 'agent', text: '✅ 已执行：L2 转办工单已建、L3 辟谣专项已立项计时。L1 回复建议<b>全部待编辑确认后才发出</b>（AI 不自动发评），抽查样本 10 条已推你，确认后其余批量放行。' },
+        { from: 'agent', sys: '分级处置留痕入库 · 高危明细不留存不展示' }
+      ]
+    },
+    {
+      id: 'fupan', title: '传播复盘', chip: '昨日传播复盘',
+      intro: '跨平台数据自动归集、同人多端去重计 1 次；复盘底稿直通 SVI 双看板',
+      steps: [
+        { from: 'user', voice: '昨天延迟退休那篇解读，全网表现怎么样？', dur: 5 },
+        { from: 'agent', html: '<div class="c-card"><div class="c-head"><span class="c-ic">📈</span><b>传播复盘 · 延迟退休解读</b><span class="tag teal">自动归集</span></div><div class="c-bars"><div class="b-row"><span>公众号</span><span class="b-track"><span class="b-fill" style="width:38%"></span></span><span class="b-val">4.2 万</span></div><div class="b-row"><span>视频号</span><span class="b-track"><span class="b-fill warm" style="width:92%"></span></span><span class="b-val">11.8 万</span></div><div class="b-row"><span>抖音</span><span class="b-track"><span class="b-fill warm" style="width:71%"></span></span><span class="b-val">8.9 万</span></div><div class="b-row"><span>银发语音版</span><span class="b-track"><span class="b-fill" style="width:16%"></span></span><span class="b-val">1.4 万</span></div></div><div class="c-kv"><span>去重触达</span><b class="warm">15.6 万人 · 同人多端计 1 次</b></div><div class="c-foot">平台后台 API 归集 · 去重规则入合同附件 · 示意口径</div></div>' },
+        { from: 'agent', html: '<div class="c-card"><div class="c-head"><span class="c-ic warm">🎯</span><b>到达-理解双指标</b><span class="tag warm">SVI 口径</span></div><div class="c-kv"><span>完读 / 完播率</span><b>71%（读完 70% 计完成）</b></div><div class="c-kv"><span>银发语音完播</span><b class="teal">63% · 单列统计</b></div><div class="c-kv"><span>文末一题快测正确率</span><b class="ok">82%</b></div><div class="c-kv"><span>归集去向</span><b>本月绩效底稿 · 政策专项</b></div><div class="c-foot">H5 埋点 + 内嵌快测组件 · 政采合同验收口径</div></div>' },
+        { from: 'agent', text: '双指标已按政策专项自动归集——这就是「政策解读到达-理解双指标」的<b>政采验收口径</b>：不只证明发了，还证明<b>到了、被读懂了</b>。' },
+        { from: 'user', voice: '分层版本里，干部版和群众版哪个效果好？', dur: 6 },
+        { from: 'agent', text: '群众版完读率最高（74%），干部版被 <b>12 个政务号转载</b>贡献了权威扩散，银发语音版应答率超预期。建议下期<b>银发有声版提前到与图文同步首发</b>，预计去重触达再提 8%（示意口径）。' },
+        { from: 'agent', sys: '复盘数据已同源写入双看板 · 经营 × 社会价值' }
+      ]
+    },
+    {
+      id: 'paiqi', title: '发布排期', chip: '排今天的发布',
+      intro: '多平台排期一张表，未核签到点自动顺延；应急权威信息可插队首发、时限倒计时',
+      steps: [
+        { from: 'user', voice: '今天的发布排期给我看一下。', dur: 4 },
+        { from: 'agent', html: '<div class="c-card"><div class="c-head"><span class="c-ic">🗓</span><b>今日发布排期</b><span class="tag teal">多平台一张表</span></div><div class="c-check"><span class="s done">✓</span>08:00 公众号头条《延迟退休三问》· 已核签</div><div class="c-check"><span class="s done">✓</span>09:30 银发语音版同步上线 · 已核签</div><div class="c-check"><span class="s todo">…</span>12:30 视频号《社区养老 60″》· 待核签</div><div class="c-check"><span class="s todo">…</span>18:00 抖音 + 海报《新规一图懂》· 待核签</div><div class="c-kv"><span>规则</span><b class="warm">未核签到点自动顺延，不带签章发不出</b></div><div class="c-foot">排期引擎与核签卡点联动 · 示意口径</div></div>' },
+        { from: 'user', voice: '应急办刚来通知，本地汛情要发权威通报，最高优先级。', dur: 7 },
+        { from: 'agent', html: '<div class="c-card"><div class="c-head"><span class="c-ic warm">⚡</span><b>应急首发 · 插队通道</b><span class="tag warn">倒计时 2:00:00</span></div><div class="c-kv"><span>约定时限</span><b class="warm">2 小时内全渠道首发（示意口径）</b></div><div class="c-check"><span class="s done">✓</span>官方通稿已接入 · 来源核验通过</div><div class="c-check"><span class="s done">✓</span>SenseAudio-S2 多平台版式改写 · 8 分钟完成</div><div class="c-check"><span class="s done">✓</span>值班终审绿色通道已呼叫 · 优先核签</div><div class="c-kv"><span>计量口径</span><b class="teal">首发时间取平台发布回执</b></div><div class="c-foot">计入 SVI 应急信息首发及时率 · 不可回填</div></div>' },
+        { from: 'agent', text: '✅ 汛情权威通报已<b>全渠道首发，用时 47 分钟</b>（示意口径），银发语音播报版同步推送。原 12:30 条目自动顺延至 14:00，各平台负责人已收到变更通知。' },
+        { from: 'agent', sys: '应急首发时间戳=平台回执 · 事件对账单月末与付费方确认' }
+      ]
+    },
+    {
+      id: 'zhoubao', title: '涨粉周报', chip: '看涨粉周报',
+      intro: '每周一 9:00 自动推送：涨粉不只看数量，权威触达质量单列——经营与社会价值同源',
+      steps: [
+        { from: 'agent', html: '<div class="c-card"><div class="c-head"><span class="c-ic">📣</span><b>涨粉周报 · 全矩阵</b><span class="tag teal">每周一 9:00</span></div><div class="c-big"><div class="v">+1.2 万</div><div class="l">本周矩阵粉丝净增 · 示意口径</div></div><div class="c-bars"><div class="b-row"><span>视频号</span><span class="b-track"><span class="b-fill warm" style="width:88%"></span></span><span class="b-val">+5,400</span></div><div class="b-row"><span>公众号</span><span class="b-track"><span class="b-fill" style="width:52%"></span></span><span class="b-val">+3,200</span></div><div class="b-row"><span>抖音</span><span class="b-track"><span class="b-fill warm" style="width:41%"></span></span><span class="b-val">+2,500</span></div><div class="b-row"><span>银发语音栏目</span><span class="b-track"><span class="b-fill" style="width:15%"></span></span><span class="b-val">+900</span></div></div><div class="c-kv"><span>周取关率</span><b class="ok">0.8% · 低于均值</b></div><div class="c-foot">平台 API 自动归集 · 跨渠道去重 · 示意口径</div></div>' },
+        { from: 'agent', html: '<div class="c-card"><div class="c-head"><span class="c-ic warm">🧭</span><b>质量口径 · 单列</b><span class="tag warm">不只看数量</span></div><div class="c-kv"><span>银发用户占比</span><b class="warm">18% ↑ 高于同类账号</b></div><div class="c-kv"><span>本地社区用户占比</span><b>41% ↑</b></div><div class="c-kv"><span>权威信息有效触达率</span><b class="teal">联动 SVI 双看板</b></div><div class="c-kv"><span>政务号转载引用</span><b>本周 19 次</b></div><div class="c-foot">质量口径进社会价值看板 · 示意口径</div></div>' },
+        { from: 'user', voice: '这周涨粉主要靠哪几篇？', dur: 4 },
+        { from: 'agent', text: '归因 Top3：① 医疗辟谣短视频（净增 4,100，老年用户占比高）② 延迟退休一稿多态套件（净增 3,300）③ 汛情权威通报（净增 2,200）。<b>辟谣和权威首发是涨粉主力</b>——公信力本身就是最好的增长策略。' },
+        { from: 'user', voice: '周报归档，给领导版加一页社会价值口径。', dur: 6 },
+        { from: 'agent', text: '✅ 已生成两版并归档：<b>经营版</b>（涨粉 / 互动 / 转化）+ <b>社会价值版</b>（权威触达 / 辟谣覆盖 / 银发触达），同源同口径推送双看板，并自动汇入月度绩效底稿——年终即社会价值年报素材。' },
+        { from: 'agent', sys: '周报双版本归档 · 经营 × 社会价值同源同口径' }
+      ]
+    }
+  ]
+});
+</script>
+</body>
+</html>

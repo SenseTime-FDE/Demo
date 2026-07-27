@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>记者 Agent · 企微语音助理 | 报社 AI 原型</title>
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+
+<header class="topnav">
+  <div class="brand">
+    <img src="assets/st_logo.png" alt="商汤科技">
+    <span class="divider"></span>
+    <span class="name">报社 AI · 一线 Agent 与社会价值运营<small>PRESS AI · FRONTLINE AGENTS</small></span>
+  </div>
+  <nav>
+    <a href="index.html">方案总览</a>
+    <a href="agent_jizhe.html" class="active"><span class="dot"></span>记者 Agent</a>
+    <a href="agent_bianji.html">编辑 Agent</a>
+    <a href="agent_xinmeiti.html">新媒体 Agent</a>
+    <a href="agent_faxing.html">发行·社区 Agent</a>
+    <a href="miniapp.html">读者小程序</a>
+    <a href="bi.html">双看板</a>
+  </nav>
+</header>
+
+<main class="page">
+  <div class="page-head">
+    <div class="eyebrow">Reporter Agent · WeCom Voice Channel</div>
+    <h1>记者 Agent：<span class="hl">一句话开工</span>，把关永远在人</h1>
+    <p class="sub">记者人手一个长在<b>企业微信对话框</b>里的 AI 助理——不装新 App、不新建中心化系统，<b>复用报社已建知识库当燃料</b>。按住说话即可：收早报选题雷达、要采访提纲、录音转写成初稿、一稿多平台改写、核查事实线索、晚报自动复盘。每一步自动打点留痕，喂给「经营 × 社会价值」双看板；<b>AI 只出初稿，签发权永远在三审三校</b>。左侧手机可点击场景演示。</p>
+  </div>
+
+  <div class="split">
+    <!-- 左：手机 -->
+    <div class="phone-wrap">
+      <div id="phone-slot"></div>
+      <p class="phone-caption">▲ 可交互原型 · 点上方场景或气泡下方 <b>🎙 快捷话术</b> 切换演示</p>
+    </div>
+
+    <!-- 右：说明 -->
+    <div>
+      <div class="panel">
+        <h3>记者 Agent · 六项核心能力</h3>
+        <div class="cap-grid">
+          <div class="cap warm"><div class="ic">📡</div><b>选题雷达早报</b><span>舆情热点 + 政策发布 + 读者求证台线索，每晨 7:30 自动推送</span></div>
+          <div class="cap"><div class="ic">📝</div><b>采访提纲</b><span>SenseAudio-S2 旗舰大模型检索报社知识库与历史报道，30 秒出提纲</span></div>
+          <div class="cap warm"><div class="ic">🎙</div><b>录音转写成稿</b><span>SenseAudio-V2 语音大模型转写采访录音，结构化成待核初稿</span></div>
+          <div class="cap"><div class="ic">📤</div><b>一稿多平台改写</b><span>签发母版一鱼多吃：报纸 / 公众号 / 微博 / 银发有声版</span></div>
+          <div class="cap warm"><div class="ic">🔍</div><b>事实线索核查</b><span>比对知识库与权威来源出依据链，结论须编辑复核签发</span></div>
+          <div class="cap"><div class="ic">🌙</div><b>晚报复盘留痕</b><span>成果、触达、时效自动归集，21:30 推送并写入双看板</span></div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <h3>语音交互链路 · 每句话都变成看板证据</h3>
+        <div class="flow">
+          <div class="f-step hot"><div class="n">1</div><b>企微按住说话</b><span>零学习成本 · 不换工具</span></div>
+          <div class="f-arrow">→</div>
+          <div class="f-step"><div class="n">2</div><b>SenseAudio-V2 转写</b><span>方言口音 · 术语校正</span></div>
+          <div class="f-arrow">→</div>
+          <div class="f-step"><div class="n">3</div><b>SenseAudio-S2 理解</b><span>意图识别 + 工具调用</span></div>
+          <div class="f-arrow">→</div>
+          <div class="f-step"><div class="n">4</div><b>业务执行</b><span>检索 / 成稿 / 核查 / 改写</span></div>
+          <div class="f-arrow">→</div>
+          <div class="f-step hot"><div class="n">5</div><b>自动打点留痕</b><span>时间戳入库 → 双看板</span></div>
+        </div>
+        <p class="note"><b>为什么这次一线用得起来：</b>过去的知识库系统要记者「打开系统去用」，现在是 Agent 长在企微工作流里主动找记者——早报送线索、采访出提纲、录音变初稿。已建知识库不废弃，作为 RAG 燃料被每天调用。</p>
+      </div>
+
+      <div class="panel">
+        <h3>过程数据自动留痕 · 喂给「经营 × 社会价值」双看板</h3>
+        <table class="mini-table">
+          <tr><th>数据类型</th><th>记录什么</th><th>去向</th></tr>
+          <tr><td><b>选题线索</b></td><td>雷达线索、报题、领题节点时间戳</td><td>选题—签发—首发链路留痕</td></tr>
+          <tr><td><b>采访成稿</b></td><td>录音转写、AI 初稿、待核标注清单</td><td>三审三校系统 · AI 初稿占比单独披露</td></tr>
+          <tr><td><b>核查辟谣</b></td><td>线索确认 → 复核 → 首发时间戳（不可人工回填）</td><td>SVI「辟谣响应时效」结算底稿</td></tr>
+          <tr><td><b>多平台分发</b></td><td>各平台首发回执与触达数据</td><td>跨渠道去重 → 权威信息有效触达率</td></tr>
+          <tr><td><b>采编效能</b></td><td>Agent 使用日志、省下的工时流向</td><td>采编效能释放度（内部指标，证明 AI 转移人力而非替代人力）</td></tr>
+        </table>
+        <p class="note"><b>取证成本趋零：</b>记者只是在企微里说话干活，绩效底稿、社会价值年报所需的证据由 Agent 顺手打点归集——社会价值可计量，所以可汇报、可采购。</p>
+      </div>
+
+      <div class="panel">
+        <h3>合规红线 · 写进产品层，不靠制度自觉</h3>
+        <table class="mini-table">
+          <tr><td><b>AI 不替代终审</b></td><td>AI 只出初稿并依法标识；发布链路在人工三审三校核签环节<b>技术性卡死</b>，AI 无法直接签发</td><td><span class="tag warn">一票否决</span></td></tr>
+          <tr><td><b>不碰采编导向</b></td><td>按效结算只挂钩时效、闭环率、触达等流程性指标，绝不挂钩报道内容与倾向</td><td><span class="tag warm">物理分账</span></td></tr>
+          <tr><td><b>数据授权边界</b></td><td>涉政原文、内参、未刊稿、读者来信及个人信息，严禁进入任何语料授权池</td><td><span class="tag teal">出域审查</span></td></tr>
+          <tr><td><b>数据不可注水</b></td><td>时间戳不可回填、触达跨渠道去重、估计值一律标注「示意口径」并开放第三方审计</td><td><span class="tag gold">可审计</span></td></tr>
+        </table>
+        <p class="note"><b>专业领域从严：</b>医疗、法律等专业稿件须由具备资质的编辑终审，产品层写死「科普 / 指引不构成诊疗或法律意见」。本页全部数字均为目标态<b>示意口径</b>。</p>
+      </div>
+    </div>
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="foot-brand"><img src="assets/st_logo.png" alt="商汤科技"></div>
+  <div><b>商汤科技 · 大模型生态渠道部</b> — AI 技术底座 · 高保真交互原型（页面数据均为目标态示意口径，非真实经营数据；客户报社名仅作定制示例）</div>
+</footer>
+
+<script src="assets/chat.js"></script>
+<script>
+BaoChat.mount(document.getElementById('phone-slot'), {
+  contact: { name: '日日新 · 记者 Agent', corp: '@某报业集团（示例）', sub: '企业微信 · SenseAudio-S2 旗舰大模型 + SenseAudio-V2 语音大模型' },
+  agent: { name: '日日新 · 记者 Agent', avatar: '新' },
+  user: { name: '陈雨薇 · 民生健康线记者', avatar: '陈' },
+  scenarios: [
+    {
+      id: 'zaobao', title: '早报推送', chip: '看今天早报',
+      intro: '每晨 7:30 选题雷达 + 今日任务自动送达——不用翻系统，线索追着人走',
+      steps: [
+        { from: 'agent', sys: '⏰ 07:30 · 记者早报自动推送' },
+        { from: 'agent', html: '<div class="c-card"><div class="c-head"><span class="c-ic warm">📡</span><b>选题雷达 · 今晨 3 条线索</b><span class="tag warm">早报</span></div><div class="c-check"><span class="s warn">●</span>热点：「秋季流感疫苗开打」多平台讨论升温（示意口径）</div><div class="c-check"><span class="s todo">●</span>政策：卫健部门昨发布秋冬接种安排通知，待权威解读</div><div class="c-check"><span class="s todo">●</span>求证：读者小程序 12 条求证「隔夜菜致癌」传言（示意口径）</div><div class="c-foot">来源：舆情监测 + 读者求证台 + 政策发布库 · 已按您的条线过滤</div></div>' },
+        { from: 'agent', html: '<div class="c-card"><div class="c-head"><span class="c-ic">🗓</span><b>今日任务</b></div><div class="c-check"><span class="s todo">○</span>10:00 采访省疾控中心免疫规划专家（已约）</div><div class="c-check"><span class="s todo">○</span>14:00 前交《社区养老观察》二稿</div><div class="c-check"><span class="s todo">○</span>待核查：「隔夜菜致癌」读者求证</div><div class="c-foot">与编辑部选题会日程自动同步</div></div>' },
+        { from: 'agent', text: '建议主打<b>流感疫苗</b>选题：昨晚读者求证台相关提问 38 条（示意口径），权威解读正是缺口，也是 SVI「权威触达」的加分项。' },
+        { from: 'user', voice: '就报流感疫苗这个选题，帮我备采访提纲；隔夜菜那条传言立个核查单。', dur: 11 },
+        { from: 'agent', text: '✅ 选题已报编辑部选题会（报题时间戳自动留痕）；核查单 <b>#F-0722</b> 已建立。提纲马上来，也可以点下方「要采访提纲」看完整过程。' }
+      ]
+    },
+    {
+      id: 'tigang', title: '采访提纲', chip: '要采访提纲',
+      intro: '说一句话，SenseAudio-S2 检索报社知识库 + 历史报道，30 秒出提纲',
+      steps: [
+        { from: 'user', voice: '十点采访省疾控中心免疫规划专家王主任，主题是今年流感疫苗接种，帮我出个采访提纲。', dur: 13 },
+        { from: 'agent', text: '好的雨薇，已检索本报近三年 26 篇相关报道与知识库政策条目（示意口径），提纲如下 👇' },
+        { from: 'agent', html: '<div class="c-card"><div class="c-head"><span class="c-ic">📝</span><b>采访提纲 · 流感疫苗接种</b><span class="tag teal">知识库</span></div><ol class="c-steps"><li>今年疫苗批签发与到位节奏，与去年同期比如何？</li><li>三价改四价，公众最该知道的差别是什么？</li><li>老年人、儿童免费接种政策落地进度（读者高频问题）</li><li>「打了疫苗还会得流感」如何科学回应？</li><li>接种高峰期社区接种点的预约与错峰建议</li></ol><div class="c-foot">来源：报社知识库 + 历史报道 26 篇溯源可查 · AI 起草，待记者确认</div></div>' },
+        { from: 'user', voice: '加一个角度：让专家顺带回应一下隔夜菜致癌那类伪科普。', dur: 8 },
+        { from: 'agent', text: '✅ 已加入第 6 问，并附上该传言的溯源摘要——专家原声回应可直接进核查稿 <b>#F-0722</b>。提纲已同步企微日程，采访时对我说「开始录音」即可转写。' },
+        { from: 'agent', sys: '提纲检索与领题动作已自动打点 · 计入选题—签发链路留痕' }
+      ]
+    },
+    {
+      id: 'zhuangao', title: '转写成稿', chip: '录音转成稿',
+      intro: '采访结束说一句话，SenseAudio-V2 转写录音 → SenseAudio-S2 结构化成待核初稿',
+      steps: [
+        { from: 'agent', sys: '11:20 · 采访录音已上传（48 分钟 · 双人对话）' },
+        { from: 'user', voice: '采访结束了，录音转成稿子，突出免费接种政策和专家辟谣那两段。', dur: 10 },
+        { from: 'agent', text: '收到。SenseAudio-V2 语音大模型正在转写：区分双人声、专业术语自动校正，金句同步标记……' },
+        { from: 'agent', html: '<div class="c-card"><div class="c-head"><span class="c-ic warm">📄</span><b>初稿已生成 · 待人工把关</b><span class="tag warm">AI 初稿</span></div><div class="c-kv"><span>建议标题</span><b>《流感疫苗开打：免费政策落到哪一步？》</b></div><div class="c-kv"><span>结构</span><b>政策进展 — 接种答疑 — 专家辟谣</b></div><div class="c-check"><span class="s done">✓</span>专家金句 3 条已标注，均可回溯录音原点</div><div class="c-check"><span class="s warn">⚠</span>待核数据 4 处：批签发量、覆盖率等已标黄</div><div class="c-btns"><span class="c-btn primary">查看全文</span><span class="c-btn ghost">待核清单</span></div><div class="c-foot">AI 生成初稿依法标识 · 须三审三校核签后方可签发</div></div>' },
+        { from: 'user', voice: '待核的四处我来核。第二处我有现场数据，改成「已到位约六成」，标注示意口径。', dur: 12 },
+        { from: 'agent', text: '✅ 已替换，并把信源标注为「记者现场采访」。初稿连同录音溯源链已推送值班编辑，进入三审三校——<b>发布链路在核签环节技术性卡死，AI 无法直接签发</b>。' },
+        { from: 'agent', sys: '效率打点：录音到初稿 9 分钟（示意口径）· 省下工时计入「采编效能释放度」' }
+      ]
+    },
+    {
+      id: 'duogao', title: '多平台改写', chip: '一稿改多版',
+      intro: '终审签发后的母版一鱼多吃——同一份把关，多个可分发版本，每版仍须核签',
+      steps: [
+        { from: 'agent', sys: '15:40 · 《流感疫苗开打》已过三审三校签发（母版）' },
+        { from: 'user', voice: '这篇出多平台版本：公众号、微博，再来一版给社区老人听的语音版。', dur: 10 },
+        { from: 'agent', html: '<div class="c-card"><div class="c-head"><span class="c-ic">📤</span><b>一稿多平台 · 4 个版本</b><span class="tag gold">一鱼多吃</span></div><div class="c-check"><span class="s done">✓</span>报纸见报版 · 已签发（母版）</div><div class="c-check"><span class="s done">✓</span>公众号版：小标题重排 + 接种点查询指引</div><div class="c-check"><span class="s done">✓</span>微博版：3 条要点 + 辟谣卡片图脚本</div><div class="c-check"><span class="s done">✓</span>银发有声版：SenseAudio-V2 慢速播报 + 方言版 + 大字海报</div><div class="c-foot">各版本继承母版终审签章 · 首发回执自动归集并跨渠道去重</div></div>' },
+        { from: 'user', voice: '银发版开头改口语一点，就说「天冷了，免费流感疫苗开打了」。', dur: 9 },
+        { from: 'agent', text: '✅ 已改写并重新合成语音。4 个版本已进入编辑核签队列——<b>核签通过后</b>由新媒体 Agent 定时分发、发行·社区 Agent 送达社区点位，触达数据回流双看板。' },
+        { from: 'agent', sys: '分发打点：多平台首发时间与触达将按合同附件口径去重归集（示意口径）' }
+      ]
+    },
+    {
+      id: 'hecha', title: '事实核查', chip: '帮我核一下',
+      intro: '谣言线索确认 → 辟谣首发全程自动打点，响应时效直接进 SVI 看板',
+      steps: [
+        { from: 'user', voice: '核查单那条「隔夜菜致癌」帮我核一下，社区群里都传疯了。', dur: 8 },
+        { from: 'agent', text: '正在比对报社知识库、国家标准与本报历史实测报道……' },
+        { from: 'agent', html: '<div class="c-card"><div class="c-head"><span class="c-ic warm">🔍</span><b>核查结论 · #F-0722</b><span class="tag warn">夸大不实</span></div><div class="c-kv"><span>传言</span><b>「隔夜菜亚硝酸盐超标致癌」</b></div><div class="c-kv"><span>初步结论</span><b>夸大不实：正常冷藏远低于限量</b></div><div class="c-check"><span class="s done">✓</span>依据一：食品安全国家标准亚硝酸盐限量条目</div><div class="c-check"><span class="s done">✓</span>依据二：本报 2024 年送检实测报道（溯源可查）</div><div class="c-check"><span class="s warn">⚠</span>保留提示：凉拌菜隔夜风险较高，建议表述保留</div><div class="c-btns"><span class="c-btn primary">生成辟谣稿</span><span class="c-btn">转专家复核</span></div><div class="c-foot">AI 只供线索与依据链 · 结论须具资质编辑复核签发</div></div>' },
+        { from: 'user', voice: '生成辟谣稿，转王编辑复核，争取今天发出去。', dur: 7 },
+        { from: 'agent', text: '✅ 辟谣稿已生成并转王编辑复核。本单<b>线索确认 09:12 → 当前 16:05</b>，各节点时间戳自动打点、不可人工回填；首发后响应时效自动计入 SVI「辟谣响应时效」结算底稿。' },
+        { from: 'agent', sys: '辟谣首发后，将由发行·社区 Agent 对谣言起源社区做二次定向覆盖' }
+      ]
+    },
+    {
+      id: 'wanbao', title: '晚报复盘', chip: '看晚报复盘',
+      intro: '21:30 自动复盘：成果、时效、触达一目了然，全部同步双看板',
+      steps: [
+        { from: 'agent', sys: '⏰ 21:30 · 记者晚报自动推送' },
+        { from: 'agent', html: '<div class="c-card"><div class="c-head"><span class="c-ic">🌙</span><b>今日成果</b><span class="tag teal">晚报</span></div><div class="c-check"><span class="s done">✓</span>《流感疫苗开打》签发 + 4 平台版本核签发布</div><div class="c-check"><span class="s done">✓</span>辟谣稿《隔夜菜致癌？》18:20 全渠道首发</div><div class="c-check"><span class="s done">✓</span>核查单 #F-0722 闭环 · 响应 9.1 小时（示意口径）</div><div class="c-check"><span class="s warn">⚠</span>《社区养老观察》二稿顺延明日 14:00</div><div class="c-foot">成果按选题—签发—首发链路自动归集</div></div>' },
+        { from: 'agent', html: '<div class="c-card"><div class="c-head"><span class="c-ic warm">📊</span><b>今日打点 → 双看板</b><span class="tag warm">示意口径</span></div><div class="c-kv"><span>权威触达（去重）</span><b class="warm">21.4 万人次</b></div><div class="c-kv"><span>辟谣响应时效</span><b class="ok">9.1 小时（约定 ≤ 24h）</b></div><div class="c-kv"><span>读者求证回应</span><b>12 条已回应</b></div><div class="c-kv"><span>效能释放</span><b class="teal">省约 3.5 小时 → 深度选题</b></div><div class="c-foot">经营 × 社会价值双看板自动归集 · 全部为目标态示意口径</div></div>' },
+        { from: 'agent', text: '明日提醒：上午收尾《社区养老观察》二稿；选题雷达今夜继续盯「秋冬呼吸道感染」话题，有异动早报见。' },
+        { from: 'user', voice: '收到，明天把养老那篇收尾。今天转写和核查帮了大忙。', dur: 9 },
+        { from: 'agent', text: '晚安 🌙 省下来的时间就该花在采访与追问上——<b>那是 AI 替代不了、也不该替代的部分</b>。' }
+      ]
+    }
+  ]
+});
+</script>
+</body>
+</html>

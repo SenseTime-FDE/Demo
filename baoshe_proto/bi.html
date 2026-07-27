@@ -1,0 +1,1495 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>双看板 · 经营 × 社会价值（SVI）· 四级下钻 + chatBI | 报社 AI 原型</title>
+<link rel="stylesheet" href="assets/style.css">
+<style>
+/* ===== bi.html 页面专属样式（前缀 .bi-） ===== */
+
+/* 双看板 tab 切换 */
+.bi-tabs { display: flex; gap: 10px; margin-bottom: 16px; flex-wrap: wrap; }
+.bi-tab {
+  flex: none; display: flex; align-items: center; gap: 10px; cursor: pointer;
+  border: 1px solid var(--line); background: var(--white); border-radius: 14px;
+  padding: 10px 20px; transition: all .18s; font-family: var(--font); text-align: left;
+}
+.bi-tab .tb-ic { width: 30px; height: 30px; border-radius: 9px; background: var(--sky); display: flex; align-items: center; justify-content: center; font-size: 15px; flex: none; }
+.bi-tab b { display: block; font-size: 13.5px; color: var(--ink); line-height: 1.3; }
+.bi-tab span { display: block; font-size: 10.5px; color: var(--muted); line-height: 1.3; }
+.bi-tab:hover { border-color: var(--warm-l); box-shadow: var(--shadow-sm); }
+.bi-tab.on { background: var(--ink); border-color: var(--ink); }
+.bi-tab.on .tb-ic { background: var(--warm); }
+.bi-tab.on b { color: #fff; }
+.bi-tab.on span { color: var(--teal-l); }
+.bi-tabpane { display: none; }
+.bi-tabpane.on { display: block; animation: biIn .32s ease both; }
+
+/* 视角徽章条 */
+.bi-badges { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; margin-bottom: 18px; }
+.bi-badges .bi-hint { font-size: 12px; color: var(--muted); margin-left: 4px; }
+.bi-badge {
+  display: flex; align-items: center; gap: 9px; cursor: pointer;
+  background: var(--white); border: 1px solid var(--line); border-radius: 999px;
+  padding: 7px 16px 7px 12px; transition: all .18s; user-select: none;
+}
+.bi-badge .bd-ic { width: 26px; height: 26px; border-radius: 50%; background: var(--sky); display: flex; align-items: center; justify-content: center; font-size: 13px; flex: none; }
+.bi-badge b { font-size: 13px; color: var(--ink); display: block; line-height: 1.25; }
+.bi-badge span { font-size: 10.5px; color: var(--muted); display: block; line-height: 1.25; }
+.bi-badge:hover { border-color: var(--warm-l); box-shadow: var(--shadow-sm); }
+.bi-badge.on { background: var(--ink); border-color: var(--ink); }
+.bi-badge.on .bd-ic { background: var(--warm); }
+.bi-badge.on b { color: #fff; }
+.bi-badge.on span { color: var(--teal-l); }
+.bi-badge.lock { opacity: .42; cursor: not-allowed; border-style: dashed; }
+.bi-badge.lock:hover { border-color: var(--line); box-shadow: none; }
+.bi-badge.lock b::after { content: " 🔒"; font-size: 9px; }
+
+/* 主布局：左看板 + 右 chatBI 停靠栏 */
+.bi-layout { display: grid; grid-template-columns: 1fr 340px; gap: 24px; align-items: start; }
+@media (max-width: 1080px) { .bi-layout { grid-template-columns: 1fr; } }
+
+/* 面包屑条 */
+.bi-crumbbar {
+  display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+  background: var(--white); border: 1px solid var(--line); border-radius: 12px;
+  padding: 10px 16px; margin-bottom: 14px; box-shadow: var(--shadow-sm);
+}
+.bi-crumbs { display: flex; align-items: center; gap: 7px; flex-wrap: wrap; font-size: 13px; }
+.bi-crumb { color: var(--teal-d); cursor: pointer; padding: 2px 6px; border-radius: 6px; transition: background .15s; }
+.bi-crumb:hover { background: var(--sky); }
+.bi-crumb.cur { color: var(--ink); font-weight: 700; cursor: default; }
+.bi-crumb.cur:hover { background: none; }
+.bi-crumbs .sep { color: var(--muted); font-size: 12px; }
+.bi-view { margin-left: auto; font-size: 12px; color: var(--sub); white-space: nowrap; }
+.bi-view b { color: var(--warm-d); }
+
+/* 看板卡区 */
+.bi-board { display: none; background: var(--white); border: 1px solid var(--line); border-radius: var(--radius); padding: 20px 22px; box-shadow: var(--shadow-sm); }
+.bi-board.on { display: block; animation: biIn .32s ease both; }
+@keyframes biIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+.bi-bhead { display: flex; align-items: flex-start; gap: 12px; margin-bottom: 16px; }
+.bi-lv {
+  flex: none; width: 40px; height: 40px; border-radius: 12px; background: var(--ink); color: #fff;
+  display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 14px; letter-spacing: .5px;
+}
+.bi-bhead .bt b { display: block; font-size: 17px; color: var(--ink); line-height: 1.35; }
+.bi-bhead .bt span { display: block; font-size: 12px; color: var(--muted); margin-top: 1px; }
+.bi-bhead .tag { margin-left: auto; flex: none; margin-top: 3px; }
+
+/* KPI 卡 */
+.bi-kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(128px, 1fr)); gap: 10px; margin-bottom: 14px; }
+.bi-kpi { background: var(--bg); border: 1px solid var(--line); border-radius: 12px; padding: 11px 13px; }
+.bi-kpi .k-l { font-size: 11.5px; color: var(--muted); display: block; }
+.bi-kpi .k-v { font-size: 21px; font-weight: 800; color: var(--ink); font-variant-numeric: tabular-nums; line-height: 1.35; letter-spacing: .2px; }
+.bi-kpi .k-v small { font-size: 12px; font-weight: 600; color: var(--sub); }
+.bi-kpi .k-d { display: inline-block; margin-top: 3px; font-size: 11px; font-weight: 700; padding: 1px 8px; border-radius: 999px; }
+.bi-kpi .k-d.up { background: #E7F5EE; color: var(--ok); }
+.bi-kpi .k-d.dn { background: #FBEAEA; color: var(--warn); }
+.bi-kpi .k-d.mid { background: #F5EDD8; color: #8A6E2B; }
+.bi-kpi .k-d.info { background: var(--sky); color: var(--teal-d); }
+
+/* 本级关注指标条（口径带公式） */
+.bi-focal { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; }
+.bi-focal .fl { flex: none; font-size: 11px; font-weight: 700; color: var(--teal-d); letter-spacing: 1px; align-self: center; }
+.bi-focal .fc { background: var(--sky); border-radius: 10px; padding: 6px 12px; font-size: 12px; color: var(--sub); }
+.bi-focal .fc b { color: var(--ink); font-variant-numeric: tabular-nums; }
+.bi-focal .fc i { font-style: normal; color: var(--muted); font-size: 10.5px; display: block; line-height: 1.4; }
+.bi-focal .fc.warn-fc { background: #FBEAEA; }
+.bi-focal .fc.warn-fc b { color: var(--warn); }
+
+/* 横条图 */
+.bi-bars { margin: 6px 0 4px; }
+.bi-bars .brow { display: grid; grid-template-columns: 128px 1fr 64px; gap: 10px; align-items: center; font-size: 12.5px; color: var(--sub); padding: 5px 0; }
+.bi-bars .btrack { height: 15px; border-radius: 8px; background: var(--bg); border: 1px solid var(--line); overflow: hidden; }
+.bi-bars .bfill { display: block; height: 100%; border-radius: 8px; background: linear-gradient(90deg, var(--teal), var(--teal-l)); animation: biGrow .8s ease both; transform-origin: left; }
+.bi-bars .bfill.top { background: linear-gradient(90deg, var(--warm), var(--warm-l)); }
+.bi-bars .bfill.faint { background: repeating-linear-gradient(45deg, var(--sky2), var(--sky2) 5px, var(--sky) 5px, var(--sky) 10px); }
+@keyframes biGrow { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+.bi-bars .bval { text-align: right; font-weight: 700; color: var(--ink); font-variant-numeric: tabular-nums; }
+.bi-bars .bval small { font-weight: 500; color: var(--muted); }
+.bi-sect { font-size: 13px; color: var(--ink); font-weight: 700; margin: 16px 0 8px; display: flex; align-items: center; gap: 8px; }
+.bi-sect::before { content: ""; width: 7px; height: 7px; border-radius: 2.5px; background: var(--warm); flex: none; }
+.bi-sect small { font-weight: 500; color: var(--muted); font-size: 11.5px; }
+
+/* 下钻表格 */
+.bi-tblwrap { overflow-x: auto; }
+.bi-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.bi-table th { text-align: left; color: var(--teal-d); font-weight: 600; padding: 8px 10px; background: var(--sky); font-size: 12px; white-space: nowrap; }
+.bi-table th:first-child { border-radius: 8px 0 0 8px; }
+.bi-table th:last-child { border-radius: 0 8px 8px 0; }
+.bi-table td { padding: 9px 10px; border-bottom: 1px solid var(--line); color: var(--sub); white-space: nowrap; font-variant-numeric: tabular-nums; }
+.bi-table tr:last-child td { border-bottom: none; }
+.bi-table td b { color: var(--ink); font-weight: 600; }
+.bi-table tr.drill { cursor: pointer; transition: background .15s; }
+.bi-table tr.drill:hover { background: var(--cream); }
+.bi-table tr.drill td:first-child b { color: var(--teal-d); }
+.bi-table tr.dim { cursor: pointer; }
+.bi-table tr.dim td { color: var(--muted); }
+.bi-table .go { color: var(--warm); font-weight: 800; }
+.bi-table .ok-t { color: var(--ok); font-weight: 600; }
+.bi-table .warn-t { color: var(--warn); font-weight: 700; }
+.bi-table .gold-t { color: #8A6E2B; font-weight: 600; }
+.bi-bfoot { margin-top: 12px; font-size: 11px; color: var(--muted); display: flex; gap: 6px; align-items: baseline; line-height: 1.6; }
+.bi-bfoot::before { content: "⛁"; color: var(--teal-l); }
+
+/* 域指标区（经营三域 / SVI 四域共用） */
+.bi-domains { margin-top: 24px; }
+.bi-domgrid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+.bi-svigrid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; }
+@media (max-width: 1080px) { .bi-domgrid { grid-template-columns: 1fr; } }
+@media (max-width: 640px)  { .bi-svigrid { grid-template-columns: 1fr; } }
+.bi-dom { background: var(--bg); border: 1px solid var(--line); border-radius: 12px; padding: 13px 15px; border-top: 3px solid var(--teal); }
+.bi-dom.warm-d2 { border-top-color: var(--warm); }
+.bi-dom.gold-d2 { border-top-color: var(--gold); }
+.bi-dom.ink-d2  { border-top-color: var(--ink); }
+.bi-dom h4 { font-size: 13.5px; color: var(--ink); margin-bottom: 6px; display: flex; gap: 6px; align-items: center; }
+.bi-dom h4 small { font-weight: 500; color: var(--muted); font-size: 10.5px; letter-spacing: .5px; }
+.bi-dom h4 .tag { margin-left: auto; }
+.bi-dom .dm { padding: 7px 0; border-bottom: 1px dashed var(--line); }
+.bi-dom .dm:last-child { border-bottom: none; }
+.bi-dom .dm .dm-t { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
+.bi-dom .dm .dm-t b { font-size: 12.5px; color: var(--ink); font-weight: 600; }
+.bi-dom .dm .dm-t b .dm-tag { font-style: normal; font-size: 9.5px; font-weight: 700; color: var(--warn); border: 1px solid var(--warm-l); border-radius: 999px; padding: 0 6px; margin-left: 4px; vertical-align: 1px; }
+.bi-dom .dm .dm-t b .dm-tag.soft { color: var(--teal-d); border-color: var(--sky2); }
+.bi-dom .dm .dm-t .dm-v { font-size: 13.5px; font-weight: 800; color: var(--teal-d); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.bi-dom.warm-d2 .dm .dm-t .dm-v { color: var(--warm-d); }
+.bi-dom.gold-d2 .dm .dm-t .dm-v { color: #8A6E2B; }
+.bi-dom .dm .dm-f { font-size: 10.5px; color: var(--muted); line-height: 1.5; margin-top: 1px; }
+
+/* SVI 达标率 hero */
+.svi-hero { display: flex; align-items: center; gap: 20px; flex-wrap: wrap; background: linear-gradient(135deg, var(--ink), var(--ink3)); border-radius: 14px; padding: 18px 22px; margin-bottom: 16px; color: #fff; }
+.svi-hero .sh-v { font-size: 40px; font-weight: 800; color: var(--gold); font-variant-numeric: tabular-nums; line-height: 1.05; }
+.svi-hero .sh-l { font-size: 11.5px; color: rgba(237,241,246,.75); line-height: 1.55; }
+.svi-hero .sh-l b { color: #fff; }
+.svi-hero .sh-doms { display: flex; gap: 8px; flex-wrap: wrap; margin-left: auto; }
+.svi-hero .sh-doms span { font-size: 11.5px; font-weight: 600; background: rgba(194,161,75,.16); border: 1px solid rgba(194,161,75,.42); color: #F0E3C0; border-radius: 999px; padding: 4px 12px; }
+.svi-hero button { flex: none; border: none; cursor: pointer; font-family: var(--font); background: var(--warm); color: #fff; font-size: 12.5px; font-weight: 700; border-radius: 999px; padding: 9px 18px; transition: background .15s; }
+.svi-hero button:hover { background: var(--warm-d); }
+
+/* chatBI 停靠栏 */
+.bi-dock { position: sticky; top: 80px; }
+.bi-dock .panel { padding: 16px 16px 14px; }
+.bi-dock h3 small { font-weight: 500; font-size: 11px; color: var(--muted); margin-left: 2px; }
+.bi-msgs { display: flex; flex-direction: column; gap: 10px; max-height: 46vh; overflow-y: auto; padding: 2px 2px 4px; scroll-behavior: smooth; }
+.bi-msgs::-webkit-scrollbar { width: 4px; }
+.bi-msgs::-webkit-scrollbar-thumb { background: var(--line); border-radius: 2px; }
+.bi-m { max-width: 92%; border-radius: 12px; padding: 9px 12px; font-size: 12.5px; line-height: 1.6; animation: biIn .25s ease both; }
+.bi-m.q { align-self: flex-end; background: var(--cream); color: var(--ink); border: 1px solid var(--cream2); border-bottom-right-radius: 4px; }
+.bi-m.a { align-self: flex-start; background: var(--white); border: 1px solid var(--line); color: var(--sub); border-bottom-left-radius: 4px; box-shadow: var(--shadow-sm); }
+.bi-m.a b { color: var(--warm-d); }
+.bi-m.a .m-chart { margin-top: 8px; background: var(--bg); border: 1px solid var(--line); border-radius: 10px; padding: 8px 8px 4px; }
+.bi-m.a .m-chart svg { width: 100%; height: auto; display: block; }
+.bi-m.a .m-cal { margin-top: 8px; padding-top: 7px; border-top: 1px dashed var(--line); font-size: 10.5px; color: var(--muted); line-height: 1.55; }
+.bi-m.a .m-cal::before { content: "口径 · "; color: var(--teal); font-weight: 700; }
+.bi-caret { display: inline-block; width: 7px; height: 13px; background: var(--warm); vertical-align: -2px; margin-left: 1px; animation: biBlink .8s infinite; border-radius: 1px; }
+@keyframes biBlink { 0%,100% { opacity: 1; } 50% { opacity: .15; } }
+.bi-chips { display: flex; flex-wrap: wrap; gap: 6px; margin: 12px 0 10px; }
+.bi-chip {
+  font-size: 11.5px; color: var(--teal-d); background: var(--white); border: 1px solid var(--sky2);
+  padding: 5px 11px; border-radius: 999px; cursor: pointer; transition: all .15s;
+}
+.bi-chip:hover { background: var(--sky); border-color: var(--teal-l); }
+.bi-chip:active { transform: scale(.96); }
+.bi-chips.busy .bi-chip { opacity: .4; pointer-events: none; }
+.bi-inputbar { display: flex; gap: 8px; }
+.bi-inputbar input {
+  flex: 1; border: 1px solid var(--line); border-radius: 999px; padding: 8px 14px;
+  font-size: 12.5px; font-family: var(--font); background: var(--bg); color: var(--text); outline: none;
+}
+.bi-inputbar input:focus { border-color: var(--warm-l); background: var(--white); }
+.bi-inputbar button {
+  flex: none; border: none; background: var(--ink); color: #fff; font-family: var(--font);
+  border-radius: 999px; padding: 8px 16px; font-size: 12.5px; font-weight: 600; cursor: pointer; transition: background .15s;
+}
+.bi-inputbar button:hover { background: var(--ink2); }
+.bi-dockfoot { margin-top: 10px; font-size: 10.5px; color: var(--muted); line-height: 1.6; }
+.bi-dockfoot b { color: var(--teal-d); }
+
+/* 数据从哪来 */
+.bi-flowpanel { margin-top: 24px; }
+
+/* ===== 角色登录 / 常驻角色栏 / 三种触达 ===== */
+body.bi-locked { overflow: hidden; }
+.bi-login {
+  position: fixed; inset: 0; z-index: 300; overflow-y: auto;
+  background: rgba(250, 248, 243, .96); backdrop-filter: blur(8px);
+  display: flex; align-items: center; justify-content: center;
+  padding: 30px 20px; transition: opacity .28s;
+}
+.bi-login.off { opacity: 0; pointer-events: none; }
+.bi-login-box { width: 100%; max-width: 1120px; text-align: center; }
+.bi-login-box .eyebrow { font-size: 11px; font-weight: 700; letter-spacing: 3px; color: var(--teal); text-transform: uppercase; }
+.bi-login-box h2 { font-size: 26px; color: var(--ink); margin: 6px 0 8px; }
+.bi-login-box .lg-sub { font-size: 13.5px; color: var(--sub); max-width: 680px; margin: 0 auto 24px; line-height: 1.7; }
+.bi-login-box .lg-sub b { color: var(--warm-d); }
+.bi-login-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(172px, 1fr)); gap: 14px; }
+.bi-role {
+  background: var(--white); border: 1px solid var(--line); border-radius: var(--radius);
+  padding: 22px 14px 18px; cursor: pointer; box-shadow: var(--shadow-sm);
+  transition: all .18s; display: flex; flex-direction: column; align-items: center; user-select: none;
+}
+.bi-role:hover { transform: translateY(-4px); border-color: var(--warm-l); box-shadow: var(--shadow); }
+.bi-role b { font-size: 15px; color: var(--ink); }
+.bi-role .r-t { font-size: 11.5px; color: var(--teal-d); margin: 2px 0 8px; }
+.bi-role .r-p { font-size: 11px; color: var(--muted); line-height: 1.55; min-height: 51px; }
+.bi-role .r-go { margin-top: 8px; font-size: 12px; font-weight: 700; color: var(--warm-d); }
+.r-av {
+  width: 54px; height: 54px; border-radius: 50%; color: #fff; font-size: 22px; font-weight: 800;
+  display: flex; align-items: center; justify-content: center; margin-bottom: 10px; flex: none;
+}
+.av-ink   { background: linear-gradient(135deg, var(--ink2), var(--ink)); }
+.av-ink2  { background: linear-gradient(135deg, var(--ink3), var(--ink2)); }
+.av-teal  { background: linear-gradient(135deg, var(--teal), var(--teal-d)); }
+.av-warm  { background: linear-gradient(135deg, var(--warm), var(--warm-d)); }
+.av-gold  { background: linear-gradient(135deg, var(--gold), #8A6E2B); }
+.av-warm2 { background: linear-gradient(135deg, var(--warm-l), var(--warm)); }
+.bi-login-foot { margin-top: 22px; font-size: 12px; color: var(--muted); }
+
+/* 常驻角色栏 */
+.bi-rolebar {
+  display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+  background: var(--ink); border-radius: 14px; padding: 10px 16px;
+  margin-bottom: 16px; box-shadow: var(--shadow-sm);
+}
+.bi-rolebar .rb-av {
+  width: 36px; height: 36px; border-radius: 50%; color: #fff; font-size: 15px; font-weight: 800;
+  display: flex; align-items: center; justify-content: center; flex: none;
+}
+.bi-rolebar .rb-t b { display: block; font-size: 13.5px; color: #fff; line-height: 1.35; }
+.bi-rolebar .rb-t span { display: block; font-size: 11.5px; color: var(--teal-l); line-height: 1.4; }
+.bi-rolebar .rb-switch {
+  margin-left: auto; flex: none; border: none; cursor: pointer; font-family: var(--font);
+  background: var(--warm); color: #fff; font-size: 12.5px; font-weight: 700;
+  border-radius: 999px; padding: 8px 18px; transition: background .15s;
+}
+.bi-rolebar .rb-switch:hover { background: var(--warm-d); }
+
+/* 同一套数 · 三种触达 */
+.bi-touch { margin-top: 24px; }
+.bi-touchgrid { display: grid; grid-template-columns: 1fr 1.4fr 1fr; gap: 16px; align-items: stretch; }
+@media (max-width: 1080px) { .bi-touchgrid { grid-template-columns: 1fr; } }
+.bi-tcol { background: var(--bg); border: 1px solid var(--line); border-radius: 14px; padding: 16px; display: flex; flex-direction: column; }
+.tc-head { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+.tc-ic { width: 36px; height: 36px; border-radius: 11px; background: var(--sky); display: flex; align-items: center; justify-content: center; font-size: 18px; flex: none; }
+.tc-head b { display: block; font-size: 14px; color: var(--ink); line-height: 1.35; }
+.tc-head .tc-sub { display: block; font-size: 11px; color: var(--muted); }
+.tc-list { list-style: none; }
+.tc-list li { font-size: 12.5px; color: var(--sub); padding: 7px 0 7px 18px; position: relative; line-height: 1.55; border-bottom: 1px dashed var(--line); }
+.tc-list li:last-child { border-bottom: none; }
+.tc-list li::before { content: ""; position: absolute; left: 2px; top: 14px; width: 7px; height: 7px; border-radius: 2.5px; background: var(--warm); }
+.tc-list li b { color: var(--ink); }
+.tc-note { margin-top: auto; padding-top: 12px; font-size: 11px; color: var(--muted); line-height: 1.55; }
+
+/* 缩放手机壳静态 mockup */
+.bi-minis { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; }
+.bi-mini { width: 176px; }
+.mp-shell { background: #101418; border-radius: 26px; padding: 6px; box-shadow: 0 12px 28px rgba(12, 37, 69, .2), inset 0 0 0 1.5px #2a3138; }
+.mp-scr { background: var(--white); border-radius: 21px; overflow: hidden; display: flex; flex-direction: column; }
+.mp-head { background: linear-gradient(135deg, var(--ink2), var(--ink)); color: #fff; padding: 13px 11px 9px; }
+.mp-head.warm { background: linear-gradient(135deg, var(--warm-d), var(--ink)); }
+.mp-head b { display: block; font-size: 11.5px; }
+.mp-head span { display: block; font-size: 8.5px; opacity: .75; margin-top: 1px; }
+.mp-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 5px; padding: 8px; }
+.mp-st { background: var(--bg); border: 1px solid var(--line); border-radius: 8px; padding: 5px 7px; }
+.mp-st b { display: block; font-size: 11.5px; color: var(--warm-d); font-variant-numeric: tabular-nums; }
+.mp-st span { display: block; font-size: 8px; color: var(--muted); }
+.mp-six { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; padding: 8px 8px 4px; }
+.mp-six div { background: var(--bg); border: 1px solid var(--line); border-radius: 7px; padding: 4px 2px; text-align: center; }
+.mp-six b { display: block; font-size: 10px; color: var(--ink); font-variant-numeric: tabular-nums; }
+.mp-six span { display: block; font-size: 7.5px; color: var(--muted); }
+.mp-sect { font-size: 9px; font-weight: 700; color: var(--teal-d); padding: 5px 10px 2px; }
+.mp-task { display: flex; justify-content: space-between; align-items: center; gap: 6px; font-size: 9px; color: var(--sub); padding: 4px 10px; border-top: 1px dashed var(--line); }
+.mp-task b { font-size: 8.5px; flex: none; }
+.mp-task b.ok { color: var(--ok); }
+.mp-task b.todo { color: #8A6E2B; }
+.mp-task b.warn { color: var(--warn); }
+.mp-ringrow { display: flex; align-items: center; gap: 8px; padding: 4px 10px 2px; }
+.mp-ringrow svg { width: 46px; height: 46px; flex: none; }
+.mp-ringtxt b { display: block; font-size: 10.5px; color: var(--ink); }
+.mp-ringtxt span { display: block; font-size: 8px; color: var(--muted); }
+.mp-btn { margin: 7px 10px 10px; text-align: center; background: var(--warm); color: #fff; font-size: 9.5px; font-weight: 700; border-radius: 999px; padding: 5px 0; }
+.mp-cap { display: block; text-align: center; font-size: 11px; color: var(--muted); margin-top: 8px; line-height: 1.5; }
+
+/* Agent 主动推送（企微气泡示意） */
+.bi-push { background: var(--wx-bg); border: 1px solid var(--line); border-radius: 12px; padding: 10px 10px 6px; }
+.push-time { text-align: center; font-size: 10.5px; color: #9b9b9b; margin: 4px 0 8px; }
+.push-b { display: flex; gap: 8px; margin-bottom: 10px; }
+.push-av { width: 30px; height: 30px; border-radius: 6px; flex: none; background: linear-gradient(135deg, var(--teal), var(--ink2)); color: #fff; font-size: 13px; font-weight: 700; display: flex; align-items: center; justify-content: center; }
+.push-bub { background: #fff; border-radius: 8px; padding: 8px 10px; font-size: 11.5px; color: #333; line-height: 1.6; box-shadow: 0 1px 1px rgba(0, 0, 0, .04); }
+.push-bub b { color: var(--teal-d); }
+.push-links { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; }
+.push-links a { font-size: 12px; font-weight: 600; color: var(--warm-d); background: var(--cream); border: 1px solid var(--cream2); border-radius: 999px; padding: 6px 13px; transition: background .15s; }
+.push-links a:hover { background: var(--cream2); }
+
+/* 提示 toast */
+.bi-toast {
+  position: fixed; left: 50%; bottom: 34px; transform: translateX(-50%) translateY(20px);
+  background: var(--ink); color: #fff; font-size: 12.5px; padding: 10px 20px; border-radius: 999px;
+  box-shadow: var(--shadow); opacity: 0; pointer-events: none; transition: all .3s; z-index: 200; max-width: 86vw; text-align: center;
+}
+.bi-toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+</style>
+</head>
+<body>
+
+<header class="topnav">
+  <div class="brand">
+    <img src="assets/st_logo.png" alt="商汤科技">
+    <span class="divider"></span>
+    <span class="name">报社 AI · 一线 Agent 与社会价值运营<small>PRESS AI · FRONTLINE AGENTS</small></span>
+  </div>
+  <nav>
+    <a href="index.html">方案总览</a>
+    <a href="agent_jizhe.html">记者 Agent</a>
+    <a href="agent_bianji.html">编辑 Agent</a>
+    <a href="agent_xinmeiti.html">新媒体 Agent</a>
+    <a href="agent_faxing.html">发行·社区 Agent</a>
+    <a href="miniapp.html">读者小程序</a>
+    <a href="bi.html" class="active"><span class="dot"></span>双看板</a>
+  </nav>
+</header>
+
+<main class="page">
+  <div class="page-head">
+    <div class="eyebrow">Dual Dashboards · Operations × Social Value (SVI) + chatBI</div>
+    <h1>双看板：<span class="hl">经营 × 社会价值</span>，报社 → 部门 → 栏目 → 稿件/个人 一钻到底</h1>
+    <p class="sub">左手<b>经营看板</b>管采编效能、传播与收入曲线，右手<b>社会价值看板</b>管 SVI 四域 12 指标——同一套指标、同一套口径，点一下就从全社钻到一篇稿、一个人；右侧 <b>chatBI 对话问数</b>，一句话查任意层级、任意口径。数据源自采编 / 派送<b>语音·埋点自动留痕</b>（云端数据库 · 商汤 AI 技术底座），时间戳不可人工回填。页面数值均为<b>目标态示意口径</b>。进入先选<b>角色</b>——权限由企微 / 飞书身份自动识别，各角色只看自己那一段。</p>
+  </div>
+
+  <!-- 常驻角色栏：当前角色 + 数据权限说明 + 切换角色 -->
+  <div class="bi-rolebar" id="bi-rolebar">
+    <span class="rb-av av-ink" id="bi-role-av">林</span>
+    <div class="rb-t">
+      <b id="bi-role-name">当前角色：林社长 · 社领导 · 社委会</b>
+      <span id="bi-role-perm">数据权限：全社双看板全链路 · 由企微/飞书身份自动识别，无需输密码</span>
+    </div>
+    <button class="rb-switch" id="bi-role-switch" type="button">⇄ 切换角色</button>
+  </div>
+
+  <!-- 视角徽章条：点击可直达对应看板 -->
+  <div class="bi-badges" id="bi-badges">
+    <div class="bi-badge" data-board="0"><span class="bd-ic">🏛</span><span><b>社领导 · 总编室</b><span>L1 全社总览</span></span></div>
+    <div class="bi-badge" data-board="1"><span class="bd-ic">🗞️</span><span><b>编辑部主任</b><span>L2 部门</span></span></div>
+    <div class="bi-badge" data-board="2"><span class="bd-ic">📰</span><span><b>栏目主编</b><span>L3 栏目</span></span></div>
+    <div class="bi-badge" data-board="3"><span class="bd-ic">🎙️</span><span><b>记者本人</b><span>L4 稿件 · 个人</span></span></div>
+    <div class="bi-badge" data-board="4"><span class="bd-ic">📣</span><span><b>新媒体中心</b><span>L2 传播分发</span></span></div>
+    <div class="bi-badge" data-board="5"><span class="bd-ic">🚲</span><span><b>发行站长</b><span>L2 点位触达</span></span></div>
+    <span class="bi-hint">◂ 权限内的视角可点击直达，🔒 为超出当前角色权限（切换角色后可见）</span>
+  </div>
+
+  <div class="bi-layout">
+    <!-- ================= 左：双看板区 ================= -->
+    <div class="bi-main">
+
+      <!-- 双看板 tab -->
+      <div class="bi-tabs">
+        <button class="bi-tab on" data-tab="jy" type="button"><span class="tb-ic">📈</span><span><b>经营看板</b><span>采编效能 · 传播 · 经营三域 + 四级下钻</span></span></button>
+        <button class="bi-tab" data-tab="svi" type="button"><span class="tb-ic">🏛</span><span><b>社会价值看板</b><span>SVI 四域 12 指标 · 第三张报表</span></span></button>
+      </div>
+
+      <!-- ======== Tab 1：经营看板（下钻） ======== -->
+      <div class="bi-tabpane on" id="pane-jy">
+
+        <!-- 面包屑 -->
+        <div class="bi-crumbbar">
+          <div class="bi-crumbs" id="bi-crumbs"></div>
+          <div class="bi-view" id="bi-view"></div>
+        </div>
+
+        <!-- L1 全社总览 -->
+        <section class="bi-board" data-board="0">
+          <div class="bi-bhead">
+            <span class="bi-lv">L1</span>
+            <div class="bt"><b>全社总览 · 采编 × 传播 × 经营 · 今日</b><span>社领导 / 总编室视角：全社一屏掌握，指标可钻到一篇稿、一个人</span></div>
+            <span class="tag gold">目标态示意</span>
+          </div>
+          <div class="bi-kpis">
+            <div class="bi-kpi"><span class="k-l">全渠道触达（人次）</span><span class="k-v">486<small>万</small></span><span class="k-d up">↑ 5.2%</span></div>
+            <div class="bi-kpi"><span class="k-l">今日签发稿件</span><span class="k-v">128<small>篇</small></span><span class="k-d up">↑ 9</span></div>
+            <div class="bi-kpi"><span class="k-l">辟谣响应中位</span><span class="k-v">3.2<small>小时</small></span><span class="k-d up">达标 &lt;4h</span></div>
+            <div class="bi-kpi"><span class="k-l">本月三曲线收入</span><span class="k-v">¥118<small>万</small></span><span class="k-d up">↑ 12%</span></div>
+            <div class="bi-kpi"><span class="k-l">本月 SVI 达标率</span><span class="k-v">92.4%</span><span class="k-d info">结算挂钩</span></div>
+          </div>
+          <div class="bi-focal">
+            <span class="fl">本级关注</span>
+            <span class="fc"><i>权威信息有效触达率 · 去重口径</i><b>78.6%</b></span>
+            <span class="fc"><i>民生回应闭环率 · 乘满意度 0.94</i><b>91.2%</b></span>
+            <span class="fc"><i>内容安全合格率 · 门槛一票否决</i><b>99.94%</b></span>
+          </div>
+          <div class="bi-sect">各部门今日签发 / 产出 · Top <small>（篇 / SKU）</small></div>
+          <div class="bi-bars">
+            <div class="brow"><span>时政新闻部</span><span class="btrack"><span class="bfill top" style="width:100%"></span></span><span class="bval">42</span></div>
+            <div class="brow"><span>经济新闻部</span><span class="btrack"><span class="bfill" style="width:67%"></span></span><span class="bval">28</span></div>
+            <div class="brow"><span>新媒体中心 · SKU</span><span class="btrack"><span class="bfill" style="width:62%"></span></span><span class="bval">26</span></div>
+            <div class="brow"><span>文化副刊部</span><span class="btrack"><span class="bfill" style="width:45%"></span></span><span class="bval">19</span></div>
+            <div class="brow"><span>视觉中心</span><span class="btrack"><span class="bfill faint" style="width:31%"></span></span><span class="bval">13</span></div>
+          </div>
+          <div class="bi-sect">部门明细 <small>（点击行下钻到部门 / 中心 / 站点）</small></div>
+          <div class="bi-tblwrap">
+          <table class="bi-table">
+            <tr><th>部门 / 中心</th><th>今日产出</th><th>触达 / 到达</th><th>完读完播</th><th>效能释放</th><th>本月闭环 / 工单</th><th></th></tr>
+            <tr class="drill" data-go="1"><td><b>时政新闻部</b>（民生直通车等 4 栏目）</td><td>42 篇</td><td>186万</td><td>48%</td><td class="ok-t">+32%</td><td>闭环 128 件</td><td class="go">›</td></tr>
+            <tr class="drill" data-go="4"><td><b>新媒体中心</b>（一鱼多吃 · 分发）</td><td>26 SKU</td><td>214万</td><td>47%</td><td class="ok-t">+28%</td><td class="warn-t">辟谣快反 2 件</td><td class="go">›</td></tr>
+            <tr class="drill" data-go="5"><td><b>发行·社区服务中心</b>（城东站等 6 站）</td><td>3,240 份签收</td><td>确认 82%</td><td>应答 76%</td><td>—</td><td>顺访 112 件</td><td class="go">›</td></tr>
+            <tr class="dim" data-toast="dept"><td><b>经济新闻部</b></td><td>28 篇</td><td>92万</td><td>45%</td><td>+24%</td><td>—</td><td class="go">›</td></tr>
+            <tr class="dim" data-toast="dept"><td><b>文化副刊部</b></td><td>19 篇</td><td>61万</td><td>51%</td><td>+18%</td><td>—</td><td class="go">›</td></tr>
+          </table>
+          </div>
+          <div class="bi-bfoot">示意稿：数值为目标态占位，上线后按真实数据实时回填 · 全社触达 486 万为去重前人次口径，跨渠道去重后 168 万人（同人多端计 1）· SVI 四域 12 指标见「社会价值看板」tab，与本页同源同口径</div>
+        </section>
+
+        <!-- L2 时政新闻部 -->
+        <section class="bi-board" data-board="1">
+          <div class="bi-bhead">
+            <span class="bi-lv">L2</span>
+            <div class="bt"><b>时政新闻部 · 部门经营</b><span>编辑部主任视角：效能 · 质量 · 闭环——AI 是转移人力，不是替代人力</span></div>
+            <span class="tag gold">目标态示意</span>
+          </div>
+          <div class="bi-kpis">
+            <div class="bi-kpi"><span class="k-l">今日签发</span><span class="k-v">42<small>篇</small></span><span class="k-d up">↑ 4</span></div>
+            <div class="bi-kpi"><span class="k-l">采编人数</span><span class="k-v">36<small>人</small></span><span class="k-d info">在岗 34</span></div>
+            <div class="bi-kpi"><span class="k-l">人均稿件处理量</span><span class="k-v">3.4<small>篇/人·日</small></span><span class="k-d up">vs AI 前 +31%</span></div>
+            <div class="bi-kpi"><span class="k-l">部门触达</span><span class="k-v">186<small>万</small></span><span class="k-d up">↑ 6.8%</span></div>
+            <div class="bi-kpi"><span class="k-l">平均签发时效</span><span class="k-v">2.6<small>小时</small></span><span class="k-d up">↓ 0.4h</span></div>
+          </div>
+          <div class="bi-focal">
+            <span class="fl">本级关注</span>
+            <span class="fc"><i>三审三校一次通过率</i><b>96.8%</b></span>
+            <span class="fc"><i>深度报道占比 · 工时释放转投</i><b>22%</b>（↑6pp）</span>
+            <span class="fc"><i>政策口径校对拦截 · 今日</i><b>17 处</b></span>
+          </div>
+          <div class="bi-sect">栏目明细 <small>（点击行下钻到栏目）</small></div>
+          <div class="bi-tblwrap">
+          <table class="bi-table">
+            <tr><th>栏目</th><th>本月稿件</th><th>触达</th><th>完读率</th><th>民生闭环</th><th>快测正确率</th><th></th></tr>
+            <tr class="drill" data-go="2"><td><b>民生直通车</b></td><td>86 篇</td><td>512万</td><td class="ok-t">52%</td><td>128 / 143</td><td>83%</td><td class="go">›</td></tr>
+            <tr class="dim" data-toast="col"><td><b>权威发布</b></td><td>64 篇</td><td>388万</td><td>44%</td><td>—</td><td>81%</td><td class="go">›</td></tr>
+            <tr class="dim" data-toast="col"><td><b>政策解读室</b></td><td>42 篇</td><td>236万</td><td>49%</td><td>—</td><td>86%</td><td class="go">›</td></tr>
+            <tr class="dim" data-toast="col"><td><b>深一度调查</b></td><td>12 篇</td><td>158万</td><td class="ok-t">61%</td><td>—</td><td>—</td><td class="go">›</td></tr>
+          </table>
+          </div>
+          <div class="bi-bfoot">人均稿件处理量 = 部门签发 ÷ 在岗采编（AI 辅助后 2.6 → 3.4 篇/人·日）· 省下的工时 38% 转投深度报道与核查，深度占比 16% → 22% · 取数：Agent 使用日志 + 采编系统工时统计</div>
+        </section>
+
+        <!-- L3 民生直通车栏目 -->
+        <section class="bi-board" data-board="2">
+          <div class="bi-bhead">
+            <span class="bi-lv">L3</span>
+            <div class="bt"><b>「民生直通车」栏目 · 稿件与闭环</b><span>栏目主编视角：到达 · 理解 · 闭环——未闭环不计费</span></div>
+            <span class="tag gold">目标态示意</span>
+          </div>
+          <div class="bi-kpis">
+            <div class="bi-kpi"><span class="k-l">本月稿件</span><span class="k-v">86<small>篇</small></span><span class="k-d up">↑ 9</span></div>
+            <div class="bi-kpi"><span class="k-l">全网触达</span><span class="k-v">512<small>万</small></span><span class="k-d up">↑ 8.4%</span></div>
+            <div class="bi-kpi"><span class="k-l">民生诉求受理</span><span class="k-v">143<small>件</small></span><span class="k-d info">在办 15</span></div>
+            <div class="bi-kpi"><span class="k-l">闭环件</span><span class="k-v">128<small>件</small></span><span class="k-d up">闭环率 89.5%</span></div>
+            <div class="bi-kpi"><span class="k-l">回访满意度系数</span><span class="k-v">0.94</span><span class="k-d up">↑ 0.02</span></div>
+          </div>
+          <div class="bi-focal">
+            <span class="fl">本级关注</span>
+            <span class="fc"><i>到达-理解双指标 · 完读 / 快测</i><b>71% / 83%</b></span>
+            <span class="fc"><i>银发语音完播率 · 单列</i><b>64%</b></span>
+            <span class="fc"><i>转办响应中位</i><b>18 小时</b></span>
+          </div>
+          <div class="bi-sect">记者明细 <small>（点击陈晓峰看个人看板）</small></div>
+          <div class="bi-tblwrap">
+          <table class="bi-table">
+            <tr><th>记者</th><th>本月稿件</th><th>触达</th><th>闭环件</th><th>语音报题</th><th>工时释放</th><th></th></tr>
+            <tr class="drill" data-go="3"><td><b>陈晓峰</b></td><td>14 篇</td><td class="ok-t">96万</td><td>4 件</td><td>22 次</td><td>38%</td><td class="go">›</td></tr>
+            <tr class="dim" data-toast="rep"><td><b>韩雪</b></td><td>12 篇</td><td>88万</td><td>3 件</td><td>18 次</td><td>34%</td><td class="go">›</td></tr>
+            <tr class="dim" data-toast="rep"><td><b>马志远</b></td><td>11 篇</td><td>72万</td><td>2 件</td><td>15 次</td><td>29%</td><td class="go">›</td></tr>
+            <tr class="dim" data-toast="rep"><td><b>宋佳</b>（实习）</td><td>6 篇</td><td>21万</td><td>1 件</td><td>9 次</td><td>—</td><td class="go">›</td></tr>
+          </table>
+          </div>
+          <div class="bi-bfoot">闭环件按「受理—转办—督办—责任单位书面回应—当事人回访确认」全流程计，缺一不计 · 回访由 SenseAudio-V2 语音执行、人工抽检 10%，拒访与未接通单列、不美化分母</div>
+        </section>
+
+        <!-- L4 记者个人 · 稿件 -->
+        <section class="bi-board" data-board="3">
+          <div class="bi-bhead">
+            <span class="bi-lv">L4</span>
+            <div class="bt"><b>陈晓峰 · 个人看板（时政新闻部 / 民生直通车）</b><span>记者本人视角：发了几篇、传播如何、省下的时间去了哪</span></div>
+            <span class="tag gold">目标态示意</span>
+          </div>
+          <div class="bi-kpis">
+            <div class="bi-kpi"><span class="k-l">本月签发</span><span class="k-v">14<small>篇</small></span><span class="k-d up">↑ 1</span></div>
+            <div class="bi-kpi"><span class="k-l">全网触达</span><span class="k-v">96<small>万</small></span><span class="k-d up">栏目第 1</span></div>
+            <div class="bi-kpi"><span class="k-l">民生闭环件</span><span class="k-v">4<small>件</small></span><span class="k-d info">回访 4.8 / 5</span></div>
+            <div class="bi-kpi"><span class="k-l">工时释放</span><span class="k-v">38%</span><span class="k-d up">深度 +2 篇</span></div>
+            <div class="bi-kpi"><span class="k-l">本月绩效</span><span class="k-v">¥8,600</span><span class="k-d up">↑ 6%</span></div>
+          </div>
+          <div class="bi-focal">
+            <span class="fl">本级关注</span>
+            <span class="fc"><i>完读率 · 本人稿件均值</i><b>54%</b></span>
+            <span class="fc"><i>知识库引用溯源</i><b>100%</b></span>
+            <span class="fc"><i>语音报题 / 速记转写</i><b>22 次 · 31 小时</b></span>
+          </div>
+          <div class="bi-sect">本月稿件清单 <small>（节选 4 / 14 篇 · 正式版逐篇可溯源）</small></div>
+          <div class="bi-tblwrap">
+          <table class="bi-table">
+            <tr><th>稿件</th><th>版本</th><th>触达</th><th>状态</th></tr>
+            <tr class="dim" data-toast="gao"><td><b>《老旧小区加装电梯资金去向调查》</b></td><td>深度报道</td><td>28万</td><td class="ok-t">已闭环 · 督办回应 ✓</td></tr>
+            <tr class="dim" data-toast="gao"><td><b>《社保新规二十问》</b></td><td>干部 / 群众 / 银发有声 3 版</td><td>41万</td><td class="ok-t">快测正确率 88%</td></tr>
+            <tr class="dim" data-toast="gao"><td><b>《辟谣：「XX 补贴停发」不实》</b></td><td>快反 + 社区定向</td><td>18万</td><td class="ok-t">响应 2.1 小时 ✓</td></tr>
+            <tr class="dim" data-toast="gao"><td><b>《社区食堂涨价追踪》</b></td><td>图文 + 有声版</td><td>9.6万</td><td class="gold-t">转办中 ○</td></tr>
+          </table>
+          </div>
+          <div class="bi-bfoot">记者无需打开看板：在企微对 Agent 说「查我的看板」，同一份数据卡片回传 · 绩效口径与人事系统对账一致 · 触达按稿件聚合各平台并去重，多版本 SKU 归主稿计</div>
+        </section>
+
+        <!-- L2 分支：新媒体中心 -->
+        <section class="bi-board" data-board="4">
+          <div class="bi-bhead">
+            <span class="bi-lv">L2</span>
+            <div class="bt"><b>新媒体中心 · 传播分发</b><span>新媒体中心主任视角：一鱼多吃 · 多平台归集去重 · 辟谣快反</span></div>
+            <span class="tag gold">目标态示意</span>
+          </div>
+          <div class="bi-kpis">
+            <div class="bi-kpi"><span class="k-l">今日多平台发布</span><span class="k-v">64<small>条</small></span><span class="k-d up">↑ 6</span></div>
+            <div class="bi-kpi"><span class="k-l">一鱼多吃 SKU</span><span class="k-v">26<small>个</small></span><span class="k-d up">签章即计费</span></div>
+            <div class="bi-kpi"><span class="k-l">全网触达</span><span class="k-v">214<small>万</small></span><span class="k-d up">↑ 7.1%</span></div>
+            <div class="bi-kpi"><span class="k-l">去重确认触达</span><span class="k-v">168<small>万人</small></span><span class="k-d info">同人多端计 1</span></div>
+            <div class="bi-kpi"><span class="k-l">辟谣快反</span><span class="k-v">2<small>件</small></span><span class="k-d up">中位 2.4h</span></div>
+          </div>
+          <div class="bi-focal">
+            <span class="fl">本级关注</span>
+            <span class="fc"><i>完读完播率 · 全渠道</i><b>47%</b></span>
+            <span class="fc"><i>银发有声版完播 · 单列</i><b>61%</b></span>
+            <span class="fc"><i>辟谣覆盖修正率</i><b>121%</b></span>
+          </div>
+          <div class="bi-sect">渠道明细 <small>（各平台后台 API 自动归集）</small></div>
+          <div class="bi-tblwrap">
+          <table class="bi-table">
+            <tr><th>渠道</th><th>今日发布</th><th>触达</th><th>完读 / 完播</th><th>政务转载</th></tr>
+            <tr class="dim" data-toast="xm"><td><b>微信公号 + 视频号</b></td><td>18 条</td><td class="ok-t">86万</td><td>52%</td><td>12 次</td></tr>
+            <tr class="dim" data-toast="xm"><td><b>抖音 / 快手</b></td><td>16 条</td><td>74万</td><td>44%</td><td>8 次</td></tr>
+            <tr class="dim" data-toast="xm"><td><b>客户端 + 网站</b></td><td>22 条</td><td>32万</td><td>41%</td><td>6 次</td></tr>
+            <tr class="dim" data-toast="xm"><td><b>银发有声版</b>（外呼 + 音箱）</td><td>8 条</td><td>12万</td><td class="ok-t">61%</td><td>—</td></tr>
+          </table>
+          </div>
+          <div class="bi-bfoot">触达数据由 Agent 每日自动归集各平台后台 API 并跨渠道去重，去重规则写入合同附件 · SKU 全部走「AI 起草—编辑终审签章」流水线，签章即计费凭证 · 辟谣落地社区见发行·社区 Agent 页</div>
+        </section>
+
+        <!-- L2 分支：城东发行站 -->
+        <section class="bi-board" data-board="5">
+          <div class="bi-bhead">
+            <span class="bi-lv">L2</span>
+            <div class="bt"><b>城东发行站 · 点位与触达</b><span>发行站长视角：点位到达 · 顺访工单 · 银发守护——工单即结算凭证</span></div>
+            <span class="tag gold">目标态示意</span>
+          </div>
+          <div class="bi-kpis">
+            <div class="bi-kpi"><span class="k-l">在管点位</span><span class="k-v">86<small>个</small></span><span class="k-d info">覆盖 12 社区</span></div>
+            <div class="bi-kpi"><span class="k-l">今日派送签收</span><span class="k-v">3,240<small>份</small></span><span class="k-d up">↑ 2.1%</span></div>
+            <div class="bi-kpi"><span class="k-l">顺访工单</span><span class="k-v">112<small> / 118</small></span><span class="k-d up">完成 95%</span></div>
+            <div class="bi-kpi"><span class="k-l">银发守护覆盖</span><span class="k-v">1,260<small>人</small></span><span class="k-d info">应答 76%</span></div>
+            <div class="bi-kpi"><span class="k-l">异常预警</span><span class="k-v">2<small>起</small></span><span class="k-d mid">已响应</span></div>
+          </div>
+          <div class="bi-focal">
+            <span class="fl">本级关注</span>
+            <span class="fc"><i>确认触达率 · 三源回执去重</i><b>82%</b></span>
+            <span class="fc"><i>预警响应中位</i><b>42 分钟</b></span>
+            <span class="fc"><i>派送员语音签到率</i><b>97%</b></span>
+          </div>
+          <div class="bi-sect">点位明细 <small>（社区 · 信息员，节选 3 / 12 社区）</small></div>
+          <div class="bi-tblwrap">
+          <table class="bi-table">
+            <tr><th>社区 · 信息员</th><th>签收</th><th>顺访</th><th>老人应答率</th><th>预警</th></tr>
+            <tr class="dim" data-toast="fx"><td><b>潮阳里 · 老金</b></td><td>412 份</td><td>18 件</td><td class="ok-t">81%</td><td>0</td></tr>
+            <tr class="dim" data-toast="fx"><td><b>站前社区 · 刘姐</b></td><td>386 份</td><td>16 件</td><td>78%</td><td class="warn-t">1 · 已响应</td></tr>
+            <tr class="dim" data-toast="fx"><td><b>纺织新村 · 老宋</b></td><td>344 份</td><td>14 件</td><td>74%</td><td class="warn-t">1 · 已响应</td></tr>
+            <tr class="dim" data-toast="fx"><td><b>其余 9 社区合计</b></td><td>2,098 份</td><td>64 件</td><td>75%</td><td>0</td></tr>
+          </table>
+          </div>
+          <div class="bi-bfoot">「确认触达」= 小程序已读 + 信息员语音打卡 + 点位扫码三源回执交叉去重核验，外呼抽检 5% · 仅送达不计，老人有应答才计有效 · 异常预警自动升级为街道工单，工单即结算凭证</div>
+        </section>
+
+        <!-- 经营三域指标 + 口径 -->
+        <div class="panel bi-domains">
+          <h3>核心经营指标 · 三域口径体系 <span class="tag teal" style="margin-left:6px">今日 · 全社口径</span></h3>
+          <div class="bi-domgrid">
+            <div class="bi-dom">
+              <h4>采编效能 <small>EDITORIAL</small></h4>
+              <div class="dm" title="人均稿件处理量 = 全社签发稿件 ÷ 在岗采编人数；AI 辅助前基线 2.6 篇/人·日"><div class="dm-t"><b>人均稿件处理量</b><span class="dm-v">3.1 篇/人·日</span></div><div class="dm-f">全社签发 ÷ 在岗采编 · AI 前 2.6（+19%）</div></div>
+              <div class="dm" title="签发时效 = 选题立项到终审签发的中位时长，取企微审稿流各节点时间戳"><div class="dm-t"><b>平均签发时效</b><span class="dm-v">2.6 小时</span></div><div class="dm-f">选题立项 → 终审签发中位 · 时间戳自动打点</div></div>
+              <div class="dm" title="三审三校一次通过率 = 一次过审稿件 ÷ 送审稿件；刊播差错率单列"><div class="dm-t"><b>三审三校一次通过率</b><span class="dm-v">96.8%</span></div><div class="dm-f">一次过审 ÷ 送审 · 差错率单列披露</div></div>
+              <div class="dm" title="工时释放转投比例 = AI 节省工时中转投深度报道与核查的比例；取 Agent 使用日志 + 工时统计"><div class="dm-t"><b>工时释放转投比例</b><span class="dm-v">38%</span></div><div class="dm-f">省下工时转深度 / 核查 · 取 Agent 日志</div></div>
+            </div>
+            <div class="bi-dom warm-d2">
+              <h4>传播触达 <small>REACH</small></h4>
+              <div class="dm" title="全渠道触达 = 各平台阅读播放人次合计（去重前口径）"><div class="dm-t"><b>全渠道触达</b><span class="dm-v">486 万人次</span></div><div class="dm-f">各平台阅读播放合计 · 去重前人次口径</div></div>
+              <div class="dm" title="去重确认触达 = 跨渠道去重后触达人数，同人多端计 1 次，去重规则写入合同附件"><div class="dm-t"><b>去重确认触达</b><span class="dm-v">168 万人</span></div><div class="dm-f">同人多端计 1 · 去重规则写入合同附件</div></div>
+              <div class="dm" title="完读完播率：读完/播完 70% 计完成；银发人群以语音完播单列"><div class="dm-t"><b>完读完播率</b><span class="dm-v">47%</span></div><div class="dm-f">读完 70% 计成 · 银发语音完播 61% 单列</div></div>
+              <div class="dm" title="政务转载引用 = 被政务媒体 / 平台转载引用次数，第三方监测统计"><div class="dm-t"><b>政务转载引用</b><span class="dm-v">36 次/周</span></div><div class="dm-f">政务媒体 / 平台转载引用 · 第三方监测</div></div>
+            </div>
+            <div class="bi-dom gold-d2">
+              <h4>经营收入 <small>REVENUE</small></h4>
+              <div class="dm" title="三曲线收入：To G 权威合约 + To B 知识资产 + To C·社区触达网络，由文化公司主体承接"><div class="dm-t"><b>三曲线本月收入</b><span class="dm-v">¥118 万</span></div><div class="dm-f">To G 62 + To B 41 + To C·社区 15（万元）</div></div>
+              <div class="dm" title="传统业务收入：报刊发行与广告，独立核算"><div class="dm-t"><b>传统发行 + 广告</b><span class="dm-v">¥168 万</span></div><div class="dm-f">报刊发行与广告 · 与曲线收入分账核算</div></div>
+              <div class="dm" title="按效结算达成率 = 结算挂钩 SVI 指标加权达标程度，只挂钩流程性与到达性指标"><div class="dm-t"><b>按效结算达成率</b><span class="dm-v">92.4%</span></div><div class="dm-f">只挂钩 SVI 流程 / 到达指标 · 不碰采编导向</div></div>
+              <div class="dm" title="合同续约率 = 三曲线合同年度续约口径"><div class="dm-t"><b>合同续约率</b><span class="dm-v">87%</span></div><div class="dm-f">三曲线合同年度续约口径 · 目标态示意</div></div>
+            </div>
+          </div>
+          <p class="note"><b>口径边界：</b>触达并示「人次（去重前）× 人（去重后）」双口径，去重规则写入合同附件；<b>按效结算只挂钩流程性与到达性指标，绝不挂钩报道内容与倾向</b>；曲线收入由报社所属文化公司主体承接，与采编决策物理分账。头部 5 个指标天天看，其余按域周度复盘。</p>
+        </div>
+      </div>
+
+      <!-- ======== Tab 2：社会价值看板（SVI 四域 12 指标） ======== -->
+      <div class="bi-tabpane" id="pane-svi">
+        <div class="bi-board on" style="display:block">
+          <div class="bi-bhead">
+            <span class="bi-lv">SVI</span>
+            <div class="bt"><b>社会价值看板 · SVI 四域 12 指标 · 本月</b><span>国资报社的「第三张报表」：社会价值年报 = 财政绩效评价报告 = 下年度预算立项依据</span></div>
+            <span class="tag gold">目标态示意</span>
+          </div>
+
+          <div class="svi-hero">
+            <div>
+              <div class="sh-v">92.4%</div>
+              <div class="sh-l">本月 SVI 达标率<br><b>绩效浮动 30% 唯一挂钩指标</b>（示意口径）</div>
+            </div>
+            <div class="sh-doms">
+              <span>权威传播 96</span>
+              <span>澄清回应 94</span>
+              <span>公益覆盖 89</span>
+              <span>生态治理 门槛达标 ✓</span>
+            </div>
+            <button type="button" id="svi-report">📄 生成月度绩效底稿</button>
+          </div>
+
+          <div class="bi-svigrid">
+            <div class="bi-dom warm-d2">
+              <h4>权威传播域 <small>传播力 · 引领力</small><span class="tag ok">达标 96</span></h4>
+              <div class="dm" title="权威发布类内容去重触达人数 ÷ 合约目标人群基数；纸媒按数字化签收、新媒体按平台后台 API、派送按扫码回执，Agent 跨渠道去重（同人多端计 1 次），去重规则写入合同附件"><div class="dm-t"><b>权威信息有效触达率</b><span class="dm-v">78.6%</span></div><div class="dm-f">口径：权威发布去重触达 ÷ 合约目标人群；同人多端计 1，去重规则写入合同附件</div></div>
+              <div class="dm" title="到达＝多版本解读完读/完播率（读完 70% 计完成，银发人群以语音完播单列）；理解＝文末一题快测正确率；H5 埋点＋Agent 内嵌快测组件，作为政采合同验收口径"><div class="dm-t"><b>政策解读到达-理解双指标</b><span class="dm-v">71% / 83%</span></div><div class="dm-f">口径：到达 = 完读完播（读完 70% 计成，银发语音单列 64%）；理解 = 文末快测正确率</div></div>
+              <div class="dm" title="突发公共事件中权威信息在约定时限内（示意口径 2 小时）首发的事件数 ÷ 应响应事件总数；应响应清单与付费方按月对账确认，首发时间取平台发布回执"><div class="dm-t"><b>应急信息首发及时率</b><span class="dm-v">100%（12/12）</span></div><div class="dm-f">口径：约定时限 2 小时内首发事件 ÷ 应响应事件；首发时间取平台回执，按月对账</div></div>
+            </div>
+            <div class="bi-dom">
+              <h4>澄清回应域 <small>公信力</small><span class="tag ok">达标 94</span></h4>
+              <div class="dm" title="谣言线索确认到辟谣内容全渠道首发的中位时长；线索确认取监测系统告警时间戳、首发取平台回执，Agent 全程自动打点、不可人工回填，超时工单自动标红并留因"><div class="dm-t"><b>辟谣响应时效（中位数）</b><span class="dm-v">3.2 小时</span></div><div class="dm-f">口径：线索确认（监测告警戳）→ 全渠道首发（平台回执）；自动打点、不可人工回填</div></div>
+              <div class="dm" title="辟谣内容触达量 ÷ 对应谣言预估触达量，并核算对谣言起源社区的二次定向覆盖比例；谣言基数取第三方监测峰值，基线算法与付费方共同确认并标注「估计值」"><div class="dm-t"><b>辟谣覆盖修正率</b><span class="dm-v">121%</span></div><div class="dm-f">口径：辟谣触达 ÷ 谣言预估触达（第三方监测峰值 · 标注估计值）；起源社区二次定向覆盖</div></div>
+              <div class="dm" title="完成「受理—转办—督办—责任单位书面回应—当事人回访确认」全流程件数 ÷ 受理总件数，缺一不计；结算乘语音回访满意度系数（录音经授权留存、人工抽检 10%，拒访与未接通单列不美化分母）"><div class="dm-t"><b>民生回应闭环率</b><span class="dm-v">91.2% × 0.94</span></div><div class="dm-f">口径：受理—转办—督办—书面回应—回访确认全流程 ÷ 受理，缺一不计；结算乘满意度系数</div></div>
+            </div>
+            <div class="bi-dom gold-d2">
+              <h4>公益覆盖域 <small>服务力</small><span class="tag gold">达标 89</span></h4>
+              <div class="dm" title="覆盖独居/高龄老人数 × 周均有效触达次数 × 异常预警响应中位时长的复合指标；「有效触达」以老人有应答为准（仅送达不计），取派送员语音打卡＋老人应答记录＋预警工单时间戳"><div class="dm-t"><b>银发守护指数</b><span class="dm-v">86.5</span></div><div class="dm-f">口径：覆盖老人数 × 周均有效触达 × 预警响应时长复合；有应答才计，仅送达不计</div></div>
+              <div class="dm" title="家庭教育课程完课家长数（完课＝学完 80%）＋企业女职工服务覆盖人数＋维权咨询转介闭环数；维权个案明细不进看板、只出脱敏聚合数"><div class="dm-t"><b>妇儿公益覆盖</b><span class="dm-v">2.4 万人</span></div><div class="dm-f">口径：完课家长（学完 80%）+ 女职工服务覆盖 + 维权转介闭环；个案明细不进看板</div></div>
+              <div class="dm" title="患教/科普内容覆盖人次及行为转化（筛查/接种/义诊预约完成数、合作医疗机构随访依从率变化）；只回传匿名化聚合统计，不收任何个案病历"><div class="dm-t"><b>健康科普干预有效性</b><span class="dm-v">1.8 万人次</span></div><div class="dm-f">口径：科普覆盖人次及行为转化（预约完成 3,420）；机构只回传匿名化聚合统计</div></div>
+            </div>
+            <div class="bi-dom ink-d2">
+              <h4>生态治理域 <small>保障与门槛</small><span class="tag teal">门槛达标</span></h4>
+              <div class="dm" title="重点议题中本报权威内容占议题总声量的比重及同比、被政务媒体/平台转载引用次数；「重大事件」以年度清单预先框定防事后挑选；只用于年报评价叙事，不进结算公式（防博弈）"><div class="dm-t"><b>舆论生态贡献度 <i class="dm-tag soft">只进年报</i></b><span class="dm-v">声量占比 34%</span></div><div class="dm-f">口径：重点议题权威内容声量占比 + 政务转载引用；只进年报叙事，不进结算公式</div></div>
+              <div class="dm" title="发布内容导向审核一次通过率与刊播差错率，AI 生成初稿占比单独披露；取三审三校系统记录；一票否决型门槛——不达标当期绩效浮动全额扣减"><div class="dm-t"><b>内容安全合格率 <i class="dm-tag">门槛 · 一票否决</i></b><span class="dm-v">99.94%</span></div><div class="dm-f">口径：导向审核一次通过率 + 刊播差错率；AI 初稿占比 34% 单独披露；不达标浮动全扣</div></div>
+              <div class="dm" title="AI 辅助后单位稿件人均处理量，及省下工时转投深度报道与核查的比例；取 Agent 使用日志＋采编系统工时统计；用于证明 AI 是转移人力而非替代人力"><div class="dm-t"><b>采编效能释放度 <i class="dm-tag soft">内部指标</i></b><span class="dm-v">+31%</span></div><div class="dm-f">口径：AI 后人均处理量提升 + 工时转投深度比例 38%；证明 AI 转移人力而非替代人力</div></div>
+            </div>
+          </div>
+          <p class="note" id="svi-note"><b>同源同口径：</b>SVI 每个指标的取数点位与时间戳证据链和经营看板同一套云端数据库；月度绩效底稿自动生成，年终归集为社会价值年报与审计底稿。数值均为目标态示意口径。</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- ================= 右：chatBI 停靠栏 ================= -->
+    <aside class="bi-dock">
+      <div class="panel">
+        <h3>chatBI · 对话问数 <small>与双看板同源同口径</small></h3>
+        <div class="bi-msgs" id="bi-msgs">
+          <div class="bi-m a">您好，我是 <b>chatBI</b>。经营与社会价值（SVI）任意层级、任意口径的数据，一句话就能查——答案永远带口径，和左侧看板同一套数。试试下面的问题 👇</div>
+        </div>
+        <!-- 预设问题随当前角色切换（JS 渲染） -->
+        <div class="bi-chips" id="bi-chips"></div>
+        <form class="bi-inputbar" id="bi-form">
+          <input id="bi-input" type="text" placeholder="用一句话问数，如：辟谣时效…" autocomplete="off">
+          <button type="submit">发送</button>
+        </form>
+        <p class="bi-dockfoot"><b>chatBI</b> 与双看板、SVI 工具 SaaS 打包按席位订阅交付（示意口径）· 应答范围随角色数据权限收敛 · 演示应答为目标态示意。</p>
+      </div>
+    </aside>
+  </div>
+
+  <!-- 数据从哪来 -->
+  <div class="panel bi-flowpanel">
+    <h3>数据从哪来：留痕即录入，不额外填表</h3>
+    <div class="flow">
+      <div class="f-step hot"><div class="n">1</div><b>采编 / 派送过程留痕</b><span>语音报题 · 终审签章 · 派送语音打卡，过程自动打点</span></div>
+      <div class="f-arrow">→</div>
+      <div class="f-step"><div class="n">2</div><b>云端数据库</b><span>ASR 转写 + 结构化写库 · 时间戳不可人工回填</span></div>
+      <div class="f-arrow">→</div>
+      <div class="f-step"><div class="n">3</div><b>指标计算</b><span>统一口径 · 经营三域 + SVI 四域 · 每数可溯源</span></div>
+      <div class="f-arrow">→</div>
+      <div class="f-step hot"><div class="n">4</div><b>双看板 + chatBI</b><span>报社 → 个人一钻到底 · 一句话问数</span></div>
+    </div>
+    <p class="note"><b>同一套数：</b>从记者到社长，看的是同一份账——全社总览钻到底就是陈晓峰的个人看板，陈晓峰在企微问到的也是这套数。云端数据库 + 双看板（含 chatBI）由商汤交付；示意稿数值为目标态占位，上线后按真实数据实时回填。</p>
+  </div>
+
+  <!-- 同一套数 · 三种触达 -->
+  <div class="panel bi-touch">
+    <h3>同一套数 · 三种触达 <span class="tag teal" style="margin-left:6px">同一套云端数据库 · 口径一致</span></h3>
+    <div class="bi-touchgrid">
+      <!-- 1 桌面双看板 -->
+      <div class="bi-tcol">
+        <div class="tc-head"><span class="tc-ic">🖥️</span><span><b>桌面双看板</b><span class="tc-sub">管理层深度分析 · 即本页</span></span></div>
+        <ul class="tc-list">
+          <li><b>双看板</b>：经营 × 社会价值（SVI），一页切换、同源同口径</li>
+          <li><b>四级下钻</b>：报社 → 部门 → 栏目 → 稿件/个人，一钻到底</li>
+          <li><b>chatBI 对话问数</b>：一句话查任意层级，答案永远带口径</li>
+          <li><b>角色权限</b>：企微/飞书身份自动识别，各角色只看自己那一段</li>
+        </ul>
+        <div class="tc-note">适合：社领导 / 总编室 / 部门主任的周度复盘与按效结算对账场景</div>
+      </div>
+      <!-- 2 员工小程序 · 手机看板 -->
+      <div class="bi-tcol">
+        <div class="tc-head"><span class="tc-ic">📱</span><span><b>员工小程序 · 手机看板</b><span class="tc-sub">记者 / 发行站长手机上随时看</span></span></div>
+        <div class="bi-minis">
+          <div class="bi-mini">
+            <div class="mp-shell"><div class="mp-scr">
+              <div class="mp-head"><b>我的看板 · 陈晓峰</b><span>时政新闻部 · 民生直通车</span></div>
+              <div class="mp-stats">
+                <div class="mp-st"><b>14 篇</b><span>本月签发</span></div>
+                <div class="mp-st"><b>96 万</b><span>全网触达</span></div>
+                <div class="mp-st"><b>4 件</b><span>民生闭环</span></div>
+                <div class="mp-st"><b>¥8,600</b><span>本月绩效</span></div>
+              </div>
+              <div class="mp-sect">今日任务 · 打卡</div>
+              <div class="mp-task"><span>社区食堂追踪 · 补采</span><b class="ok">✓ 已完成</b></div>
+              <div class="mp-task"><span>社保二十问 · 银发版复核</span><b class="ok">✓ 已完成</b></div>
+              <div class="mp-task"><span>加装电梯 · 回访确认</span><b class="todo">○ 待办</b></div>
+              <div class="mp-task"><span>明日选题 · 语音报题</span><b class="todo">○ 待办</b></div>
+            </div></div>
+            <span class="mp-cap">记者屏 · 陈晓峰个人看板</span>
+          </div>
+          <div class="bi-mini">
+            <div class="mp-shell"><div class="mp-scr">
+              <div class="mp-head warm"><b>城东发行站 · 周站长</b><span>86 点位 · 12 社区</span></div>
+              <div class="mp-six">
+                <div><b>3,240</b><span>今日签收</span></div>
+                <div><b>112/118</b><span>顺访工单</span></div>
+                <div><b>82%</b><span>确认触达</span></div>
+                <div><b>958</b><span>银发应答</span></div>
+                <div><b>2 起</b><span>预警·已响应</span></div>
+                <div><b>97%</b><span>语音签到</span></div>
+              </div>
+              <div class="mp-ringrow">
+                <svg viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg"><circle cx="30" cy="30" r="24" style="fill:none;stroke:var(--sky2);stroke-width:7"/><circle cx="30" cy="30" r="24" transform="rotate(-90 30 30)" style="fill:none;stroke:var(--teal);stroke-width:7;stroke-linecap:round;stroke-dasharray:123.7 150.8"/><text x="30" y="35" text-anchor="middle" style="font-size:13px;font-weight:800;fill:var(--teal-d)">82%</text></svg>
+                <div class="mp-ringtxt"><b>回执 2,657 份</b><span>三源去重 · 确认触达率</span></div>
+              </div>
+              <div class="mp-sect">待办</div>
+              <div class="mp-task"><span>站前社区 · 预警回访</span><b class="warn">⚠ 今日必访</b></div>
+              <div class="mp-task"><span>纺织新村 · 扫码补录</span><b class="todo">○ 待办</b></div>
+              <div class="mp-btn">一键生成顺访路线</div>
+            </div></div>
+            <span class="mp-cap">发行站长屏 · 城东站看板</span>
+          </div>
+        </div>
+      </div>
+      <!-- 3 Agent 主动推送 -->
+      <div class="bi-tcol">
+        <div class="tc-head"><span class="tc-ic">🤖</span><span><b>Agent 早晚报推送</b><span class="tc-sub">不看板，也一样不遗漏</span></span></div>
+        <div class="bi-push">
+          <div class="push-time">每天 7:30 · 采编早报</div>
+          <div class="push-b"><span class="push-av">报</span><div class="push-bub"><b>📋 时政新闻部早报</b><br>昨日签发 42 篇、触达 186 万；今日重点：延迟退休解读三版本分发、加装电梯稿回访确认；2 条政策口径更新已同步知识库。</div></div>
+          <div class="push-time">每天 21:30 · 社会价值晚报</div>
+          <div class="push-b"><span class="push-av">报</span><div class="push-bub"><b>🌙 全社 SVI 晚报</b><br>今日新增闭环件 6 件（累计 128）；辟谣「XX 补贴停发」响应 2.1 小时；确认触达率 82%。SVI 达标率 92.4%，绩效底稿已更新。</div></div>
+        </div>
+        <div class="push-links">
+          <a href="agent_jizhe.html">记者 Agent 完整演示 →</a>
+          <a href="agent_faxing.html">发行·社区 Agent 完整演示 →</a>
+        </div>
+      </div>
+    </div>
+    <p class="note"><b>三种触达 · 一套账：</b>桌面双看板、员工手机看板、企微 / 飞书 Agent 推送，读的都是<b>同一套云端数据库指标</b>，口径完全一致——周站长早上收到的 82%，和社领导在本页钻到城东站看到的是同一个数。</p>
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="foot-brand"><img src="assets/st_logo.png" alt="商汤科技"></div>
+  <div><b>商汤科技 · 大模型生态渠道部</b> — AI 技术底座 · 高保真交互原型（页面数据均为目标态示意口径，非真实经营/传播数据；客户报社名仅作定制示例）</div>
+</footer>
+
+<div class="bi-toast" id="bi-toast"></div>
+
+<!-- ============ 角色登录层：选角色进入（企微/飞书 SSO 概念演示） ============ -->
+<div class="bi-login" id="bi-login">
+  <div class="bi-login-box">
+    <div class="eyebrow">Role-Based Access · 企微/飞书身份 = 数据权限</div>
+    <h2>选择角色，进入你的那一段数据</h2>
+    <p class="lg-sub">正式环境由<b>企业微信 / 飞书身份自动识别</b>直接落到本人视角、无需输密码；演示环境请点选角色体验。同一套云端数据库、同一套口径，角色只决定「能看到哪一段」。页面数值均为目标态示意口径。</p>
+    <div class="bi-login-cards">
+      <div class="bi-role" data-role="shezhang">
+        <span class="r-av av-ink">林</span>
+        <b>林社长</b>
+        <span class="r-t">社领导 · 社委会</span>
+        <span class="r-p">数据权限：经营 × 社会价值双看板全链路，L1→L4 一钻到底</span>
+        <span class="r-go">进入 L1 全社总览 ›</span>
+      </div>
+      <div class="bi-role" data-role="zongbian">
+        <span class="r-av av-teal">吴</span>
+        <b>吴总编</b>
+        <span class="r-t">总编室 · 值班总编</span>
+        <span class="r-p">数据权限：全社采编与传播线（发行站经营明细不在权限内）</span>
+        <span class="r-go">进入 L1 全社总览 ›</span>
+      </div>
+      <div class="bi-role" data-role="bumen">
+        <span class="r-av av-warm">郑</span>
+        <b>郑主任</b>
+        <span class="r-t">编辑部主任 · 时政新闻部</span>
+        <span class="r-p">数据权限：仅本部门栏目 · 稿件 · 记者，回退不越过部门</span>
+        <span class="r-go">进入 L2 时政新闻部 ›</span>
+      </div>
+      <div class="bi-role" data-role="xinmeiti">
+        <span class="r-av av-gold">苏</span>
+        <b>苏主任</b>
+        <span class="r-t">新媒体中心 · 主任</span>
+        <span class="r-p">数据权限：仅新媒体中心传播分发数据（跨渠道已去重）</span>
+        <span class="r-go">进入 L2 新媒体中心 ›</span>
+      </div>
+      <div class="bi-role" data-role="faxing">
+        <span class="r-av av-warm2">周</span>
+        <b>周站长</b>
+        <span class="r-t">发行站长 · 城东发行站</span>
+        <span class="r-p">数据权限：仅本站点位 · 顺访工单 · 银发守护</span>
+        <span class="r-go">进入 L2 城东发行站 ›</span>
+      </div>
+      <div class="bi-role" data-role="jizhe">
+        <span class="r-av av-ink2">陈</span>
+        <b>陈晓峰</b>
+        <span class="r-t">记者 · 时政新闻部</span>
+        <span class="r-p">数据权限：仅本人稿件 · 传播 · 效能，无下钻</span>
+        <span class="r-go">进入 L4 个人看板 ›</span>
+      </div>
+    </div>
+    <p class="bi-login-foot">六个角色 · 一套账：双看板与 chatBI 的可见范围随角色变化，数值均为目标态示意口径。</p>
+  </div>
+</div>
+
+<script>
+/* ================= 角色定义：企微/飞书身份 = 数据权限（SSO 概念演示） ================= */
+var BI_ROLES = {
+  shezhang: { key: 'shezhang', av: '林', avc: 'av-ink',   name: '林社长', title: '社领导 · 社委会',         home: 0, allow: [0, 1, 2, 3, 4, 5], perm: '经营 × 社会价值双看板全链路，L1→L4 一钻到底' },
+  zongbian: { key: 'zongbian', av: '吴', avc: 'av-teal',  name: '吴总编', title: '总编室 · 值班总编',       home: 0, allow: [0, 1, 2, 3, 4],    perm: '全社采编与传播线（发行站经营明细不在权限内）' },
+  bumen:    { key: 'bumen',    av: '郑', avc: 'av-warm',  name: '郑主任', title: '编辑部主任 · 时政新闻部', home: 1, allow: [1, 2, 3],          perm: '仅时政新闻部：栏目 · 稿件 · 记者' },
+  xinmeiti: { key: 'xinmeiti', av: '苏', avc: 'av-gold',  name: '苏主任', title: '新媒体中心 · 主任',       home: 4, allow: [4],                perm: '仅新媒体中心传播分发数据' },
+  faxing:   { key: 'faxing',   av: '周', avc: 'av-warm2', name: '周站长', title: '发行站长 · 城东发行站',   home: 5, allow: [5],                perm: '仅城东发行站点位 · 顺访工单 · 银发守护' },
+  jizhe:    { key: 'jizhe',    av: '陈', avc: 'av-ink2',  name: '陈晓峰', title: '记者 · 时政新闻部',       home: 3, allow: [3],                perm: '仅本人稿件 · 传播 · 效能（无下钻）' }
+};
+
+/* ================= 双看板 tab 切换 ================= */
+(function () {
+  var tabs = document.querySelectorAll('.bi-tab');
+  var paneJy  = document.getElementById('pane-jy');
+  var paneSvi = document.getElementById('pane-svi');
+  tabs.forEach(function (t) {
+    t.addEventListener('click', function () {
+      tabs.forEach(function (x) { x.classList.toggle('on', x === t); });
+      var isJy = t.getAttribute('data-tab') === 'jy';
+      paneJy.classList.toggle('on', isJy);
+      paneSvi.classList.toggle('on', !isJy);
+    });
+  });
+  document.getElementById('svi-report').addEventListener('click', function () {
+    window.__biToast('月度绩效底稿已按 SVI 口径生成（演示）：含 12 项指标的取数点位、时间戳证据链与对账清单，年终自动归集为社会价值年报');
+  });
+})();
+
+/* ================= 四级下钻：报社 → 部门 → 栏目 → 稿件/个人 + 分支看板 + 角色权限边界 ================= */
+(function () {
+  var BOARDS_META = [
+    { lv: 'L1', crumb: '🏛 全社总览',         view: '社领导 / 总编室',   parent: -1 },
+    { lv: 'L2', crumb: '时政新闻部',          view: '编辑部主任',        parent: 0 },
+    { lv: 'L3', crumb: '「民生直通车」栏目',  view: '栏目主编',          parent: 1 },
+    { lv: 'L4', crumb: '陈晓峰',              view: '记者本人',          parent: 2 },
+    { lv: 'L2', crumb: '新媒体中心',          view: '新媒体中心主任',    parent: 0 },
+    { lv: 'L2', crumb: '城东发行站',          view: '发行站长',          parent: 0 }
+  ];
+  var role = BI_ROLES.shezhang;   /* 登录层选择后由 __biDrillApply 覆盖 */
+  var cur = 0;
+  var crumbsEl = document.getElementById('bi-crumbs');
+  var viewEl   = document.getElementById('bi-view');
+  var boards   = document.querySelectorAll('.bi-board[data-board]');
+  var badges   = document.querySelectorAll('.bi-badge');
+  var toastEl  = document.getElementById('bi-toast');
+  var sviNote  = document.getElementById('svi-note');
+  var toastTimer = null;
+
+  var TOASTS = {
+    dept: '演示以「时政新闻部 → 民生直通车 → 陈晓峰」为完整下钻路径，其余部门同构，点前三行体验',
+    col:  '演示以「民生直通车」为完整下钻路径，其余栏目同构',
+    rep:  '演示以「陈晓峰」为完整下钻路径，点第一行看记者个人看板',
+    gao:  '正式版每篇稿件可继续下钻：触达证据链 · 转办工单 · 回访记录（脱敏）逐条可溯源',
+    xm:   '渠道明细同构展示，正式版可下钻到单条内容的传播证据链与去重底稿',
+    fx:   '点位明细同构展示，正式版可下钻到单个点位 / 信息员的工单留痕与三源回执'
+  };
+
+  function toast(msg) {
+    toastEl.textContent = msg;
+    toastEl.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function () { toastEl.classList.remove('show'); }, 3400);
+  }
+  window.__biToast = toast;
+
+  function chainOf(n) {
+    var c = [], i = n;
+    while (i !== -1) { c.unshift(i); i = BOARDS_META[i].parent; }
+    return c;
+  }
+
+  function render() {
+    boards.forEach(function (b) {
+      b.classList.toggle('on', +b.getAttribute('data-board') === cur);
+    });
+    /* 面包屑：沿父链回溯，只显示权限内的层级 */
+    var chain = chainOf(cur).filter(function (i) { return role.allow.indexOf(i) > -1; });
+    var html = '';
+    chain.forEach(function (i, idx) {
+      if (idx > 0) html += '<span class="sep">›</span>';
+      html += '<span class="bi-crumb' + (i === cur ? ' cur' : '') + '" data-lv="' + i + '">' + BOARDS_META[i].crumb + '</span>';
+    });
+    crumbsEl.innerHTML = html;
+    crumbsEl.querySelectorAll('.bi-crumb:not(.cur)').forEach(function (c) {
+      c.addEventListener('click', function () { go(+c.getAttribute('data-lv')); });
+    });
+    viewEl.innerHTML = '视角：<b>' + BOARDS_META[cur].view + '</b> · ' + BOARDS_META[cur].lv;
+    /* 徽章高亮 + 权限锁定 */
+    badges.forEach(function (bd) {
+      var i = +bd.getAttribute('data-board');
+      bd.classList.toggle('lock', role.allow.indexOf(i) === -1);
+      bd.classList.toggle('on', i === cur);
+    });
+  }
+
+  function go(n) {
+    if (role.allow.indexOf(n) === -1) {
+      toast('「' + role.name + ' · ' + role.title + '」数据权限：' + role.perm + '——该层级不在权限内，点右上「切换角色」后可见');
+      return;
+    }
+    cur = n;
+    render();
+  }
+
+  /* 表格行下钻 / 提示 */
+  document.querySelectorAll('tr[data-go]').forEach(function (tr) {
+    tr.addEventListener('click', function () { go(+tr.getAttribute('data-go')); });
+  });
+  document.querySelectorAll('tr[data-toast]').forEach(function (tr) {
+    tr.addEventListener('click', function () { toast(TOASTS[tr.getAttribute('data-toast')] || ''); });
+  });
+  /* 徽章直达（权限内） */
+  badges.forEach(function (bd) {
+    bd.addEventListener('click', function () {
+      if (bd.classList.contains('lock')) {
+        toast('该视角超出当前角色数据权限 · 点右上「切换角色」后可见');
+        return;
+      }
+      go(+bd.getAttribute('data-board'));
+    });
+  });
+
+  /* 角色切换入口：登录层选择后调用 */
+  window.__biDrillApply = function (r) {
+    role = r;
+    cur = r.home;
+    var av = document.getElementById('bi-role-av');
+    av.textContent = r.av;
+    av.className = 'rb-av ' + r.avc;
+    document.getElementById('bi-role-name').textContent = '当前角色：' + r.name + ' · ' + r.title;
+    document.getElementById('bi-role-perm').textContent = '数据权限：' + r.perm + ' · 由企微/飞书身份自动识别，无需输密码';
+    if (sviNote) {
+      sviNote.innerHTML = r.allow.indexOf(0) > -1
+        ? '<b>同源同口径：</b>SVI 每个指标的取数点位与时间戳证据链和经营看板同一套云端数据库；月度绩效底稿自动生成，年终归集为社会价值年报与审计底稿。数值均为目标态示意口径。'
+        : '<b>只读公示口径：</b>社会价值看板为全社级公示视图，「' + r.name + '」当前权限下工单级明细下钻不可见（切换角色后可见）。数值均为目标态示意口径。';
+    }
+    render();
+  };
+
+  render();
+})();
+
+/* ================= chatBI：预设问答（随角色）+ 打字机 + SVG 迷你图 ================= */
+(function () {
+  var msgsEl  = document.getElementById('bi-msgs');
+  var chipsEl = document.getElementById('bi-chips');
+  var formEl  = document.getElementById('bi-form');
+  var inputEl = document.getElementById('bi-input');
+  var busy = false;
+
+  /* —— SVG 迷你图生成器（与设计系统同色板） —— */
+  function svgBars(rows) {
+    var h = rows.length * 30 + 4;
+    var s = '<svg viewBox="0 0 268 ' + h + '" xmlns="http://www.w3.org/2000/svg">';
+    rows.forEach(function (r, i) {
+      var y = 6 + i * 30;
+      var bw = Math.max(10, Math.round(112 * r.w));
+      var fill = r.hot ? 'var(--warm)' : (r.dim ? 'var(--teal-l)' : 'var(--teal)');
+      s += '<text x="82" y="' + (y + 11) + '" text-anchor="end" style="font-size:10px;fill:var(--sub)">' + r.l + '</text>';
+      s += '<rect x="88" y="' + y + '" width="' + bw + '" height="14" rx="7" style="fill:' + fill + '"/>';
+      s += '<text x="' + (88 + bw + 6) + '" y="' + (y + 11) + '" style="font-size:10px;' + (r.hot ? 'font-weight:700;fill:var(--warm-d)' : 'fill:var(--sub)') + '">' + r.v + '</text>';
+    });
+    return s + '</svg>';
+  }
+
+  function svgLine(vals, labels, unit) {
+    var x0 = 40, x1 = 236, n = vals.length;
+    var min = Math.min.apply(null, vals), max = Math.max.apply(null, vals);
+    var span = (max - min) || 1;
+    var pts = [], i;
+    for (i = 0; i < n; i++) {
+      pts.push([Math.round(x0 + (x1 - x0) * i / (n - 1)), Math.round(70 - 38 * ((vals[i] - min) / span))]);
+    }
+    var s = '<svg viewBox="0 0 268 100" xmlns="http://www.w3.org/2000/svg">';
+    s += '<polyline points="';
+    pts.forEach(function (p, j) { s += (j ? ' ' : '') + p[0] + ',' + p[1]; });
+    s += '" style="fill:none;stroke:var(--teal);stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round"/>';
+    for (i = 0; i < n; i++) {
+      var last = (i === n - 1);
+      s += '<circle cx="' + pts[i][0] + '" cy="' + pts[i][1] + '" r="' + (last ? 4 : 3.5) + '" style="' + (last ? 'fill:var(--warm);stroke:#fff;stroke-width:1.5' : 'fill:#fff;stroke:var(--teal);stroke-width:2') + '"/>';
+      s += '<text x="' + pts[i][0] + '" y="' + (pts[i][1] - 9) + '" text-anchor="middle" style="font-size:9.5px;' + (last ? 'font-weight:700;fill:var(--warm-d)' : 'fill:var(--muted)') + '">' + vals[i] + unit + '</text>';
+      s += '<text x="' + pts[i][0] + '" y="95" text-anchor="middle" style="font-size:9px;fill:var(--muted)">' + labels[i] + '</text>';
+    }
+    return s + '</svg>';
+  }
+
+  function svgRing(pct, center, sub, lines) {
+    var C = 226.2;
+    var on = (C * pct / 100).toFixed(1);
+    var s = '<svg viewBox="0 0 268 104" xmlns="http://www.w3.org/2000/svg">';
+    s += '<circle cx="62" cy="52" r="36" style="fill:none;stroke:var(--sky2);stroke-width:10"/>';
+    s += '<circle cx="62" cy="52" r="36" transform="rotate(-90 62 52)" style="fill:none;stroke:var(--teal);stroke-width:10;stroke-linecap:round;stroke-dasharray:' + on + ' ' + C + '"/>';
+    s += '<text x="62" y="50" text-anchor="middle" style="font-size:15px;font-weight:800;fill:var(--teal-d)">' + center + '</text>';
+    s += '<text x="62" y="65" text-anchor="middle" style="font-size:9px;fill:var(--muted)">' + sub + '</text>';
+    lines.forEach(function (t, i) {
+      s += '<text x="116" y="' + (32 + i * 20) + '" style="font-size:10.5px;fill:var(--sub)">' + t + '</text>';
+    });
+    return s + '</svg>';
+  }
+
+  function svgSquares(items) {
+    var n = items.length;
+    var step = n > 1 ? Math.min(80, Math.round(198 / (n - 1))) : 0;
+    var x0 = Math.round((268 - (34 + step * (n - 1))) / 2);
+    var s = '<svg viewBox="0 0 268 72" xmlns="http://www.w3.org/2000/svg">';
+    items.forEach(function (it, i) {
+      var x = x0 + i * step;
+      if (it.ok) {
+        s += '<rect x="' + x + '" y="14" width="34" height="34" rx="9" style="fill:var(--sky);stroke:var(--teal-l);stroke-width:1.5"/>';
+        s += '<text x="' + (x + 17) + '" y="37" text-anchor="middle" style="font-size:15px;font-weight:700;fill:var(--teal-d)">✓</text>';
+      } else {
+        s += '<rect x="' + x + '" y="14" width="34" height="34" rx="9" style="fill:#FBEAEA;stroke:var(--warn);stroke-width:1.5;stroke-dasharray:3 2"/>';
+        s += '<text x="' + (x + 17) + '" y="37" text-anchor="middle" style="font-size:13px;font-weight:700;fill:var(--warn)">✗</text>';
+      }
+      s += '<text x="' + (x + 17) + '" y="64" text-anchor="middle" style="font-size:9.5px;fill:var(--muted)">' + it.l + '</text>';
+    });
+    return s + '</svg>';
+  }
+
+  /* —— 预设问答（答案 + 迷你图 + 口径） —— */
+  var QA = {
+    chuda: {
+      q: '全社权威触达率现在多少？',
+      a: '本月权威信息有效触达率 <b>78.6%</b>，近 4 周 74.2% → 76.1% → 77.4% → 78.6% 连续爬升；合约目标 75%，已达标。',
+      svg: svgLine([74.2, 76.1, 77.4, 78.6], ['第1周', '第2周', '第3周', '第4周'], '%'),
+      cal: '有效触达率 = 权威发布去重触达人数 ÷ 合约目标人群基数；同人多端计 1 次，去重规则写入合同附件。',
+      keys: ['触达', '权威']
+    },
+    svida: {
+      q: '本月 SVI 达标率进度怎么样？',
+      a: '本月 SVI 达标率 <b>92.4%</b>：权威传播 96、澄清回应 94、公益覆盖 89，生态治理门槛达标；绩效浮动 30% 只挂钩此达标率。',
+      svg: svgBars([
+        { l: '权威传播', w: 1, v: '96', hot: true },
+        { l: '澄清回应', w: .98, v: '94' },
+        { l: '公益覆盖', w: .93, v: '89' },
+        { l: '生态治理', w: 1, v: '门槛达标 ✓', dim: true }
+      ]),
+      cal: 'SVI 达标率 = 结算挂钩指标加权达标程度；主观类指标只进年报叙事、不进结算公式。',
+      keys: ['SVI', 'svi', '达标']
+    },
+    quxian: {
+      q: '三条价值曲线收入进展？',
+      a: '本月三曲线合计 <b>¥118 万</b>：To G 权威合约 ¥62 万、To B 知识资产 ¥41 万、To C·社区 ¥15 万，占总收入 41%、环比 +12%。',
+      svg: svgBars([
+        { l: 'To G 权威合约', w: 1, v: '¥62万', hot: true },
+        { l: 'To B 知识资产', w: .66, v: '¥41万' },
+        { l: 'To C·社区', w: .24, v: '¥15万' }
+      ]),
+      cal: '曲线收入由报社所属文化公司主体承接，与采编决策物理分账；数值为目标态示意口径。',
+      keys: ['曲线', '收入']
+    },
+    piyao: {
+      q: '辟谣响应时效走势？',
+      a: '本月辟谣响应中位 <b>3.2 小时</b>，近 4 周 4.8 → 4.1 → 3.6 → 3.2 持续压降，全部在合约时限 4 小时内；覆盖修正率 121%。',
+      svg: svgLine([4.8, 4.1, 3.6, 3.2], ['第1周', '第2周', '第3周', '第4周'], 'h'),
+      cal: '时效 = 线索确认（监测告警时间戳）→ 全渠道首发（平台回执）的中位时长；全程自动打点、不可人工回填。',
+      keys: ['辟谣', '时效']
+    },
+    qianfa: {
+      q: '今天签发时效怎么样？',
+      a: '今日平均签发时效 <b>2.6 小时</b>（近 4 月 3.4 → 2.6 持续下降），三审三校一次通过率 96.8%；政策口径校对今日拦截 17 处，全部在终审前修正。',
+      svg: svgLine([3.4, 3.1, 2.8, 2.6], ['4月', '5月', '6月', '7月'], 'h'),
+      cal: '签发时效 = 选题立项 → 终审签发的中位时长；取企微审稿流各节点时间戳，不可人工回填。',
+      keys: ['签发']
+    },
+    anquan: {
+      q: '内容安全合格率现在多少？',
+      a: '本月内容安全合格率 <b>99.94%</b>（门槛指标 · 一票否决），刊播差错 1 起已复盘；AI 生成初稿占比 34% 单独披露，全部经人工终审签章后签发。',
+      svg: svgRing(99.9, '99.94%', '门槛达标', ['刊播差错 1 起（已复盘）', 'AI 初稿占比 34%（单独披露）', '终审签章覆盖 100%']),
+      cal: '合格率 = 导向审核一次通过率与刊播差错率合成；取三审三校系统记录；不达标当期绩效浮动全额扣减。',
+      keys: ['安全', '合格']
+    },
+    shoufa: {
+      q: '应急首发及时率？',
+      a: '本季应响应事件 12 起全部在约定时限 2 小时内首发，及时率 <b>100%</b>；本月 4 起如下，最快一单 38 分钟。',
+      svg: svgSquares([
+        { ok: true, l: '暴雨预警' }, { ok: true, l: '燃气事故' },
+        { ok: true, l: '谣言快反' }, { ok: true, l: '停水通告' }
+      ]),
+      cal: '及时率 = 时限内首发事件 ÷ 应响应事件；应响应清单与付费方按月对账确认，首发时间取平台回执。',
+      keys: ['首发', '应急']
+    },
+    xiaoneng: {
+      q: '我们部人均稿件处理量？',
+      a: '时政新闻部人均 <b>3.4 篇/人·日</b>，高于全社均值 3.1、较 AI 前 2.6 提升 31%；省下的工时 38% 转投深度报道与核查。',
+      svg: svgBars([
+        { l: '时政新闻部', w: 1, v: '3.4 篇', hot: true },
+        { l: '全社均值', w: .91, v: '3.1 篇' },
+        { l: 'AI 前基线', w: .76, v: '2.6 篇', dim: true }
+      ]),
+      cal: '人均处理量 = 部门签发稿件 ÷ 在岗采编数；取 Agent 使用日志 + 采编系统工时统计。',
+      keys: ['人均', '处理量', '效能']
+    },
+    wandu: {
+      q: '民生直通车完读率？',
+      a: '「民生直通车」本月完读率 <b>52%</b>，高于部门均值 48% 与全社均值 47%；银发语音完播率 64% 单列统计。',
+      svg: svgBars([
+        { l: '民生直通车', w: 1, v: '52%', hot: true },
+        { l: '部门均值', w: .92, v: '48%' },
+        { l: '全社均值', w: .90, v: '47%', dim: true }
+      ]),
+      cal: '完读 = 读完 70% 计完成；银发人群以语音完播单列。数据源：H5 埋点 + 平台后台 API。',
+      keys: ['完读', '直通车']
+    },
+    bihuan: {
+      q: '本部门民生闭环情况？',
+      a: '本月受理 143 件、闭环 <b>128 件（89.5%）</b>，在办 15 件均未超期；回访满意度系数 0.94——未闭环不计费。',
+      svg: svgRing(89.5, '89.5%', '128 / 143', ['已闭环 128 件', '在办 15 件 · 0 超期', '回访满意度系数 0.94']),
+      cal: '闭环 = 受理—转办—督办—书面回应—回访确认全流程，缺一不计；回访由 SenseAudio-V2 执行、人工抽检 10%。',
+      keys: ['闭环', '民生']
+    },
+    shendu: {
+      q: '深度报道占比多少？',
+      a: '本月深度报道占比 <b>22%</b>，较 AI 上线前提升 6 个百分点——语音速记与初稿起草省下的工时，正在流向深一度调查。',
+      svg: svgBars([
+        { l: '本月', w: 1, v: '22%', hot: true },
+        { l: '上季度', w: .82, v: '18%' },
+        { l: 'AI 前', w: .73, v: '16%', dim: true }
+      ]),
+      cal: '深度占比 = 深度报道篇数 ÷ 签发总篇数；用于证明 AI 是转移人力而非替代人力。',
+      keys: ['深度']
+    },
+    pingtai: {
+      q: '各平台触达对比？',
+      a: '今日全网触达 <b>214 万</b>：微信公号+视频号 86 万、抖音/快手 74 万、客户端+网站 32 万、银发有声版 12 万；跨渠道去重后 168 万人。',
+      svg: svgBars([
+        { l: '微信公号+视频号', w: 1, v: '86万', hot: true },
+        { l: '抖音 / 快手', w: .86, v: '74万' },
+        { l: '客户端+网站', w: .37, v: '32万' },
+        { l: '银发有声版', w: .14, v: '12万', dim: true }
+      ]),
+      cal: '各平台数据由 Agent 每日归集后台 API；去重触达同人多端计 1 次，规则写入合同附件。',
+      keys: ['平台', '对比']
+    },
+    sku: {
+      q: '今天出了多少 SKU？',
+      a: '今日一鱼多吃产出 <b>26 个 SKU</b>：群众版 8、银发有声版 7、干部版 6、企业版 5——全部经编辑终审签章后分发，签章即计费凭证。',
+      svg: svgBars([
+        { l: '群众版', w: 1, v: '8 个', hot: true },
+        { l: '银发有声版', w: .875, v: '7 个' },
+        { l: '干部版', w: .75, v: '6 个' },
+        { l: '企业版', w: .625, v: '5 个' }
+      ]),
+      cal: 'SKU = 同一篇终审稿的分版本改写产物；按「AI 起草—编辑终审签章」流水线计数。',
+      keys: ['SKU', 'sku', '一鱼']
+    },
+    xiuzheng: {
+      q: '辟谣覆盖修正率？',
+      a: '本月辟谣覆盖修正率 <b>121%</b>：谣言预估触达 58 万（估计值），辟谣内容触达 70 万；谣言起源社区的二次定向覆盖已全部完成。',
+      svg: svgBars([
+        { l: '辟谣触达', w: 1, v: '70万', hot: true },
+        { l: '谣言预估', w: .83, v: '58万 · 估计值' }
+      ]),
+      cal: '修正率 = 辟谣触达量 ÷ 谣言预估触达量；基数取第三方监测峰值，与付费方共同确认并标注「估计值」。',
+      keys: ['修正', '覆盖']
+    },
+    wanbo: {
+      q: '银发有声版完播率？',
+      a: '银发有声版本月完播率 <b>61%</b>，高于视频号 52% 与图文均值 47%；多方言音频由 SenseAudio-V2 批量生成，老人听完即计有效触达。',
+      svg: svgBars([
+        { l: '银发有声版', w: 1, v: '61%', hot: true },
+        { l: '视频号', w: .85, v: '52%' },
+        { l: '图文均值', w: .77, v: '47%', dim: true }
+      ]),
+      cal: '完播 = 播完 70% 计完成，银发人群单列；数据源：外呼与音箱回执。',
+      keys: ['完播', '有声']
+    },
+    daoda: {
+      q: '今天点位确认到达率？',
+      a: '今日确认触达率 <b>82%</b>：小程序已读 46%、信息员语音打卡 71%、点位扫码 38%，三源交叉去重后合成；外呼抽检 5% 无异常。',
+      svg: svgBars([
+        { l: '小程序已读', w: .56, v: '46%' },
+        { l: '语音打卡', w: .87, v: '71%' },
+        { l: '点位扫码', w: .46, v: '38%' },
+        { l: '三源去重合成', w: 1, v: '82%', hot: true }
+      ]),
+      cal: '确认触达 = 三源回执交叉去重核验；只算「对方确认收到」，仅送达不计。',
+      keys: ['到达', '点位', '触达']
+    },
+    yinfa: {
+      q: '银发守护应答情况？',
+      a: '覆盖 1,260 位老人，今日有效应答 <b>958 位（76%）</b>；2 位连续未应答已自动升级街道工单并确认响应，中位 42 分钟。',
+      svg: svgRing(76, '76%', '958 / 1,260', ['有效应答 958 位', '未应答 → 预警 2 位', '响应中位 42 分钟']),
+      cal: '有效触达以老人有应答为准（仅送达不计）；取派送员语音打卡 + 应答记录 + 预警工单时间戳。',
+      keys: ['银发', '应答', '守护']
+    },
+    shunfang: {
+      q: '顺访工单完成度？',
+      a: '今日顺访工单 <b>112 / 118（95%）</b>，剩余 6 件已顺延至明日派送线路；每件工单含语音打卡回执，可直接对账结算。',
+      svg: svgRing(95, '95%', '112 / 118', ['已完成 112 件', '顺延明日 6 件', '语音打卡回执 100%']),
+      cal: '顺访工单由 Agent 按派送线路自动生成；派送员「语音一句话」即完成签到上报。',
+      keys: ['顺访', '工单']
+    },
+    yujing: {
+      q: '异常预警处理情况？',
+      a: '今日 2 起独居老人连续未应答预警，均已升级街道工单并确认响应，响应中位 <b>42 分钟</b>；无未闭环预警。',
+      svg: svgSquares([{ ok: true, l: '站前社区' }, { ok: true, l: '纺织新村' }]),
+      cal: '预警 = 连续 2 日无应答或信息员上报异常；自动升级街道工单，响应时长全程留痕。',
+      keys: ['预警', '异常']
+    },
+    wode: {
+      q: '我这个月发了几篇稿？',
+      a: '本月已签发 <b>14 篇</b>（5 月 12、6 月 13，连续三个月上升），栏目排第 1；其中深度报道 2 篇。',
+      svg: svgBars([
+        { l: '5月', w: .86, v: '12 篇' },
+        { l: '6月', w: .93, v: '13 篇' },
+        { l: '7月至今', w: 1, v: '14 篇', hot: true }
+      ]),
+      cal: '签发数以终审签章时间归月；深度报道由栏目主编标注。',
+      keys: ['几篇', '发了']
+    },
+    chuanbo: {
+      q: '我的稿件传播怎么样？',
+      a: '本月全网触达 <b>96 万</b>，栏目第 1：《社保新规二十问》41 万（三版本）、《加装电梯调查》28 万、辟谣快反 18 万。',
+      svg: svgBars([
+        { l: '社保新规二十问', w: 1, v: '41万', hot: true },
+        { l: '加装电梯调查', w: .68, v: '28万' },
+        { l: '辟谣快反', w: .44, v: '18万' },
+        { l: '其余合计', w: .22, v: '9万', dim: true }
+      ]),
+      cal: '触达按稿件聚合各平台数据并去重；多版本 SKU 归主稿计。',
+      keys: ['传播', '触达']
+    },
+    shifang: {
+      q: '我的工时释放了多少？',
+      a: '本月工时释放 <b>38%</b>：语音速记省 22 小时、初稿起草省 14 小时、核查检索省 8 小时，全部转投 2 篇深度报道——AI 干杂活，你干专业的活。',
+      svg: svgBars([
+        { l: '语音速记', w: 1, v: '22 小时', hot: true },
+        { l: '初稿起草', w: .64, v: '14 小时' },
+        { l: '核查检索', w: .36, v: '8 小时' }
+      ]),
+      cal: '释放度 = AI 辅助节省工时 ÷ 总工时；取 Agent 使用日志 + 采编工时统计。',
+      keys: ['工时', '释放', '省']
+    }
+  };
+
+  function scrollBottom() { msgsEl.scrollTop = msgsEl.scrollHeight; }
+
+  function addQ(text) {
+    var el = document.createElement('div');
+    el.className = 'bi-m q';
+    el.textContent = text;
+    msgsEl.appendChild(el);
+    scrollBottom();
+  }
+
+  /* 打字机：先按纯文本逐字打，完成后换富文本并挂图表 + 口径 */
+  function addA(item) {
+    var el = document.createElement('div');
+    el.className = 'bi-m a';
+    var span = document.createElement('span');
+    var caret = document.createElement('span');
+    caret.className = 'bi-caret';
+    el.appendChild(span);
+    el.appendChild(caret);
+    msgsEl.appendChild(el);
+    scrollBottom();
+
+    var plain = item.a.replace(/<[^>]+>/g, '');
+    var t0 = Date.now();
+    var timer = setInterval(function () {
+      /* 按时间推进而非按 tick 推进：定时器被节流也能匀速走完 */
+      var i = Math.min(plain.length, Math.ceil((Date.now() - t0) / 16));
+      span.textContent = plain.slice(0, i);
+      scrollBottom();
+      if (i >= plain.length) {
+        clearInterval(timer);
+        caret.remove();
+        span.innerHTML = item.a;
+        if (item.svg) {
+          var chart = document.createElement('div');
+          chart.className = 'm-chart';
+          chart.innerHTML = item.svg;
+          el.appendChild(chart);
+        }
+        if (item.cal) {
+          var cal = document.createElement('div');
+          cal.className = 'm-cal';
+          cal.textContent = item.cal;
+          el.appendChild(cal);
+        }
+        scrollBottom();
+        busy = false;
+        chipsEl.classList.remove('busy');
+      }
+    }, 18);
+  }
+
+  function ask(key, customQ) {
+    if (busy) return;
+    var item = QA[key];
+    if (!item) return;
+    busy = true;
+    chipsEl.classList.add('busy');
+    addQ(customQ || item.q);
+    setTimeout(function () { addA(item); }, 420);
+  }
+
+  function fallback(q) {
+    if (busy) return;
+    busy = true;
+    chipsEl.classList.add('busy');
+    addQ(q);
+    setTimeout(function () {
+      addA({
+        a: '演示环境为「' + curRole.name + '」预置了 ' + allowedChips.length + ' 组示例应答（见下方问题）。正式版 chatBI 基于云端数据库，可用自然语言查询<b>您权限内任意层级、任意口径</b>的经营与 SVI 指标 👇',
+        svg: '',
+        cal: '所有应答均附口径公式与数据来源，保证「问出来的数」与「看板上的数」一致；应答范围随角色数据权限收敛。'
+      });
+    }, 420);
+  }
+
+  /* —— 预设问题随角色切换 —— */
+  var CHIPS = {
+    shezhang: [
+      { k: 'chuda',  t: '全社权威触达率多少' },
+      { k: 'svida',  t: '本月 SVI 达标率进度' },
+      { k: 'quxian', t: '三条曲线收入进展' },
+      { k: 'piyao',  t: '辟谣响应时效走势' }
+    ],
+    zongbian: [
+      { k: 'qianfa', t: '今天签发时效怎么样' },
+      { k: 'anquan', t: '内容安全合格率多少' },
+      { k: 'shoufa', t: '应急首发及时率' },
+      { k: 'piyao',  t: '辟谣响应时效走势' }
+    ],
+    bumen: [
+      { k: 'xiaoneng', t: '我们部人均稿件处理量' },
+      { k: 'wandu',    t: '民生直通车完读率' },
+      { k: 'bihuan',   t: '本部门民生闭环情况' },
+      { k: 'shendu',   t: '深度报道占比多少' }
+    ],
+    xinmeiti: [
+      { k: 'pingtai',  t: '各平台触达对比' },
+      { k: 'sku',      t: '今天出了多少 SKU' },
+      { k: 'xiuzheng', t: '辟谣覆盖修正率' },
+      { k: 'wanbo',    t: '银发有声版完播率' }
+    ],
+    faxing: [
+      { k: 'daoda',    t: '今天点位确认到达率' },
+      { k: 'yinfa',    t: '银发守护应答情况' },
+      { k: 'shunfang', t: '顺访工单完成度' },
+      { k: 'yujing',   t: '异常预警处理情况' }
+    ],
+    jizhe: [
+      { k: 'wode',    t: '我这个月发了几篇' },
+      { k: 'chuanbo', t: '我的稿件传播怎么样' },
+      { k: 'shifang', t: '我的工时释放了多少' }
+    ]
+  };
+  var GREET = {
+    shezhang: '林社长好。全社<b>触达 · SVI · 三条曲线收入</b>一句话可查，答案永远带口径，与双看板同一套数 👇',
+    zongbian: '吴总编好。<b>签发时效 · 内容安全 · 应急首发</b>随口问——口径与三审三校系统同源，时间戳不可回填 👇',
+    bumen:    '郑主任好。<b>时政新闻部</b>的效能、完读、民生闭环都在这——本部门以外的数据不在权限内 👇',
+    xinmeiti: '苏主任好。<b>各平台触达 · SKU 产出 · 辟谣修正</b>随口问，数据已跨渠道去重、规则入合同附件 👇',
+    faxing:   '周站长好。<b>点位到达 · 顺访工单 · 银发守护</b>都在这——每件工单即结算凭证 👇',
+    jizhe:    '晓峰好。想知道<b>自己发了几篇、传播怎么样、省了多少时间</b>，点下面直接问 👇'
+  };
+  var curRole = BI_ROLES.shezhang;
+  var allowedChips = CHIPS.shezhang;
+
+  function renderChips() {
+    chipsEl.innerHTML = '';
+    allowedChips.forEach(function (c) {
+      var s = document.createElement('span');
+      s.className = 'bi-chip';
+      s.textContent = c.t;
+      s.addEventListener('click', function () { ask(c.k, c.t); });
+      chipsEl.appendChild(s);
+    });
+  }
+
+  /* 角色切换入口：登录层选择后调用 */
+  window.__biChatApply = function (r) {
+    curRole = r;
+    allowedChips = CHIPS[r.key] || [];
+    renderChips();
+    busy = false;
+    chipsEl.classList.remove('busy');
+    msgsEl.innerHTML = '';
+    var g = document.createElement('div');
+    g.className = 'bi-m a';
+    g.innerHTML = GREET[r.key] || '';
+    msgsEl.appendChild(g);
+  };
+
+  formEl.addEventListener('submit', function (e) {
+    e.preventDefault();
+    var q = inputEl.value.trim();
+    if (!q || busy) return;
+    inputEl.value = '';
+    var hit = null;
+    /* 只在当前角色权限内的问答里匹配 */
+    allowedChips.forEach(function (c) {
+      if (!hit && QA[c.k].keys.some(function (w) { return q.indexOf(w) > -1; })) hit = c.k;
+    });
+    if (hit) ask(hit, q); else fallback(q);
+  });
+})();
+
+/* ================= 角色登录层：选角色 → 权限落点 ================= */
+(function () {
+  var loginEl = document.getElementById('bi-login');
+  document.body.classList.add('bi-locked');
+
+  function enter(key) {
+    var r = BI_ROLES[key];
+    if (!r) return;
+    window.__biDrillApply(r);
+    window.__biChatApply(r);
+    loginEl.classList.add('off');
+    document.body.classList.remove('bi-locked');
+    window.__biToast('已进入「' + r.name + ' · ' + r.title + '」视角 · 数据权限：' + r.perm);
+  }
+
+  loginEl.querySelectorAll('.bi-role').forEach(function (card) {
+    card.addEventListener('click', function () { enter(card.getAttribute('data-role')); });
+  });
+  document.getElementById('bi-role-switch').addEventListener('click', function () {
+    loginEl.classList.remove('off');
+    document.body.classList.add('bi-locked');
+  });
+
+  /* 登录层之下预热社领导视角（未选择前的底图） */
+  window.__biDrillApply(BI_ROLES.shezhang);
+  window.__biChatApply(BI_ROLES.shezhang);
+})();
+</script>
+</body>
+</html>

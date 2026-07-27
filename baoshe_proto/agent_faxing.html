@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>发行·社区 Agent · 派送网变触达网 | 报社 AI 原型</title>
+<link rel="stylesheet" href="assets/style.css">
+<style>
+/* ---- 本页专属（fx- 前缀） ---- */
+.fx-six { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin: 2px 0 4px; }
+.fx-six .s { background: #F7F9F9; border-radius: 8px; padding: 7px 9px; }
+.fx-six .s span { display: block; font-size: 10.5px; color: #999; }
+.fx-six .s b { font-size: 15px; color: #222; font-variant-numeric: tabular-nums; }
+.fx-six .s small { font-size: 10px; font-weight: 700; margin-left: 3px; color: var(--ok); }
+.fx-six .s small.hot { color: var(--warm-d); }
+.fx-six .s small.warn { color: var(--warn); }
+.fx-six .s small.teal { color: var(--teal-d); }
+.fx-sec { font-size: 10.5px; font-weight: 700; color: var(--teal-d); letter-spacing: 1.5px; margin: 8px 0 1px; }
+.fx-sec:first-of-type { margin-top: 3px; }
+.fx-span { display: flex; align-items: stretch; gap: 10px; }
+.fx-span .fx-box { flex: 1; background: var(--bg); border: 1px solid var(--line); border-radius: 12px; padding: 13px 15px; text-align: center; }
+.fx-span .fx-box.hot { background: var(--cream); border-color: var(--warm-l); }
+.fx-span .fx-box em { display: block; font-style: normal; font-size: 11px; font-weight: 700; letter-spacing: 2px; color: var(--muted); }
+.fx-span .fx-box.hot em { color: var(--warm-d); }
+.fx-span .fx-box .v { font-size: 20px; font-weight: 800; color: var(--ink); margin: 2px 0; }
+.fx-span .fx-box.hot .v { color: var(--warm-d); }
+.fx-span .fx-box span { font-size: 12px; color: var(--sub); display: block; line-height: 1.5; }
+.fx-span .fx-arrow { display: flex; align-items: center; color: var(--warm); font-weight: 800; font-size: 20px; }
+.fx-cap3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+@media (max-width: 640px) { .fx-cap3 { grid-template-columns: 1fr; } }
+.fx-red { display: flex; flex-direction: column; gap: 9px; }
+.fx-red .r { border-left: 3px solid var(--red); padding: 1px 0 1px 11px; font-size: 12.5px; color: var(--sub); line-height: 1.6; }
+.fx-red .r b { color: var(--red-d); }
+</style>
+</head>
+<body>
+
+<header class="topnav">
+  <div class="brand">
+    <img src="assets/st_logo.png" alt="商汤科技">
+    <span class="divider"></span>
+    <span class="name">报社 AI · 一线 Agent 与社会价值运营<small>PRESS AI · FRONTLINE AGENTS</small></span>
+  </div>
+  <nav>
+    <a href="index.html">方案总览</a>
+    <a href="agent_jizhe.html">记者 Agent</a>
+    <a href="agent_bianji.html">编辑 Agent</a>
+    <a href="agent_xinmeiti.html">新媒体 Agent</a>
+    <a href="agent_faxing.html" class="active"><span class="dot"></span>发行·社区 Agent</a>
+    <a href="miniapp.html">读者小程序</a>
+    <a href="bi.html">双看板</a>
+  </nav>
+</header>
+
+<main class="page">
+  <div class="page-head">
+    <div class="eyebrow">Distribution &amp; Community Agent · WeCom Voice Channel</div>
+    <h1>派送网络变触达网络：<span class="hl">每一次派送，都是一张可计量的公共服务工单</span></h1>
+    <p class="sub">派送员、点位、订户——一张能把权威信息可靠送到「算法够不着的人」手上的物理网络，过去一直被当发行成本项核算。现在 <b>企业微信里的 S-Agent</b>（SenseAudio-S2 旗舰大模型 + SenseAudio-V2 语音大模型）让这张网双向跑起来：<b>下行送权威信息，上行收社情反馈</b>，年长派送员语音一句话完成签到与上报。演示角色：<b>周德海 · 城东发行站资深派送员 · 兼社区信息员</b>，送报 22 年。左侧手机可点击场景演示。</p>
+  </div>
+
+  <div class="split">
+    <!-- 左：手机 -->
+    <div class="phone-wrap">
+      <div id="phone-slot"></div>
+      <p class="phone-caption">▲ 可交互原型 · 点上方场景或气泡下方 <b>🎙 快捷话术</b> 切换演示</p>
+    </div>
+
+    <!-- 右：说明 -->
+    <div>
+      <div class="panel">
+        <h3>六个场景 = 一张触达网的六个动作</h3>
+        <table class="mini-table">
+          <tr><th>场景</th><th>它把什么变成了资产</th><th></th></tr>
+          <tr><td><b>台账早报</b></td><td>路线、顺访、夹报一张卡送达，出门前全有数</td><td><span class="tag teal">下行</span></td></tr>
+          <tr><td><b>到位确认</b></td><td>语音一句话签到，三源回执让触达可审计</td><td><span class="tag ok">凭证</span></td></tr>
+          <tr><td><b>反馈回收</b></td><td>读者一句话托付、派送员一句话捎回，求证有下文</td><td><span class="tag warm">上行</span></td></tr>
+          <tr><td><b>信息员协同</b></td><td>谣言在哪个社区冒头，辟谣就精准打回哪个社区</td><td><span class="tag warn">澄清</span></td></tr>
+          <tr><td><b>银发守护</b></td><td>未取报即预警，顺访有应答才计数，仅送达不计</td><td><span class="tag gold">守护</span></td></tr>
+          <tr><td><b>公益组织</b></td><td>活动全程留痕，成效可回溯、可验收、可结算</td><td><span class="tag teal">公益</span></td></tr>
+        </table>
+        <p class="note"><b>单向送报网 → 双向公共信息触达网：</b>下行推权威信息与政策解读，上行回收辟谣求证、民生诉求、银发异常预警。Agent 把每一次派送都变成可计量、可审计的公共服务工单——这张网从此不是成本，是「最后一公里公共信息基础设施」。</p>
+      </div>
+
+      <div class="panel">
+        <h3>商业模式换轨：从按份计价到按工单计价</h3>
+        <div class="fx-span">
+          <div class="fx-box"><em>现在</em><div class="v">卖报纸</div><span>按份计价 · 越送越亏<br>发行 = 成本项</span></div>
+          <div class="fx-arrow">→</div>
+          <div class="fx-box hot"><em>目标态</em><div class="v">卖确认触达与回应闭环</div><span>按服务工单计价<br>发行 = 公共信息基础设施</span></div>
+        </div>
+        <p class="note"><b>谁来买单（触达网络曲线 · Reach-as-a-Service）：</b>民政局/街道办按人头购买，纳入居家养老采购包（示意口径：60-120 元/人/年）；子女端订阅 9.9-19.9 元/月（示意口径）；基金会与企业 CSR/ESG 购买公益留痕平台，收执行与传播服务费而非善款抽成；社区商户点位联营年费，公益内容占比写入协议。</p>
+      </div>
+
+      <div class="panel">
+        <h3>发行·社区 Agent · 三项核心能力</h3>
+        <div class="fx-cap3">
+          <div class="cap"><div class="ic">🎙</div><b>语音一句话</b><span>SenseAudio-V2 语音大模型：年长派送员与银发订户全语音交互，签到、上报、外呼问安说一句话即完成</span></div>
+          <div class="cap warm"><div class="ic">🧾</div><b>三源回执核验</b><span>小程序已读 + 信息员语音打卡 + 点位扫码自动去重核验，外呼抽检 5%，触达数据不注水</span></div>
+          <div class="cap"><div class="ic">🚨</div><b>异常自动升级</b><span>未取报 / 未应答自动预警，顺访销单、超时升级为街道工单；SenseAudio-S2 按画像生成个性化防诈提醒</span></div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <h3>这张网怎么进双看板：留痕即指标，指标即凭据</h3>
+        <table class="mini-table">
+          <tr><th>指标</th><th>口径（写入合同附件）</th><th></th></tr>
+          <tr><td><b>权威信息确认触达率</b></td><td>派送扫码 + 小程序已读 + 信息员打卡，跨渠道去重、同人多端计 1 次，银发人群分层单列</td><td><span class="tag teal">传播域</span></td></tr>
+          <tr><td><b>银发守护指数</b></td><td>覆盖数 × 周均有效应答 × 预警响应时长；「有效触达」以老人有应答为准，仅送达不计</td><td><span class="tag gold">公益域</span></td></tr>
+          <tr><td><b>辟谣覆盖修正率</b></td><td>对谣言起源社区的二次定向覆盖比例单独核算，基数标注「估计值」</td><td><span class="tag warn">澄清域</span></td></tr>
+          <tr><td><b>公益成效可回溯率</b></td><td>报名—签到—回访全程留痕，街道可验收、基金会可审计</td><td><span class="tag ok">凭据</span></td></tr>
+        </table>
+        <p class="note"><b>双看板 = 经营 × 社会价值（SVI）：</b>同一套派送留痕数据，一边算经营账（服务工单收入、点位联营），一边自动归集为社会价值年报底稿——社会价值可计量，所以可汇报、可采购。详见「双看板」页。</p>
+      </div>
+
+      <div class="panel">
+        <h3>合规红线：这张网的信任从这里来</h3>
+        <div class="fx-red">
+          <div class="r"><b>敏感人群数据最高保护：</b>银发数据须单独同意、最小必要采集，日日新私有化/本地化部署，看板只出脱敏聚合统计；严禁用于任何广告定向。</div>
+          <div class="r"><b>数据不可注水：</b>触达数据跨渠道去重、口径写入合同附件，时间戳不可人工回填；三源回执交叉核验 + 语音外呼抽检 + 第三方审计接口，估计值一律标注「示意口径」。</div>
+          <div class="r"><b>政采合规：</b>计价对象是服务工单与触达闭环，而非报纸份数——严禁以触达指标名义变相摊派订报；政府购买服务纳入指导性目录并履行采购程序。</div>
+          <div class="r"><b>AI 不替代终审：</b>进入派送网络的一切下行内容（辟谣、防诈、政策解读）均为「AI 起草、编辑部终审签章」后签发，发布链路技术性卡死在核签环节。</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="foot-brand"><img src="assets/st_logo.png" alt="商汤科技"></div>
+  <div><b>商汤科技 · 大模型生态渠道部</b> — AI 技术底座 · 高保真交互原型（页面数据均为目标态示意口径，非真实经营数据；客户报社名仅作定制示例）</div>
+</footer>
+
+<script src="assets/chat.js"></script>
+<script>
+BaoChat.mount(document.getElementById('phone-slot'), {
+  contact: { name: 'S-Agent 发行·社区助理', corp: '@报社发行事业部', sub: '企业微信 · 日日新大模型技术底座' },
+  agent: { name: 'S-Agent 发行·社区助理', avatar: 'S' },
+  user: { name: '周德海', avatar: '周' },
+  scenarios: [
+    {
+      id: 'zaobao', title: '派送台账早报', chip: '台账早报自动推',
+      intro: '每天 6:30 派送台账自动推送——路线、点位、顺访任务、夹报提醒一张卡送到手，不用问',
+      steps: [
+        { from: 'agent', sys: '⏰ 06:30 · 派送台账早报自动推送（无需询问，S-Agent 定时送达）' },
+        { from: 'agent', text: '周师傅早 ☀️ 今天的派送台账送到，路线和顺访任务都给您排好了 👇' },
+        { from: 'agent', html: '<div class="c-card"><div class="c-head"><span class="c-ic">🌅</span><b>城东发行站 · 派送台账早报</b><span class="tag teal">3 号线</span></div><div class="fx-sec">今日派送</div><div class="fx-six"><div class="s"><span>派送点位</span><b>42</b><small class="teal">+3 新增</small></div><div class="s"><span>订户份数</span><b>618</b><small>全覆盖</small></div><div class="s"><span>顺访任务</span><b>6</b><small class="hot">银发</small></div><div class="s"><span>信息驿站</span><b>4</b><small class="warn">补物料 1</small></div><div class="s"><span>昨日确认触达</span><b>96%</b><small>↑1pp</small></div><div class="s"><span>待回收反馈</span><b>3</b><small class="teal">上行</small></div></div><div class="fx-sec">今日重点</div><div class="c-check"><span class="s warn">⚠</span>雨天 · 7 个报箱点位改投驿站代收，涉及订户已自动通知</div><div class="c-check"><span class="s warn">⚠</span>张桂兰奶奶（国槐里 3 栋）<b style="color:#8E2C2C">连续 2 天报纸未取</b> → 今日顺访确认</div><div class="c-check"><span class="s done">✓</span>今日夹报：《防范养老诈骗一页纸》大字版 120 份 · 优先投银发订户</div><div class="c-foot">台账来源：发行系统 + 社区工单库 · 每天 06:30 自动推送（目标态示意）</div></div>' },
+        { from: 'user', voice: '收到。先跑国槐里，张奶奶那家我第一站就去看。夹报大字版给我留 20 份，驿站也各放一摞。', dur: 11 },
+        { from: 'agent', text: '✅ 已调整：<b>国槐里设为第 1 站，顺访张奶奶置顶</b>；大字版 20 份计入您路线、40 份配给 4 个驿站。到点位跟我说一声就行，签到和回执我来记。' },
+        { from: 'agent', sys: '台账每步自动留痕 · 与双看板同一套数据（时间戳不可人工回填）' }
+      ]
+    },
+    {
+      id: 'daowei', title: '点位到达确认', chip: '到点位说一声',
+      intro: '到点说一句话即完成签到——语音打卡 + 点位扫码 + 小程序已读三源回执自动核验，触达数据不注水',
+      steps: [
+        { from: 'user', voice: '到国槐里了，东门报箱和驿站都投完了，58 份，大字版放了 20 份。', dur: 9 },
+        { from: 'agent', text: '好嘞周师傅，签到收到 ✅ 三源回执核验通过，这一站的触达凭证给您 👇' },
+        { from: 'agent', html: '<div class="c-card"><div class="c-head"><span class="c-ic">📍</span><b>国槐里小区 · 到位确认</b><span class="tag ok">三源核验</span></div><div class="c-kv"><span>语音打卡</span><b>07:42 · 时间戳自动记录</b></div><div class="c-kv"><span>点位扫码</span><b class="teal">驿站码 07:44 已扫</b></div><div class="c-kv"><span>小程序已读</span><b>34 户已确认收报（截至 09:00）</b></div><div class="c-kv"><span>本站触达</span><b class="warm">58 份 · 含大字版 20 份</b></div><div class="c-foot">三源回执自动去重核验 · 语音外呼抽检 5% · 不可人工回填（示意口径）</div></div>' },
+        { from: 'agent', text: '这一站已生成<b>公共服务工单 #0722-03</b>——按「确认触达」计量结算，不按报纸份数。下一站顺义巷，雨天路滑慢点骑。' },
+        { from: 'user', voice: '行，那我走了。', dur: 2 },
+        { from: 'agent', sys: '确认触达率实时汇入双看板 · 计价对象是工单与触达闭环，严禁以指标名义变相摊派订报' }
+      ]
+    },
+    {
+      id: 'fankui', title: '读者反馈回收', chip: '捎回读者反馈',
+      intro: '读者一句话托付、派送员一句话捎回——语音自动结构化：反馈入库 / 辟谣求证 / 需求登记',
+      steps: [
+        { from: 'user', voice: '记两条：3 栋李大爷说上礼拜防诈骗那篇特别有用，问还有没有大字版；5 栋有位阿姨拿着个保健品广告问是真是假，我拍了照发你。', dur: 16 },
+        { from: 'agent', text: '都记下了，两条我分开处理 👇' },
+        { from: 'agent', html: '<div class="c-card"><div class="c-head"><span class="c-ic">🗣</span><b>读者反馈 · 语音回收</b><span class="tag teal">自动结构化</span></div><div class="fx-sec">① 正向反馈 · 入库</div><div class="c-check"><span class="s done">✓</span>李大爷（3 栋）：《防范养老诈骗》有用 → 计入内容有效性台账</div><div class="c-check"><span class="s done">✓</span>大字版需求 +1 → 已登记，下期直接配送到户</div><div class="fx-sec">② 辟谣求证 · 转编辑部</div><div class="c-check"><span class="s warn">⚠</span>保健品广告真伪存疑 → 生成求证工单 <b>#Q-118</b>，转编辑部核查通道</div><div class="c-kv"><span>求证时限</span><b class="warm">24 小时内回复 · 超时自动标红</b></div><div class="c-foot">SenseAudio-V2 语音转写 + SenseAudio-S2 结构化分单 · 读者信息最小必要采集</div></div>' },
+        { from: 'agent', text: '核查结果出来后，我会生成<b>大字版回复卡</b>（编辑终审签章），明天您顺路带给 5 栋阿姨——求证有下文，读者才信这张网。' },
+        { from: 'user', voice: '好，明天我给她带到。', dur: 3 },
+        { from: 'agent', sys: '上行反馈是触达网络的另一半 · 求证-回复闭环计入澄清回应域指标' }
+      ]
+    },
+    {
+      id: 'xinxiyuan', title: '社区信息员协同', chip: '联动信息员',
+      intro: '谣言在哪个社区冒头，辟谣就精准打回哪个社区——派送员 × 社区信息员 × 编辑部三方协同',
+      steps: [
+        { from: 'agent', text: '⚠ 周师傅，编辑部监测到一条线索，涉及您负责的片区，需要现场了解一下：' },
+        { from: 'agent', html: '<div class="c-card"><div class="c-head"><span class="c-ic warm">🤝</span><b>协同任务 · 谣言线索核实</b><span class="tag warn">优先</span></div><div class="c-kv"><span>线索</span><b class="warm">「自来水加了消毒剂不能喝」在国槐里业主群传播</b></div><div class="c-kv"><span>监测时间</span><b>10:15 · 系统告警时间戳</b></div><div class="c-kv"><span>协同人</span><b class="teal">社区信息员 · 何淑芬（国槐里）</b></div><div class="c-kv"><span>您的任务</span><b>顺路了解传播范围、是否有居民囤水</b></div><div class="c-foot">线索来源：舆情监测 + 信息员上报 · 辟谣响应时效从告警时刻起自动计时</div></div>' },
+        { from: 'user', voice: '我刚从国槐里过来，群里确实在传，楼下小超市的水都卖空一半了。何大姐我熟，我跟她碰一下。', dur: 12 },
+        { from: 'agent', text: '已同步给何淑芬的 Agent。编辑部核实口径已出：<b>水务集团例行管网冲洗，水质检测合格</b>——辟谣内容经编辑终审签章，30 分钟内下发。' },
+        { from: 'agent', html: '<div class="c-card"><div class="c-head"><span class="c-ic">🎯</span><b>辟谣精准回投 · 国槐里</b><span class="tag ok">三渠道</span></div><div class="c-check"><span class="s done">✓</span>社区群：信息员何淑芬转发官方辟谣图文（11:20）</div><div class="c-check"><span class="s done">✓</span>驿站海报：辟谣一页纸 40 份（含大字版），您明日补投</div><div class="c-check"><span class="s done">✓</span>小程序：向该社区订户定向推送 · 已读 61%</div><div class="c-kv"><span>响应时效</span><b class="ok">线索确认 → 全渠道首发 1 小时 05 分</b></div><div class="c-foot">辟谣覆盖修正率按社区单独核算 · 起源社区二次定向覆盖（示意口径）</div></div>' },
+        { from: 'agent', sys: '协同全程留痕 → 辟谣响应时效中位数 · 覆盖修正率计入澄清回应域' }
+      ]
+    },
+    {
+      id: 'yinfa', title: '银发订户关怀', chip: '顺访张奶奶',
+      intro: '报纸未取自动预警 → 派送员顺访 → 语音一句话销单——银发守护以「老人有应答」为准，仅送达不计',
+      steps: [
+        { from: 'agent', html: '<div class="c-card"><div class="c-head"><span class="c-ic warm">🔔</span><b>银发守护 · 异常预警</b><span class="tag warn">待顺访</span></div><div class="c-kv"><span>订户</span><b>张桂兰 · 82 岁 · 独居（国槐里 3 栋）</b></div><div class="c-kv"><span>异常</span><b class="warm">连续 2 天报纸未取</b></div><div class="c-kv"><span>外呼问安</span><b>昨 17:00 SenseAudio-V2 外呼 · 未接通</b></div><div class="c-kv"><span>子女端</span><b class="teal">已同步提醒女儿（小程序订阅）</b></div><div class="c-foot">守护服务经老人及家属单独同意 · 最小必要采集 · 严禁任何广告定向</div></div>' },
+        { from: 'user', voice: '到了到了，敲门没人，邻居说昨天她闺女把她接走了，去住几天，人没事。', dur: 10 },
+        { from: 'agent', text: '太好了 ✅ 工单销项：<b>顺访确认「随女儿小住」，预警解除</b>，已同步子女端；小住期间报纸转驿站代存，回来补送。' },
+        { from: 'agent', html: '<div class="c-card"><div class="c-head"><span class="c-ic">🧡</span><b>张桂兰 · 守护档案（本月）</b><span class="tag ok">已应答</span></div><div class="c-bars"><div class="b-row"><span>有效触达</span><span class="b-track"><span class="b-fill" style="width:84%"></span></span><span class="b-val">4.2 次/周</span></div><div class="b-row"><span>语音完播</span><span class="b-track"><span class="b-fill warm" style="width:78%"></span></span><span class="b-val">78%</span></div></div><div class="c-kv"><span>本次预警响应</span><b>3 小时 12 分 · 顺访确认闭环</b></div><div class="c-kv"><span>适老服务</span><b class="teal">大字版 + 每日《要闻语音版》已开通</b></div><div class="c-foot">有效触达以老人有应答为准 · 明细不外泄，看板只出脱敏聚合数（示意口径）</div></div>' },
+        { from: 'user', voice: '跟她闺女说一声，老太太就爱听那个语音报，回来了接着给放。', dur: 7 },
+        { from: 'agent', text: '✅ 已留言子女端。周师傅，这一单按<b>银发守护服务工单</b>计量结算——您多敲的这一下门，就是这张网最值钱的地方。' },
+        { from: 'agent', sys: '银发守护指数 = 覆盖数 × 有效应答 × 预警响应时长 · 政府端按人头购买（示意口径 60-120 元/人/年）' }
+      ]
+    },
+    {
+      id: 'gongyi', title: '社区公益活动', chip: '办防诈骗讲座',
+      intro: '一句话发起社区公益活动——方案、物料、动员、回访全流程 Agent 代办，公益成效可回溯、可结算',
+      steps: [
+        { from: 'user', voice: '街道跟我说，国槐里最近保健品骗局多，想让咱们办一场防诈骗讲座，你给张罗张罗。', dur: 12 },
+        { from: 'agent', text: '好事，这正是咱们触达网的强项。方案给您搭好了 👇' },
+        { from: 'agent', html: '<div class="c-card"><div class="c-head"><span class="c-ic">📋</span><b>「银发防诈」社区公益讲座 · 方案</b><span class="tag teal">一键生成</span></div><div class="c-kv"><span>时间地点</span><b>周六 9:30 · 国槐里社区活动室</b></div><div class="c-kv"><span>内容</span><b>权威防诈内容 + 真实案例拆解<br>（AI 起草 · 编辑终审签章）</b></div><div class="c-kv"><span>讲员</span><b>报社读者服务讲师 + 社区民警</b></div><div class="c-kv"><span>动员</span><b class="teal">派送顺访邀约 + 信息员群通知 + 子女端代报名</b></div><div class="c-btns"><span class="c-btn primary">按这个办</span><span class="c-btn ghost">改一下</span></div><div class="c-foot">物料：大字版讲义 60 份 · SenseAudio-V2 生成方言音频版（目标态示意）</div></div>' },
+        { from: 'user', voice: '行，就这么办。我这两天顺访的时候挨家说一声。', dur: 6 },
+        { from: 'agent', text: '✅ 已建活动工单 <b>#GY-09</b>：给您生成了<b>顺访邀约话术卡</b>和报名二维码；报名、签到、满意度回访我全程记录留痕。' },
+        { from: 'agent', sys: '📅 周六 11:40 · 活动结束，成效回执自动生成' },
+        { from: 'agent', html: '<div class="c-card"><div class="c-head"><span class="c-ic">🧾</span><b>活动成效回执 · 可回溯</b><span class="tag ok">已归档</span></div><div class="c-big"><div class="v">83 人到场</div><div class="l">其中银发订户 61 人 · 报名 96 人 · 到场率 86%</div></div><div class="c-kv"><span>现场求证</span><b>12 件保健品线索 · 已转编辑部核查</b></div><div class="c-kv"><span>满意度回访</span><b class="ok">语音回访 4.8 分（抽样 30 人 · 录音经授权）</b></div><div class="c-kv"><span>结算凭据</span><b class="teal">基金会 / CSR 留痕报告已生成（脱敏）</b></div><div class="c-foot">公益成效可回溯率计入 SVI · 收执行与传播服务费、不抽成善款（示意口径）</div></div>' },
+        { from: 'agent', text: '这场活动每一步都留了痕：<b>街道能验收、基金会能审计、看板能呈现</b>——公益做了多少，第一次能说清楚。' },
+        { from: 'agent', sys: '公益覆盖域指标自动归集 → 社会价值年报底稿' }
+      ]
+    }
+  ]
+});
+</script>
+</body>
+</html>

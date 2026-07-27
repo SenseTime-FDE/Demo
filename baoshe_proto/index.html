@@ -1,0 +1,717 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>方案总览 · 报社 AI · 一线 Agent 与社会价值运营</title>
+<link rel="stylesheet" href="assets/style.css">
+<style>
+/* ============ index 页专属样式（前缀 ix-） ============ */
+
+/* ---- 通用节结构 ---- */
+.ix-sec { padding: 64px 28px; }
+.ix-sec.white { background: var(--white); }
+.ix-sec.dark  { background: var(--ink); color: #EDF1F6; }
+.ix-wrap { max-width: 1280px; margin: 0 auto; }
+.ix-sec-head { text-align: center; margin-bottom: 38px; }
+.ix-sec-head .eyebrow { font-size: 11px; font-weight: 700; letter-spacing: 3px; color: var(--teal); text-transform: uppercase; margin-bottom: 8px; }
+.ix-sec.dark .ix-sec-head .eyebrow { color: var(--gold); }
+.ix-sec-head h2 { font-size: 26px; color: var(--ink); letter-spacing: .3px; line-height: 1.35; }
+.ix-sec.dark .ix-sec-head h2 { color: #fff; }
+.ix-sec-head h2 .hl { color: var(--warm-d); }
+.ix-sec.dark .ix-sec-head h2 .hl { color: var(--gold); }
+.ix-sec-head .sub { margin: 8px auto 0; color: var(--sub); font-size: 14px; max-width: 800px; }
+.ix-sec.dark .ix-sec-head .sub { color: rgba(237,241,246,.72); }
+
+/* ---- Hero ---- */
+.ix-hero { position: relative; overflow: hidden; background: linear-gradient(140deg, var(--ink) 0%, var(--ink2) 58%, var(--ink3) 100%); color: #EDF1F6; padding: 84px 28px 66px; }
+.ix-hero::before { /* 鎏金大圆（呼应 deck 封面） */
+  content: ""; position: absolute; right: -180px; bottom: -280px; width: 620px; height: 620px; border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, var(--gold) 0%, #8A6E2B 55%, transparent 72%);
+  opacity: .42; filter: blur(2px);
+}
+.ix-hero::after { /* 人民红描边圆 */
+  content: ""; position: absolute; left: -140px; top: -180px; width: 460px; height: 460px; border-radius: 50%;
+  border: 60px solid var(--red); opacity: .18;
+}
+.ix-hero .ix-ring2 { position: absolute; right: 16%; top: -70px; width: 210px; height: 210px; border-radius: 50%; border: 2px solid var(--gold); opacity: .3; }
+.ix-hero .ix-dot1 { position: absolute; left: 12%; bottom: 60px; width: 14px; height: 14px; border-radius: 50%; background: var(--red); opacity: .85; }
+.ix-hero .ix-dot2 { position: absolute; right: 30%; bottom: 130px; width: 8px; height: 8px; border-radius: 50%; background: var(--gold); opacity: .8; }
+.ix-hero-in { max-width: 1280px; margin: 0 auto; position: relative; z-index: 2; }
+.ix-hero .kicker { display: inline-flex; align-items: center; gap: 10px; font-size: 12px; font-weight: 700; letter-spacing: 2.5px; color: var(--gold); margin-bottom: 20px; }
+.ix-hero .kicker::before { content: ""; width: 26px; height: 2px; background: var(--red); }
+.ix-hero h1 { font-size: 44px; line-height: 1.25; color: #fff; letter-spacing: 1px; max-width: 940px; }
+.ix-hero h1 .hl { color: var(--gold); }
+.ix-hero .slogans { display: flex; gap: 12px; flex-wrap: wrap; margin: 22px 0 18px; }
+.ix-hero .slogans span { font-size: 13.5px; font-weight: 600; color: #F0E3C0; border: 1px solid rgba(194,161,75,.45); background: rgba(194,161,75,.14); padding: 6px 16px; border-radius: 999px; }
+.ix-hero .lede { font-size: 15px; color: rgba(237,241,246,.78); max-width: 760px; line-height: 1.8; }
+.ix-hero .lede b { color: #fff; font-weight: 600; }
+.ix-hero .ctas { display: flex; gap: 14px; flex-wrap: wrap; margin-top: 30px; }
+.ix-btn { display: inline-flex; align-items: center; gap: 8px; padding: 12px 26px; border-radius: 999px; font-size: 14.5px; font-weight: 700; transition: all .18s; }
+.ix-btn.primary { background: var(--red); color: #fff; box-shadow: 0 8px 24px rgba(180,58,58,.4); }
+.ix-btn.primary:hover { background: var(--red-d); transform: translateY(-2px); }
+.ix-btn.ghost { border: 1.5px solid rgba(194,161,75,.6); color: #F0E3C0; }
+.ix-btn.ghost:hover { background: rgba(194,161,75,.16); border-color: var(--gold); transform: translateY(-2px); }
+.ix-hero .stats { display: flex; gap: 0; flex-wrap: wrap; margin-top: 44px; border-top: 1px solid rgba(237,241,246,.14); padding-top: 26px; }
+.ix-hero .stat { padding: 0 40px 0 0; margin-right: 40px; border-right: 1px solid rgba(237,241,246,.14); }
+.ix-hero .stat:last-child { border-right: none; margin-right: 0; }
+.ix-hero .stat .v { font-size: 30px; font-weight: 800; color: #fff; font-variant-numeric: tabular-nums; }
+.ix-hero .stat .v small { font-size: 15px; font-weight: 700; color: var(--gold); margin-left: 2px; }
+.ix-hero .stat .l { font-size: 12px; color: rgba(237,241,246,.6); margin-top: 3px; letter-spacing: .5px; }
+
+/* ---- 系统逻辑一张图 ---- */
+.ix-sysgrid { display: grid; grid-template-columns: 1fr 320px 1fr; grid-template-rows: auto auto; gap: 34px 56px; align-items: stretch; }
+.ix-hub { grid-column: 2; grid-row: 1 / 3; align-self: center; position: relative; text-align: center;
+  background: linear-gradient(150deg, var(--ink), var(--ink3)); color: #fff; border-radius: 20px; padding: 34px 26px 28px;
+  box-shadow: 0 18px 44px rgba(12,37,69,.30); z-index: 2; }
+.ix-hub::before { content: ""; position: absolute; inset: -9px; border-radius: 26px; border: 1.5px dashed var(--gold); opacity: .5; }
+.ix-hub::after { content: ""; position: absolute; inset: -9px; border-radius: 26px; border: 1.5px dashed var(--warm-l); opacity: 0; animation: ixbreath 3.6s ease-in-out infinite; }
+@keyframes ixbreath { 0%,100% { opacity: 0; } 50% { opacity: .5; } }
+.ix-hub .h-ic { width: 54px; height: 54px; border-radius: 16px; margin: 0 auto 12px; background: rgba(180,58,58,.2); border: 1px solid rgba(180,58,58,.55); display: flex; align-items: center; justify-content: center; font-size: 26px; }
+.ix-hub b { display: block; font-size: 19px; letter-spacing: 1px; }
+.ix-hub .h-sub { font-size: 12px; color: var(--gold); margin-top: 4px; letter-spacing: 1px; }
+.ix-hub .h-chips { display: flex; justify-content: center; gap: 8px; flex-wrap: wrap; margin-top: 16px; }
+.ix-hub .h-chips span { font-size: 11.5px; font-weight: 600; padding: 4px 12px; border-radius: 999px; background: rgba(194,161,75,.18); border: 1px solid rgba(194,161,75,.4); color: #F0E3C0; }
+.ix-hub .h-note { margin-top: 14px; font-size: 11px; color: rgba(237,241,246,.55); line-height: 1.6; }
+.ix-role { position: relative; background: var(--white); border: 1px solid var(--line); border-radius: 16px; padding: 20px 22px; box-shadow: var(--shadow-sm); }
+.ix-role::after { content: ""; position: absolute; top: 50%; width: 56px; height: 2px;
+  background: linear-gradient(90deg, var(--warm-l), var(--gold)); }
+.ix-role.rt::after, .ix-role.rb::after { background: linear-gradient(90deg, var(--gold), var(--warm-l)); }
+.ix-role.lt::after, .ix-role.lb::after { right: -56px; }
+.ix-role.rt::after, .ix-role.rb::after { left: -56px; }
+.ix-role .r-dot { position: absolute; top: 50%; margin-top: -4px; width: 8px; height: 8px; border-radius: 50%; background: var(--red); box-shadow: 0 0 0 4px rgba(180,58,58,.16); }
+.ix-role.lt .r-dot, .ix-role.lb .r-dot { right: -60px; }
+.ix-role.rt .r-dot, .ix-role.rb .r-dot { left: -60px; }
+.ix-role .r-head { display: flex; align-items: center; gap: 10px; margin-bottom: 6px; }
+.ix-role .r-head .ic { width: 38px; height: 38px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 19px; flex: none; background: var(--cream); }
+.ix-role.teal .r-head .ic { background: var(--sky); }
+.ix-role .r-head b { font-size: 16px; color: var(--ink); }
+.ix-role .r-head .tag { margin-left: auto; }
+.ix-role .r-way { font-size: 12.5px; font-weight: 600; color: var(--warm-d); margin-bottom: 8px; }
+.ix-role.teal .r-way { color: var(--teal-d); }
+.ix-role ul { list-style: none; }
+.ix-role li { font-size: 12.5px; color: var(--sub); line-height: 1.6; padding: 3px 0 3px 16px; position: relative; }
+.ix-role li::before { content: "▸"; position: absolute; left: 0; color: var(--red); font-size: 11px; }
+.ix-role.teal li::before { color: var(--teal); }
+.ix-syslaw { margin-top: 34px; display: flex; align-items: center; gap: 14px; background: var(--card); border: 1px solid var(--card-b); border-radius: 14px; padding: 16px 22px; }
+.ix-syslaw .k { flex: none; font-size: 12px; font-weight: 800; letter-spacing: 2px; color: #fff; background: var(--red); border-radius: 8px; padding: 6px 12px; }
+.ix-syslaw p { font-size: 14px; color: var(--ink); }
+.ix-syslaw p b { color: var(--warm-d); }
+
+/* ---- 原型导览 ---- */
+.ix-tour { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
+.ix-tcard { display: block; background: var(--white); border: 1px solid var(--line); border-radius: 16px; padding: 22px 24px; box-shadow: var(--shadow-sm); transition: all .18s; position: relative; overflow: hidden; }
+.ix-tcard::before { content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 4px; background: linear-gradient(180deg, var(--red), var(--gold)); opacity: 0; transition: opacity .18s; }
+.ix-tcard:hover { transform: translateY(-4px); box-shadow: var(--shadow); border-color: var(--warm-l); }
+.ix-tcard:hover::before { opacity: 1; }
+.ix-tcard .t-top { display: flex; align-items: center; gap: 12px; margin-bottom: 8px; }
+.ix-tcard .t-top .ic { width: 42px; height: 42px; border-radius: 13px; background: var(--sky); display: flex; align-items: center; justify-content: center; font-size: 21px; flex: none; }
+.ix-tcard.warm .t-top .ic { background: var(--cream); }
+.ix-tcard .t-top b { font-size: 16px; color: var(--ink); }
+.ix-tcard .t-top .arr { margin-left: auto; color: var(--red); font-weight: 800; font-size: 17px; transition: transform .18s; }
+.ix-tcard:hover .t-top .arr { transform: translateX(4px); }
+.ix-tcard p { font-size: 12.5px; color: var(--sub); line-height: 1.65; min-height: 42px; }
+.ix-tcard .t-tags { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 12px; }
+.ix-tcard .t-shot { position: relative; margin: -22px -24px 16px; height: 158px; background: var(--sky); border-bottom: 1px solid var(--line); overflow: hidden; }
+.ix-tcard .t-shot iframe { width: 1440px; height: 900px; border: 0; transform-origin: 0 0; pointer-events: none; display: block; }
+.ix-tcard .t-shot::after { content: "LIVE · 实时预览"; position: absolute; top: 8px; right: 8px; font-size: 9.5px; font-weight: 700; letter-spacing: 1px; color: var(--teal-d); background: rgba(255,255,255,.9); border: 1px solid var(--sky2); padding: 2px 8px; border-radius: 999px; pointer-events: none; }
+.ix-tcard .t-shot::before { content: ""; position: absolute; inset: 0; z-index: 1; } /* 罩住 iframe，保证整卡可点 */
+
+/* ---- 角色 × 能力矩阵 ---- */
+.ix-matrix-scroll { overflow-x: auto; background: var(--white); border: 1px solid var(--line); border-radius: 16px; box-shadow: var(--shadow-sm); }
+.ix-matrix { width: 100%; min-width: 880px; border-collapse: collapse; font-size: 13px; }
+.ix-matrix th { background: var(--ink); color: #fff; font-weight: 600; text-align: left; padding: 12px 18px; font-size: 12.5px; letter-spacing: 1px; white-space: nowrap; }
+.ix-matrix td { padding: 14px 18px; border-bottom: 1px solid var(--line); color: var(--sub); vertical-align: top; line-height: 1.7; }
+.ix-matrix tr:last-child td { border-bottom: none; }
+.ix-matrix tr:hover td { background: var(--bg); }
+.ix-matrix .role { white-space: nowrap; }
+.ix-matrix .role b { display: block; color: var(--ink); font-size: 14px; }
+.ix-matrix .role span { font-size: 11.5px; color: var(--muted); }
+.ix-matrix .entry { white-space: nowrap; font-weight: 600; color: var(--teal-d); }
+.ix-matrix a.golink { display: inline-block; font-size: 12.5px; font-weight: 700; color: var(--warm-d); border: 1px solid var(--warm-l); background: var(--cream); border-radius: 999px; padding: 4px 13px; white-space: nowrap; transition: all .15s; }
+.ix-matrix a.golink:hover { background: var(--red); color: #fff; border-color: var(--red); }
+.ix-matrix a.golink + a.golink { margin-left: 6px; }
+
+/* ---- 三张资产（商业模式铺垫） ---- */
+.ix-assets { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; margin-bottom: 30px; }
+.ix-acard { background: rgba(255,255,255,.05); border: 1px solid rgba(237,241,246,.14); border-radius: 16px; padding: 20px 22px; position: relative; }
+.ix-acard .a-no { position: absolute; top: 16px; right: 18px; font-size: 30px; font-weight: 800; color: rgba(194,161,75,.28); font-variant-numeric: tabular-nums; }
+.ix-acard b.a-name { display: block; font-size: 15.5px; color: #fff; margin-bottom: 8px; }
+.ix-acard b.a-name small { display: block; font-size: 11px; font-weight: 600; color: var(--gold); letter-spacing: 1px; margin-top: 2px; }
+.ix-acard .a-desc { font-size: 12.5px; color: rgba(237,241,246,.68); line-height: 1.7; }
+.ix-acard .a-amp { margin-top: 12px; border-top: 1px dashed rgba(237,241,246,.2); padding-top: 10px; font-size: 12.5px; color: rgba(237,241,246,.82); line-height: 1.7; }
+.ix-acard .a-amp b { color: #F0E3C0; }
+.ix-acard .a-amp::before { content: "AI 放大 ↓"; display: block; font-size: 10.5px; font-weight: 800; letter-spacing: 2px; color: var(--gold); margin-bottom: 4px; }
+.ix-bizarrow { text-align: center; margin: 0 0 26px; font-size: 13px; font-weight: 700; letter-spacing: 2px; color: rgba(237,241,246,.55); }
+.ix-bizarrow b { color: var(--gold); }
+
+/* ---- 三条价值曲线 ---- */
+.ix-biz { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
+.ix-bcard { position: relative; border-radius: 18px; padding: 26px 26px 22px; background: rgba(255,255,255,.05); border: 1px solid rgba(237,241,246,.14); display: flex; flex-direction: column; }
+.ix-bcard.g { border-top: 4px solid var(--red); }
+.ix-bcard.b { border-top: 4px solid var(--gold); }
+.ix-bcard.c { border-top: 4px solid var(--teal-l); }
+.ix-bcard .b-tier { font-size: 11px; font-weight: 700; letter-spacing: 2px; color: var(--gold); margin-bottom: 6px; text-transform: uppercase; }
+.ix-bcard .b-name { font-size: 19px; font-weight: 800; color: #fff; line-height: 1.4; }
+.ix-bcard .b-name small { display: block; font-size: 12px; font-weight: 600; color: rgba(237,241,246,.6); margin-top: 3px; }
+.ix-bcard .b-payer { margin-top: 12px; font-size: 12px; color: rgba(237,241,246,.72); background: rgba(12,37,69,.4); border: 1px solid rgba(237,241,246,.12); border-radius: 10px; padding: 9px 12px; line-height: 1.7; }
+.ix-bcard .b-payer b { color: #F0E3C0; font-weight: 700; }
+.ix-bcard .b-logic { margin-top: 12px; font-size: 12.5px; color: rgba(237,241,246,.82); line-height: 1.75; }
+.ix-bcard .b-logic b { color: #fff; }
+.ix-bcard ul { list-style: none; margin-top: 12px; }
+.ix-bcard li { font-size: 12.5px; color: rgba(237,241,246,.75); padding: 4px 0 4px 18px; position: relative; line-height: 1.6; }
+.ix-bcard li::before { content: "✓"; position: absolute; left: 0; color: var(--gold); font-weight: 700; font-size: 11px; }
+.ix-bcard li b { color: #fff; font-weight: 600; }
+.ix-bcard .b-ai { margin-top: 12px; font-size: 12px; color: rgba(237,241,246,.68); line-height: 1.7; border-left: 2px solid rgba(194,161,75,.5); padding-left: 10px; }
+.ix-bcard .b-ai b { color: #F0E3C0; }
+.ix-bcard .b-eq { margin-top: auto; border-top: 1px dashed rgba(237,241,246,.22); padding-top: 12px; font-size: 11.5px; color: rgba(237,241,246,.6); line-height: 1.7; }
+.ix-bcard .b-eq b { color: #fff; }
+.ix-bcard .b-eq .kl { display: block; font-size: 10px; font-weight: 800; letter-spacing: 2px; color: var(--gold); margin-bottom: 3px; }
+.ix-bizlaw { margin-top: 22px; display: flex; gap: 14px; align-items: flex-start; background: rgba(255,255,255,.05); border: 1px solid rgba(237,241,246,.14); border-radius: 14px; padding: 16px 22px; }
+.ix-bizlaw .k { flex: none; font-size: 12px; font-weight: 800; letter-spacing: 2px; color: #fff; background: var(--red); border-radius: 8px; padding: 6px 12px; }
+.ix-bizlaw p { font-size: 13px; color: rgba(237,241,246,.78); line-height: 1.8; }
+.ix-bizlaw p b { color: #fff; }
+
+/* ---- 合规红线 ---- */
+.ix-redgrid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+.ix-redcard { background: var(--white); border: 1px solid var(--line); border-left: 4px solid var(--red); border-radius: 12px; padding: 18px 20px; box-shadow: var(--shadow-sm); }
+.ix-redcard b { display: flex; align-items: center; gap: 8px; font-size: 14px; color: var(--ink); margin-bottom: 6px; }
+.ix-redcard b .no { flex: none; width: 20px; height: 20px; border-radius: 50%; background: var(--cream); color: var(--warm-d); font-size: 11px; font-weight: 800; display: flex; align-items: center; justify-content: center; }
+.ix-redcard p { font-size: 12.5px; color: var(--sub); line-height: 1.7; }
+.ix-redcard p b2, .ix-redcard p strong { color: var(--warm-d); font-weight: 600; }
+
+/* ---- 90 天路线图 ---- */
+.ix-road { display: grid; grid-template-columns: 1fr 34px 1fr 34px 1fr; gap: 0; align-items: stretch; }
+.ix-rarr { display: flex; align-items: center; justify-content: center; color: var(--red); font-size: 20px; font-weight: 800; }
+.ix-rcard { background: var(--white); border: 1px solid var(--line); border-radius: 16px; padding: 22px 24px; box-shadow: var(--shadow-sm); display: flex; flex-direction: column; }
+.ix-rcard .m-badge { display: inline-flex; align-self: flex-start; align-items: center; gap: 8px; font-size: 12px; font-weight: 800; letter-spacing: 1.5px; color: #fff; background: var(--ink); border-radius: 999px; padding: 5px 14px; margin-bottom: 12px; }
+.ix-rcard.hot .m-badge { background: var(--red); }
+.ix-rcard h4 { font-size: 16.5px; color: var(--ink); margin-bottom: 2px; }
+.ix-rcard .r-sub { font-size: 12px; color: var(--muted); margin-bottom: 12px; }
+.ix-rcard ol { list-style: none; counter-reset: rc; margin-bottom: 14px; }
+.ix-rcard ol li { counter-increment: rc; position: relative; font-size: 12.5px; color: var(--sub); line-height: 1.6; padding: 4px 0 4px 26px; }
+.ix-rcard ol li::before { content: counter(rc); position: absolute; left: 0; top: 7px; width: 17px; height: 17px; border-radius: 50%; background: var(--sky); color: var(--teal-d); font-size: 10.5px; font-weight: 700; display: flex; align-items: center; justify-content: center; }
+.ix-rcard .r-kpi { margin-top: auto; background: var(--bg); border: 1px dashed var(--card-b); border-radius: 10px; padding: 10px 14px; font-size: 12px; color: var(--sub); line-height: 1.7; }
+.ix-rcard .r-kpi b { color: var(--warm-d); }
+.ix-rcard .r-kpi .kl { font-size: 10.5px; font-weight: 800; letter-spacing: 2px; color: var(--teal-d); display: block; margin-bottom: 2px; }
+
+/* ---- 愿景三层 ---- */
+.ix-vision { display: grid; grid-template-columns: 1.25fr 1fr; gap: 44px; align-items: center; }
+.ix-vstack { display: flex; flex-direction: column-reverse; gap: 14px; }
+.ix-vlayer { display: flex; align-items: center; gap: 16px; border-radius: 14px; padding: 18px 22px; color: #fff; box-shadow: var(--shadow-sm); }
+.ix-vlayer .n { flex: none; width: 40px; height: 40px; border-radius: 12px; background: rgba(255,255,255,.16); border: 1px solid rgba(255,255,255,.3); display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 15px; }
+.ix-vlayer b { display: block; font-size: 15.5px; }
+.ix-vlayer span { display: block; font-size: 12px; opacity: .85; margin-top: 2px; line-height: 1.6; }
+.ix-vlayer .vtag { margin-left: auto; flex: none; font-size: 11px; font-weight: 700; background: rgba(255,255,255,.16); border-radius: 999px; padding: 3px 11px; white-space: nowrap; }
+.ix-vlayer.l1 { background: linear-gradient(120deg, var(--red), var(--red-d)); width: 100%; }
+.ix-vlayer.l2 { background: linear-gradient(120deg, #A98A3E, #8A6E2B); width: 92%; }
+.ix-vlayer.l3 { background: linear-gradient(120deg, var(--ink3), var(--ink)); width: 84%; }
+.ix-vaside h3 { font-size: 20px; color: var(--ink); line-height: 1.5; margin-bottom: 14px; }
+.ix-vaside h3 b { color: var(--warm-d); }
+.ix-vaside .v-quote { font-size: 13.5px; color: var(--sub); border-left: 3px solid var(--red); padding-left: 14px; line-height: 1.8; margin-bottom: 18px; }
+.ix-vaside ul { list-style: none; margin-bottom: 16px; }
+.ix-vaside li { font-size: 13px; color: var(--sub); padding: 4px 0 4px 18px; position: relative; }
+.ix-vaside li::before { content: "▸"; position: absolute; left: 0; color: var(--teal); font-size: 11px; }
+.ix-vaside .v-red { font-size: 12px; color: var(--muted); background: var(--sky); border-radius: 10px; padding: 10px 14px; }
+.ix-vaside .v-red b { color: var(--teal-d); }
+
+/* ---- 响应式 ---- */
+@media (max-width: 1080px) {
+  .ix-hero h1 { font-size: 32px; }
+  .ix-hero .stat { padding-right: 24px; margin-right: 24px; }
+  .ix-sysgrid { grid-template-columns: 1fr; gap: 18px; }
+  .ix-hub { grid-column: 1; grid-row: 1; }
+  .ix-role::after, .ix-role .r-dot { display: none; }
+  .ix-tour { grid-template-columns: 1fr 1fr; }
+  .ix-assets, .ix-biz, .ix-redgrid { grid-template-columns: 1fr; }
+  .ix-road { grid-template-columns: 1fr; }
+  .ix-rarr { transform: rotate(90deg); padding: 6px 0; }
+  .ix-vision { grid-template-columns: 1fr; }
+}
+@media (max-width: 640px) {
+  .ix-tour { grid-template-columns: 1fr; }
+  .ix-hero .stats { gap: 18px; }
+  .ix-hero .stat { border-right: none; }
+}
+</style>
+</head>
+<body>
+
+<header class="topnav">
+  <div class="brand">
+    <img src="assets/st_logo.png" alt="商汤科技">
+    <span class="divider"></span>
+    <span class="name">报社 AI · 一线 Agent 与社会价值运营<small>PRESS AI · FRONTLINE AGENTS</small></span>
+  </div>
+  <nav>
+    <a href="index.html" class="active"><span class="dot"></span>方案总览</a>
+    <a href="agent_jizhe.html">记者 Agent</a>
+    <a href="agent_bianji.html">编辑 Agent</a>
+    <a href="agent_xinmeiti.html">新媒体 Agent</a>
+    <a href="agent_faxing.html">发行·社区 Agent</a>
+    <a href="miniapp.html">读者小程序</a>
+    <a href="bi.html">双看板</a>
+  </nav>
+</header>
+
+<!-- ============ Hero ============ -->
+<section class="ix-hero">
+  <span class="ix-ring2"></span><span class="ix-dot1"></span><span class="ix-dot2"></span>
+  <div class="ix-hero-in">
+    <div class="kicker">商汤科技 · 大模型生态渠道部 × 国资报社（定制示例）· PRESS AI</div>
+    <h1>报纸可以变薄<br><span class="hl">价值必须变厚</span></h1>
+    <div class="slogans"><span>知识库当燃料</span><span>Agent 长在工作流</span><span>社会价值可采购</span></div>
+    <p class="lede">内部 AI 知识库建过了，一线为什么用不起来？因为系统在「另一个地方」。这套方案<b>不再新建中心化系统</b>——AI Agent 长在记者、编辑、新媒体、发行的<b>企微 / 飞书对话框里</b>，已有知识库变成燃料；配一套「经营 × 社会价值」双看板，用 AI 让国资报社的社会价值<b>可计量、可汇报、可采购</b>，做出第三张报表。以人民日报、健康报、中国妇女报为定制示例，本站为可交互高保真原型，数字均为目标态示意口径。</p>
+    <div class="ctas">
+      <a class="ix-btn primary" href="agent_jizhe.html">▶ 看记者 Agent 演示</a>
+      <a class="ix-btn ghost" href="bi.html">看「经营 × 社会价值」双看板 →</a>
+    </div>
+    <div class="stats">
+      <div class="stat"><div class="v">0<small>个</small></div><div class="l">新建中心化系统 · Agent 长在企微/飞书</div></div>
+      <div class="stat"><div class="v">1<small>座</small></div><div class="l">已建知识库复用当燃料 · 不推倒重来</div></div>
+      <div class="stat"><div class="v">2<small>张</small></div><div class="l">看板 · 经营 × 社会价值（SVI）</div></div>
+      <div class="stat"><div class="v">3<small>条</small></div><div class="l">价值曲线 · To G / To B / To C·社区</div></div>
+      <div class="stat"><div class="v">90<small>天</small></div><div class="l">落地路线 · 首单按效结算验证</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 系统逻辑一张图 ============ -->
+<section class="ix-sec white">
+  <div class="ix-wrap">
+    <div class="ix-sec-head">
+      <div class="eyebrow">System Logic · 系统逻辑</div>
+      <h2>一张图看懂：<span class="hl">知识库 → 一线 Agent → 双看板 → 商业模式</span></h2>
+      <p class="sub">已有知识库当燃料、Agent 长在一线工作流、留痕自动出双看板、看板口径直接变成可采购的服务合同——四步一条线</p>
+    </div>
+
+    <div class="ix-sysgrid">
+      <!-- 左上：知识库（燃料） -->
+      <div class="ix-role lt teal">
+        <span class="r-dot"></span>
+        <div class="r-head"><span class="ic">📚</span><b>已建知识库 · 燃料</b><span class="tag teal">复用不重建</span></div>
+        <div class="r-way">存量报道语料化，检索可溯源</div>
+        <ul>
+          <li>几十年报道沉淀为结构化、可溯源知识资产</li>
+          <li>政策口径库 / 历史提法库供 Agent 实时核查</li>
+          <li>语料治理流水线：清洗 · 脱敏 · 涉政过滤 · 版权链存证</li>
+        </ul>
+      </div>
+
+      <!-- 中枢 -->
+      <div class="ix-hub">
+        <div class="h-ic">🧠</div>
+        <b>一线 Agent 群</b>
+        <div class="h-sub">日日新大模型 · 商汤 AI 技术底座</div>
+        <div class="h-chips"><span>企微 / 飞书</span><span>SenseAudio-S2 旗舰大模型</span><span>SenseAudio-V2 语音大模型</span></div>
+        <div class="h-note">长在对话框里，不新建系统入口<br>选题—签发—触达—回访 全程自动打点留痕</div>
+      </div>
+
+      <!-- 右上：双看板（出表） -->
+      <div class="ix-role rt">
+        <span class="r-dot"></span>
+        <div class="r-head"><span class="ic">📊</span><b>双看板 · 出表</b><span class="tag warm">第三张报表</span></div>
+        <div class="r-way">经营看板 × 社会价值（SVI）看板</div>
+        <ul>
+          <li>SVI 四域：权威传播 / 澄清回应 / 公益覆盖 / 生态治理</li>
+          <li>时间戳自动打点、不可人工回填，证据链可下钻</li>
+          <li>月度绩效底稿自动生成，年终归集社会价值年报</li>
+        </ul>
+      </div>
+
+      <!-- 左下：一线工作流（人） -->
+      <div class="ix-role lb">
+        <span class="r-dot"></span>
+        <div class="r-head"><span class="ic">🗞️</span><b>一线工作流 · 人</b><span class="tag warm">不换工具</span></div>
+        <div class="r-way">记者 / 编辑 / 新媒体 / 发行·社区，人手一个 Agent</div>
+        <ul>
+          <li>记者语音报题速记、编辑口径核查终审卡点</li>
+          <li>新媒体一鱼多吃出多版本 SKU、多平台分发</li>
+          <li>派送员「语音一句话」签到，派送变公共服务工单</li>
+        </ul>
+      </div>
+
+      <!-- 右下：商业模式（变现） -->
+      <div class="ix-role rb teal">
+        <span class="r-dot"></span>
+        <div class="r-head"><span class="ic">🧾</span><b>商业模式 · 变现</b><span class="tag gold">可采购</span></div>
+        <div class="r-way">三条价值曲线：To G / To B / To C·社区</div>
+        <ul>
+          <li>To G 权威合约：社会价值年报＝财政绩效评价依据</li>
+          <li>To B 知识资产：一鱼多吃 SKU，签章即计费凭证</li>
+          <li>To C·社区：卖确认触达与回应闭环，不再按份卖报</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="ix-syslaw">
+      <span class="k">系统逻辑</span>
+      <p>知识库当燃料、Agent 长在工作流、留痕自动出表 —— <b>一线不换工具，价值自动出账</b>。记者编辑不需要「用系统」，只是在企微里说话；社会价值第一次有了「发票」。</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 原型导览 ============ -->
+<section class="ix-sec" id="tour">
+  <div class="ix-wrap">
+    <div class="ix-sec-head">
+      <div class="eyebrow">Prototype Tour · 原型导览</div>
+      <h2>六个可交互演示页 · <span class="hl">点卡片进入</span></h2>
+      <p class="sub">四个角色 Agent 均可在手机壳内点场景演示企微语音交互；读者小程序与双看板可点击操作</p>
+    </div>
+    <div class="ix-tour">
+      <a class="ix-tcard warm" href="agent_jizhe.html">
+        <div class="t-shot" data-src="agent_jizhe.html" data-scroll="270"></div>
+        <div class="t-top"><span class="ic">🎙️</span><b>记者 Agent</b><span class="arr">→</span></div>
+        <p>语音报题、采访速记转写、知识库检索核查、初稿起草——SenseAudio-V2 听写、SenseAudio-S2 起草，省下的工时转投深度报道。</p>
+        <div class="t-tags"><span class="tag warm">语音速记</span><span class="tag teal">知识库检索</span><span class="tag gold">初稿起草</span></div>
+      </a>
+      <a class="ix-tcard" href="agent_bianji.html">
+        <div class="t-shot" data-src="agent_bianji.html" data-scroll="270"></div>
+        <div class="t-top"><span class="ic">✍️</span><b>编辑 Agent</b><span class="arr">→</span></div>
+        <p>政策口径与历史提法自动校对、差错拦截、三审三校辅助——发布链路技术性卡死在人工核签环节，签章即留痕、即计费凭证。</p>
+        <div class="t-tags"><span class="tag teal">口径核查</span><span class="tag warm">终审卡点</span><span class="tag ok">签章留痕</span></div>
+      </a>
+      <a class="ix-tcard warm" href="agent_xinmeiti.html">
+        <div class="t-shot" data-src="agent_xinmeiti.html" data-scroll="270"></div>
+        <div class="t-top"><span class="ic">📣</span><b>新媒体 Agent</b><span class="arr">→</span></div>
+        <p>一篇终审稿一鱼多吃：干部版 / 企业版 / 群众版 / 银发有声版多版本改写、多平台分发、辟谣快反——触达数据自动归集去重。</p>
+        <div class="t-tags"><span class="tag warm">一鱼多吃</span><span class="tag teal">多平台分发</span><span class="tag warn">辟谣快反</span></div>
+      </a>
+      <a class="ix-tcard" href="agent_faxing.html">
+        <div class="t-shot" data-src="agent_faxing.html" data-scroll="270"></div>
+        <div class="t-top"><span class="ic">🚲</span><b>发行·社区 Agent</b><span class="arr">→</span></div>
+        <p>派送员「语音一句话」完成顺访签到、银发异常上报、辟谣落地社区——单向送报网升级为双向公共信息触达网，每次派送都是工单。</p>
+        <div class="t-tags"><span class="tag teal">语音签到</span><span class="tag warm">顺访工单</span><span class="tag warn">异常预警</span></div>
+      </a>
+      <a class="ix-tcard warm" href="miniapp.html">
+        <div class="t-shot" data-src="miniapp.html" data-scroll="300"></div>
+        <div class="t-top"><span class="ic">📱</span><b>读者小程序</b><span class="arr">→</span></div>
+        <p>大字版＋语音播报的银发友好阅读、辟谣求证一键提交、民生诉求全程进度可查——老人「说一句话」即完成交互。</p>
+        <div class="t-tags"><span class="tag warm">语音播报</span><span class="tag teal">辟谣求证</span><span class="tag ok">诉求闭环</span></div>
+      </a>
+      <a class="ix-tcard" href="bi.html">
+        <div class="t-shot" data-src="bi.html" data-scroll="120"></div>
+        <div class="t-top"><span class="ic">📊</span><b>双看板</b><span class="arr">→</span></div>
+        <p>经营看板管收入曲线，社会价值看板管 SVI 四域——每个指标可下钻到工单级证据链，月度绩效底稿与社会价值年报自动生成。</p>
+        <div class="t-tags"><span class="tag teal">SVI 四域</span><span class="tag warm">证据下钻</span><span class="tag gold">年报导出</span></div>
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 角色 × 能力矩阵 ============ -->
+<section class="ix-sec white">
+  <div class="ix-wrap">
+    <div class="ix-sec-head">
+      <div class="eyebrow">Role × Capability · 角色能力矩阵</div>
+      <h2>每个角色：<span class="hl">从哪进、做什么、沉淀什么</span></h2>
+      <p class="sub">同一个日日新底座，六类使用者各取所需——所有动作自动汇入同一套证据链，出经营与社会价值双看板</p>
+    </div>
+    <div class="ix-matrix-scroll">
+      <table class="ix-matrix">
+        <tr><th>角色</th><th>交互入口</th><th>核心动作</th><th>沉淀数据</th><th>演示页面</th></tr>
+        <tr>
+          <td class="role"><b>记者</b><span>采编一线</span></td>
+          <td class="entry">企微 / 飞书 · 按住说话</td>
+          <td>语音报题 · 采访速记转写 · 知识库检索核查 · 初稿起草 · 选题跟进</td>
+          <td>选题-成稿链路 · 语料引用溯源 · 工时释放度</td>
+          <td><a class="golink" href="agent_jizhe.html">记者 Agent →</a></td>
+        </tr>
+        <tr>
+          <td class="role"><b>编辑 / 终审</b><span>三审三校 · 终审权</span></td>
+          <td class="entry">企微审稿流 · 卡点核签</td>
+          <td>政策口径核查 · 差错拦截 · 三审三校辅助 · 终审签章 · AI 生成标识</td>
+          <td>签发时间戳 · 签章凭证 · 内容安全合格率</td>
+          <td><a class="golink" href="agent_bianji.html">编辑 Agent →</a></td>
+        </tr>
+        <tr>
+          <td class="role"><b>新媒体运营</b><span>分发与快反</span></td>
+          <td class="entry">企微 + 内容流水线</td>
+          <td>一鱼多吃多版本 SKU · 多平台分发 · 辟谣快反 · 多平台数据归集去重</td>
+          <td>触达与完读完播 · 跨渠道去重口径 · SKU 调用量</td>
+          <td><a class="golink" href="agent_xinmeiti.html">新媒体 Agent →</a></td>
+        </tr>
+        <tr>
+          <td class="role"><b>发行·社区信息员</b><span>派送员 / 巾帼志愿者</span></td>
+          <td class="entry">企微 · 语音一句话</td>
+          <td>顺访签到 · 银发守护上报 · 社区辟谣落地 · 民生诉求回收 · 点位扫码</td>
+          <td>服务工单 · 三源回执 · 异常预警响应时长</td>
+          <td><a class="golink" href="agent_faxing.html">发行·社区 Agent →</a></td>
+        </tr>
+        <tr>
+          <td class="role"><b>读者 / 银发家庭</b><span>被算法遗忘的人群</span></td>
+          <td class="entry">小程序 + 全语音交互</td>
+          <td>大字版语音播报 · 辟谣求证 · 民生诉求提交 · 家人守护订阅 · 快测答题</td>
+          <td>确认触达回执 · 应答记录 · 回访满意度（脱敏聚合）</td>
+          <td><a class="golink" href="miniapp.html">读者小程序 →</a></td>
+        </tr>
+        <tr>
+          <td class="role"><b>经营管理层</b><span>社委会 / 经营与总编室</span></td>
+          <td class="entry">双看板 · 对话问数</td>
+          <td>经营 × SVI 双看 · 证据链下钻 · 按效结算对账 · 年报一键导出</td>
+          <td>SVI 达标率 · 绩效底稿 · 审计留痕</td>
+          <td><a class="golink" href="bi.html">双看板 →</a></td>
+        </tr>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 商业模式 · 三条价值曲线 ============ -->
+<section class="ix-sec dark">
+  <div class="ix-wrap">
+    <div class="ix-sec-head">
+      <div class="eyebrow">Business Model · 商业模式</div>
+      <h2>三张被低估的资产，<span class="hl">卖成三条价值曲线</span></h2>
+      <p class="sub">报社真正值钱的从来不是纸——是公信力、终审权与触达网。AI 不创造这三张资产，AI 让它们第一次可计量、可出表、可采购（定价均为示意口径）</p>
+    </div>
+
+    <div class="ix-assets">
+      <div class="ix-acard">
+        <span class="a-no">01</span>
+        <b class="a-name">公信力<small>信任资产</small></b>
+        <p class="a-desc">AI 幻觉与伪科普泛滥的时代，「经专业把关的权威信息」是稀缺品，正在升值——但过去只能沉淀在报头上，无法计价、无法出表。</p>
+        <p class="a-amp">终审签章＋「审校标识」对外授权，SVI 看板逐单留痕——公信力第一次有了<b>「发票」</b>。</p>
+      </div>
+      <div class="ix-acard">
+        <span class="a-no">02</span>
+        <b class="a-name">专业采编能力<small>终审权资产</small></b>
+        <p class="a-desc">选题判断、事实核查、政策口径把关，是任何大模型替代不了的「终审权」——过去只有「卖版面」一个低效出口。</p>
+        <p class="a-amp">一鱼多吃：同一篇把关内容加工成多种可售 SKU，边际成本趋零，<b>「人类终审签章」成为计费凭证</b>——卖的不是内容，是把关。</p>
+      </div>
+      <div class="ix-acard">
+        <span class="a-no">03</span>
+        <b class="a-name">党政与社区触达网络<small>渠道资产</small></b>
+        <p class="a-desc">派送员、点位、机关订阅、妇联/卫健体系触达——一张覆盖算法平台失灵人群的物理网络，却一直被当发行成本项核算。</p>
+        <p class="a-amp">单向送报网升级为双向公共信息触达网，SenseAudio-V2 让老人「说一句话即完成」，<b>每次派送都是可审计的公共服务工单</b>。</p>
+      </div>
+    </div>
+
+    <div class="ix-bizarrow">三张资产 <b>▼</b> 对应三条收入曲线</div>
+
+    <div class="ix-biz">
+      <!-- 曲线一 To G -->
+      <div class="ix-bcard g">
+        <div class="b-tier">Trust-to-Contract · To G</div>
+        <div class="b-name">权威合约曲线<small>公共传播服务 · 把「社会责任」翻译成财政语言</small></div>
+        <div class="b-payer"><b>谁付费：</b>各级宣传部、网信办、应急管理部门与条线主管部委（卫健委、全国妇联等），经财政预算走政府购买服务目录</div>
+        <p class="b-logic">五步闭环：服务目录化 → 指标口径化（SVI）→ 证据自动化 → 结算合同化 → <b>年报凭据化</b>——社会价值年报＝财政绩效评价报告＝下年度预算立项依据，汇报材料变成结算依据。</p>
+        <ul>
+          <li>基础包<b>「保底 70%＋绩效浮动 30%」</b>（示意口径，浮动只挂钩 SVI 达标率）</li>
+          <li>辟谣专项按事件计价、响应时效分档</li>
+          <li>民生回应按完整闭环件计价，<b>未闭环不计费</b>、乘回访满意度系数</li>
+          <li>政策解读按「到达-理解」双指标验收</li>
+        </ul>
+        <p class="b-ai"><b>AI 干什么：</b>Agent 在企微/飞书审稿流中自动记录各节点时间戳（不可人工回填），SenseAudio-S2 跨渠道去重、按月出绩效底稿，SenseAudio-V2 执行语音回访（人工抽检 10%）。</p>
+        <div class="b-eq"><span class="kl">结算 KPI</span>SVI 达标率 · 辟谣响应时效中位数 · 民生回应闭环率 · 权威信息有效触达率</div>
+      </div>
+
+      <!-- 曲线二 To B -->
+      <div class="ix-bcard b">
+        <div class="b-tier">Knowledge-as-Asset · To B</div>
+        <div class="b-name">知识资产曲线<small>专业知识服务 · 卖的不是内容，是把关与凭据</small></div>
+        <div class="b-payer"><b>谁付费：</b>医疗机构与互联网医疗平台、健康管理平台与险企、学校与教育局、国企工会与 ESG 部门、大模型企业（语料分层授权）、同业媒体（SVI 工具 SaaS）</div>
+        <p class="b-logic">存量内容语料化（复用已建知识库当燃料）→ 一鱼多吃 SKU 化 → <b>信任标识授权</b>——付费方买到的是「可写进自己绩效与 ESG 报告」的把关与凭据。</p>
+        <ul>
+          <li>患教内容包按科室/全院包年（示意口径：单科室 <b>3-8 万元/年</b>）</li>
+          <li>知识库 API 年费＋调用量阶梯</li>
+          <li>课程包按校/社区年费或按覆盖人头政采打包</li>
+          <li>语料授权 <b>L1 训练 / L2 检索 / L3 不出域精调</b> 三层分级计价</li>
+          <li>SVI 工具 SaaS 按席位订阅</li>
+        </ul>
+        <p class="b-ai"><b>AI 干什么：</b>SenseAudio-S2 按病种/人群/阅读水平重组分级版本，SenseAudio-V2 批量生成多方言音频课下沉县域；全部走「AI 起草—编辑终审签章」流水线，<b>签章即计费凭证</b>；商汤提供语料治理与不出域精调。</p>
+        <div class="b-eq"><span class="kl">结算 KPI</span>订阅续费率 · SKU 调用量与完课/完读率 · 语料资产健康度</div>
+      </div>
+
+      <!-- 曲线三 To C·社区 -->
+      <div class="ix-bcard c">
+        <div class="b-tier">Reach-as-a-Service · To C·社区</div>
+        <div class="b-name">触达网络曲线<small>精准公共信息服务 · 不再按份卖报，按工单卖触达</small></div>
+        <div class="b-payer"><b>谁付费：</b>民政局/街道办按人头购买（居家养老采购包）＋子女端订阅；基金会与企业 CSR/ESG（公益留痕平台）；社区商户点位联营</div>
+        <p class="b-logic">计价对象从「卖报纸」（按份计价，越送越亏）转为<b>「卖确认触达与回应闭环」</b>（按服务工单计价）——派送网变「最后一公里公共信息基础设施」，谣言在哪个社区冒头，辟谣就精准打回哪个社区。</p>
+        <ul>
+          <li>政府端按人头年费（示意口径：<b>60-120 元/人/年</b>，纳入养老服务采购包）</li>
+          <li>子女端订阅 <b>9.9-19.9 元/月</b>（示意口径）</li>
+          <li>公益项目收执行与传播服务费，<b>不抽善款</b></li>
+          <li>点位联营年费，公益内容占比写入协议</li>
+        </ul>
+        <p class="b-ai"><b>AI 干什么：</b>SenseAudio-V2 支撑老人全语音交互与外呼问安、派送员「语音一句话」签到；SenseAudio-S2 按画像生成防诈提醒与分层解读；Agent 三源回执去重核验（小程序已读＋语音打卡＋点位扫码，外呼抽检 5%），异常自动升级街道工单。</p>
+        <div class="b-eq"><span class="kl">结算 KPI</span>权威信息确认触达率（分层单列）· 银发守护指数 · 公益成效可回溯率</div>
+      </div>
+    </div>
+
+    <div class="ix-bizlaw">
+      <span class="k">结算铁律</span>
+      <p>按效结算<b>只挂钩流程性与到达性指标</b>（时效、闭环率、触达），绝不挂钩具体报道的内容与倾向；经营性合同由报社所属文化公司主体承接，采编部门只输出审校标准与终审服务，<b>采编决策与结算凭据物理分账</b>——社会价值可采购，采编导向不可采购。</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 合规红线 ============ -->
+<section class="ix-sec">
+  <div class="ix-wrap">
+    <div class="ix-sec-head">
+      <div class="eyebrow">Red Lines · 合规红线</div>
+      <h2>跑得快的前提，是<span class="hl">六条线踩得住</span></h2>
+      <p class="sub">国资报社的方案，合规不是附录是骨架——每条红线都落到产品与合同层，不靠制度自觉</p>
+    </div>
+    <div class="ix-redgrid">
+      <div class="ix-redcard">
+        <b><span class="no">1</span>AI 不替代终审</b>
+        <p>所有对外内容一律「AI 出初稿、人工三审三校/编辑核签后签发」，发布链路<strong>技术性卡死</strong>在核签环节；AI 生成内容依法标识留痕，医疗、法律等专业领域由具资质编辑终审，产品层写死「科普/指引不构成诊疗或法律意见」。</p>
+      </div>
+      <div class="ix-redcard">
+        <b><span class="no">2</span>不碰采编导向</b>
+        <p>按效结算只挂钩 SVI 流程性与到达性指标，<strong>绝不挂钩报道内容与倾向</strong>——否则实质构成有偿新闻/有偿不闻；舆论监督报道的采编决策与结算凭据物理分账。</p>
+      </div>
+      <div class="ix-redcard">
+        <b><span class="no">3</span>数据授权边界</b>
+        <p>涉政报道原文、内参、未刊稿、读者来信及个人信息，<strong>严禁进入任何语料授权池</strong>；训练授权与检索授权分合同、分计价、可审计，「语料出域审查委员会」对每笔授权一票否决。</p>
+      </div>
+      <div class="ix-redcard">
+        <b><span class="no">4</span>敏感人群最高保护</b>
+        <p>银发、妇儿、家暴、健康数据须单独同意、最小必要采集、日日新<strong>私有化/本地化部署</strong>、只出脱敏聚合统计；严禁广告定向，家暴求助明细不进看板不留存——宁可指标粗一档，不可数据越一线。</p>
+      </div>
+      <div class="ix-redcard">
+        <b><span class="no">5</span>数据不可注水</b>
+        <p>触达数据跨渠道去重、口径写入合同附件，<strong>时间戳不可人工回填</strong>；三源回执交叉核验＋语音外呼抽检＋第三方监测，估计值主动标注「示意口径」并开放审计接口——宁可数字难看，不可数字可疑。</p>
+      </div>
+      <div class="ix-redcard">
+        <b><span class="no">6</span>政采合规与品牌口径</b>
+        <p>政府购买服务纳入指导性目录并履行采购程序，不以「宣传费」变通列支；<strong>严禁以触达指标变相摊派订报</strong>；对外署名统一「商汤科技 · 大模型生态渠道部」，客户报社名仅作定制示例、不使用其 logo、不冒充其身份。</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 90 天路线图 ============ -->
+<section class="ix-sec white">
+  <div class="ix-wrap">
+    <div class="ix-sec-head">
+      <div class="eyebrow">Roadmap · 90 天落地路线图</div>
+      <h2>Agent 进一线 → 双看板出表 → 首单验证，<span class="hl">先跑通、再复制</span></h2>
+      <p class="sub">知识库已就绪：第 1 个月 Agent 长进工作流、第 2 个月双看板与闭环试点、第 3 个月挑一条曲线签首单（里程碑均为目标态示意口径）</p>
+    </div>
+    <div class="ix-road">
+      <div class="ix-rcard hot">
+        <span class="m-badge">第 1–30 天</span>
+        <h4>Agent 进一线</h4>
+        <div class="r-sub">企微/飞书接入 + 知识库变燃料 + 终审卡点</div>
+        <ol>
+          <li>记者 / 编辑 Agent 接入企微审稿流，SenseAudio-S2 对接已建知识库做检索溯源</li>
+          <li>发布链路技术性卡死在人工核签环节，AI 生成内容自动标识留痕</li>
+          <li>SVI 指标口径与取数点位定稿，写入合同附件级文档</li>
+        </ol>
+        <div class="r-kpi"><span class="kl">里程碑 · KPI（示意口径）</span>首批 <b>20 名采编</b>激活 · 周活 <b>≥70%</b> · 知识库日均调用可见增长 · 口径文档三方会签</div>
+      </div>
+      <div class="ix-rarr">›</div>
+      <div class="ix-rcard">
+        <span class="m-badge">第 31–60 天</span>
+        <h4>双看板 + 闭环试点</h4>
+        <div class="r-sub">经营 × 社会价值出表 + 辟谣/民生闭环跑通</div>
+        <ol>
+          <li>双看板上线：经营曲线 × SVI 四域，指标可下钻到工单级证据链</li>
+          <li>辟谣响应与民生回应闭环流程自动打点（时间戳不可回填），跑通首批闭环件</li>
+          <li>新媒体 / 发行·社区 Agent 上线，一鱼多吃流水线出首批多版本 SKU</li>
+        </ol>
+        <div class="r-kpi"><span class="kl">里程碑 · KPI（示意口径）</span>辟谣时效中位数<b>可计量</b> · 首批闭环件 <b>≥10 件</b> · SVI 月报自动生成、管理层月度复盘启用</div>
+      </div>
+      <div class="ix-rarr">›</div>
+      <div class="ix-rcard">
+        <span class="m-badge">第 61–90 天</span>
+        <h4>首单按效结算验证</h4>
+        <div class="r-sub">挑一条曲线签首单 + 社会价值季报 1.0</div>
+        <ol>
+          <li>按报社禀赋选曲线签首单：To G 辟谣/民生专项、To B 科室内容包或 To C 银发守护试点</li>
+          <li>社会价值季报 1.0 交主管部门，验证「汇报材料变结算依据」</li>
+          <li>复盘定价与口径，准备年度合同与跨报社复制包</li>
+        </ol>
+        <div class="r-kpi"><span class="kl">里程碑 · KPI（示意口径）</span>首单<b>按效结算跑通、可对账</b> · 季报被采用为汇报底稿 · 下年度合同意向确认</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 愿景三层 ============ -->
+<section class="ix-sec">
+  <div class="ix-wrap">
+    <div class="ix-sec-head">
+      <div class="eyebrow">Vision · 未来定位与愿景</div>
+      <h2>不止是降本增效：<span class="hl">三层价值</span>逐层向上</h2>
+      <p class="sub">从「一份越送越亏的报纸」，到「一张可信的公共信息基础设施」——盈利不是终极目标，社会价值被放大、被看见、被采购</p>
+    </div>
+    <div class="ix-vision">
+      <div class="ix-vstack">
+        <div class="ix-vlayer l1">
+          <span class="n">1</span>
+          <div><b>采编提效基本盘</b><span>AI 辅助不替代终审，省下的工时转投深度报道与核查——先赢得一线，AI 是转移人力而非替代人力</span></div>
+          <span class="vtag">效率资产</span>
+        </div>
+        <div class="ix-vlayer l2">
+          <span class="n">2</span>
+          <div><b>社会价值可计量</b><span>SVI 双看板成为国资报社的「第三张报表」——社会价值年报＝绩效评价报告＝预算立项依据</span></div>
+          <span class="vtag">价值出表</span>
+        </div>
+        <div class="ix-vlayer l3">
+          <span class="n">3</span>
+          <div><b>权威公共信息基础设施</b><span>公信力可授权、知识可订阅、触达可采购——报社成为权威信息的运营方而非印刷方</span></div>
+          <span class="vtag">可被采购的公共品</span>
+        </div>
+      </div>
+      <div class="ix-vaside">
+        <h3>报纸可以变薄，价值必须变厚——让每一次把关、每一次触达，都沉淀为<b>可计量的社会价值</b></h3>
+        <p class="v-quote">AI 幻觉越泛滥，专业把关越值钱；算法触达越失灵，物理网络越稀缺——国资报社手里的旧资产，正在变成新基础设施。</p>
+        <ul>
+          <li>SVI 行业标准共建：计量方法论向全行业输出</li>
+          <li>语料资产授权生态：分层授权、可审计、不出域</li>
+          <li>最后一公里公共信息网：覆盖算法遗忘的人群</li>
+          <li>同业复制：SVI 工具 SaaS 与方法论输出（目标态）</li>
+        </ul>
+        <p class="v-red"><b>红线始终在场：</b>AI 不替代终审、结算不碰采编导向、敏感数据不出域、数字不注水——第三张报表的公信力，来自每一条经得起审计的证据链。</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer class="site-footer">
+  <div class="foot-brand"><img src="assets/st_logo.png" alt="商汤科技"></div>
+  <div><b>商汤科技 · 大模型生态渠道部</b> — AI 技术底座 · 高保真交互原型（页面数字均为目标态示意口径，非真实经营/传播数据；客户报社名仅作定制示例，不使用其 logo、不代表其立场）</div>
+</footer>
+
+<script>
+/* 原型导览 · 实时缩略预览：同源 iframe + transform 缩放
+   http 服务下自动隐藏缩略图内导航页脚并滚到代表位置；file:// 打开时优雅降级为页面顶部 */
+(function () {
+  var shots = document.querySelectorAll('.t-shot');
+  var fitters = [];
+  shots.forEach(function (shot) {
+    var ifr = document.createElement('iframe');
+    ifr.src = shot.dataset.src;
+    ifr.setAttribute('tabindex', '-1');
+    ifr.setAttribute('aria-hidden', 'true');
+    ifr.setAttribute('scrolling', 'no');
+    ifr.loading = 'lazy';
+    var fit = function () {
+      var scale = shot.clientWidth / 1440;
+      ifr.style.transform = 'scale(' + scale + ')';
+    };
+    fitters.push(fit);
+    ifr.addEventListener('load', function () {
+      try {
+        var d = ifr.contentDocument;
+        var nav = d.querySelector('.topnav'); if (nav) nav.style.display = 'none';
+        var foot = d.querySelector('.site-footer'); if (foot) foot.style.display = 'none';
+        d.documentElement.style.scrollBehavior = 'auto';
+        ifr.contentWindow.scrollTo(0, parseInt(shot.dataset.scroll || '0', 10));
+      } catch (e) { /* file:// 下跨 frame 受限，保持默认视图 */ }
+    });
+    shot.appendChild(ifr);
+    fit();
+  });
+  window.addEventListener('resize', function () { fitters.forEach(function (f) { f(); }); });
+})();
+</script>
+
+</body>
+</html>

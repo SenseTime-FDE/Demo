@@ -1,0 +1,1008 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>读者小程序 · 今日权威 + 求证辟谣 + 民生闭环 | 报社 AI 原型</title>
+<link rel="stylesheet" href="assets/style.css">
+<style>
+/* ============ miniapp 页面专属样式（mp- 前缀） ============ */
+.mp-phone .screen { background: #F7F8FA; }
+
+/* 小程序导航栏 + 胶囊 */
+.mp-navbar { flex: none; height: 44px; display: flex; align-items: center; padding: 0 12px; position: relative; background: #F7F8FA; z-index: 20; }
+.mp-navbar .mp-title { position: absolute; left: 50%; transform: translateX(-50%); font-size: 16px; font-weight: 600; color: #111; white-space: nowrap; }
+.mp-back { width: 30px; height: 30px; display: none; align-items: center; justify-content: center; font-size: 22px; color: #111; cursor: pointer; border-radius: 50%; }
+.mp-back:active { background: rgba(0,0,0,.05); }
+.mp-back.show { display: flex; }
+.mp-capsule { margin-left: auto; display: flex; align-items: center; height: 30px; border: 1px solid rgba(0,0,0,.08); background: rgba(255,255,255,.8); border-radius: 999px; }
+.mp-capsule i { width: 40px; text-align: center; font-style: normal; font-size: 15px; color: #111; line-height: 1; }
+.mp-capsule em { width: 1px; height: 16px; background: rgba(0,0,0,.12); }
+
+/* 屏幕切换 */
+.mp-body { flex: 1; position: relative; overflow: hidden; }
+.mp-screen { display: none; position: absolute; inset: 0; overflow-y: auto; padding: 10px 0 16px; scroll-behavior: smooth; }
+.mp-screen::-webkit-scrollbar { width: 0; }
+.mp-screen.active { display: block; }
+#scr-sub { padding-bottom: 0; }
+#mpSceneBar .scene-btn { font-family: var(--font); }
+
+/* 底部 tabbar */
+.mp-tabbar { flex: none; display: flex; background: #fff; border-top: .5px solid #e4e4e4; padding: 7px 4px 18px; }
+.mp-tab { flex: 1; text-align: center; font-size: 10.5px; color: #8a8a8a; cursor: pointer; line-height: 1.3; }
+.mp-tab .ti { display: block; font-size: 20px; line-height: 1.25; filter: grayscale(1); opacity: .5; }
+.mp-tab.active { color: var(--warm-d); font-weight: 600; }
+.mp-tab.active .ti { filter: none; opacity: 1; }
+
+/* 通用卡片 */
+.mp-card { background: #fff; border-radius: 12px; padding: 13px 14px; margin: 0 12px 12px; box-shadow: 0 1px 4px rgba(12,37,69,.05); }
+.mp-sec-head { display: flex; align-items: center; gap: 7px; margin-bottom: 10px; }
+.mp-sec-head b { font-size: 14px; color: #111; }
+.mp-sec-head .mp-lnk { margin-left: auto; font-size: 11.5px; color: #999; cursor: pointer; }
+.mp-note { font-size: 10.5px; color: #b0b0b0; line-height: 1.5; }
+.mp-foot-note { margin: 2px 24px 8px; text-align: center; font-size: 10.5px; color: #b8b2aa; line-height: 1.6; }
+.mp-btn { display: inline-block; text-align: center; padding: 8px 0; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; transition: transform .1s; }
+.mp-btn:active { transform: scale(.97); }
+.mp-btn.primary { background: linear-gradient(135deg, var(--warm), var(--warm-d)); color: #fff; }
+.mp-btn.ghost { background: var(--sky); color: var(--teal-d); }
+.mp-row-btns { display: flex; gap: 9px; margin-top: 11px; }
+.mp-row-btns .mp-btn { flex: 1; }
+
+/* ---- 今日权威（首页） ---- */
+.mp-hero { margin: 0 12px 12px; padding: 15px 16px 16px; border-radius: 14px; background: linear-gradient(135deg, var(--ink), var(--ink3)); color: #fff; }
+.mp-hello { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+.mp-hello .txt { flex: 1; }
+.mp-hello b { display: block; font-size: 17px; }
+.mp-hello span { display: block; font-size: 11px; opacity: .78; margin-top: 2px; }
+.mp-hello-av { width: 40px; height: 40px; border-radius: 50%; background: linear-gradient(135deg, var(--warm), var(--warm-d)); display: flex; align-items: center; justify-content: center; font-size: 16px; font-weight: 700; flex: none; }
+.mp-search { background: rgba(255,255,255,.92); border-radius: 999px; padding: 8px 14px; font-size: 12.5px; color: #9a9a9a; }
+.mp-masthead { display: flex; align-items: baseline; gap: 8px; margin-top: 11px; font-size: 10.5px; color: rgba(255,255,255,.7); }
+.mp-masthead b { font-size: 11px; color: var(--gold); letter-spacing: 2px; }
+
+.mp-news { display: flex; gap: 9px; align-items: flex-start; padding: 9px 0; border-bottom: 1px solid #f5f5f5; }
+.mp-news:last-of-type { border-bottom: none; }
+.mp-news .tm { flex: none; font-size: 10.5px; color: #b8b2aa; font-variant-numeric: tabular-nums; margin-top: 3px; width: 36px; }
+.mp-news .t { flex: 1; min-width: 0; }
+.mp-news .t b { font-size: 13px; color: #222; line-height: 1.5; display: block; }
+.mp-news .meta { display: flex; align-items: center; gap: 6px; margin-top: 4px; flex-wrap: wrap; }
+.mp-news .meta .tag { font-size: 10px; padding: 1px 7px; }
+.mp-sign { font-size: 10px; color: var(--ok); font-weight: 600; }
+
+.mp-ai-entry { display: flex; align-items: center; gap: 11px; cursor: pointer; }
+.mp-ai-entry .aiic { width: 40px; height: 40px; border-radius: 12px; background: linear-gradient(135deg, var(--teal), var(--ink2)); display: flex; align-items: center; justify-content: center; font-size: 20px; flex: none; }
+.mp-ai-entry .t { flex: 1; }
+.mp-ai-entry .t b { font-size: 14px; color: #111; display: block; }
+.mp-ai-entry .t span { font-size: 11px; color: #999; display: block; margin-top: 1px; }
+.mp-ai-demo { display: none; margin-top: 11px; border-top: 1px dashed #eee; padding-top: 11px; }
+.mp-ai-demo.open { display: block; }
+.mp-ai-q { background: var(--cream); border-radius: 9px 9px 2px 9px; padding: 7px 11px; font-size: 12px; color: #6d2f2a; margin: 0 0 7px 44px; }
+.mp-ai-a { background: #F4F8F9; border-radius: 9px 9px 9px 2px; padding: 8px 11px; font-size: 12px; color: #333; line-height: 1.6; margin-right: 30px; }
+.mp-ai-a b { color: var(--teal-d); }
+
+/* ---- 政策解读 ---- */
+.mp-vers { display: flex; gap: 6px; flex-wrap: wrap; margin: 2px 0 10px; }
+.mp-ver { font-size: 11.5px; padding: 4px 11px; border-radius: 999px; background: #f4f4f4; color: #666; cursor: pointer; border: 1px solid transparent; transition: all .15s; }
+.mp-ver.on { background: var(--cream); color: var(--warm-d); border-color: var(--warm-l); font-weight: 600; }
+.mp-ver-body { display: none; font-size: 12.5px; color: #444; line-height: 1.7; }
+.mp-ver-body.on { display: block; }
+.mp-ver-body ul { margin: 4px 0 0; padding-left: 0; }
+.mp-ver-body li { list-style: none; position: relative; padding: 3px 0 3px 16px; }
+.mp-ver-body li::before { content: ""; position: absolute; left: 2px; top: 12px; width: 5px; height: 5px; border-radius: 50%; background: var(--warm); }
+.mp-ver-body .big { font-size: 15px; line-height: 1.85; color: #222; }
+.mp-voicebar { display: flex; align-items: center; gap: 10px; background: var(--sky); border-radius: 10px; padding: 10px 13px; cursor: pointer; margin: 4px 0 9px; user-select: none; }
+.mp-voicebar .pv { width: 34px; height: 34px; border-radius: 50%; background: var(--teal); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 13px; flex: none; }
+.mp-voicebar .waves { display: flex; gap: 3px; align-items: center; height: 18px; flex: 1; }
+.mp-voicebar .waves i { width: 3px; height: 8px; border-radius: 2px; background: var(--teal-d); display: block; }
+.mp-voicebar .waves i:nth-child(2n) { height: 14px; }
+.mp-voicebar .waves i:nth-child(3n) { height: 18px; }
+.mp-voicebar.playing .waves i { animation: wave .9s ease-in-out infinite; }
+.mp-voicebar.playing .waves i:nth-child(2n) { animation-delay: .15s; }
+.mp-voicebar.playing .waves i:nth-child(3n) { animation-delay: .3s; }
+.mp-voicebar .dur { flex: none; font-size: 11.5px; color: var(--teal-d); font-weight: 600; }
+.mp-dialects { display: flex; gap: 6px; flex-wrap: wrap; }
+.mp-dialects span { font-size: 10.5px; padding: 2px 9px; border-radius: 999px; background: #fff; border: 1px solid var(--sky2); color: var(--teal-d); cursor: pointer; }
+.mp-dialects span.on { background: var(--teal); border-color: var(--teal); color: #fff; font-weight: 600; }
+
+.mp-opt { border: 1.5px solid #eee; border-radius: 10px; padding: 9px 12px; font-size: 12.5px; color: #333; margin-bottom: 8px; cursor: pointer; display: flex; gap: 9px; align-items: center; transition: all .15s; line-height: 1.5; }
+.mp-opt .k { flex: none; width: 20px; height: 20px; border-radius: 50%; background: #f2f2f2; color: #888; font-size: 11px; font-weight: 700; display: flex; align-items: center; justify-content: center; }
+.mp-opt.ok { border-color: var(--ok); background: #F0F9F4; }
+.mp-opt.ok .k { background: var(--ok); color: #fff; }
+.mp-opt.bad { border-color: var(--warn); background: #FBEAEA; }
+.mp-quiz-fb { display: none; font-size: 12px; color: var(--ok); margin-top: 4px; line-height: 1.6; }
+.mp-quiz-fb.show { display: block; }
+
+/* ---- 求证辟谣 ---- */
+.mp-clue { background: linear-gradient(135deg, #FDF6F1, #F8ECE6); border: 1px solid var(--card-b); }
+.mp-clue textarea { width: 100%; border: 1px solid #e5ddd2; border-radius: 9px; padding: 9px 11px; font-size: 12.5px; font-family: var(--font); color: #333; outline: none; background: #fff; resize: none; height: 64px; line-height: 1.55; }
+.mp-clue textarea:focus { border-color: var(--warm-l); }
+.mp-rumor { padding: 10px 0; border-bottom: 1px solid #f5f5f5; }
+.mp-rumor:last-of-type { border-bottom: none; }
+.mp-rumor .rh { display: flex; align-items: flex-start; gap: 7px; cursor: pointer; }
+.mp-rumor .rh .tag { flex: none; margin-top: 2px; }
+.mp-rumor .rh b { flex: 1; font-size: 13px; color: #222; line-height: 1.5; }
+.mp-rumor .rh .arr { flex: none; color: #ccc; font-size: 13px; margin-top: 2px; transition: transform .2s; }
+.mp-rumor.open .rh .arr { transform: rotate(90deg); }
+.mp-rumor .verdict { display: flex; align-items: center; gap: 6px; margin: 6px 0 0 0; font-size: 11.5px; color: #888; flex-wrap: wrap; }
+.mp-rumor-body { display: none; margin-top: 8px; border: 1px dashed var(--teal-l); border-radius: 10px; padding: 9px 12px; font-size: 12px; color: #555; line-height: 1.7; }
+.mp-rumor.open .mp-rumor-body { display: block; }
+.mp-rumor-body b { color: var(--teal-d); }
+
+/* 时间线 */
+.mp-tl { position: relative; margin: 10px 0 4px; padding-left: 20px; }
+.mp-tl::before { content: ""; position: absolute; left: 5px; top: 8px; bottom: 8px; width: 2px; background: var(--sky2); }
+.mp-tl-item { position: relative; padding: 4px 0; font-size: 12.5px; color: #444; line-height: 1.5; }
+.mp-tl-item::before { content: ""; position: absolute; left: -19px; top: 10px; width: 8px; height: 8px; border-radius: 50%; background: var(--teal); box-shadow: 0 0 0 2.5px var(--sky); }
+.mp-tl-item.todo::before { background: #d5d0c6; box-shadow: 0 0 0 2.5px #f0ede6; }
+.mp-tl-item b { color: var(--teal-d); font-weight: 600; margin-right: 6px; font-variant-numeric: tabular-nums; }
+.mp-tl-item .okk { color: var(--ok); font-weight: 700; }
+.mp-accepted { display: none; }
+.mp-accepted.show { display: block; }
+.mp-accepted .head { display: flex; align-items: center; gap: 8px; font-size: 13.5px; color: var(--ok); font-weight: 700; }
+
+/* ---- 民生互助 ---- */
+.mp-order-head { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+.mp-order-head b { font-size: 14px; color: #111; flex: 1; line-height: 1.45; }
+.mp-order-head .tag { flex: none; }
+.mp-case-row { display: flex; align-items: center; gap: 8px; font-size: 12.5px; color: #444; padding: 8px 0; border-bottom: 1px solid #f5f5f5; line-height: 1.5; }
+.mp-case-row:last-child { border-bottom: none; }
+.mp-case-row .ci { flex: none; }
+.mp-case-row .t { flex: 1; min-width: 0; }
+.mp-case-row .t small { display: block; font-size: 10.5px; color: #b0b0b0; margin-top: 1px; }
+.mp-case-row .tag { flex: none; font-size: 10px; }
+.mp-stars { display: flex; align-items: center; gap: 3px; }
+.mp-stars i { font-style: normal; font-size: 19px; color: #ddd; cursor: pointer; transition: transform .1s; user-select: none; }
+.mp-stars i:active { transform: scale(1.2); }
+.mp-stars i.lit { color: var(--gold); }
+.mp-rate-row { display: flex; align-items: center; gap: 10px; padding: 4px 0; }
+.mp-rate-row span { flex: none; width: 58px; font-size: 12px; color: #777; }
+.mp-rated-ok { display: none; font-size: 12px; color: var(--ok); padding: 8px 0 2px; line-height: 1.6; }
+
+/* ---- 健康与服务 ---- */
+.mp-paper { display: flex; gap: 8px; margin: 0 12px 12px; }
+.mp-paper span { flex: 1; text-align: center; font-size: 11px; padding: 8px 6px; background: #fff; border: 1.5px solid #e8e8e8; border-radius: 11px; cursor: pointer; color: #999; line-height: 1.4; transition: all .15s; }
+.mp-paper span b { display: block; font-size: 12.5px; color: #555; }
+.mp-paper span.on { border-color: var(--warm); background: #FDF7F5; color: var(--warm-d); }
+.mp-paper span.on b { color: var(--warm-d); }
+.mp-svc-block { display: none; }
+.mp-svc-block.on { display: block; }
+.mp-svc-row { display: flex; align-items: center; gap: 10px; padding: 8px 0; border-bottom: 1px solid #f5f5f5; }
+.mp-svc-row:last-child { border-bottom: none; }
+.mp-svc-row .si { font-size: 22px; flex: none; width: 32px; text-align: center; }
+.mp-svc-row .t { flex: 1; min-width: 0; }
+.mp-svc-row .t b { font-size: 13px; color: #222; line-height: 1.45; }
+.mp-svc-row .t span { display: block; font-size: 10.5px; color: #b0b0b0; margin-top: 1px; }
+.mp-svc-row .act { flex: none; font-size: 11px; color: var(--teal-d); background: var(--sky); border-radius: 999px; padding: 4px 11px; cursor: pointer; }
+.mp-prog { height: 6px; border-radius: 3px; background: #F0EBDF; overflow: hidden; margin-top: 5px; width: 100%; }
+.mp-prog i { display: block; height: 100%; background: linear-gradient(90deg, var(--gold), #D8BC6F); border-radius: 3px; }
+.mp-kv { display: flex; justify-content: space-between; gap: 10px; padding: 6px 0; border-bottom: 1px solid #f4f4f4; font-size: 12.5px; }
+.mp-kv:last-child { border-bottom: none; }
+.mp-kv span { color: #999; flex: none; }
+.mp-kv b { color: #222; text-align: right; font-weight: 600; line-height: 1.5; }
+.mp-kv b.ok { color: var(--ok); }
+.mp-sos { background: linear-gradient(135deg, var(--ink), var(--ink3)); color: #fff; }
+.mp-sos b.tt { font-size: 13.5px; display: block; }
+.mp-sos p { font-size: 11.5px; line-height: 1.65; opacity: .85; margin-top: 5px; }
+.mp-sos .sos-btn { margin-top: 10px; text-align: center; background: rgba(255,255,255,.14); border: 1px solid rgba(255,255,255,.4); border-radius: 999px; padding: 8px 0; font-size: 13px; font-weight: 700; cursor: pointer; }
+.mp-sos small { display: block; margin-top: 8px; font-size: 10px; color: rgba(255,255,255,.6); line-height: 1.6; }
+#scr-service.elder-big .mp-card { zoom: 1.12; }
+
+/* ---- 我的 / 订报 ---- */
+.mp-me-head { display: flex; align-items: center; gap: 12px; margin: 4px 12px 14px; padding: 0 4px; }
+.mp-me-head .mp-av { width: 52px; height: 52px; border-radius: 50%; font-size: 20px; background: linear-gradient(135deg, var(--warm), var(--warm-d)); color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 700; flex: none; }
+.mp-me-head .t b { font-size: 17px; color: #111; display: block; }
+.mp-me-head .t span { font-size: 11px; color: #999; }
+.mp-me-stats { display: grid; grid-template-columns: repeat(3, 1fr); text-align: center; }
+.mp-me-stats .s b { display: block; font-size: 18px; color: var(--ink); font-variant-numeric: tabular-nums; }
+.mp-me-stats .s span { font-size: 11px; color: #999; }
+.mp-me-stats .s { border-right: 1px solid #f2f2f2; }
+.mp-me-stats .s:last-child { border-right: none; }
+.mp-invite { margin-top: 11px; background: var(--cream); border-radius: 10px; padding: 9px 12px; display: flex; align-items: center; gap: 8px; font-size: 12px; color: #6d2f2a; }
+.mp-invite b { color: var(--warm-d); }
+.mp-invite .go { margin-left: auto; flex: none; background: var(--warm); color: #fff; font-size: 11.5px; font-weight: 700; border-radius: 999px; padding: 4px 12px; cursor: pointer; }
+.mp-auth-row { display: flex; align-items: flex-start; gap: 10px; padding: 9px 0; border-bottom: 1px solid #f4f4f4; }
+.mp-auth-row:last-child { border-bottom: none; }
+.mp-auth-row .t { flex: 1; }
+.mp-auth-row .t b { font-size: 13px; color: #222; display: block; }
+.mp-auth-row .t span { font-size: 11px; color: #999; line-height: 1.5; display: block; margin-top: 1px; }
+.mp-switch { width: 42px; height: 24px; border-radius: 999px; background: #e0e0e0; position: relative; transition: background .2s; cursor: pointer; flex: none; margin-top: 3px; }
+.mp-switch::after { content: ""; position: absolute; top: 2px; left: 2px; width: 20px; height: 20px; border-radius: 50%; background: #fff; transition: left .2s; box-shadow: 0 1px 3px rgba(0,0,0,.2); }
+.mp-switch.on { background: var(--ok); }
+.mp-switch.on::after { left: 20px; }
+.mp-menu-row { display: flex; align-items: center; gap: 10px; padding: 10px 0; border-bottom: 1px solid #f4f4f4; font-size: 13px; color: #333; }
+.mp-menu-row:last-child { border-bottom: none; }
+.mp-menu-row .mi { flex: none; width: 26px; text-align: center; font-size: 16px; }
+.mp-menu-row small { margin-left: auto; font-size: 11px; color: #b5b5b5; text-align: right; }
+.mp-menu-row .arr { color: #ccc; font-size: 14px; }
+
+.mp-sku { border: 1.5px solid #eee; border-radius: 11px; padding: 10px 12px; margin-bottom: 9px; cursor: pointer; display: flex; align-items: center; gap: 10px; transition: all .15s; }
+.mp-sku:last-child { margin-bottom: 0; }
+.mp-sku .r { width: 18px; height: 18px; border-radius: 50%; border: 2px solid #ddd; flex: none; position: relative; }
+.mp-sku .t { flex: 1; }
+.mp-sku .t b { font-size: 13.5px; color: #111; display: block; }
+.mp-sku .t span { font-size: 11px; color: #999; line-height: 1.5; }
+.mp-sku .p { font-size: 14px; font-weight: 700; color: var(--warm-d); flex: none; }
+.mp-sku .p small { font-size: 10px; color: #aaa; font-weight: 400; }
+.mp-sku.on { border-color: var(--warm); background: #FDF7F5; }
+.mp-sku.on .r { border-color: var(--warm); }
+.mp-sku.on .r::after { content: ""; position: absolute; inset: 3px; border-radius: 50%; background: var(--warm); }
+.mp-coupon { display: flex; gap: 8px; align-items: center; }
+.mp-coupon .txt { flex: 1; font-size: 12.5px; color: #555; line-height: 1.5; }
+.mp-coupon .use { flex: none; padding: 7px 15px; border-radius: 8px; background: var(--sky); color: var(--teal-d); font-size: 12.5px; font-weight: 600; cursor: pointer; }
+.mp-coupon-ok { display: none; font-size: 12px; color: var(--ok); margin-top: 8px; }
+.mp-coupon-ok.show { display: block; }
+.mp-agree { display: flex; gap: 9px; align-items: flex-start; cursor: pointer; }
+.mp-agree .box { width: 17px; height: 17px; border-radius: 5px; border: 1.5px solid #ccc; flex: none; margin-top: 2px; display: flex; align-items: center; justify-content: center; font-size: 11px; color: #fff; }
+.mp-agree.on .box { background: var(--ok); border-color: var(--ok); }
+.mp-agree p { font-size: 11.5px; color: #777; line-height: 1.55; }
+.mp-agree p b { color: var(--teal-d); font-weight: 600; }
+.mp-paybar { position: sticky; bottom: 0; background: #fff; border-top: .5px solid #eee; padding: 10px 14px 12px; display: flex; align-items: center; gap: 12px; z-index: 10; margin: 0; }
+.mp-paybar .sum { flex: 1; line-height: 1.35; }
+.mp-paybar .sum b { font-size: 19px; color: var(--warm-d); }
+.mp-paybar .sum span { display: block; font-size: 10px; color: #aaa; }
+.mp-paybtn { flex: none; width: 148px; text-align: center; padding: 11px 0; border-radius: 999px; background: #d8d8d8; color: #fff; font-size: 14px; font-weight: 700; cursor: pointer; transition: background .2s; }
+.mp-paybtn.ready { background: var(--ok); }
+.mp-paid { display: none; text-align: center; padding: 34px 22px 10px; }
+.mp-paid.show { display: block; }
+.mp-paid .big { font-size: 46px; line-height: 1.4; }
+.mp-paid h4 { font-size: 17px; color: #111; margin: 6px 0 10px; }
+.mp-paid p { font-size: 12.5px; color: #777; line-height: 1.7; }
+.mp-paid .mp-btn { margin-top: 18px; width: 70%; }
+
+/* toast */
+.mp-toast { position: absolute; left: 50%; bottom: 110px; transform: translateX(-50%); background: rgba(12,37,69,.88); color: #fff; font-size: 12px; padding: 8px 16px; border-radius: 999px; opacity: 0; pointer-events: none; transition: opacity .25s; z-index: 50; white-space: nowrap; max-width: 86%; overflow: hidden; text-overflow: ellipsis; }
+.mp-toast.show { opacity: 1; }
+
+/* 右栏：红线清单 */
+.rl-item { display: flex; gap: 9px; align-items: flex-start; padding: 8px 0; border-bottom: 1px dashed var(--line); font-size: 12.5px; color: var(--sub); line-height: 1.6; }
+.rl-item:last-child { border-bottom: none; }
+.rl-item .x { flex: none; width: 18px; height: 18px; border-radius: 6px; background: #FBEAEA; color: var(--warn); font-size: 11px; font-weight: 800; display: flex; align-items: center; justify-content: center; margin-top: 2px; }
+.rl-item b { color: var(--ink); }
+</style>
+</head>
+<body>
+
+<header class="topnav">
+  <div class="brand">
+    <img src="assets/st_logo.png" alt="商汤科技">
+    <span class="divider"></span>
+    <span class="name">报社 AI · 一线 Agent 与社会价值运营<small>PRESS AI · FRONTLINE AGENTS</small></span>
+  </div>
+  <nav>
+    <a href="index.html">方案总览</a>
+    <a href="agent_jizhe.html">记者 Agent</a>
+    <a href="agent_bianji.html">编辑 Agent</a>
+    <a href="agent_xinmeiti.html">新媒体 Agent</a>
+    <a href="agent_faxing.html">发行·社区 Agent</a>
+    <a href="miniapp.html" class="active"><span class="dot"></span>读者小程序</a>
+    <a href="bi.html">双看板</a>
+  </nav>
+</header>
+
+<main class="page">
+  <div class="page-head">
+    <div class="eyebrow">Reader Mini-Program · Authority · Fact-Check · Livelihood Loop</div>
+    <h1>读者小程序：<span class="hl">今日权威 → 求证辟谣 → 民生闭环</span> → 订报与积分</h1>
+    <p class="sub">读者端不是又一个资讯 App，而是<b>双向公共信息触达网</b>的 C 端入口：下行送权威信息与政策解读，上行收辟谣线索、民生诉求与银发应答——每次「已读 / 应答 / 回访确认」都成为社会价值看板（SVI）的证据。小程序前台可由报社或第三方承建，<b>商汤接入「日日新」大模型能力</b>（SenseAudio-S2 旗舰大模型 + SenseAudio-V2 语音大模型）。演示视角：<b>张桂芳阿姨</b>（68 岁 · 观澜社区订阅读者）。左侧手机可点击底部 tab 与卡片交互，全部数字为目标态示意口径。</p>
+  </div>
+
+  <div class="split">
+    <!-- 左：手机 -->
+    <div class="phone-wrap">
+      <div class="scene-bar" id="mpSceneBar">
+        <button class="scene-btn active" data-go="home">今日权威</button>
+        <button class="scene-btn" data-go="policy">政策解读</button>
+        <button class="scene-btn" data-go="fact">求证辟谣</button>
+        <button class="scene-btn" data-go="help">民生互助</button>
+        <button class="scene-btn" data-go="service">健康与服务</button>
+        <button class="scene-btn" data-go="sub">订报中心</button>
+        <button class="scene-btn" data-go="me">我的</button>
+      </div>
+
+      <div class="phone mp-phone">
+        <div class="screen">
+          <div class="notch"></div>
+          <div class="statusbar"><span>9:41</span><span class="right">📶 5G &nbsp;🔋</span></div>
+
+          <div class="mp-navbar">
+            <span class="mp-back" id="mpBack">‹</span>
+            <span class="mp-title" id="mpTitle">读者之家</span>
+            <span class="mp-capsule"><i>⋯</i><em></em><i>◎</i></span>
+          </div>
+
+          <div class="mp-body">
+
+            <!-- ========== 今日权威 ========== -->
+            <section class="mp-screen active" id="scr-home">
+              <div class="mp-hero">
+                <div class="mp-hello">
+                  <div class="txt"><b>早上好，张桂芳阿姨</b><span>观澜社区读者 · 已订阅纸质银发大字版</span></div>
+                  <div class="mp-hello-av">张</div>
+                </div>
+                <div class="mp-search">🔍 搜权威资讯 / 政策解读 / 辟谣求证</div>
+                <div class="mp-masthead"><b>今日权威</b><span>2026 年 7 月 22 日 · 星期三 · 每条内容均经编辑部终审签章</span></div>
+              </div>
+
+              <div class="mp-card">
+                <div class="mp-sec-head"><b>当日要闻</b><span class="tag ok" style="margin-left:auto">✓ 编辑部终审签章</span></div>
+                <div class="mp-news">
+                  <span class="tm">08:12</span>
+                  <div class="t"><b>城乡居民基础养老金再上调，上调部分本月底前自动补发到位</b>
+                    <div class="meta"><span class="tag warm">权威发布</span><span class="mp-sign">✓ 终审签章</span><span class="mp-note">🔊 可听</span></div>
+                  </div>
+                </div>
+                <div class="mp-news">
+                  <span class="tm">09:40</span>
+                  <div class="t"><b>社区长者食堂本月扩容 12 个点位，覆盖名单与助餐补贴标准公布</b>
+                    <div class="meta"><span class="tag teal">民生服务</span><span class="mp-sign">✓ 终审签章</span></div>
+                  </div>
+                </div>
+                <div class="mp-news">
+                  <span class="tm">11:05</span>
+                  <div class="t"><b>台风蓝色预警：今夜起大风降雨，出行与门窗加固提示</b>
+                    <div class="meta"><span class="tag warn">应急首发</span><span class="mp-sign">✓ 终审签章</span><span class="mp-note">首发用时 42 分钟（示意）</span></div>
+                  </div>
+                </div>
+                <p class="mp-note" style="margin-top:8px">「应急信息首发及时率」按约定时限逐事件对账，首发时间取平台发布回执（示意口径）。</p>
+              </div>
+
+              <div class="mp-card">
+                <div class="mp-sec-head"><b>政策解读 · 与您有关</b><span class="tag gold" style="margin-left:auto">一稿四版</span></div>
+                <div class="mp-news" style="border:none;padding-top:2px">
+                  <span class="tm" style="width:auto">📌</span>
+                  <div class="t"><b>「渐进式延迟退休」怎么改、跟我有什么关系？</b>
+                    <div class="meta"><span class="tag warm">群众版</span><span class="tag teal">干部版</span><span class="tag teal">企业版</span><span class="tag gold">银发有声版</span></div>
+                  </div>
+                </div>
+                <div class="mp-row-btns" style="margin-top:8px">
+                  <span class="mp-btn primary" data-go="policy">看解读 · 测一测</span>
+                  <span class="mp-btn ghost" data-go="policy">🔊 听银发有声版</span>
+                </div>
+              </div>
+
+              <div class="mp-card">
+                <div class="mp-ai-entry" id="mpAiEntry">
+                  <div class="aiic">🔊</div>
+                  <div class="t"><b>AI 读报助手 · 说一句话就行</b><span>SenseAudio-V2 语音大模型 · 支持多方言</span></div>
+                  <span class="tag teal">点击试试</span>
+                </div>
+                <div class="mp-ai-demo" id="mpAiDemo">
+                  <div class="mp-ai-q">🎙 「养老金那条新闻，用大白话给我讲讲」</div>
+                  <div class="mp-ai-a">好的阿姨：本月底前，养老金<b>上调的部分会自动补发</b>到您平时领钱的那个账户，<b>不用申请、不用交任何手续费</b>。凡是让您先交钱才能领的，都是骗子。<br><span style="color:#b0b0b0;font-size:10.5px">＊AI 仅转述编辑部终审签发的稿件，不改动事实与口径</span></div>
+                </div>
+                <p class="mp-note" style="margin-top:9px">AI 只转述已终审内容，不生成未经把关的信息；语音数据经您授权后仅用于本服务，绝不用于广告。</p>
+              </div>
+
+              <p class="mp-foot-note">本页所有内容均经三审三校、编辑部终审签章后发布<br>「AI 辅助不替代终审」· 页面数字均为目标态示意口径</p>
+            </section>
+
+            <!-- ========== 政策解读（子屏） ========== -->
+            <section class="mp-screen" id="scr-policy">
+              <div class="mp-card">
+                <div class="mp-sec-head"><b>「渐进式延迟退休」解读</b><span class="tag warm" style="margin-left:auto">政策专项</span></div>
+                <div class="mp-vers">
+                  <span class="mp-ver on" data-v="mass">群众版</span>
+                  <span class="mp-ver" data-v="cadre">干部版</span>
+                  <span class="mp-ver" data-v="corp">企业版</span>
+                  <span class="mp-ver" data-v="elder">银发有声版</span>
+                </div>
+
+                <div class="mp-ver-body on" data-v="mass">
+                  <p style="margin-bottom:4px"><b style="color:var(--warm-d)">三句话读懂：</b></p>
+                  <ul>
+                    <li>不是「一刀切」推迟，是<b>小步慢走、逐年微调</b>，离退休越近的人受影响越小；</li>
+                    <li><b>自愿弹性优先</b>：达到最低缴费年限后，可在弹性区间内自己选早退或晚退；</li>
+                    <li>配套同步跟上：大龄就业支持、失业保障与养老金激励一起落地。</li>
+                  </ul>
+                </div>
+                <div class="mp-ver-body" data-v="cadre">
+                  <p style="margin-bottom:4px"><b style="color:var(--warm-d)">宣讲口径要点（供基层干部）：</b></p>
+                  <ul>
+                    <li>强调「自愿、弹性」两个关键词，避免「统一延长 N 年」的错误表述；</li>
+                    <li>答疑先分人群：距退休 5 年内 / 5–15 年 / 新入职，分别给测算示例；</li>
+                    <li>引用口径以本专项终审稿为准，历史提法对照表见附录。</li>
+                  </ul>
+                </div>
+                <div class="mp-ver-body" data-v="corp">
+                  <p style="margin-bottom:4px"><b style="color:var(--warm-d)">用工与社保衔接要点（供企业 HR）：</b></p>
+                  <ul>
+                    <li>劳动合同到期与弹性退休申请的衔接流程与时限；</li>
+                    <li>大龄员工岗位适配与工伤保险参保的注意事项；</li>
+                    <li>缴费年限渐进调整对企业社保成本的测算模板。</li>
+                  </ul>
+                </div>
+                <div class="mp-ver-body" data-v="elder">
+                  <div class="mp-voicebar" id="pvVoice">
+                    <span class="pv">▶</span>
+                    <span class="waves"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span>
+                    <span class="dur">4′32″</span>
+                  </div>
+                  <div class="mp-dialects" style="margin-bottom:9px">
+                    <span class="on">普通话</span><span>河南话</span><span>粤语</span><span>川渝话</span>
+                  </div>
+                  <p class="big">您如果已经退休了，<b style="color:var(--warm-d)">待遇一分不变</b>。快退休的，变化很小。有人打电话说「政策变了要重新登记、先交钱」——<b style="color:var(--warm-d)">都是骗子，别理他</b>。</p>
+                </div>
+                <p class="mp-note" style="margin-top:9px">同一篇终审稿件，由 SenseAudio-S2 旗舰大模型生成多版本、编辑复核签章后分发；语音由 SenseAudio-V2 语音大模型合成。完读 70% 计完成，银发人群以语音完播单列（示意口径）。</p>
+              </div>
+
+              <div class="mp-card">
+                <div class="mp-sec-head"><b>一题快测</b><span class="mp-note" style="margin-left:auto">测「理解」不只测「到达」</span></div>
+                <p style="font-size:12.5px;color:#333;margin-bottom:8px">延迟退休启动后，退休年龄的调整方式是？</p>
+                <div class="mp-opt" data-ok="0"><span class="k">A</span>一步到位，所有人统一延长退休年龄</div>
+                <div class="mp-opt" data-ok="1"><span class="k">B</span>渐进式小步调整，自愿弹性优先</div>
+                <p class="mp-quiz-fb" id="qzFb">✓ 回答正确，+5 积分。您的作答将以匿名聚合方式计入「政策解读到达-理解双指标」，作为政采合同验收口径（示意口径）。</p>
+              </div>
+
+              <p class="mp-foot-note">本专项已按干部 / 企业 / 群众 / 银发四版分层推送<br>银发有声版完播率 62%（示意口径）</p>
+            </section>
+
+            <!-- ========== 求证辟谣 ========== -->
+            <section class="mp-screen" id="scr-fact">
+              <div class="mp-card mp-clue">
+                <div class="mp-sec-head"><b>遇到可疑信息？发来求证</b><span class="tag warm" style="margin-left:auto">24 小时受理</span></div>
+                <div id="fcForm">
+                  <textarea id="fcText" placeholder="粘贴可疑文章链接，或描述一下（例：亲戚群里说吃 XX 能根治高血压，是真的吗？）"></textarea>
+                  <div class="mp-row-btns" style="margin-top:9px">
+                    <span class="mp-btn ghost" id="fcShot">📷 传截图</span>
+                    <span class="mp-btn primary" id="fcSubmit">提交求证</span>
+                  </div>
+                  <p class="mp-note" style="margin-top:8px">求证角也可在社区信息驿站扫码使用；线索被采用 +50 积分。</p>
+                </div>
+                <div class="mp-accepted" id="fcDone">
+                  <div class="head">✅ 已受理 · 编号 QZ-20260722-018</div>
+                  <div class="mp-tl">
+                    <div class="mp-tl-item"><b>09:41</b>线索受理，系统自动打点 <span class="okk">✓</span></div>
+                    <div class="mp-tl-item"><b>进行中</b>专业编辑核查中（涉健康类由具备资质的医学编辑终审）</div>
+                    <div class="mp-tl-item todo"><b>待办</b>权威回应全渠道首发，并第一时间回送给您</div>
+                  </div>
+                  <p class="mp-note">从线索确认到全渠道首发的每个时间戳由 Agent 自动记录、<b style="color:#8a6e2b">不可人工回填</b>，超时自动标红留因（示意口径）。</p>
+                </div>
+              </div>
+
+              <div class="mp-card">
+                <div class="mp-sec-head"><b>权威辟谣 · 本周热点</b><span class="mp-note" style="margin-left:auto">点开看权威回应</span></div>
+
+                <div class="mp-rumor">
+                  <div class="rh"><span class="tag warn">谣言</span><b>「养老金资格认证要重新登记，先交 200 元手续费」</b><span class="arr">›</span></div>
+                  <div class="verdict">结论：<span class="tag warn">诈骗信息</span><span>响应 3.2 小时全渠道首发（示意）</span></div>
+                  <div class="mp-rumor-body">
+                    <b>权威回应：</b>养老金资格认证<b>全程免费</b>，可在官方渠道或社区代办点办理，任何「先交费再认证」均为诈骗。已同步生成社区防诈提醒，由派送员与信息员定向送达银发读者。<br>
+                    <span style="color:#b0b0b0;font-size:10.5px">✓ 编辑部终审签章 · 已对谣言起源社区二次定向覆盖（示意口径）</span>
+                  </div>
+                </div>
+
+                <div class="mp-rumor">
+                  <div class="rh"><span class="tag warn">谣言</span><b>「隔夜西瓜有剧毒，吃一口就进抢救室」</b><span class="arr">›</span></div>
+                  <div class="verdict">结论：<span class="tag gold">以偏概全</span><span>响应 5.8 小时（示意）</span></div>
+                  <div class="mp-rumor-body">
+                    <b>权威回应：</b>规范冷藏（覆膜、4℃ 以下、24 小时内食用）风险很低；「剧毒」说法夸大个案。切开后室温久放才是主要风险。<br>
+                    <span style="color:#b0b0b0;font-size:10.5px">✓ 具备执业资质的医学编辑终审 · 科普内容不构成诊疗意见</span>
+                  </div>
+                </div>
+
+                <div class="mp-rumor">
+                  <div class="rh"><span class="tag warn">谣言</span><b>「某保健品获批新药，能替代降压药」</b><span class="arr">›</span></div>
+                  <div class="verdict">结论：<span class="tag warn">不实</span><span>已定向覆盖起源社区（示意）</span></div>
+                  <div class="mp-rumor-body">
+                    <b>权威回应：</b>该产品为普通食品备案，<b>不具备任何治疗功能</b>；擅自停用降压药有严重风险，用药调整请遵医嘱。此谣言集中出现于 3 个社区团购群，辟谣内容已精准打回相应社区。<br>
+                    <span style="color:#b0b0b0;font-size:10.5px">✓ 医学编辑终审 · 谣言基数为第三方监测估计值，已标注「示意口径」</span>
+                  </div>
+                </div>
+              </div>
+
+              <p class="mp-foot-note">谣言在哪个社区冒头，辟谣就精准打回哪个社区<br>响应时效中位数与覆盖修正率进入双看板（示意口径）</p>
+            </section>
+
+            <!-- ========== 民生互助 ========== -->
+            <section class="mp-screen" id="scr-help">
+              <div class="mp-card mp-clue">
+                <div class="mp-sec-head"><b>我要留言</b><span class="tag teal" style="margin-left:auto">件件有回音</span></div>
+                <textarea id="hpText" placeholder="说说您遇到的操心事、烦心事（也可以按住底部语音条直接说）"></textarea>
+                <div class="mp-row-btns" style="margin-top:9px">
+                  <span class="mp-btn ghost" id="hpVoice">🎙 语音留言</span>
+                  <span class="mp-btn primary" id="hpSubmit">提交留言</span>
+                </div>
+                <p class="mp-note" style="margin-top:8px">受理后经媒体转办至责任单位，每一步进展都会推送给您。</p>
+              </div>
+
+              <div class="mp-card">
+                <div class="mp-order-head"><b>我的诉求：小区消防通道被长期占用</b><span class="tag ok">已闭环</span></div>
+                <div class="mp-tl">
+                  <div class="mp-tl-item"><b>07.08</b>受理 · 生成民生工单 <span class="okk">✓</span></div>
+                  <div class="mp-tl-item"><b>07.09</b>转办 · 街道综合执法（Agent 自动对接）<span class="okk">✓</span></div>
+                  <div class="mp-tl-item"><b>07.12</b>督办 · 本报记者跟进报道 <span class="okk">✓</span></div>
+                  <div class="mp-tl-item"><b>07.15</b>责任单位书面回应 · 已清理并加装警示桩 <span class="okk">✓</span></div>
+                  <div class="mp-tl-item"><b>07.16</b>回访确认 · 您已确认属实 <span class="okk">✓</span></div>
+                </div>
+                <p class="mp-note">「受理—转办—督办—书面回应—回访确认」缺一不计闭环；全流程时间戳自动留痕、可查可审计。</p>
+                <div style="border-top:1px dashed #eee;margin-top:9px;padding-top:9px" id="hpRateWrap">
+                  <div class="mp-rate-row"><span>办理满意度</span><span class="mp-stars" id="hpStars"><i>★</i><i>★</i><i>★</i><i>★</i><i>★</i></span></div>
+                  <div class="mp-row-btns" style="margin-top:8px"><span class="mp-btn primary" id="hpRateSubmit">提交评价</span></div>
+                </div>
+                <p class="mp-rated-ok" id="hpRatedOk">✓ 感谢评价。满意度系数直接乘进闭环件结算——不满意的件，结算跟着打折（语音回访经授权留存，人工抽检 10%，示意口径）。</p>
+              </div>
+
+              <div class="mp-card">
+                <div class="mp-sec-head"><b>身边的回应</b><span class="mp-note" style="margin-left:auto">观澜社区 · 本月</span></div>
+                <div class="mp-case-row"><span class="ci">🌙</span><div class="t">观澜路夜市噪音扰民<small>责任单位回应：划定限时经营区 · 闭环用时 8 天</small></div><span class="tag ok">已闭环</span></div>
+                <div class="mp-case-row"><span class="ci">🚌</span><div class="t">632 路公交高峰班次太少<small>交通部门已接单 · 正在排班测算</small></div><span class="tag gold">转办中</span></div>
+                <div class="mp-case-row"><span class="ci">🛗</span><div class="t">老楼加装电梯政策咨询<small>已回应并附政策原文与申请流程</small></div><span class="tag ok">已闭环</span></div>
+              </div>
+
+              <p class="mp-foot-note">未完成闭环的事项不计入任何成效统计、不参与结算<br>——宁可数字难看，不可数字可疑</p>
+            </section>
+
+            <!-- ========== 健康与服务 ========== -->
+            <section class="mp-screen" id="scr-service">
+              <div class="mp-paper" id="svcPaper">
+                <span class="on" data-p="health"><b>健康报 · 定制示例</b>健康科普 + 健康求证</span>
+                <span data-p="women"><b>中国妇女报 · 定制示例</b>家庭教育 + 维权通道</span>
+              </div>
+
+              <!-- 健康报定制 -->
+              <div class="mp-svc-block on" id="svc-health">
+                <div class="mp-card">
+                  <div class="mp-sec-head"><b>权威健康科普库</b><span class="tag teal" style="margin-left:auto">「健康报审校」标识（示例）</span></div>
+                  <div class="mp-svc-row"><span class="si">🩺</span><div class="t"><b>高血压用药十问</b><span>心血管专业主任医师审定 · 大字版</span></div><span class="act">🔊 听</span></div>
+                  <div class="mp-svc-row"><span class="si">🍚</span><div class="t"><b>糖尿病饮食三个常见误区</b><span>注册营养师参与审校</span></div><span class="act">🔊 听</span></div>
+                  <div class="mp-svc-row"><span class="si">💊</span><div class="t"><b>家庭小药箱整理清单（银发版）</b><span>执业药师审校 · 多方言语音版</span></div><span class="act">🔊 听</span></div>
+                  <p class="mp-note" style="margin-top:8px">科普内容不构成诊疗建议，身体不适请及时就诊并遵医嘱；每条均由具备资质的医学编辑终审签章。</p>
+                </div>
+                <div class="mp-card">
+                  <div class="mp-sec-head"><b>健康求证角</b><span class="tag warm" style="margin-left:auto">老年防骗重点</span></div>
+                  <p style="font-size:12.5px;color:#444;line-height:1.65">「神药」广告、保健品讲座、免费体检拉人头……拿不准的，拍下来发给我们核一核。</p>
+                  <div class="mp-row-btns"><span class="mp-btn primary" data-go="fact">去求证</span><span class="mp-btn ghost" id="svcJkTs">看本周防骗提醒</span></div>
+                </div>
+                <div class="mp-card">
+                  <div class="mp-sec-head"><b>健康行动提醒</b><span class="mp-note" style="margin-left:auto">按社区推送</span></div>
+                  <div class="mp-svc-row"><span class="si">💉</span><div class="t"><b>流感疫苗接种开始预约</b><span>观澜社区卫生服务中心 · 本周六起</span></div><span class="act" id="svcYy">预约</span></div>
+                  <div class="mp-svc-row"><span class="si">🔬</span><div class="t"><b>65 岁以上免费健康筛查</b><span>凭身份证即可 · 无需空腹项目已标注</span></div><span class="act" id="svcSc">查看</span></div>
+                  <p class="mp-note" style="margin-top:8px">预约与筛查完成数是「健康科普干预有效性」的行为转化证据；机构只回传匿名化聚合统计（示意口径）。</p>
+                </div>
+              </div>
+
+              <!-- 妇女报定制 -->
+              <div class="mp-svc-block" id="svc-women">
+                <div class="mp-card">
+                  <div class="mp-sec-head"><b>家庭教育分龄课</b><span class="tag teal" style="margin-left:auto">家长学校（示例）</span></div>
+                  <div class="mp-svc-row"><span class="si">🍼</span><div class="t"><b>0–3 岁 · 亲子陪伴 12 讲</b><span>已学 8/12 讲 · 完课＝学完 80%</span><span class="mp-prog"><i style="width:66%"></i></span></div><span class="act">继续</span></div>
+                  <div class="mp-svc-row"><span class="si">✏️</span><div class="t"><b>小学段 · 作业沟通不吼课</b><span>音频课 · 多方言版下沉县域</span></div><span class="act">🔊 听</span></div>
+                  <div class="mp-svc-row"><span class="si">🌱</span><div class="t"><b>青春期 · 好好说话训练营</b><span>新课上线 · 家长互助群同步开营</span></div><span class="act">报名</span></div>
+                  <p class="mp-note" style="margin-top:8px">依据《家庭教育促进法》配套课程；完课数据只作匿名聚合统计，计入「妇儿公益覆盖」（示意口径）。</p>
+                </div>
+                <div class="mp-card">
+                  <div class="mp-sec-head"><b>女职工服务</b><span class="tag gold" style="margin-left:auto">企业妇委会共建</span></div>
+                  <div class="mp-svc-row"><span class="si">⚖️</span><div class="t"><b>职场权益微课：产假与哺乳期</b><span>妇联维权干部审定</span></div><span class="act">学习</span></div>
+                  <div class="mp-svc-row"><span class="si">🎗️</span><div class="t"><b>「两癌」筛查提醒与预约</b><span>按属地推送 · 结果仅本人可见</span></div><span class="act">预约</span></div>
+                </div>
+                <div class="mp-card mp-sos">
+                  <b class="tt">🛡️ 求助绿色通道</b>
+                  <p>遇到家庭暴力等紧急情况，长按下方按钮直连 <b>12338</b> 妇联维权服务热线；也可在语音助手中说出您与我们约定的暗语，Agent 会立即静默转接。</p>
+                  <div class="sos-btn" id="sosBtn">长按直连 12338</div>
+                  <small>求助信息只用于识别与分流（直连妇联维权干部），不出具法律意见、不留存明细、不进入任何统计看板。</small>
+                </div>
+              </div>
+
+              <!-- 银发守护（通用） -->
+              <div class="mp-card">
+                <div class="mp-sec-head"><b>银发守护</b><span class="tag gold" style="margin-left:auto">家人可同步</span></div>
+                <div class="mp-kv"><span>今日语音问安</span><b class="ok">已应答 ✓ 09:10「我挺好的」</b></div>
+                <div class="mp-kv"><span>派送员顺访</span><b class="ok">周三 李师傅已上门签到 ✓</b></div>
+                <div class="mp-kv"><span>异常预警</span><b>连续 2 天未应答 → 提醒家人与社区</b></div>
+                <div class="mp-auth-row" style="border-bottom:none;padding-bottom:2px">
+                  <div class="t"><b>大字模式</b><span>本页字号放大，适合长辈阅读</span></div>
+                  <span class="mp-switch" id="svcBig"></span>
+                </div>
+                <p class="mp-note" style="margin-top:6px">「有效触达」以老人有应答为准，仅送达不计；银发数据属敏感个人信息——单独同意、最小必要、只出脱敏聚合统计，绝不用于广告定向。</p>
+              </div>
+
+              <p class="mp-foot-note">本页板块按报社定制：健康报＝健康科普 · 中国妇女报＝家庭教育<br>（定制示例，不使用其 logo、不代表其官方产品）</p>
+            </section>
+
+            <!-- ========== 我的 ========== -->
+            <section class="mp-screen" id="scr-me">
+              <div class="mp-me-head">
+                <div class="mp-av">张</div>
+                <div class="t"><b>张桂芳</b><span>观澜社区读者 · 已添加社区信息员企业微信</span></div>
+              </div>
+
+              <div class="mp-card">
+                <div class="mp-me-stats">
+                  <div class="s"><b>860</b><span>积分</span></div>
+                  <div class="s"><b>2</b><span>有效订阅</span></div>
+                  <div class="s"><b>3</b><span>求证被采用</span></div>
+                </div>
+                <div class="mp-invite">👪 家人共读：邀请子女绑定「守护共享」<b>+100 积分</b><span class="go" id="mpInvite">邀请家人</span></div>
+              </div>
+
+              <div class="mp-card">
+                <div class="mp-sec-head"><b>我的订阅</b><span class="mp-lnk" data-go="sub">订报中心 ›</span></div>
+                <div class="mp-kv"><span>纸质 · 银发大字版</span><b>2026 年度 · 每周三 李师傅送达</b></div>
+                <div class="mp-kv"><span>数字版 · 听报</span><b>已开通 · SenseAudio-V2 语音播报</b></div>
+                <div class="mp-row-btns">
+                  <span class="mp-btn primary" data-go="sub">续订 2027 年</span>
+                  <span class="mp-btn ghost" data-go="sub">送长辈一份</span>
+                </div>
+                <p class="mp-note" style="margin-top:8px">订阅完全自愿、可随时退订——严禁以任何触达指标名义变相摊派订报。</p>
+              </div>
+
+              <div class="mp-card">
+                <div class="mp-sec-head"><b>积分任务</b><span class="mp-note" style="margin-left:auto">可抵订报费 · 兑社区服务（示意）</span></div>
+                <div class="mp-menu-row" style="padding-top:4px"><span class="mi">📖</span>读完一篇政策解读<small>+10</small></div>
+                <div class="mp-menu-row"><span class="mi">✅</span>一题快测答对<small>+5</small></div>
+                <div class="mp-menu-row"><span class="mi">🔎</span>求证线索被采用<small>+50</small></div>
+                <div class="mp-menu-row"><span class="mi">⭐</span>完成民生回访评价<small>+10</small></div>
+              </div>
+
+              <div class="mp-card">
+                <div class="mp-sec-head"><b>数据授权管理</b><span class="mp-note" style="margin-left:auto">可随时撤回</span></div>
+                <div class="mp-auth-row">
+                  <div class="t"><b>语音服务授权</b><span>SenseAudio-V2 处理您的语音指令，仅用于读报、问安与求证</span></div>
+                  <span class="mp-switch on"></span>
+                </div>
+                <div class="mp-auth-row">
+                  <div class="t"><b>家人守护共享</b><span>异常预警推送给绑定家人 · 敏感信息单独同意、最小必要</span></div>
+                  <span class="mp-switch on"></span>
+                </div>
+                <div class="mp-auth-row">
+                  <div class="t"><b>参与匿名阅读研究</b><span>只出脱敏聚合数据 · 绝不用于任何广告定向</span></div>
+                  <span class="mp-switch"></span>
+                </div>
+              </div>
+
+              <div class="mp-card">
+                <div class="mp-menu-row" style="padding-top:4px"><span class="mi">📮</span>我的留言与求证记录<span class="arr" style="margin-left:auto">›</span></div>
+                <div class="mp-menu-row"><span class="mi">💬</span>联系社区信息员（企业微信）<small>李师傅 · 周三顺访</small></div>
+                <div class="mp-menu-row"><span class="mi">🔎</span>无障碍与大字模式<span class="arr" style="margin-left:auto">›</span></div>
+                <div class="mp-menu-row"><span class="mi">📄</span>服务协议与隐私说明<span class="arr" style="margin-left:auto">›</span></div>
+              </div>
+
+              <p class="mp-foot-note">您的数据经授权采集、全程脱敏、可随时撤回<br>敏感数据绝不用于任何广告定向</p>
+            </section>
+
+            <!-- ========== 订报中心（子屏） ========== -->
+            <section class="mp-screen" id="scr-sub">
+              <div id="subForm">
+                <div class="mp-card">
+                  <div class="mp-sec-head"><b>选择订阅方案</b><span class="mp-note" style="margin-left:auto">价格为示意口径</span></div>
+                  <div class="mp-sku on" data-price="360" data-name="纸质 · 银发大字版">
+                    <span class="r"></span>
+                    <span class="t"><b>纸质 · 银发大字版</b><span>每周 3 期上门送达 · 含语音伴读与顺访问安</span></span>
+                    <span class="p">¥360<small>/年</small></span>
+                  </div>
+                  <div class="mp-sku" data-price="120" data-name="数字版 · 听报">
+                    <span class="r"></span>
+                    <span class="t"><b>数字版 · 听报</b><span>全端阅读 + SenseAudio-V2 多方言语音播报</span></span>
+                    <span class="p">¥120<small>/年</small></span>
+                  </div>
+                  <div class="mp-sku" data-price="398" data-name="孝心套餐">
+                    <span class="r"></span>
+                    <span class="t"><b>孝心套餐（纸质＋数字＋守护）</b><span>长辈看纸质大字版 · 您看数字版 · 含家人守护共享</span></span>
+                    <span class="p">¥398<small>/年</small></span>
+                  </div>
+                </div>
+
+                <div class="mp-card">
+                  <div class="mp-sec-head"><b>积分抵扣</b></div>
+                  <div class="mp-coupon">
+                    <span class="txt">当前 860 积分，可用 <b style="color:var(--warm-d)">200 积分抵 ¥20</b></span>
+                    <span class="use" id="subUse">使用</span>
+                  </div>
+                  <p class="mp-coupon-ok" id="subCouponOk">✓ 已使用 200 积分，抵扣 ¥20</p>
+                </div>
+
+                <div class="mp-card">
+                  <div class="mp-agree" id="subAgree">
+                    <span class="box">✓</span>
+                    <p>我已阅读并同意<b>《订阅服务协议》</b>与<b>《隐私与数据授权说明》</b>。订阅完全自愿，可随时退订、按未使用期退款（示意）。</p>
+                  </div>
+                </div>
+
+                <div class="mp-paybar">
+                  <div class="sum"><b id="subTotal">¥360</b><span id="subDetail">纸质 · 银发大字版 × 1 年</span></div>
+                  <span class="mp-paybtn" id="subPay">微信支付</span>
+                </div>
+              </div>
+
+              <div class="mp-paid" id="subPaid">
+                <div class="big">📬</div>
+                <h4>订阅成功 · 感谢支持权威内容</h4>
+                <p>配送信息已同步派送员<b>李师傅</b>（企业微信）；<br>数字版与语音播报即时生效，<br>银发大字版下周三首次送达。</p>
+                <span class="mp-btn primary" data-go="me">返回我的</span>
+              </div>
+            </section>
+
+          </div><!-- /mp-body -->
+
+          <!-- 底部 tabbar -->
+          <div class="mp-tabbar">
+            <div class="mp-tab active" data-go="home"><span class="ti">📰</span>今日权威</div>
+            <div class="mp-tab" data-go="fact"><span class="ti">🔎</span>求证辟谣</div>
+            <div class="mp-tab" data-go="help"><span class="ti">🤝</span>民生互助</div>
+            <div class="mp-tab" data-go="service"><span class="ti">❤️</span>健康与服务</div>
+            <div class="mp-tab" data-go="me"><span class="ti">👤</span>我的</div>
+          </div>
+
+          <div class="mp-toast" id="mpToast"></div>
+        </div>
+      </div>
+      <p class="phone-caption">▲ 可交互原型 · 底部 tab 切屏 · 点<b>「看解读 · 测一测」</b>体验一稿四版与快测，<b>「我的 → 续订」</b>可走通订报支付流程</p>
+    </div>
+
+    <!-- 右：说明 -->
+    <div>
+      <div class="panel">
+        <h3>读者小程序 · 五 tab 六项能力</h3>
+        <div class="cap-grid">
+          <div class="cap warm"><div class="ic">📰</div><b>今日权威</b><span>当日要闻 + 应急首发，条条带编辑部终审签章——权威是唯一卖点</span></div>
+          <div class="cap"><div class="ic">🧭</div><b>政策解读 · 一稿四版</b><span>群众 / 干部 / 企业 / 银发有声四版分层触达，完读＋快测构成「到达-理解」双指标</span></div>
+          <div class="cap warm"><div class="ic">🔎</div><b>求证辟谣</b><span>线索受理自动打点，权威回应回送提交人，并定向覆盖谣言起源社区</span></div>
+          <div class="cap"><div class="ic">🤝</div><b>民生闭环</b><span>受理—转办—督办—回应—回访全流程可查，缺一不计闭环、不计费</span></div>
+          <div class="cap warm"><div class="ic">❤️</div><b>定制服务库</b><span>板块按报社定制：健康报＝健康科普，妇女报＝家庭教育（可切换示例）</span></div>
+          <div class="cap"><div class="ic">📬</div><b>订报与积分</b><span>订阅自愿 + 积分激励 + 家人守护共享，把发行变成可持续的读者关系</span></div>
+        </div>
+        <p class="note"><b>定位一句话：</b>读者端是「触达网络曲线」的 C 端入口——计价对象从「卖报纸份数」转为<b>「卖确认触达与回应闭环」</b>。</p>
+      </div>
+
+      <div class="panel">
+        <h3>双向公共信息触达网：下行送权威，上行收线索</h3>
+        <table class="mini-table">
+          <tr><th>方向</th><th>小程序里的动作</th><th>沉淀为哪些 SVI 证据</th></tr>
+          <tr><td><b>下行</b></td><td>权威要闻 · 政策四版 · 定制科普 · 防诈提醒 · 应急首发</td><td>权威信息有效触达率 · 到达-理解双指标 · 应急首发及时率</td></tr>
+          <tr><td><b>上行</b></td><td>求证线索 · 民生留言 · 回访确认 · 银发语音应答</td><td>辟谣响应时效 · 民生回应闭环率（乘满意度系数）· 银发守护指数</td></tr>
+        </table>
+        <p class="note"><b>证据自动化：</b>读者每次「已读 / 应答 / 回访确认」由 Agent 自动打点——时间戳不可人工回填、跨渠道去重（同人多端计 1 次）、口径写入合同附件，按月生成绩效底稿，年终归集为<b>社会价值年报＝财政绩效评价报告</b>。取证成本趋零，公信力第一次有了「发票」。</p>
+      </div>
+
+      <div class="panel">
+        <h3>按报社定制：同一框架，三种读者端</h3>
+        <table class="mini-table">
+          <tr><th>报社（定制示例）</th><th>读者端定制重点</th><th></th></tr>
+          <tr><td><b>人民日报</b></td><td>重大政策分层触达示范：一套终审稿按干部 / 企业 / 群众 / 银发四版、省-市-县三级全国分层落地</td><td><span class="tag warm">标准制定方</span></td></tr>
+          <tr><td><b>健康报</b></td><td>健康科普库＋健康求证角，对准保健品骗局与伪科普的老年受骗重灾区；「健康报审校」标识对外授权</td><td><span class="tag teal">垂直样板</span></td></tr>
+          <tr><td><b>中国妇女报</b></td><td>家庭教育分龄课＋女职工服务＋维权绿色通道（只识别分流、不留存明细、不进看板）</td><td><span class="tag gold">闭环载体</span></td></tr>
+        </table>
+        <p class="note"><b>品牌口径：</b>客户报社名仅作定制示例，不使用其 logo、不冒充其身份；旗舰能力为 <b>SenseAudio-S2 旗舰大模型</b>（多版本改写 / 归集去重），语音为 <b>SenseAudio-V2 语音大模型</b>（方言播报 / 语音回访 / 一句话交互）。</p>
+      </div>
+
+      <div class="panel">
+        <h3>从读者动作到「第三张报表」</h3>
+        <div class="flow">
+          <div class="f-step hot"><div class="n">1</div><b>读者动作</b><span>已读 / 快测 / 应答 / 回访确认</span></div>
+          <div class="f-arrow">→</div>
+          <div class="f-step"><div class="n">2</div><b>Agent 打点</b><span>时间戳自动记录 · 不可回填</span></div>
+          <div class="f-arrow">→</div>
+          <div class="f-step"><div class="n">3</div><b>口径治理</b><span>跨渠道去重 · 估计值标「示意」</span></div>
+          <div class="f-arrow">→</div>
+          <div class="f-step"><div class="n">4</div><b>双看板</b><span>经营 × 社会价值（SVI）</span></div>
+          <div class="f-arrow">→</div>
+          <div class="f-step hot"><div class="n">5</div><b>年报与结算</b><span>年报＝绩效评价＝预算依据</span></div>
+        </div>
+        <p class="note"><b>付费方视角：</b>宣传部 / 卫健 / 妇联按「服务工单与触达闭环」结算（保底＋绩效浮动，示意口径 70%＋30%），拿着同一份留痕数据去交自己的账——报纸可以变薄，价值必须变厚。</p>
+      </div>
+
+      <div class="panel">
+        <h3>读者端可见的合规红线</h3>
+        <div class="rl-item"><span class="x">✕</span><div><b>AI 不替代终审：</b>读者看到的每条内容都经三审三校、编辑核签后发布，发布链路技术性卡死在核签环节；AI 生成内容依法标识留痕。</div></div>
+        <div class="rl-item"><span class="x">✕</span><div><b>科普不越界：</b>健康科普与政策指引不构成诊疗或法律意见，产品层写死提示；医疗类内容须由具备执业资质的医学编辑终审。</div></div>
+        <div class="rl-item"><span class="x">✕</span><div><b>敏感人群数据最高保护：</b>银发、妇儿、健康数据单独同意、最小必要、只出脱敏聚合统计，严禁广告定向；家暴求助不留存明细、不进任何看板。</div></div>
+        <div class="rl-item"><span class="x">✕</span><div><b>不摊派订报：</b>计价对象是服务工单与触达闭环而非报纸份数，严禁以触达指标名义变相摊派订报，订阅完全自愿。</div></div>
+        <div class="rl-item"><span class="x">✕</span><div><b>数据不可注水：</b>时间戳不可人工回填、三源回执交叉核验＋语音外呼抽检，估计值一律标注「示意口径」并开放第三方审计接口。</div></div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="foot-brand"><img src="assets/st_logo.png" alt="商汤科技"></div>
+  <div><b>商汤科技 · 大模型生态渠道部</b> — AI 技术底座 · 高保真交互原型（页面数据均为目标态示意口径，非真实经营数据）</div>
+</footer>
+
+<script>
+(function () {
+  var titles = { home: '读者之家', policy: '政策解读', fact: '求证辟谣', help: '民生互助', service: '健康与服务', sub: '订报中心', me: '个人中心' };
+  var tabOf  = { home: 'home', policy: 'home', fact: 'fact', help: 'help', service: 'service', sub: 'me', me: 'me' };
+  var backTo = { policy: 'home', sub: 'me' };
+  var current = 'home';
+
+  function go(id) {
+    if (!titles[id]) return;
+    current = id;
+    document.querySelectorAll('.mp-screen').forEach(function (s) {
+      s.classList.toggle('active', s.id === 'scr-' + id);
+      if (s.id === 'scr-' + id) s.scrollTop = 0;
+    });
+    document.getElementById('mpTitle').textContent = titles[id];
+    document.getElementById('mpBack').classList.toggle('show', !!backTo[id]);
+    document.querySelectorAll('.mp-tab').forEach(function (t) {
+      t.classList.toggle('active', t.dataset.go === tabOf[id]);
+    });
+    document.querySelectorAll('#mpSceneBar .scene-btn').forEach(function (b) {
+      b.classList.toggle('active', b.dataset.go === id);
+    });
+  }
+
+  /* 统一 data-go 跳转 */
+  document.addEventListener('click', function (e) {
+    var el = e.target.closest('[data-go]');
+    if (!el) return;
+    go(el.dataset.go);
+  });
+
+  document.getElementById('mpBack').addEventListener('click', function () {
+    if (backTo[current]) go(backTo[current]);
+  });
+
+  /* toast */
+  var toastTimer = null;
+  function toast(msg) {
+    var t = document.getElementById('mpToast');
+    t.textContent = msg;
+    t.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function () { t.classList.remove('show'); }, 1600);
+  }
+
+  /* ---- 首页：AI 读报助手示例展开 ---- */
+  document.getElementById('mpAiEntry').addEventListener('click', function () {
+    document.getElementById('mpAiDemo').classList.toggle('open');
+  });
+
+  /* ---- 政策解读：版本切换 / 有声播放 / 方言 / 快测 ---- */
+  document.querySelectorAll('.mp-ver').forEach(function (v) {
+    v.addEventListener('click', function () {
+      document.querySelectorAll('.mp-ver').forEach(function (x) { x.classList.toggle('on', x === v); });
+      document.querySelectorAll('.mp-ver-body').forEach(function (b) {
+        b.classList.toggle('on', b.dataset.v === v.dataset.v);
+      });
+    });
+  });
+  var pv = document.getElementById('pvVoice');
+  pv.addEventListener('click', function () {
+    pv.classList.toggle('playing');
+    pv.querySelector('.pv').textContent = pv.classList.contains('playing') ? '❚❚' : '▶';
+    if (pv.classList.contains('playing')) toast('SenseAudio-V2 语音播报中（示意）· 完播将计入语音完播率');
+  });
+  document.querySelectorAll('.mp-dialects span').forEach(function (d) {
+    d.addEventListener('click', function (e) {
+      e.stopPropagation();
+      document.querySelectorAll('.mp-dialects span').forEach(function (x) { x.classList.toggle('on', x === d); });
+      toast('已切换到「' + d.textContent + '」语音（示意）');
+    });
+  });
+  var quizDone = false;
+  document.querySelectorAll('.mp-opt').forEach(function (o) {
+    o.addEventListener('click', function () {
+      if (quizDone) return;
+      if (o.dataset.ok === '1') {
+        quizDone = true;
+        o.classList.add('ok');
+        document.getElementById('qzFb').classList.add('show');
+        toast('回答正确 +5 积分');
+      } else {
+        o.classList.add('bad');
+        toast('再想想——提示：关键词是「渐进」与「弹性」');
+        setTimeout(function () { o.classList.remove('bad'); }, 900);
+      }
+    });
+  });
+
+  /* ---- 求证辟谣：提交线索 / 辟谣项展开 ---- */
+  document.getElementById('fcShot').addEventListener('click', function () {
+    toast('已添加截图（示意）');
+  });
+  document.getElementById('fcSubmit').addEventListener('click', function () {
+    var v = document.getElementById('fcText').value.trim();
+    if (!v) { document.getElementById('fcText').value = '亲戚群里说吃 XX 能根治高血压，是真的吗？'; return; }
+    document.getElementById('fcForm').style.display = 'none';
+    document.getElementById('fcDone').classList.add('show');
+    toast('已受理 · 线索被采用 +50 积分');
+  });
+  document.querySelectorAll('.mp-rumor .rh').forEach(function (h) {
+    h.addEventListener('click', function () {
+      h.parentElement.classList.toggle('open');
+    });
+  });
+
+  /* ---- 民生互助：留言 / 满意度打星 ---- */
+  document.getElementById('hpVoice').addEventListener('click', function () {
+    toast('按住底部语音条说话即可（SenseAudio-V2 转写，示意）');
+  });
+  document.getElementById('hpSubmit').addEventListener('click', function () {
+    var v = document.getElementById('hpText').value.trim();
+    if (!v) { document.getElementById('hpText').value = '观澜路与文昌街路口的红绿灯坏了三天，老人过马路很危险。'; return; }
+    document.getElementById('hpText').value = '';
+    toast('已提交 · 受理后每一步进展都会通知您');
+  });
+  var hpStars = document.querySelectorAll('#hpStars i');
+  hpStars.forEach(function (st, i) {
+    st.addEventListener('click', function () {
+      hpStars.forEach(function (x, j) { x.classList.toggle('lit', j <= i); });
+    });
+  });
+  document.getElementById('hpRateSubmit').addEventListener('click', function () {
+    var lit = document.querySelectorAll('#hpStars i.lit').length;
+    if (!lit) { toast('轻点星星先打个分吧'); return; }
+    document.getElementById('hpRateWrap').style.display = 'none';
+    document.getElementById('hpRatedOk').style.display = 'block';
+    toast('评价已提交 +10 积分');
+  });
+
+  /* ---- 健康与服务：定制切换 / 大字模式 / 各类动作 ---- */
+  document.querySelectorAll('#svcPaper span').forEach(function (p) {
+    p.addEventListener('click', function () {
+      document.querySelectorAll('#svcPaper span').forEach(function (x) { x.classList.toggle('on', x === p); });
+      document.getElementById('svc-health').classList.toggle('on', p.dataset.p === 'health');
+      document.getElementById('svc-women').classList.toggle('on', p.dataset.p === 'women');
+    });
+  });
+  document.getElementById('svcBig').addEventListener('click', function () {
+    this.classList.toggle('on');
+    document.getElementById('scr-service').classList.toggle('elder-big', this.classList.contains('on'));
+    toast(this.classList.contains('on') ? '大字模式已开启' : '大字模式已关闭');
+  });
+  document.getElementById('svcYy').addEventListener('click', function () {
+    this.textContent = '已预约 ✓';
+    toast('预约成功 · 完成数计入行为转化（匿名聚合，示意）');
+  });
+  document.getElementById('svcSc').addEventListener('click', function () { toast('筛查指南已推送到您的消息（示意）'); });
+  document.getElementById('svcJkTs').addEventListener('click', function () { toast('本周提醒：凡「先交费才能领补贴」的都是骗局'); });
+  document.getElementById('sosBtn').addEventListener('click', function () {
+    toast('演示环境 · 实际将直连 12338 并静默转接维权干部');
+  });
+  document.querySelectorAll('.mp-svc-row .act').forEach(function (a) {
+    if (a.id) return;
+    a.addEventListener('click', function () {
+      toast(a.textContent.indexOf('听') > -1 ? 'SenseAudio-V2 语音播放中（示意）' : '已打开（示意）');
+    });
+  });
+
+  /* ---- 我的：授权开关 / 邀请 ---- */
+  document.querySelectorAll('.mp-switch').forEach(function (s) {
+    if (s.id === 'svcBig') return;
+    s.addEventListener('click', function () {
+      s.classList.toggle('on');
+      toast(s.classList.contains('on') ? '已开启授权 · 可随时撤回' : '已撤回授权');
+    });
+  });
+  document.getElementById('mpInvite').addEventListener('click', function () {
+    toast('守护共享邀请已生成 · 家人绑定成功 +100 积分');
+  });
+
+  /* ---- 订报中心：SKU / 积分抵扣 / 协议 / 支付 ---- */
+  var price = 360, skuName = '纸质 · 银发大字版', coupon = 0, agreed = false;
+  function renderTotal() {
+    var total = price - coupon;
+    document.getElementById('subTotal').textContent = '¥' + total.toLocaleString('zh-CN');
+    document.getElementById('subDetail').textContent = skuName + ' × 1 年' + (coupon ? ' − 积分抵 ¥' + coupon : '');
+  }
+  document.querySelectorAll('.mp-sku').forEach(function (s) {
+    s.addEventListener('click', function () {
+      document.querySelectorAll('.mp-sku').forEach(function (x) { x.classList.remove('on'); });
+      s.classList.add('on');
+      price = +s.dataset.price; skuName = s.dataset.name;
+      renderTotal();
+    });
+  });
+  document.getElementById('subUse').addEventListener('click', function () {
+    if (coupon) return;
+    coupon = 20;
+    document.getElementById('subCouponOk').classList.add('show');
+    renderTotal();
+    toast('已用 200 积分抵扣 ¥20');
+  });
+  var agree = document.getElementById('subAgree');
+  agree.addEventListener('click', function () {
+    agreed = !agreed;
+    agree.classList.toggle('on', agreed);
+    document.getElementById('subPay').classList.toggle('ready', agreed);
+  });
+  document.getElementById('subPay').addEventListener('click', function () {
+    if (!agreed) { toast('请先勾选订阅协议与授权说明'); return; }
+    document.getElementById('subForm').style.display = 'none';
+    document.getElementById('subPaid').classList.add('show');
+    toast('订阅成功 · 配送信息已同步派送员');
+  });
+})();
+</script>
+</body>
+</html>
