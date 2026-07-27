@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>数字传媒 · Agent 原型 · 灵犀统一 Agent 运营中台</title>
+  <link rel="stylesheet" href="assets/style.css">
+  <style>
+    .ag-grid { display: grid; grid-template-columns: minmax(360px, 420px) 1fr; gap: 20px; align-items: start; }
+    @media (max-width: 980px) { .ag-grid { grid-template-columns: 1fr; } }
+    .ag-log { margin-top: 16px; text-align: center; }
+    .ag-hint { font-size: 11.5px; color: var(--txt-3); margin-top: 8px; text-align: center; max-width: 360px; }
+  </style>
+</head>
+<body>
+  <div id="view"></div>
+  <script src="assets/app.js"></script>
+  <script src="assets/chat.js"></script>
+  <script>
+    Hub.boot({ page: 'media_agent', scenario: 'media' }).then(({ data, me, perms }) => {
+      const V = document.getElementById('view');
+      const E = Hub.esc;
+      const AGENT_ID = 'ag_m_edit';
+      const AGENT_NAME = '采编助理 Agent';
+      const agent = data.agents.find(a => a.id === AGENT_ID) || {};
+      const sop = (id) => data.sops.find(s => s.id === id) || { title: '', priority: '', steps: [], mustAck: false };
+      const kws = data.media.keywords;
+
+      // ---- 企微卡片构造器 ----
+      function sopCard(id) {
+        const s = sop(id);
+        return `<div class="c-card"><div class="ch">📋 ${E(s.title)} · ${E(s.priority)}</div><div class="cb">`
+          + s.steps.map((st, i) => `<div class="r"><span class="l">步骤 ${i + 1}</span><span>${E(st)}</span></div>`).join('')
+          + `</div><div class="cf">${s.mustAck ? '需签收 · 点击确认执行' : '点击查看完整规程'}</div></div>`;
+      }
+      function trendIco(t) { return t === 'up' ? '↑' : t === 'down' ? '↓' : '→'; }
+      function hotCard() {
+        return `<div class="c-card"><div class="ch">🔥 今日热词 · Top5</div><div class="cb">`
+          + kws.map(k => `<div class="r"><span class="l">${trendIco(k.trend)} ${E(k.word)}</span><span>${E(k.heat)}</span></div>`).join('')
+          + `</div><div class="cf">点击任一热词 · 一键生成选题</div></div>`;
+      }
+      function checkCard() {
+        return `<div class="c-card"><div class="ch">✅ 事实核查结果</div><div class="cb">`
+          + `<div class="r"><span class="l">基金规模</span><span>50 亿元 · 一致</span></div>`
+          + `<div class="r"><span class="l">措施表述</span><span>建议改「十项措施」</span></div>`
+          + `<div class="r"><span class="l">信源</span><span>政务通稿库</span></div>`
+          + `<div class="r"><span class="l">合规</span><span>未见敏感词</span></div>`
+          + `</div><div class="cf">依据：政务通稿库 · 合规口径库</div></div>`;
+      }
+      function versionCard() {
+        return `<div class="c-card"><div class="ch">🧩 多平台版本已生成</div><div class="cb">`
+          + `<div class="r"><span class="l">微信公众号</span><span>1200 字图文</span></div>`
+          + `<div class="r"><span class="l">视频号</span><span>60″ 竖版脚本</span></div>`
+          + `<div class="r"><span class="l">抖音</span><span>30″ 竖版快剪</span></div>`
+          + `<div class="r"><span class="l">客户端 App</span><span>全文长图</span></div>`
+          + `</div><div class="cf">4 版就绪 · 进入分发队列</div></div>`;
+      }
+
+      // ---- 5 个语音场景 ----
+      const scenarios = [
+        {
+          id: 's_write', title: '口述成稿·一键分发', chip: '口述成稿',
+          intro: '记者在数字经济大会现场，用企业微信语音口述成稿并一键分发',
+          sopId: 'sop_m_dist', sopTitle: sop('sop_m_dist').title, duration: 128,
+          steps: [
+            { from: 'user', voice: '帮我把刚在数字经济大会现场的口述整理成 800 字快讯，重点写十项措施里的算力券和招商落地。', dur: 9 },
+            { from: 'agent', text: '已成稿《全市数字经济大会今日召开 十条举措发布》，导语突出「50 亿元算力产业基金 + 算力券申领」与重点招商项目。要一键分发到公众号 / 视频号 / 抖音 / 客户端吗？' },
+            { from: 'user', voice: '分发，四个渠道都发。', dur: 4 },
+            { from: 'agent', sys: '命中《一键分发前合规检查 SOP》· 发布前强制四项检查' },
+            { from: 'agent', html: sopCard('sop_m_dist') },
+            { from: 'agent', text: '四项检查已通过：各平台文风规格已适配 · 敏感词与口径终检 OK · 发布时间 08:20 · 渠道已确认。确认后立即发布并回收各平台回执。' },
+            { from: 'user', voice: '确认发布。', dur: 3 },
+            { from: 'agent', text: '✅ 四渠道发布成功，回执已回收，实时阅读 12.4 万。' },
+          ],
+        },
+        {
+          id: 's_senti', title: '突发舆情预警处置', chip: '舆情处置',
+          intro: 'Agent 主动推送红色舆情预警，命中处置 SOP 并给出统一口径',
+          sopId: 'sop_m_senti', sopTitle: sop('sop_m_senti').title, duration: 96,
+          steps: [
+            { from: 'agent', sys: '🔴 红色舆情预警触发 · 采编助理已接入舆情监测 Agent' },
+            { from: 'agent', voice: '预警播报：「某小区停水投诉」1 小时内热度升至 92，微博 3 条 + 本地论坛 1 帖，情绪负向，已达红色。', dur: 10 },
+            { from: 'user', voice: '信源核实了吗？先给我处置口径。', dur: 5 },
+            { from: 'agent', sys: '命中《突发舆情处置 SOP》P0 · 需签收' },
+            { from: 'agent', html: sopCard('sop_m_senti') },
+            { from: 'agent', text: '信源已核实为真实停水事件。统一回应口径：已联系供水部门，管网抢修中，预计 11:00 恢复供水，同步发布临时取水点与避险提示。是否生成简报报总编、抄送宣传口？' },
+            { from: 'user', voice: '生成，抄送宣传口。', dur: 4 },
+            { from: 'agent', text: '简报已生成并上报总编、抄送宣传口，处置进展每 30 分钟更新，二次传播持续监测中。' },
+          ],
+        },
+        {
+          id: 's_hot', title: '热词选题建议', chip: '热词选题',
+          intro: 'Agent 播报今日全网热词并给出可执行选题',
+          duration: 72,
+          steps: [
+            { from: 'user', voice: '今天有什么值得做的选题？', dur: 4 },
+            { from: 'agent', voice: '今日热词播报：数字经济大会 9820↑、停水 6410↑、台风预警 5230↑、非遗焕新 2140→、公交调线 1870↓。', dur: 11 },
+            { from: 'agent', html: hotCard() },
+            { from: 'agent', text: '选题建议：① 深度解读《数字经济大会十项措施》，配算力券申领指南；② 民生服务贴《停水抢修进展 + 临时取水点地图》；③ 台风避险实用长图。建议优先做 ①，正面反响正盛。' },
+          ],
+        },
+        {
+          id: 's_check', title: '稿件事实核查', chip: '事实核查',
+          intro: '引用政务通稿库 / 合规口径库对稿件数据与表述进行核查',
+          duration: 88,
+          steps: [
+            { from: 'user', voice: '帮我核一句：大会发布十条举措，设立 50 亿元算力产业基金，数字和表述对吗？', dur: 8 },
+            { from: 'agent', sys: '检索《政务通稿库》《合规口径库》…' },
+            { from: 'agent', html: checkCard() },
+            { from: 'agent', text: '比对结论：基金规模「50 亿元」与官方原文一致 ✅；但「十条举措」官方权威表述为「十项措施」，建议按政务通稿库口径统一改为「十项措施」。已标注，是否一键替换？' },
+          ],
+        },
+        {
+          id: 's_multi', title: '一键生成多平台版本', chip: '多平台版本',
+          intro: '同一稿件一键适配公众号 / 视频号 / 抖音 / 客户端',
+          duration: 105,
+          steps: [
+            { from: 'user', voice: '把这篇快讯生成公众号、视频号、抖音、客户端四个版本。', dur: 7 },
+            { from: 'agent', html: versionCard() },
+            { from: 'agent', text: '四版已生成并按各平台规格适配：公众号 1200 字图文 · 视频号 60″ 竖版脚本 · 抖音 30″ 快剪 · 客户端全文长图。已进入分发队列，等待你一键分发。' },
+          ],
+        },
+      ];
+
+      // ---- 右侧说明卡 ----
+      const boundKbs = (agent.kbIds || []).map(id => (data.kbs.find(k => k.id === id) || {}).name).filter(Boolean);
+      const flowNodes = [
+        { n: 'STEP 1', t: '语音发起', d: '企微/小程序按住说话' },
+        { n: 'STEP 2', t: 'ASR 转写', d: '语音→文字·意图识别' },
+        { n: 'STEP 3', t: '命中知识库/SOP', d: '检索作答·匹配规程' },
+        { n: 'STEP 4', t: '推送要求', d: '按事件下发 SOP·签收' },
+        { n: 'STEP 5', t: '全程留痕', d: '转写·处置·结果存证' },
+      ];
+
+      const logBtnHtml = perms.useAgent
+        ? `<div class="ag-log"><button class="btn btn-primary" id="logBtn">▶ 记录本次语音留痕</button><div class="ag-hint">把当前语音场景整理为逐条转写，写入平台「语音留痕中心」，可在留痕页检索、回放与做 SOP 命中分析。</div></div>`
+        : `<div class="ag-log"><div class="ro-note">当前角色为观察员（只读），不产生语音留痕。</div></div>`;
+
+      V.innerHTML = `<div class="wrap">
+        ${Hub.sceneSubnav('media', '_agent')}
+        <div class="page-intro">
+          <b>采编助理 Agent · 企业微信语音原型</b> —— 记者 / 编辑用企微「按住说话」发起，
+          语音经 ASR 转写、命中媒体知识库与 SOP，Agent 完成成稿、分发、舆情处置、事实核查，全过程写入语音留痕。
+          点击手机上方任一场景即可切换演示。
+        </div>
+        <div class="ag-grid">
+          <div>
+            <div id="chatMount" class="phone-stage"></div>
+            ${logBtnHtml}
+          </div>
+          <div class="panel">
+            <div class="panel-t"><h3>🎙 语音闭环 · 从口述到留痕</h3><span class="sub">${E(AGENT_NAME)} · ${E(agent.version || '')}</span></div>
+            <div class="flow">
+              ${flowNodes.map((n, i) => `<div class="node"><div class="n">${n.n}</div><div class="t">${n.t}</div><div class="d">${n.d}</div></div>${i < flowNodes.length - 1 ? '<div class="arr">›</div>' : ''}`).join('')}
+            </div>
+            <div class="section-t" style="margin-top:20px">本 Agent 说明</div>
+            <div class="kv" style="margin-bottom:8px"><span class="k">技能</span><div class="chips">${(agent.skills || []).map(s => `<span class="chip-tag">${E(s)}</span>`).join('')}</div></div>
+            <div class="kv" style="margin-bottom:8px"><span class="k">绑定知识库</span><div class="chips">${boundKbs.map(n => `<span class="chip-tag">📚 ${E(n)}</span>`).join('')}</div></div>
+            <div class="kv" style="margin-bottom:8px"><span class="k">命中 SOP</span><div class="chips"><span class="chip-tag">📋 ${E(sop('sop_m_dist').title)}</span><span class="chip-tag">📋 ${E(sop('sop_m_senti').title)}</span></div></div>
+            <div class="hint mt12">口径：Agent 提供成稿、分发与处置建议，发布 / 签发 / 对外回应等关键动作仍由记者、编辑与总编把关；全过程语音留痕，供合规追溯。</div>
+            <div class="grid g3 mt16">
+              <a class="btn btn-sm" href="media.html">🗂 场景工作台</a>
+              <a class="btn btn-sm" href="media_miniapp.html">📱 采编小程序</a>
+              <a class="btn btn-sm" href="media_board.html">📊 数据看板</a>
+            </div>
+          </div>
+        </div>
+      </div>`;
+
+      // ---- 挂载语音对话 ----
+      let curScene = scenarios[0];
+      HubChat.mount(document.getElementById('chatMount'), {
+        contact: { name: '采编助理 Agent', corp: '@某某传媒', sub: '商汤 AI 技术底座 · 企业微信' },
+        user: { name: '记者·林可', avatar: '林' },
+        agent: { name: AGENT_NAME, avatar: 'S' },
+        scenarios,
+        onScenarioEnd: (sc) => { curScene = sc; },
+      });
+
+      // ---- 记录语音留痕 ----
+      const logBtn = document.getElementById('logBtn');
+      if (logBtn) {
+        logBtn.addEventListener('click', async () => {
+          const cur = curScene || scenarios[0];
+          const transcript = cur.steps.filter(s => !s.sys).map(s => ({ who: s.from, text: s.voice || s.text || '[企微卡片]' }));
+          logBtn.disabled = true; logBtn.textContent = '写入中…';
+          const r = await Hub.logTrace({
+            scenario: 'media', agentId: AGENT_ID, agentName: AGENT_NAME,
+            intent: cur.title, sopId: cur.sopId, sopTitle: cur.sopTitle,
+            duration: cur.duration || 90, transcript,
+          });
+          logBtn.disabled = false; logBtn.textContent = '▶ 记录本次语音留痕';
+          if (r) Hub.toast('已写入语音留痕中心，可在留痕页查看');
+          else Hub.toast('写入失败，请重试', true);
+        });
+      }
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>照护助理 Agent · 灵犀统一 Agent 运营中台</title>
+  <link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+  <div id="view"></div>
+  <script src="assets/app.js"></script>
+  <script src="assets/chat.js"></script>
+  <script src="assets/voice.js"></script>
+  <script>
+    Hub.boot({ page: 'eldercare_agent', scenario: 'eldercare' }).then(({ data, me, perms }) => {
+      const V = document.getElementById('view');
+      const ag = Hub.agentsOf('eldercare').find(a => a.id === 'ag_e_care') || {};
+      const sops = Hub.sopsOf('eldercare');
+      const kbs = Hub.kbsOf('eldercare');
+      const sop = id => sops.find(s => s.id === id) || { title: '', steps: [] };
+      const sopFall = sop('sop_e_fall'), sopDaily = sop('sop_e_daily'), sopFamily = sop('sop_e_family');
+
+      // 企微卡片 helper
+      const card = (title, rows, foot) =>
+        `<div class="c-card"><div class="ch">${title}</div><div class="cb">` +
+        rows.map(r => `<div class="r"><span class="l">${r[0]}</span><span>${r[1]}</span></div>`).join('') +
+        `</div>${foot ? `<div class="cf">${foot}</div>` : ''}</div>`;
+      const sopCard = (title, s, trig) => card('📋 SOP 推送 · ' + Hub.esc(title),
+        [['触发', Hub.esc(trig)], ['优先级', s.priority + (s.mustAck ? ' · 需签收' : '')]].concat(
+          s.steps.map((st, i) => ['步骤 ' + (i + 1), Hub.esc(st)])), '▷ 点击签收并按步骤处置');
+
+      // ---------- 语音场景（含留痕元数据）----------
+      const SC = [
+        {
+          id: 'assign', title: '接单派工', chip: '接单派工', intent: '语音接单派工', duration: 62,
+          intro: '企业微信 · 照护助理 Agent · 早班工作台',
+          steps: [
+            { from: 'user', voice: '我是刘敏，今天早班，帮我看看 3 楼有哪些照护任务。', dur: 6 },
+            { from: 'agent', text: '早上好，刘敏。为你拉取 3 楼今日待办：' },
+            { from: 'agent', html: card('📝 早班待办 · 3 楼', [['3-08 张秀兰', '晨间翻身+体征'], ['2-15 李国强', '压疮护理'], ['1-06 王桂芳', '用药提醒'], ['分级', '半失能 / 失能 / 自理']], '共 3 项 · 点击接单') },
+            { from: 'user', voice: '先接 3-08 张秀兰。', dur: 3 },
+            { from: 'agent', html: card('✅ 派工单 · 3-08', [['照护项', '晨间翻身+体征'], ['负责人', '护理员·刘敏'], ['时间', '09:00'], ['要求', '按分级 SOP 执行']], '已接单 · 完成后语音回复即可自动记录') },
+            { from: 'agent', text: '已接单。完成后对我说「3-08 已完成翻身，体征正常」，我会自动写入照护记录。' },
+          ],
+          trace: [
+            { who: 'user', text: '我是刘敏，今天早班，帮我看看 3 楼有哪些照护任务。' },
+            { who: 'agent', text: '早班待办 3 项：3-08 晨间翻身+体征、2-15 压疮护理、1-06 用药提醒。' },
+            { who: 'user', text: '先接 3-08 张秀兰。' },
+            { who: 'agent', text: '已生成 3-08 派工单并接单，完成后语音回复自动写入照护记录。' },
+          ],
+        },
+        {
+          id: 'sopqa', title: 'SOP 问答', chip: 'SOP 问答', intent: '照护 SOP 问答', duration: 58,
+          sopId: sopDaily.id, sopTitle: sopDaily.title,
+          intro: '照护助理 Agent · 检索「照护规范库 / 日常照护 SOP」',
+          steps: [
+            { from: 'user', voice: '半失能老人晨间照护的标准流程是什么？', dur: 5 },
+            { from: 'agent', text: '已检索《照护规范库》与《日常照护 SOP》，标准流程如下：' },
+            { from: 'agent', html: card('📖 日常照护 SOP', sopDaily.steps.map((st, i) => ['步骤 ' + (i + 1), Hub.esc(st)]), '来源：照护规范库 · 210 篇') },
+            { from: 'user', voice: '翻身间隔多久一次？', dur: 3 },
+            { from: 'agent', text: '半失能建议每 2 小时翻身一次；压疮高风险（如 2-15 李国强）建议 1.5 小时一次，并记录皮肤情况。' },
+          ],
+          trace: [
+            { who: 'user', text: '半失能老人晨间照护的标准流程是什么？' },
+            { who: 'agent', text: '按《日常照护 SOP》：晨间查房与体征记录、按分级完成照护项、三餐与用药核对、晚间巡查与交班。' },
+            { who: 'user', text: '翻身间隔多久一次？' },
+            { who: 'agent', text: '半失能每 2 小时一次，压疮高风险 1.5 小时一次并记录皮肤情况。' },
+          ],
+        },
+        {
+          id: 'fall', title: '跌倒/急症应急', chip: '跌倒应急', intent: '跌倒/急症应急处置', duration: 90,
+          sopId: sopFall.id, sopTitle: sopFall.title,
+          intro: '⚠ 2-15 床呼叫铃触发 · 疑似跌倒',
+          steps: [
+            { from: 'agent', text: '检测到 2-15 床李国强呼叫铃触发，疑似跌倒，已命中并推送《跌倒/急症应急 SOP》，请立即处置：' },
+            { from: 'agent', html: sopCard(sopFall.title, sopFall, '2-15 床 · 疑似跌倒') },
+            { from: 'user', voice: '我到现场了，老人滑坐在床边，意识清醒。', dur: 5 },
+            { from: 'agent', text: '第一步：就地评估、勿盲目搬动。已同步通知值班医护与主管。需要呼叫 120 吗？' },
+            { from: 'user', voice: '先不用，医护马上到。', dur: 3 },
+            { from: 'agent', text: '已登记事件并通知家属。请稍后补充处置记录并拍照留档——注意仅拍环境、不拍病患影像。' },
+            { from: 'agent', sys: '本次处置已进入健康预警看板，等待闭环' },
+          ],
+          trace: [
+            { who: 'agent', text: '2-15 床疑似跌倒，已推送《跌倒/急症应急 SOP》（P0 需签收）。' },
+            { who: 'user', text: '我到现场了，老人滑坐在床边，意识清醒。' },
+            { who: 'agent', text: '就地评估、勿盲目搬动，已通知医护与主管，是否呼叫 120？' },
+            { who: 'user', text: '先不用，医护马上到。' },
+            { who: 'agent', text: '已登记事件、通知家属，提醒仅拍环境不拍病患影像。' },
+          ],
+        },
+        {
+          id: 'family', title: '家属回访播报', chip: '家属回访', intent: '家属回访播报', duration: 70,
+          sopId: sopFamily.id, sopTitle: sopFamily.title,
+          intro: '照护助理 Agent · 每周家属回访',
+          steps: [
+            { from: 'user', voice: '帮我给 1-06 王桂芳家属做本周回访播报。', dur: 5 },
+            { from: 'agent', text: '已生成本周健康播报，触发《家属沟通回访 SOP》：' },
+            { from: 'agent', html: card('👪 本周健康播报 · 1-06 王桂芳', [['体征', '血压/血糖平稳'], ['用药', '按时完成 21/21 次'], ['情绪', '良好 · 参与手工活动'], ['照护', '完成率 100%']], '是否发送家属并回收满意度？') },
+            { from: 'user', voice: '发送。', dur: 2 },
+            { from: 'agent', text: '已推送家属并回收满意度：5 分。家属诉求「希望增加康复活动」已登记并转办康复组。' },
+          ],
+          trace: [
+            { who: 'user', text: '帮我给 1-06 王桂芳家属做本周回访播报。' },
+            { who: 'agent', text: '生成本周播报（体征平稳、用药 21/21、情绪良好、照护完成率 100%），触发家属回访 SOP。' },
+            { who: 'user', text: '发送。' },
+            { who: 'agent', text: '已推送家属、回收满意度 5 分，诉求「增加康复活动」转办康复组。' },
+          ],
+        },
+        {
+          id: 'report', title: '健康异常上报', chip: '健康上报', intent: '健康异常上报', duration: 54,
+          intro: '照护助理 Agent · 体征异常上报',
+          steps: [
+            { from: 'user', voice: '2-15 李国强血压 162/98，偏高。', dur: 5 },
+            { from: 'agent', text: '已记录体征异常并生成橙色预警，已通知值班医护，建议 30 分钟后复测。' },
+            { from: 'agent', html: card('🟠 预警工单 · 2-15', [['类型', '体征异常'], ['详情', '血压 162/98'], ['分级', '橙色'], ['处置', '已通知医护 · 待复测']], '已汇入健康预警看板') },
+            { from: 'user', voice: '同步给机构管理看板。', dur: 3 },
+            { from: 'agent', text: '已同步机构管理 Agent 与健康预警看板。本次会话可一键记录语音留痕。' },
+          ],
+          trace: [
+            { who: 'user', text: '2-15 李国强血压 162/98，偏高。' },
+            { who: 'agent', text: '已生成橙色体征异常预警、通知医护、建议 30 分钟复测。' },
+            { who: 'user', text: '同步给机构管理看板。' },
+            { who: 'agent', text: '已同步机构管理 Agent 与健康预警看板。' },
+          ],
+        },
+      ];
+
+      V.innerHTML = `
+        <div class="wrap">
+          ${Hub.sceneSubnav('eldercare', '_agent')}
+          <div class="page-intro">
+            <b>照护助理 Agent · 交互原型</b> —— 护理员在企业微信里对 Agent 说话，语音经
+            <b class="tacc">ASR</b> 转写、识别意图，命中知识库即作答、命中事件即推送 SOP 与处置要求，
+            全过程可一键写入语音留痕中心。 <span class="tr">底座：${Hub.esc(data.platform.base)}</span>
+          </div>
+          <div class="flex gap12 wrapf" style="align-items:flex-start">
+            <div class="phone-stage" id="chat-host"></div>
+            <div class="panel" style="flex:1;min-width:300px;max-width:440px">
+              <div class="panel-t"><h3>🎙 ${Hub.esc(ag.name || '照护助理 Agent')}</h3>${Hub.statusPill(ag.status || 'on')}</div>
+              <div class="kv"><span class="k">角色</span><span>${Hub.esc(ag.role || '护理员')}</span></div>
+              <div class="kv mt8"><span class="k">版本</span><span class="mono">${Hub.esc(ag.version || 'v2.1')}</span></div>
+              <div class="kv mt8"><span class="k">负责人</span><span>${Hub.esc(ag.owner || '马强')}</span></div>
+              <div class="kv mt8"><span class="k">调用量</span><span class="mono">${Hub.esc((ag.calls || 0).toLocaleString())} 次</span></div>
+
+              <div class="section-t" style="margin-top:18px">技能</div>
+              <div class="chips">${(ag.skills || []).map(s => `<span class="chip-tag">${Hub.esc(s)}</span>`).join('')}</div>
+
+              <div class="section-t">绑定知识库</div>
+              <div class="chips">${(ag.kbIds || []).map(id => { const k = kbs.find(x => x.id === id); return k ? `<span class="chip-tag">📚 ${Hub.esc(k.name)}</span>` : ''; }).join('')}</div>
+
+              <div class="section-t">绑定 SOP</div>
+              <div class="chips">${(ag.sopIds || []).map(id => { const s = sops.find(x => x.id === id); return s ? `<span class="pill ${s.priority === 'P0' ? 'bad' : 'acc'}">📋 ${Hub.esc(s.title)}</span>` : ''; }).join('')}</div>
+
+              <div class="mt24" id="trace-zone"></div>
+              <div class="hint mt12">提示：切换上方语音场景可体验不同处置流程；跌倒/急症场景会命中 P0 SOP 并推送签收要求。</div>
+            </div>
+          </div>
+        </div>`;
+
+      // ---------- 留痕当前场景跟踪 ----------
+      let currentScene = SC[0];
+      HubChat.mount(document.getElementById('chat-host'), {
+        live: true,
+        contact: { name: '照护助理 Agent', corp: '@晚晴养老院', sub: '商汤 AI 技术底座 · 企业微信' },
+        agent: { name: '照护助理 Agent', avatar: 'S' },
+        user: { name: '刘敏', avatar: '敏' },
+        scenarios: SC.map(s => ({ id: s.id, title: s.title, chip: s.chip, intro: s.intro, steps: s.steps })),
+        onScenarioEnd: (sc) => { const m = SC.find(x => x.id === sc.id); if (m) currentScene = m; },
+      });
+      // 场景切换按钮同步 currentScene（HubChat 生成的 .scene-btn）
+      setTimeout(() => {
+        document.querySelectorAll('#chat-host .scene-bar .scene-btn').forEach(b =>
+          b.addEventListener('click', () => { const m = SC.find(x => x.id === b.dataset.id); if (m) currentScene = m; }));
+      }, 60);
+
+      // ---------- 留痕按钮 ----------
+      const tz = document.getElementById('trace-zone');
+      if (perms.useAgent) {
+        tz.innerHTML = `<button class="btn btn-primary" id="log-trace" style="width:100%">▶ 记录本次语音留痕</button>`;
+        document.getElementById('log-trace').addEventListener('click', async () => {
+          const cur = currentScene;
+          const r = await Hub.logTrace({
+            scenario: 'eldercare', agentId: 'ag_e_care', agentName: '照护助理 Agent',
+            intent: cur.intent, sopId: cur.sopId, sopTitle: cur.sopTitle,
+            duration: cur.duration, transcript: cur.trace,
+          });
+          if (r) Hub.toast('已写入语音留痕中心：' + cur.title);
+          else Hub.toast('留痕写入失败', true);
+        });
+      } else {
+        tz.innerHTML = `<div class="ro-note">当前角色为观察员，仅可查看原型，不产生语音留痕。</div>`;
+      }
+    });
+  </script>
+</body>
+</html>

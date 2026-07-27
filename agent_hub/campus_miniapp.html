@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>数字校园 · 家校通小程序 · 灵犀统一 Agent 运营中台</title>
+  <link rel="stylesheet" href="assets/style.css">
+  <style>
+    /* 家校通小程序（家长端）· 局部浅色样式，仅作用于手机内 */
+    .mini-head { background: linear-gradient(135deg, #3E7BFA, #5A6BF5); color: #fff; padding: 12px 16px 13px; font-weight: 700; font-size: 16px; display: flex; align-items: center; gap: 7px; }
+    .mini-body { flex: 1; overflow-y: auto; background: #f2f3f5; padding: 12px; }
+    .mini-tab { display: flex; background: #fff; border-top: 1px solid #e6e6e6; }
+    .mt-i { flex: 1; text-align: center; padding: 6px 0 7px; font-size: 10.5px; color: #9aa0a6; cursor: pointer; }
+    .mt-i.active { color: #3E7BFA; }
+    .mt-i .ico { display: block; font-size: 19px; margin-bottom: 2px; filter: grayscale(1); opacity: .6; }
+    .mt-i.active .ico { filter: none; opacity: 1; }
+    .mcard { background: #fff; border-radius: 11px; padding: 13px 14px; margin-bottom: 11px; box-shadow: 0 1px 3px rgba(0,0,0,.05); }
+    .mcard h4 { font-size: 14px; color: #1f2329; margin-bottom: 9px; font-weight: 600; }
+    .m-quad { display: grid; grid-template-columns: repeat(4,1fr); gap: 6px; background: #fff; border-radius: 11px; padding: 15px 4px; margin-bottom: 11px; box-shadow: 0 1px 3px rgba(0,0,0,.05); }
+    .m-quad .q { text-align: center; font-size: 11px; color: #555; cursor: pointer; }
+    .m-quad .q .qi { display: block; font-size: 23px; margin-bottom: 4px; }
+    .m-notice { display: flex; gap: 9px; padding: 9px 0; border-bottom: 1px solid #f0f0f0; font-size: 12.8px; color: #333; cursor: pointer; }
+    .m-notice:last-child { border: none; }
+    .m-grade { display: flex; justify-content: space-between; align-items: center; font-size: 13px; color: #333; padding: 6px 0; }
+    .m-grade b { font-family: "SF Mono", monospace; color: #1f2329; }
+    .m-btn { background: #3E7BFA; color: #fff; border-radius: 9px; padding: 12px; text-align: center; font-size: 14px; font-weight: 600; cursor: pointer; border: none; width: 100%; }
+    .m-field { margin-bottom: 11px; }
+    .m-field label { display: block; font-size: 12px; color: #8a9099; margin-bottom: 5px; }
+    .m-field input, .m-field textarea, .m-field select { width: 100%; border: 1px solid #e2e4e8; border-radius: 8px; padding: 9px 10px; font-size: 13px; background: #fbfbfc; color: #1f2329; }
+    .m-row { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #f0f0f0; font-size: 13px; color: #333; cursor: pointer; }
+    .m-row:last-child { border: none; }
+    .m-row .l { color: #8a9099; }
+    .m-hint { font-size: 11px; color: #9aa0a6; text-align: center; margin-top: 9px; }
+  </style>
+</head>
+<body>
+  <div id="view"></div>
+  <script src="assets/app.js"></script>
+  <script>
+    Hub.boot({ page: 'campus_miniapp', scenario: 'campus' }).then(({ data, me, perms }) => {
+      const V = document.getElementById('view');
+      const notices = Hub.data.campus.notices;
+
+      const HEAD = { home: '🏫 家校通', leave: '📝 在线请假', consult: '💬 招生咨询', mine: '👤 我的' };
+
+      const screens = {
+        home: () => `
+          <div class="mcard" style="background:linear-gradient(135deg,#eaf1ff,#fff)">
+            <h4>👋 王同学家长，下午好</h4>
+            <div style="font-size:12px;color:#666">孩子：王小明 · 初一(3)班 · 学号 20260318</div>
+          </div>
+          <div class="m-quad">
+            <div class="q" data-mact="grade"><span class="qi">📊</span>成绩</div>
+            <div class="q" data-mact="go-leave"><span class="qi">📝</span>请假</div>
+            <div class="q" data-mact="pay"><span class="qi">💳</span>缴费</div>
+            <div class="q" data-mact="meet"><span class="qi">📣</span>家长会</div>
+          </div>
+          <div class="mcard"><h4>📢 最新通知</h4>
+            ${notices.map(n => `<div class="m-notice" data-mact="notice"><span>📌</span><div><div>${Hub.esc(n.title)}</div><div style="color:#9aa0a6;font-size:11px;margin-top:2px">${Hub.esc(n.to)} · 阅读率 ${Hub.esc(n.read)} · ${Hub.esc((n.ts || '').slice(5, 16))}</div></div></div>`).join('')}
+          </div>
+          <div class="mcard"><h4>📊 期末成绩速览</h4>
+            <div class="m-grade"><span>语文</span><b>92</b></div>
+            <div class="m-grade"><span>数学</span><b>88</b></div>
+            <div class="m-grade"><span>英语</span><b>95</b></div>
+            <div style="text-align:right;font-size:11.5px;color:#3E7BFA;margin-top:5px;cursor:pointer" data-mact="grade">年级排名前 15% · 查看详情 ›</div>
+          </div>`,
+        leave: () => `
+          <div class="mcard"><h4>📝 在线请假</h4>
+            <div class="m-field"><label>学生</label><input value="王小明 · 初一(3)班" readonly></div>
+            <div class="m-field"><label>请假类型</label><select><option>病假</option><option>事假</option><option>其他</option></select></div>
+            <div class="m-field"><label>时长</label><select><option>半天</option><option selected>1 天</option><option>2 天</option><option>3 天及以上</option></select></div>
+            <div class="m-field"><label>事由</label><textarea rows="3" placeholder="请简要说明请假原因">孩子发烧，需在家休息一天</textarea></div>
+            <button class="m-btn" data-mact="submit-leave">提交请假申请</button>
+            <div class="m-hint">提交后由班主任审批 · 结果推送至企业微信</div>
+          </div>
+          <div class="mcard"><h4>🗂 近期请假记录</h4>
+            <div class="m-row"><span class="l">2026-06-12 · 病假 1 天</span><span style="color:#07C160">已通过</span></div>
+            <div class="m-row"><span class="l">2026-05-08 · 事假半天</span><span style="color:#07C160">已通过</span></div>
+          </div>`,
+        consult: () => `
+          <div class="mcard" style="text-align:center">
+            <div style="font-size:34px">🎙</div>
+            <h4 style="margin:6px 0 0">语音问一问</h4>
+            <div style="font-size:12px;color:#8a9099;margin:6px 0 12px">招生政策 / 转学插班 / 校历课表 / 收费标准</div>
+            <button class="m-btn" data-mact="voice-ask">🎙 按住说话，问招生老师</button>
+            <div class="m-hint">由「招生咨询 Agent」实时应答 · 商汤语音技术</div>
+          </div>
+          <div class="mcard"><h4>🔥 常见问题</h4>
+            ${['初一转学插班还有名额吗？', '2026 学年收费标准是多少？', '校历与课后服务怎么安排？', '住宿申请条件与流程'].map(q => `<div class="m-notice" data-mact="faq"><span>❓</span><div>${q}</div></div>`).join('')}
+          </div>`,
+        mine: () => `
+          <div class="mcard" style="display:flex;align-items:center;gap:12px">
+            <div style="width:48px;height:48px;border-radius:50%;background:#3E7BFA;color:#fff;display:grid;place-items:center;font-size:18px;font-weight:600">王</div>
+            <div><div style="font-size:15px;font-weight:600;color:#1f2329">王同学家长</div><div style="font-size:12px;color:#9aa0a6">已绑定 1 名学生 · 认证家长</div></div>
+          </div>
+          <div class="mcard"><h4>👨‍👩‍👦 我的孩子</h4>
+            <div class="m-row"><span class="l">姓名</span><span>王小明</span></div>
+            <div class="m-row"><span class="l">班级</span><span>初一(3)班</span></div>
+            <div class="m-row"><span class="l">班主任</span><span>李老师</span></div>
+          </div>
+          <div class="mcard"><h4>⚙ 设置</h4>
+            <div class="m-row" data-mact="setting"><span class="l">消息通知</span><span>开 ›</span></div>
+            <div class="m-row" data-mact="setting"><span class="l">绑定学生</span><span>管理 ›</span></div>
+            <div class="m-row" data-mact="setting"><span class="l">隐私与安全</span><span>›</span></div>
+          </div>`,
+      };
+
+      V.innerHTML = `
+        <div class="wrap">
+          ${Hub.sceneSubnav('campus', '_miniapp')}
+          <div class="page-intro">
+            <b>家校通 · 家长端小程序</b> —— 面向家长的一线触点：通知、成绩、在线请假、语音咨询随身办。
+            小程序由学校信息化服务商开发运营，商汤提供语音识别、智能问答与招生咨询 Agent 的 AI 能力底座。
+          </div>
+
+          <div class="flex gap12 wrapf" style="align-items:flex-start">
+            <div class="phone-stage" style="flex:0 0 auto">
+              <div class="phone"><div class="notch"></div><div class="screen">
+                <div class="statusbar"><span>9:41</span><span class="right">●●●●● 5G ▮▮▮</span></div>
+                <div class="mini-head" id="mhead">🏫 家校通</div>
+                <div class="mini-body" id="mbody"></div>
+                <div class="mini-tab" id="mtab">
+                  <div class="mt-i active" data-s="home"><span class="ico">🏠</span>首页</div>
+                  <div class="mt-i" data-s="leave"><span class="ico">📝</span>请假</div>
+                  <div class="mt-i" data-s="consult"><span class="ico">💬</span>咨询</div>
+                  <div class="mt-i" data-s="mine"><span class="ico">👤</span>我的</div>
+                </div>
+              </div></div>
+            </div>
+
+            <div class="panel" style="flex:1;min-width:300px">
+              <div class="panel-t"><h3>📱 一线触点 · 家长端</h3></div>
+              <p class="t2 small">底部四个 Tab 对应家长最高频的四件事。小程序为第三方开发的独立应用，通过统一账号体系与中台后端打通。</p>
+              <div class="section-t" style="margin-top:16px">商汤 AI 能力嵌入</div>
+              <div class="kv" style="margin-bottom:8px"><span class="k">语音咨询</span><span class="t2">按住说话，招生咨询 Agent 实时应答（ASR + 大模型）</span></div>
+              <div class="kv" style="margin-bottom:8px"><span class="k">智能问答</span><span class="t2">校历 / 收费 / 转学等常见问题命中招生政策库</span></div>
+              <div class="kv" style="margin-bottom:8px"><span class="k">成绩问答</span><span class="t2">按绑定学生播报成绩与年级位次</span></div>
+              <div class="kv"><span class="k">通知回执</span><span class="t2">家校通知阅读回执实时回流看板</span></div>
+              <div class="section-t">与中台的关系</div>
+              <p class="tr small">家长在小程序的咨询与请假，会转化为工作台的「招生线索 / 校园事件」，并可在数据看板与语音留痕中心追溯，形成 C 端触点 → B 端运营 → 数据看板的闭环。</p>
+            </div>
+          </div>
+        </div>`;
+
+      const mbody = document.getElementById('mbody');
+      const mtab = document.getElementById('mtab');
+      const mhead = document.getElementById('mhead');
+
+      function showScreen(s) {
+        [...mtab.children].forEach(t => t.classList.toggle('active', t.dataset.s === s));
+        mhead.textContent = HEAD[s] || '🏫 家校通';
+        mbody.innerHTML = screens[s]();
+        mbody.scrollTop = 0;
+      }
+
+      mtab.addEventListener('click', e => { const i = e.target.closest('.mt-i'); if (i) showScreen(i.dataset.s); });
+      mbody.addEventListener('click', e => {
+        const t = e.target.closest('[data-mact]'); if (!t) return;
+        const a = t.dataset.mact;
+        if (a === 'go-leave') return showScreen('leave');
+        const msg = {
+          grade: '正在打开成绩详情（演示）', pay: '跳转在线缴费（演示）', meet: '查看家长会安排（演示）',
+          notice: '打开通知详情（演示）', faq: '正在接入招生咨询 Agent 语音应答…', 'voice-ask': '🎙 正在接入「招生咨询 Agent」…',
+          'submit-leave': '请假申请已提交，等待班主任审批', setting: '设置项（演示）',
+        }[a] || '演示功能';
+        Hub.toast(msg);
+      });
+
+      showScreen('home');
+    });
+  </script>
+</body>
+</html>

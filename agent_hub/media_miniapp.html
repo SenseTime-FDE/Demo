@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>数字传媒 · 采编小程序 · 灵犀统一 Agent 运营中台</title>
+  <link rel="stylesheet" href="assets/style.css">
+  <style>
+    .mp-grid { display: grid; grid-template-columns: minmax(360px, 420px) 1fr; gap: 20px; align-items: start; }
+    @media (max-width: 980px) { .mp-grid { grid-template-columns: 1fr; } }
+    /* 小程序（手机内自绘）局部样式，仅作用于本页 .phone 内 */
+    .mp-app { flex: 1; display: flex; flex-direction: column; min-height: 0; background: #f2f3f5; }
+    .mp-body { flex: 1; overflow-y: auto; padding: 12px 12px 16px; }
+    .mp-screen { display: none; } .mp-screen.on { display: block; }
+    .mp-h { font-size: 16px; font-weight: 700; color: #1a1a1a; margin: 2px 2px 12px; display: flex; align-items: baseline; gap: 8px; }
+    .mp-h span { font-size: 11px; color: #999; font-weight: 400; }
+    .mp-card { background: #fff; border-radius: 13px; padding: 13px 14px; margin-bottom: 12px; box-shadow: 0 1px 4px rgba(0,0,0,.05); }
+    .mp-ct { font-size: 13px; font-weight: 700; color: #222; margin-bottom: 11px; display: flex; align-items: center; }
+    .mp-ct .more { margin-left: auto; font-size: 11px; color: #999; font-weight: 400; }
+    .mp-todo { display: flex; text-align: center; }
+    .mp-todo .c { flex: 1; border-right: 1px solid #f0f0f0; }
+    .mp-todo .c:last-child { border: none; }
+    .mp-todo b { font-size: 24px; font-family: var(--mono); color: #222; display: block; line-height: 1.1; }
+    .mp-todo b.warn { color: #e08a00; } .mp-todo b.bad { color: #e2453a; } .mp-todo b.acc { color: var(--accent); }
+    .mp-todo span { font-size: 11px; color: #888; }
+    .mp-hot { display: flex; align-items: center; padding: 8px 0; border-bottom: 1px solid #f4f4f4; }
+    .mp-hot:last-child { border: none; }
+    .mp-hot .rk { width: 20px; height: 20px; border-radius: 6px; background: #f0f1f3; color: #999; font-size: 11px; font-weight: 700; display: grid; place-items: center; margin-right: 9px; }
+    .mp-hot .rk.top { background: var(--accent); color: #fff; }
+    .mp-hot .w { font-size: 13.5px; color: #222; font-weight: 600; }
+    .mp-hot .h { margin-left: auto; font-size: 11.5px; color: #999; font-family: var(--mono); }
+    .mp-tr-up { color: #e2453a; } .mp-tr-down { color: #16a34a; } .mp-tr-flat { color: #999; }
+    .mp-big { width: 100%; border: none; border-radius: 13px; padding: 15px; font-size: 15px; font-weight: 700; color: #fff; background: linear-gradient(135deg, var(--accent), #d8452a); cursor: pointer; box-shadow: 0 6px 16px rgba(242,96,60,.32); }
+    .mp-kw { display: flex; align-items: center; margin-bottom: 8px; }
+    .mp-kw b { font-size: 15px; color: #1a1a1a; }
+    .mp-kw .heat { margin-left: auto; font-size: 11px; color: var(--accent); background: rgba(242,96,60,.1); padding: 2px 8px; border-radius: 10px; font-weight: 700; }
+    .mp-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 11px; }
+    .mp-tag { font-size: 11px; color: #667; background: #f2f3f5; padding: 2px 8px; border-radius: 6px; }
+    .mp-mini { border: none; border-radius: 9px; padding: 8px 14px; font-size: 12.5px; font-weight: 700; color: #fff; background: var(--accent); cursor: pointer; }
+    .mp-mini.ghost { background: #fff; color: var(--accent); border: 1px solid var(--accent); }
+    .mp-title { font-size: 14px; font-weight: 600; color: #1a1a1a; line-height: 1.45; margin-bottom: 7px; }
+    .mp-meta { display: flex; align-items: center; gap: 7px; font-size: 11px; color: #999; margin-bottom: 9px; }
+    .mp-badge { font-size: 10.5px; padding: 1px 7px; border-radius: 6px; }
+    .mp-b-on { background: #e6f7ec; color: #1a9e57; } .mp-b-wait { background: #fff3e0; color: #e08a00; } .mp-b-draft { background: #eef0f2; color: #888; }
+    .mp-chn { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 11px; }
+    .mp-ch { font-size: 11px; padding: 3px 9px; border-radius: 14px; border: 1px solid #e2e4e8; color: #778; cursor: pointer; user-select: none; }
+    .mp-ch.on { border-color: var(--accent); color: var(--accent); background: rgba(242,96,60,.08); }
+    .mp-ch.on::before { content: '✓ '; }
+    .mp-me { display: flex; align-items: center; gap: 13px; }
+    .mp-av { width: 52px; height: 52px; border-radius: 50%; display: grid; place-items: center; color: #fff; font-size: 18px; font-weight: 700; background: linear-gradient(135deg, var(--accent), #7c3aed); flex: none; }
+    .mp-me b { font-size: 16px; color: #1a1a1a; }
+    .mp-role { font-size: 12px; color: #999; margin-top: 2px; }
+    .mp-menu { display: flex; align-items: center; padding: 12px 2px; border-bottom: 1px solid #f4f4f4; font-size: 13.5px; color: #333; cursor: pointer; }
+    .mp-menu:last-child { border: none; } .mp-menu .ic { margin-right: 10px; } .mp-menu .ar { margin-left: auto; color: #ccc; }
+    .mp-tabbar { display: flex; background: #fff; border-top: 1px solid #e6e6e6; }
+    .mp-tab { flex: 1; text-align: center; padding: 7px 0 9px; font-size: 10.5px; color: #999; cursor: pointer; }
+    .mp-tab.on { color: var(--accent); }
+    .mp-tab .i { font-size: 20px; display: block; line-height: 1.3; filter: grayscale(1) opacity(.55); }
+    .mp-tab.on .i { filter: none; }
+    .mp-note-li { font-size: 12.5px; color: var(--txt-2); padding: 6px 0; display: flex; gap: 9px; }
+    .mp-note-li b { color: var(--accent); }
+  </style>
+</head>
+<body>
+  <div id="view"></div>
+  <script src="assets/app.js"></script>
+  <script>
+    Hub.boot({ page: 'media_miniapp', scenario: 'media' }).then(({ data, me, perms }) => {
+      const V = document.getElementById('view');
+      const E = Hub.esc;
+      const M = data.media;
+      const chName = {}; M.channels.forEach(c => chName[c.id] = c.name);
+      const trendCls = (t) => t === 'up' ? 'mp-tr-up' : t === 'down' ? 'mp-tr-down' : 'mp-tr-flat';
+      const trendIco = (t) => t === 'up' ? '↑' : t === 'down' ? '↓' : '→';
+      const waitCnt = M.contents.filter(c => c.status === '待审').length;
+      const draftCnt = M.contents.filter(c => c.status === '草稿').length;
+      const alertCnt = M.sentiment.summary.alerts;
+      const badge = (st) => st === '已发' ? '<span class="mp-badge mp-b-on">已发</span>' : st === '待审' ? '<span class="mp-badge mp-b-wait">待审</span>' : '<span class="mp-badge mp-b-draft">草稿</span>';
+
+      // ---- 屏幕内容 ----
+      const homeScreen = `<div class="mp-screen on" data-screen="home">
+        <div class="mp-h">采编工作台 <span>7 月 16 日 · 周四</span></div>
+        <div class="mp-card">
+          <div class="mp-ct">今日待办</div>
+          <div class="mp-todo">
+            <div class="c"><b class="warn">${waitCnt}</b><span>待审稿件</span></div>
+            <div class="c"><b class="bad">${alertCnt}</b><span>舆情预警</span></div>
+            <div class="c"><b class="acc">${draftCnt}</b><span>草稿箱</span></div>
+          </div>
+        </div>
+        <div class="mp-card">
+          <div class="mp-ct">🔥 今日热词 · Top3 <span class="more" data-go="topics">更多 ›</span></div>
+          ${M.keywords.slice(0, 3).map((k, i) => `<div class="mp-hot">
+            <span class="rk${i === 0 ? ' top' : ''}">${i + 1}</span>
+            <span class="w">${E(k.word)}</span>
+            <span class="h">${E(k.heat)} <span class="${trendCls(k.trend)}">${trendIco(k.trend)}</span></span>
+          </div>`).join('')}
+        </div>
+        <button class="mp-big" id="mpVoice">🎙 语音写稿</button>
+      </div>`;
+
+      const topicScreen = `<div class="mp-screen" data-screen="topics">
+        <div class="mp-h">热点选题 <span>商汤 AI · 热词推荐</span></div>
+        ${M.keywords.map(k => `<div class="mp-card">
+          <div class="mp-kw"><b><span class="${trendCls(k.trend)}">${trendIco(k.trend)}</span> ${E(k.word)}</b><span class="heat">热度 ${E(k.heat)}</span></div>
+          <div class="mp-tags">${k.related.map(r => `<span class="mp-tag">#${E(r)}</span>`).join('')}</div>
+          <button class="mp-mini" data-cg data-word="${E(k.word)}">一键成稿</button>
+        </div>`).join('')}
+      </div>`;
+
+      const distScreen = `<div class="mp-screen" data-screen="dist">
+        <div class="mp-h">一键分发 <span>多平台适配</span></div>
+        <div class="mp-card">
+          <div class="mp-ct">默认分发渠道 <span class="more">点击切换</span></div>
+          <div class="mp-chn" id="mpChn">
+            ${M.channels.filter(c => c.status === 'on').map((c, i) => `<span class="mp-ch${i < 4 ? ' on' : ''}" data-ch="${c.id}">${E(c.name)}</span>`).join('')}
+          </div>
+        </div>
+        ${M.contents.map(c => `<div class="mp-card">
+          <div class="mp-title">${E(c.title)}</div>
+          <div class="mp-meta">${badge(c.status)} · ${E(c.author)}${c.reads !== '—' ? ' · 阅读 ' + E(c.reads) : ''}</div>
+          <button class="mp-mini${c.status === '草稿' ? ' ghost' : ''}" data-dist data-title="${E(c.title)}" data-n="${c.channels.length || 4}">${c.status === '草稿' ? '送审后分发' : '一键分发'}</button>
+        </div>`).join('')}
+      </div>`;
+
+      const initials = (me.name || 'U').slice(-2);
+      const meScreen = `<div class="mp-screen" data-screen="me">
+        <div class="mp-h">我的</div>
+        <div class="mp-card mp-me">
+          <div class="mp-av">${E(initials)}</div>
+          <div><b>${E(me.name)}</b><div class="mp-role">${E(me.roleLabel)} · 采编中心</div></div>
+        </div>
+        <div class="mp-card">
+          <div class="mp-todo">
+            <div class="c"><b>${M.contents.length}</b><span>我的稿件</span></div>
+            <div class="c"><b>326万</b><span>本周阅读</span></div>
+            <div class="c"><b>1280</b><span>创作积分</span></div>
+          </div>
+        </div>
+        <div class="mp-card">
+          <div class="mp-menu"><span class="ic">📝</span>我的草稿<span class="ar">›</span></div>
+          <div class="mp-menu"><span class="ic">📤</span>分发记录<span class="ar">›</span></div>
+          <div class="mp-menu"><span class="ic">🛡</span>合规提醒<span class="ar">›</span></div>
+          <div class="mp-menu"><span class="ic">🎙</span>语音留痕<span class="ar">›</span></div>
+        </div>
+      </div>`;
+
+      const tabs = [
+        { k: 'home', ic: '🏠', label: '首页' },
+        { k: 'topics', ic: '💡', label: '选题' },
+        { k: 'dist', ic: '📤', label: '分发' },
+        { k: 'me', ic: '👤', label: '我的' },
+      ];
+
+      V.innerHTML = `<div class="wrap">
+        ${Hub.sceneSubnav('media', '_miniapp')}
+        <div class="page-intro">
+          <b>采编工作小程序</b> —— 面向记者 / 编辑的一线移动工具：语音写稿、热词选题、一键多平台分发都在指尖完成，
+          背后由采编助理 Agent 与媒体知识库提供 AI 能力。下方为高保真交互原型，可点击底部 Tab 与按钮体验。
+        </div>
+        <div class="mp-grid">
+          <div class="phone-stage">
+            <div class="phone">
+              <div class="notch"></div>
+              <div class="screen">
+                <div class="statusbar"><span>9:41</span><span class="right">●●●●● 5G ▮▮▮</span></div>
+                <div class="mp-app">
+                  <div class="mp-body" id="mpBody">${homeScreen}${topicScreen}${distScreen}${meScreen}</div>
+                  <div class="mp-tabbar" id="mpTabs">
+                    ${tabs.map((t, i) => `<div class="mp-tab${i === 0 ? ' on' : ''}" data-tab="${t.k}"><span class="i">${t.ic}</span>${t.label}</div>`).join('')}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="panel">
+            <div class="panel-t"><h3>📱 小程序 · 第三方开发 × 商汤 AI</h3></div>
+            <p class="t2 small" style="margin-bottom:12px">小程序壳由第三方（媒体信息化服务商）开发与运营，商汤以 API / SDK 方式提供大模型与语音能力，双方分工清晰、能力即插即用。</p>
+            <div class="mp-note-li"><b>语音写稿</b><span>按住说话即录，ASR 转写后由采编助理 Agent 成稿、优化标题。</span></div>
+            <div class="mp-note-li"><b>热词推荐</b><span>7×24 全网热度聚合，一键把热词转成可执行选题初稿。</span></div>
+            <div class="mp-note-li"><b>一键分发</b><span>多平台文风 / 规格自动适配，发布前触发合规检查 SOP。</span></div>
+            <div class="mp-note-li"><b>全程留痕</b><span>语音、成稿、分发、处置动作统一回流平台留痕中心。</span></div>
+            <div class="hint mt16">口径：数字为目标态示意；关键发布动作仍由记者 / 编辑确认，AI 负责提效与合规兜底。</div>
+            <div class="grid g3 mt16">
+              <a class="btn btn-sm" href="media.html">🗂 场景工作台</a>
+              <a class="btn btn-sm" href="media_agent.html">🎙 Agent 原型</a>
+              <a class="btn btn-sm" href="media_board.html">📊 数据看板</a>
+            </div>
+          </div>
+        </div>
+      </div>`;
+
+      // ---- Tab 切换 ----
+      const body = document.getElementById('mpBody');
+      const tabsEl = document.getElementById('mpTabs');
+      function go(k) {
+        tabsEl.querySelectorAll('.mp-tab').forEach(t => t.classList.toggle('on', t.dataset.tab === k));
+        body.querySelectorAll('.mp-screen').forEach(s => s.classList.toggle('on', s.dataset.screen === k));
+        body.scrollTop = 0;
+      }
+      tabsEl.querySelectorAll('.mp-tab').forEach(t => t.addEventListener('click', () => go(t.dataset.tab)));
+
+      // ---- 交互（事件委托）----
+      body.addEventListener('click', (e) => {
+        const more = e.target.closest('[data-go]');
+        if (more) { go(more.dataset.go); return; }
+        if (e.target.id === 'mpVoice') { Hub.toast('🎙 正在唤起语音写稿…（原型示意，请到 Agent 原型体验完整对话）'); return; }
+        const cg = e.target.closest('[data-cg]');
+        if (cg) { Hub.toast('已把「' + cg.dataset.word + '」选题交给采编助理 Agent 生成初稿'); return; }
+        const ch = e.target.closest('.mp-ch');
+        if (ch) { ch.classList.toggle('on'); return; }
+        const dist = e.target.closest('[data-dist]');
+        if (dist) {
+          const sel = body.querySelectorAll('#mpChn .mp-ch.on').length || dist.dataset.n;
+          Hub.toast('《' + dist.dataset.title + '》已分发至 ' + sel + ' 个渠道，回执回收中…');
+          return;
+        }
+      });
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>外部平台对接 · 灵犀统一 Agent 运营中台</title>
+  <link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+  <div id="view"></div>
+  <script src="assets/app.js"></script>
+  <script>
+  Hub.boot({ page: 'integration' }).then(async ({ data, me, perms }) => {
+    const V = document.getElementById('view');
+    const esc = Hub.esc;
+    const SCN = { ecom: '跨境电商', app: '出海App', fintech: '金融科技', local: '本地生活', auto: '汽车保险' };
+    const MODE = { service: 'AI 客服', sales: 'AI 销售', outbound: 'AI 外呼' };
+
+    let ext = {};
+    async function load() { const r = await Hub.api('/api/external'); ext = r; return r; }
+    await load();
+
+    function platformCards() {
+      const ex = ext.external || {};
+      const keys = Object.keys(ex);
+      if (!keys.length) return `<div class="card"><div class="empty" style="padding:36px">
+        尚无外部平台接入。<br><span class="t2">在 声渡 VoxOne 的「统一 Agent 对接」页,填入本中台的 Hub 端点与下方接入密钥,点「同步注册 Agent」即可。</span></div></div>`;
+      return keys.map(k => {
+        const e = ex[k];
+        const ags = e.agents || [];
+        const rows = ags.map(a => `<tr>
+            <td class="mono">${esc(a.name || a.id)}</td>
+            <td><span class="pill acc">${esc(SCN[a.scenario] || a.scenario || '-')}</span></td>
+            <td>${esc(MODE[a.mode] || a.mode || '-')}</td>
+            <td><span class="tag">${esc(a.capability || '-')}</span></td>
+            <td>${(a.langs || []).map(l => `<span class="tag">${esc(l)}</span>`).join(' ') || '-'}</td>
+            <td><button class="btn btn-sm btn-primary" data-invoke="${esc(a.scenario || 'ecom')}|${esc(a.mode || 'service')}|${esc(a.name || '')}">▶ 反向调用</button></td>
+          </tr>`).join('');
+        return `<div class="card" style="margin-bottom:16px">
+          <div class="flex" style="align-items:center;gap:10px;margin-bottom:6px">
+            <div style="width:34px;height:34px;border-radius:9px;background:linear-gradient(135deg,#22C7D6,#7C6CFF);display:grid;place-items:center;font-size:17px">🌊</div>
+            <div><b style="font-size:15px">${esc(e.platform || k)}</b>
+            <div class="t2 mono">回调 ${esc(e.callbackBase || '-')} · 网关令牌 ${e.gwToken ? esc(e.gwToken.slice(0, 6)) + '••••' : '—'}</div></div>
+            <div style="flex:1"></div>
+            <span class="pill ok">已接入 · ${ags.length} 个 Agent</span>
+            <span class="t2">注册于 <span class="mono">${esc((e.ts || '').replace('T', ' ').slice(5, 16))}</span></span>
+          </div>
+          <div style="overflow-x:auto"><table class="tbl"><thead><tr><th>能力 / Agent</th><th>场景</th><th>模式</th><th>能力类型</th><th>语种</th><th>入站调用</th></tr></thead><tbody>${rows || '<tr><td colspan="6" class="t2">无</td></tr>'}</tbody></table></div>
+        </div>`;
+      }).join('');
+    }
+
+    function configCard() {
+      if (!ext.ingestKey) return `<div class="card"><b>接入配置</b><p class="t2" style="margin-top:8px">仅平台管理员可查看接入密钥。已接入平台见右侧。</p></div>`;
+      return `<div class="card">
+        <b>📥 接入配置(供外部平台注册)</b>
+        <p class="t2" style="margin:8px 0 14px">让 声渡 VoxOne 等语音 Agent 平台把能力注册进本中台:在对方平台填写下列信息即可。</p>
+        <div class="field"><label>本中台 Hub 端点</label><div class="flex" style="gap:8px"><input class="inp mono" id="hubUrl" readonly value="${esc(location.origin)}"><button class="btn btn-sm" data-copy="hubUrl">复制</button></div></div>
+        <div class="field"><label>接入密钥 · x-ingest-key(对方填到「Hub 令牌」)</label><div class="flex" style="gap:8px"><input class="inp mono" id="ingKey" readonly value="${esc(ext.ingestKey)}"><button class="btn btn-sm" data-copy="ingKey">复制</button></div></div>
+        <div class="field"><label>注册接口</label><input class="inp mono" readonly value="POST ${esc(ext.registerPath || '/api/external/register')}"></div>
+        <p class="t2">对方平台一键「同步注册」后,其已上线 Agent 即出现在右侧;本中台可对其发起<b>入站反向调用</b>,让它为对应场景实时应答。</p>
+      </div>`;
+    }
+
+    function render() {
+      const ex = ext.external || {};
+      const platforms = Object.keys(ex).length;
+      const totalAgents = Object.values(ex).reduce((s, e) => s + (e.agents ? e.agents.length : 0), 0);
+      const lastTs = Object.values(ex).map(e => e.ts).sort().slice(-1)[0];
+      V.innerHTML = `
+      <div class="wrap">
+        <div class="page-intro">
+          <b>外部平台对接</b> —— 把外部的语音 Agent 平台(如 <b>声渡 VoxOne</b>)接入统一中台:
+          <b>出站</b>由对方把已上线 Agent 注册进来,<b>入站</b>由本中台通过网关反向调用对方,让它为业务场景实时应答。
+        </div>
+        ${Hub.kpis([
+          { k: '接入平台', v: platforms, u: '个', d: platforms ? '语音 Agent 平台' : '暂无接入' },
+          { k: '接入 Agent', v: totalAgents, u: '个', d: '可反向调用' },
+          { k: '最近注册', v: lastTs ? esc(lastTs.replace('T', ' ').slice(5, 16)) : '—', u: '', d: '出站注册' },
+          { k: '接入密钥', v: ext.ingestKey ? '已启用' : '受控', u: '', d: perms.manageUsers ? '平台管理员可见' : '仅管理员可见' },
+        ])}
+        <div class="grid g2" style="margin-top:18px;align-items:start">
+          <div>${configCard()}</div>
+          <div><b style="display:block;margin-bottom:10px">已接入平台与能力</b>${platformCards()}</div>
+        </div>
+      </div>`;
+      wire();
+    }
+
+    function wire() {
+      V.querySelectorAll('[data-copy]').forEach(b => b.onclick = () => {
+        const v = document.getElementById(b.dataset.copy).value;
+        navigator.clipboard && navigator.clipboard.writeText(v); Hub.toast('已复制');
+      });
+      V.querySelectorAll('[data-invoke]').forEach(b => b.onclick = () => {
+        const [scenario, mode, name] = b.dataset.invoke.split('|');
+        openInvoke(scenario, mode, name);
+      });
+    }
+
+    function openInvoke(scenario, mode, name) {
+      const body = `
+        <p class="t2" style="margin-bottom:12px">由 <b>灵犀中台</b> 通过网关反向调用 <b>声渡 VoxOne</b> 的「${esc(name)}」,让它为 <b>${esc(SCN[scenario] || scenario)} · ${esc(MODE[mode] || mode)}</b> 场景实时应答。</p>
+        <div class="field"><label>客户话术</label><input class="inp" id="ivText" value="我要退货怎么退款"></div>
+        <div class="btn-row" style="justify-content:flex-end;margin-top:6px"><button class="btn btn-primary" id="ivGo">▶ 发起入站调用</button></div>
+        <div id="ivOut" style="margin-top:14px"></div>`;
+      Hub.modal('入站反向调用 · 灵犀 → VoxOne', body, (root, close) => {
+        root.querySelector('#ivGo').onclick = async () => {
+          const text = root.querySelector('#ivText').value.trim(); if (!text) return;
+          const out = root.querySelector('#ivOut');
+          out.innerHTML = `<div class="t2">调用中…</div>`;
+          try {
+            const r = await Hub.api('/api/external/invoke', { method: 'POST', body: { source: 'voxone', scenario, mode, text, history: [] } });
+            const rep = r.reply || {};
+            out.innerHTML = `<div class="card" style="background:linear-gradient(135deg,rgba(34,199,214,.08),transparent)">
+              <div class="t2" style="margin-bottom:6px">VoxOne 应答 · 意图「${esc(rep.intent || '-')}」 · 延迟 ${esc(rep.latencyMs || '-')}ms · 引擎 ${esc(rep.source || '-')}${rep.transfer ? ' · <b style="color:#F0513C">建议转人工</b>' : ''}</div>
+              <div style="font-size:14px;line-height:1.6">${esc(rep.text || '(无内容)')}</div></div>
+            <div class="t2" style="margin-top:8px">✅ 端到端联通:灵犀中台 → VoxOne 网关 → SenseAudio 对话引擎 → 返回</div>`;
+            Hub.toast('入站调用成功');
+          } catch (e) { out.innerHTML = `<div class="card" style="border-color:#F0513C"><b style="color:#F0513C">调用失败</b><div class="t2">${esc(e.message)}</div></div>`; }
+        };
+      });
+    }
+
+    render();
+  });
+  </script>
+</body>
+</html>

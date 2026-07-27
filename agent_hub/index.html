@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>平台总览 · 灵犀统一 Agent 运营中台</title>
+  <link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+  <div id="view"></div>
+  <script src="assets/app.js"></script>
+  <script>
+    Hub.boot({ page: 'index' }).then(({ data, me, perms }) => {
+      const V = document.getElementById('view');
+      const agentsOn = data.agents.filter(a => a.status === 'on').length;
+      const stats = Hub.stats || { total: 0, sopHits: 0 };
+      const push = (data.pushLog || []);
+
+      const platKpis = [
+        { k: '在架 Agent', v: agentsOn, u: '/' + data.agents.length, d: '覆盖 ' + data.scenarios.length + ' 大场景' },
+        { k: '语音留痕', v: stats.total, u: '条', d: '命中 SOP ' + stats.sopHits + ' 次' },
+        { k: '知识库', v: data.kbs.length, u: '个', d: '按场景绑定' },
+        { k: 'SOP 库', v: data.sops.length, u: '条', d: '累计推送 ' + data.sops.reduce((s, x) => s + (x.pushCount || 0), 0) + ' 次' },
+        { k: '接入账号', v: (Hub.users ? Hub.users.length : '—'), u: (Hub.users ? '个' : ''), d: perms.manageUsers ? '5 类角色 RBAC' : '角色权限受控' },
+      ];
+
+      const flow = [
+        { n: 'STEP 1', t: '坐席用 Agent', d: '企微/小程序语音发起' },
+        { n: 'STEP 2', t: 'ASR 转写', d: '语音→文字·意图识别' },
+        { n: 'STEP 3', t: '命中知识库/SOP', d: '检索作答·匹配规程' },
+        { n: 'STEP 4', t: '推送 SOP 与要求', d: '按角色/事件下发' },
+        { n: 'STEP 5', t: '全程语音留痕', d: '转写·处置·结果存证' },
+        { n: 'STEP 6', t: '汇入数据看板', d: '经营与合规可视' },
+      ];
+
+      V.innerHTML = `
+        <div class="wrap">
+          <div class="page-intro">
+            <b>${Hub.esc(data.platform.name)}</b> —— 一套带 RBAC 权限与后台数据库的统一 Agent 中台，
+            集中管理数字传媒 / 数字校园 / 智慧养老 / 数字餐饮四大场景的 Agent、知识库与 SOP。
+            最终用户以 Agent 语音交互，全过程数据留痕，并据事件推送对应 SOP 与要求。
+            <span class="tr">底座：${Hub.esc(data.platform.base)}</span>
+          </div>
+
+          <div class="grid g5">${platKpis.map(k => Hub.kpi(k)).join('')}</div>
+
+          <div class="section-t">场景应用 · 进入工作台</div>
+          <div class="grid g4">
+            ${Hub.visibleScenarios().map(s => {
+        const ags = Hub.agentsOf(s.id), on = ags.filter(a => a.status === 'on').length;
+        return `<a class="scene-card" href="${s.id}.html" style="--sc-accent:${s.accent}">
+                <div class="ic">${s.icon}</div>
+                <div class="tag">${Hub.esc(s.tag)}</div>
+                <h3>${Hub.esc(s.name)}</h3>
+                <div class="ds">${Hub.esc(s.desc)}</div>
+                <div class="st"><span>Agent <b>${on}/${ags.length}</b></span><span>知识库 <b>${Hub.kbsOf(s.id).length}</b></span><span>SOP <b>${Hub.sopsOf(s.id).length}</b></span></div>
+              </a>`;
+      }).join('')}
+          </div>
+          ${Hub.visibleScenarios().length < data.scenarios.length ? `<div class="hint mt8">· 仅显示你有权访问的场景；平台管理员可见全部 ${data.scenarios.length} 个。</div>` : ''}
+
+          <div class="section-t">端到端闭环 · 从 Agent 交互到留痕与推送</div>
+          <div class="card">
+            <div class="flow">
+              ${flow.map((n, i) => `<div class="node"><div class="n">${n.n}</div><div class="t">${n.t}</div><div class="d">${n.d}</div></div>${i < flow.length - 1 ? '<div class="arr">›</div>' : ''}`).join('')}
+            </div>
+          </div>
+
+          <div class="grid g2 mt16">
+            <div class="panel">
+              <div class="panel-t"><h3>🎙 最新语音留痕</h3><span class="sub">跨场景 · 全过程留痕</span><span class="sp"></span><a class="pill" href="trace.html">全部 ›</a></div>
+              <div id="recent-trace"><div class="empty">加载中…</div></div>
+            </div>
+            <div class="panel">
+              <div class="panel-t"><h3>📋 最新 SOP 推送</h3><span class="sub">按事件/角色下发</span><span class="sp"></span><a class="pill" href="sop.html">全部 ›</a></div>
+              ${push.length ? `<div class="tr-thread">${push.slice(0, 6).map(p => `
+                <div class="flex ac jb" style="padding:9px 0;border-bottom:1px solid var(--line)">
+                  <div><div class="b small">${Hub.esc(p.title)}</div><div class="tr small">${Hub.esc(p.by)} → ${Hub.esc(p.to)}</div></div>
+                  <div class="right"><span class="pill acc">${Hub.esc((Hub.scenario(p.scenario) || {}).name || p.scenario)}</span><div class="tr small mono mt8">${Hub.esc((p.ts || '').slice(5, 16))}</div></div>
+                </div>`).join('')}</div>` : '<div class="empty">暂无推送</div>'}
+            </div>
+          </div>
+
+          <div class="section-t">平台能力 · 统一管理</div>
+          <div class="grid g4">
+            ${[
+          { href: 'console.html', ic: '🤖', t: 'Agent 控制台', d: '编排 / 上下架 / 绑定知识库与 SOP / 分配场景权限', show: perms.pages.includes('console') },
+          { href: 'trace.html', ic: '🎙', t: '语音留痕中心', d: '全场景会话检索、回放、导出、SOP 命中分析', show: perms.pages.includes('trace') },
+          { href: 'sop.html', ic: '📋', t: 'SOP 与推送', d: 'SOP 库维护、触发规则、按事件推送与签收', show: perms.pages.includes('sop') },
+          { href: 'kb.html', ic: '📚', t: '知识库管理', d: '多知识库、按场景绑定、供 Agent 检索作答', show: perms.pages.includes('kb') },
+        ].filter(x => x.show).map(x => `<a class="card" href="${x.href}" style="text-decoration:none"><div style="font-size:26px">${x.ic}</div><h3 style="font-size:15px;margin:8px 0 4px">${x.t}</h3><div class="tr small">${x.d}</div></a>`).join('')}
+          </div>
+
+          <div class="hint mt24">口径：全部数字为目标态示意，用于讲清场景与闭环，非真实经营数据。数据以真后端 SQLite 持久化，权限由服务器强制校验。</div>
+        </div>`;
+
+      // 最新留痕（拉真实 traces）
+      Hub.traces({ }).then(r => {
+        const box = document.getElementById('recent-trace');
+        const list = (r.traces || []).slice(0, 6);
+        if (!list.length) { box.innerHTML = '<div class="empty">暂无留痕</div>'; return; }
+        box.innerHTML = list.map(t => `
+          <div class="flex ac jb" style="padding:9px 0;border-bottom:1px solid var(--line)">
+            <div>
+              <div class="b small">${Hub.esc(t.agentName)} · ${Hub.esc(t.intent || '会话')}</div>
+              <div class="tr small">${Hub.esc(t.actorName)}${t.sopTitle ? ' · 命中 ' + Hub.esc(t.sopTitle) : ''}</div>
+            </div>
+            <div class="right"><span class="pill acc">${Hub.esc((Hub.scenario(t.scenario) || {}).name || t.scenario)}</span><div class="tr small mono mt8">${Hub.esc((t.ts || '').slice(5, 16))} · ${t.duration}s</div></div>
+          </div>`).join('');
+      });
+    });
+  </script>
+</body>
+</html>

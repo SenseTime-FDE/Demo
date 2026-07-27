@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>语音留痕 · 灵犀统一 Agent 运营中台</title>
+  <link rel="stylesheet" href="assets/style.css">
+  <style>
+    /* 局部微调：过滤条与留痕明细，沿用深色科技风 */
+    .tc-filters { display: flex; gap: 14px; flex-wrap: wrap; align-items: flex-end; }
+    .tc-filters .f { display: flex; flex-direction: column; gap: 6px; }
+    .tc-filters .f label { font-size: 12px; color: var(--txt-3); }
+    .tc-filters .f.sc select { min-width: 168px; }
+    .tc-filters .f.ag select { min-width: 200px; }
+    .tc-filters .f.q input { min-width: 240px; }
+    .tc-filters .sp { flex: 1; min-width: 8px; }
+    .tbl tr[data-idx] { cursor: pointer; }
+    .tbl .rst { color: var(--txt-2); }
+    .tr-meta { display: grid; grid-template-columns: 1fr 1fr; gap: 8px 20px; margin-bottom: 16px; padding-bottom: 14px; border-bottom: 1px solid var(--line); }
+    .tr-meta .kv .k { min-width: 52px; }
+    .tr-sop { margin-top: 12px; padding: 10px 12px; border-radius: 10px; font-size: 12.5px; background: color-mix(in srgb, var(--accent) 12%, transparent); border: 1px solid color-mix(in srgb, var(--accent) 35%, transparent); color: var(--txt); }
+    .tr-line .tr-bub .tr-who { margin-bottom: 3px; }
+    @media (max-width: 560px) { .tr-meta { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+  <div id="view"></div>
+  <script src="assets/app.js"></script>
+  <script>
+    Hub.boot({ page: 'trace' }).then(({ data, me, perms }) => {
+      const V = document.getElementById('view');
+      const esc = Hub.esc;
+
+      // 当前筛选态与结果集
+      const state = { scenario: '', agentId: '', q: '', traces: [], stats: { total: 0, sopHits: 0, byScene: {}, bySop: {} } };
+
+      // 可见场景 / 当前场景可选 Agent
+      const scenes = Hub.visibleScenarios();
+      const sceneName = (id) => (Hub.scenario(id) || {}).name || id;
+      function visAgents(sc) {
+        if (sc) return Hub.agentsOf(sc);
+        return scenes.flatMap(s => Hub.agentsOf(s.id));
+      }
+
+      // ---- 骨架 ----
+      V.innerHTML = `
+        <div class="wrap">
+          <div class="page-intro">
+            <b>语音过程留痕中心</b> —— 这里是<b>服务器持久化的真实留痕</b>（后台 <span class="mono">traces</span> 表），
+            Agent 每一次语音交互都会实时写入：转写、意图识别、命中 SOP、处置与结果全过程存证，支持按场景 / Agent / 关键词检索、回放与导出。
+            <span class="tr">数据来源：后端真表，非 seed 示意。</span>
+          </div>
+
+          <div id="tc-kpis" class="grid g5"></div>
+
+          <div class="panel mt16">
+            <div class="panel-t">
+              <h3>🎙 留痕检索</h3>
+              <span class="sub">按场景 / Agent / 关键词过滤，改动即时刷新</span>
+              <span class="sp"></span>
+              <span id="tc-count" class="pill">共 0 条</span>
+              <button id="tc-export" class="btn btn-sm">⬇ 导出 CSV</button>
+            </div>
+
+            <div class="tc-filters">
+              <div class="f sc">
+                <label>场景</label>
+                <select id="f-scene">
+                  <option value="">全部场景</option>
+                  ${scenes.map(s => `<option value="${esc(s.id)}">${esc(s.icon)} ${esc(s.name)}</option>`).join('')}
+                </select>
+              </div>
+              <div class="f ag">
+                <label>Agent</label>
+                <select id="f-agent"></select>
+              </div>
+              <div class="f q">
+                <label>关键词（转写 / 意图 / SOP / 坐席）</label>
+                <input id="f-q" type="text" placeholder="输入关键词后回车检索…" autocomplete="off">
+              </div>
+              <div class="sp"></div>
+            </div>
+
+            <div class="tbl-wrap mt16">
+              <table class="tbl">
+                <thead>
+                  <tr>
+                    <th>时间</th><th>场景</th><th>Agent</th><th>坐席</th>
+                    <th>意图</th><th>命中 SOP</th><th>时长</th><th>结果</th>
+                  </tr>
+                </thead>
+                <tbody id="tc-body">
+                  <tr><td colspan="8"><div class="empty">加载中…</div></td></tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="hint mt12">· 点击任意一行可回放该次会话的完整逐字记录与命中 SOP。</div>
+          </div>
+        </div>`;
+
+      const $scene = document.getElementById('f-scene');
+      const $agent = document.getElementById('f-agent');
+      const $q = document.getElementById('f-q');
+      const $body = document.getElementById('tc-body');
+      const $kpis = document.getElementById('tc-kpis');
+      const $count = document.getElementById('tc-count');
+
+      // ---- Agent 下拉：随场景重建 ----
+      function fillAgents(sc) {
+        const ags = visAgents(sc);
+        $agent.innerHTML = `<option value="">全部 Agent</option>` +
+          ags.map(a => `<option value="${esc(a.id)}">${esc(a.name)}</option>`).join('');
+      }
+
+      // ---- KPI ----
+      function renderKpis() {
+        const st = state.stats || {};
+        const total = st.total || 0;
+        const sopHits = st.sopHits || 0;
+        const durs = state.traces.map(t => Number(t.duration) || 0);
+        const avg = durs.length ? Math.round(durs.reduce((a, b) => a + b, 0) / durs.length) : 0;
+        const coverage = Object.keys(st.byScene || {}).length;
+        const hitRate = total ? Math.round((sopHits / total) * 100) : 0;
+        const kpis = [
+          { k: '语音留痕', v: total, u: '条', d: '服务器持久化真表' },
+          { k: '命中 SOP', v: sopHits, u: '次', d: '按事件自动匹配下发' },
+          { k: '平均时长', v: avg, u: 's', d: '单次语音交互' },
+          { k: '覆盖场景', v: coverage, u: '个', d: '当前筛选口径' },
+          { k: 'SOP 命中率', v: hitRate, u: '%', d: '命中 / 总留痕' },
+        ];
+        $kpis.innerHTML = kpis.map(k => Hub.kpi(k)).join('');
+      }
+
+      // ---- 列表 ----
+      function renderTable() {
+        const rows = state.traces;
+        $count.textContent = '共 ' + rows.length + ' 条';
+        if (!rows.length) {
+          $body.innerHTML = `<tr><td colspan="8"><div class="empty">未找到匹配的语音留痕</div></td></tr>`;
+          return;
+        }
+        $body.innerHTML = rows.map((t, i) => `
+          <tr data-idx="${i}">
+            <td class="num tr small nowrap">${esc((t.ts || '').replace('T', ' ').slice(0, 16))}</td>
+            <td><span class="pill acc">${esc(sceneName(t.scenario))}</span></td>
+            <td class="nowrap">${esc(t.agentName || '—')}</td>
+            <td class="nowrap">${esc(t.actorName || '—')}</td>
+            <td>${esc(t.intent || '—')}</td>
+            <td>${t.sopTitle ? `<span class="pill info">${esc(t.sopTitle)}</span>` : '<span class="tr">—</span>'}</td>
+            <td class="num nowrap">${Number(t.duration) || 0}s</td>
+            <td class="rst small">${esc(t.result || '—')}</td>
+          </tr>`).join('');
+      }
+
+      // ---- 会话回放弹窗 ----
+      function openTrace(t) {
+        const meta = [
+          ['场景', `<span class="pill acc">${esc(sceneName(t.scenario))}</span>`],
+          ['Agent', esc(t.agentName || '—')],
+          ['坐席', esc(t.actorName || '—')],
+          ['时间', `<span class="mono">${esc((t.ts || '').replace('T', ' ').slice(0, 16))}</span>`],
+          ['时长', `<span class="mono">${Number(t.duration) || 0}s</span>`],
+          ['结果', esc(t.result || '—')],
+          ['命中 SOP', t.sopTitle ? `<span class="pill info">${esc(t.sopTitle)}</span>` : '<span class="tr">未命中</span>'],
+        ];
+        const metaHtml = `<div class="tr-meta">${meta.map(m =>
+          `<div class="kv"><span class="k">${m[0]}</span><span>${m[1]}</span></div>`).join('')}</div>`;
+
+        const thread = (t.transcript || []);
+        const threadHtml = thread.length
+          ? `<div class="tr-thread">${thread.map(line => {
+              const isUser = line.who === 'user';
+              const who = isUser ? (t.actorName || '坐席') : (t.agentName || 'Agent');
+              return `<div class="tr-line ${isUser ? 'user' : 'agent'}"><div class="tr-bub"><span class="tr-who">${esc(who)}</span>${esc(line.text)}</div></div>`;
+            }).join('')}</div>`
+          : `<div class="empty">该会话无逐字记录</div>`;
+
+        const sopHtml = t.sopTitle
+          ? `<div class="tr-sop">📋 已推送：<b>${esc(t.sopTitle)}</b></div>`
+          : '';
+
+        Hub.modal('会话回放 · ' + (t.intent || '语音留痕'), metaHtml + threadHtml + sopHtml);
+      }
+
+      // 行点击（事件委托）
+      $body.addEventListener('click', (e) => {
+        const tr = e.target.closest('tr[data-idx]');
+        if (!tr) return;
+        const t = state.traces[+tr.dataset.idx];
+        if (t) openTrace(t);
+      });
+
+      // ---- 拉取 + 重渲染 ----
+      async function refresh() {
+        const params = {};
+        if (state.scenario) params.scenario = state.scenario;
+        if (state.agentId) params.agentId = state.agentId;
+        if (state.q) params.q = state.q;
+        $body.innerHTML = `<tr><td colspan="8"><div class="empty">加载中…</div></td></tr>`;
+        try {
+          const r = await Hub.traces(params);
+          state.traces = r.traces || [];
+          state.stats = r.stats || { total: 0, sopHits: 0, byScene: {}, bySop: {} };
+        } catch (err) {
+          state.traces = [];
+          Hub.toast('留痕加载失败：' + (err.message || err), true);
+        }
+        renderKpis();
+        renderTable();
+      }
+
+      // ---- 事件绑定 ----
+      $scene.addEventListener('change', () => {
+        state.scenario = $scene.value;
+        state.agentId = '';
+        fillAgents(state.scenario);
+        refresh();
+      });
+      $agent.addEventListener('change', () => { state.agentId = $agent.value; refresh(); });
+      let qTimer = null;
+      $q.addEventListener('input', () => {
+        clearTimeout(qTimer);
+        qTimer = setTimeout(() => { state.q = $q.value.trim(); refresh(); }, 320);
+      });
+      $q.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') { clearTimeout(qTimer); state.q = $q.value.trim(); refresh(); }
+      });
+
+      // ---- 导出 CSV（当前筛选结果，中文表头 + BOM 防乱码）----
+      document.getElementById('tc-export').addEventListener('click', () => {
+        if (!state.traces.length) { Hub.toast('当前无可导出的留痕', true); return; }
+        const headers = ['时间', '场景', 'Agent', '坐席', '意图', '命中SOP', '时长(s)', '结果'];
+        const cell = (v) => '"' + String(v == null ? '' : v).replace(/"/g, '""') + '"';
+        const lines = [headers.map(cell).join(',')];
+        state.traces.forEach(t => {
+          lines.push([
+            (t.ts || '').replace('T', ' ').slice(0, 16),
+            sceneName(t.scenario),
+            t.agentName || '',
+            t.actorName || '',
+            t.intent || '',
+            t.sopTitle || '',
+            Number(t.duration) || 0,
+            t.result || '',
+          ].map(cell).join(','));
+        });
+        const blob = new Blob(['﻿' + lines.join('\r\n')], { type: 'text/csv;charset=utf-8' });
+        const stamp = new Date().toISOString().slice(0, 10).replace(/-/g, '');
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = '语音留痕_' + stamp + '.csv';
+        document.body.appendChild(a);
+        a.click();
+        setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 0);
+        Hub.toast('已导出 ' + state.traces.length + ' 条留痕');
+      });
+
+      // ---- 初始化 ----
+      fillAgents('');
+      refresh();
+    });
+  </script>
+</body>
+</html>

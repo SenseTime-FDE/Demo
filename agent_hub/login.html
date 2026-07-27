@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>登录 · 商汤灵犀</title>
+  <link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+  <div class="login-wrap">
+    <div class="login-card" id="card">
+      <div class="lb"><img src="assets/st_logo_white.png" alt="商汤"></div>
+      <h2 id="l-title">商汤灵犀</h2>
+      <div class="ls" id="l-sub">多租户 AI SaaS 平台 · 大模型生态渠道部</div>
+      <div class="field"><label>账号</label><input id="u" placeholder="账号" autocomplete="username"></div>
+      <div class="field"><label>密码</label><input id="p" type="password" placeholder="初始密码 hub@2026" autocomplete="current-password"></div>
+      <button class="btn btn-primary" id="go" style="width:100%;justify-content:center;padding:11px">登录</button>
+      <div class="err" id="err"></div>
+      <div class="demo-accts" id="demo"></div>
+      <div style="margin-top:14px"><a href="portal.html" class="hint">‹ 返回门户 · 切换业务</a></div>
+    </div>
+  </div>
+  <script src="assets/saas.js"></script>
+  <script src="assets/app.js"></script>
+  <script>
+    const params = new URLSearchParams(location.search);
+    const portal = params.get('portal') || 'operator';
+    const biz = window.SAAS.businesses.find(b => b.id === portal);
+    const u = document.getElementById('u'), p = document.getElementById('p'), err = document.getElementById('err');
+
+    if (biz) {
+      document.documentElement.style.setProperty('--accent', biz.accent);
+      document.getElementById('l-title').textContent = biz.product;
+      document.getElementById('l-sub').textContent = biz.tagline + ' · ' + biz.tenantNoun + '多租户 SaaS';
+    } else {
+      document.getElementById('l-title').textContent = '平台运营后台 · 商汤灵犀';
+      document.getElementById('l-sub').textContent = '跨业务管理 · 声渡总控 · 模型接入';
+    }
+
+    const ACC = {
+      operator: [['admin', '平台运营（全业务）'], ['viewer', '观察员（只读）']],
+      campus: [['campus_biz', '业务管理员'], ['campus_t1', '北京一中 · 租户管理员'], ['campus_seat', '一线教师 · AI 助理']],
+      media: [['media_biz', '业务管理员'], ['media_t1', '江城日报社 · 租户管理员'], ['media_seat', '记者 · AI 助理']],
+      eldercare: [['elder_biz', '业务管理员'], ['elder_t1', '晚晴社区 · 租户管理员'], ['elder_seat', '护理员 · AI 助理']],
+      dining: [['dining_biz', '业务管理员'], ['dining_t1', '巷子里 · 租户管理员'], ['dining_seat', '店员 · AI 助理']],
+    };
+    const list = ACC[portal] || ACC.operator;
+    document.getElementById('demo').innerHTML = '<b>演示账号</b>（点击填入 · 初始密码 <span class="mono">hub@2026</span>）' +
+      list.map(a => `<div class="da" data-u="${a[0]}">• ${a[0]} —— ${a[1]}</div>`).join('');
+    document.querySelectorAll('.da').forEach(d => d.onclick = () => { u.value = d.dataset.u; p.value = 'hub@2026'; p.focus(); });
+
+    async function login() {
+      err.textContent = '';
+      try {
+        const r = await Hub.api('/api/login', { method: 'POST', body: { username: u.value.trim(), password: p.value } });
+        localStorage.setItem('hub_token', r.token);
+        location.href = (r.me.home || 'operator') + '.html';
+      } catch (e) { err.textContent = e.message || '登录失败'; }
+    }
+    document.getElementById('go').onclick = login;
+    p.addEventListener('keydown', e => { if (e.key === 'Enter') login(); });
+    u.addEventListener('keydown', e => { if (e.key === 'Enter') p.focus(); });
+  </script>
+</body>
+</html>

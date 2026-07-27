@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>账号与权限 · 灵犀统一 Agent 运营中台</title>
+  <link rel="stylesheet" href="assets/style.css">
+  <style>
+    /* 局部微调：账号与权限（沿用深色科技风，仅补齐表单/矩阵细节）。
+       注意：Hub.modal 挂在 document.body（#view 之外），故 .pick 等表单样式不加 #view 作用域。*/
+    .pick-grid { display: flex; flex-wrap: wrap; gap: 8px; }
+    .pick { display: inline-flex; align-items: center; gap: 6px; font-size: 12.5px; color: var(--txt-2); background: var(--bg-2); border: 1px solid var(--line-2); border-radius: 8px; padding: 6px 10px; cursor: pointer; }
+    .pick input { width: auto; margin: 0; flex: none; }
+    .pick:hover { border-color: var(--accent); }
+    .tbl.mx th, .tbl.mx td { text-align: center; }
+    .tbl.mx th:first-child, .tbl.mx td:first-child { text-align: left; }
+    .mx-yes { color: var(--ok); font-weight: 800; }
+    .mx-no { color: var(--txt-3); }
+    #view .col-act { white-space: nowrap; }
+    .form-narrow { max-width: 340px; }
+  </style>
+</head>
+<body>
+  <div id="view"></div>
+  <script src="assets/app.js"></script>
+  <script>
+    Hub.boot({ page: 'settings' }).then(({ data, me, perms }) => {
+      const V = document.getElementById('view');
+      const canManage = perms.manageUsers;
+      const canReset = me.role === 'superadmin';
+      let users = Array.isArray(Hub.users) ? Hub.users.slice() : [];
+
+      // ---- 角色 → 中文 ----
+      const ROLE_LABEL = { superadmin: '平台管理员', scene_admin: '场景管理员', operator: '运营', agent_user: '坐席/一线', viewer: '观察员' };
+      // ---- 角色权限矩阵（对应 server/auth.js 的 PERMS）----
+      //   列：账号管理 / Agent上下架 / 编辑配置 / 推送SOP / 使用Agent·留痕 / 查看全部场景
+      const CAP_COLS = ['账号管理', 'Agent 上下架', '编辑配置', '推送 SOP', '使用 Agent · 留痕', '查看全部场景'];
+      const ROLE_DEFS = [
+        { role: 'superadmin', caps: [1, 1, 1, 1, 1, 1], note: '全平台 · 账号与权限' },
+        { role: 'scene_admin', caps: [0, 1, 1, 1, 1, 0], note: '本场景全权管理' },
+        { role: 'operator', caps: [0, 0, 1, 1, 1, 0], note: '配置维护与推送' },
+        { role: 'agent_user', caps: [0, 0, 0, 0, 1, 0], note: '一线使用 Agent' },
+        { role: 'viewer', caps: [0, 0, 0, 0, 0, 1], note: '跨场景只读观察' },
+      ];
+
+      // ---- 审计动作 → 中文 ----
+      const ACT_MAP = { login: '登录', logout: '退出登录', 'user.upsert': '新建 / 编辑账号', 'user.delete': '删除账号', 'user.resetpw': '重置密码', 'trace.add': '新增语音留痕', 'data.reset': '重置演示数据', 'data.replace': '数据变更' };
+      const CHG_MAP = { 'agent.upsert': 'Agent 编排', 'agent.toggle': 'Agent 上 / 下架', 'agent.delete': '删除 Agent', 'kb.upsert': '知识库维护', 'kb.delete': '删除知识库', 'sop.upsert': 'SOP 维护', 'sop.delete': '删除 SOP', 'sop.push': 'SOP 推送', 'scene.patch': '场景数据编辑', 'scene.listUpsert': '场景数据编辑', 'scene.listDelete': '场景数据删除' };
+      const actLabel = (a) => { if (!a) return '—'; if (a.indexOf('change:') === 0) { const k = a.slice(7); return CHG_MAP[k] || ('数据变更 · ' + k); } return ACT_MAP[a] || a; };
+      const fmtTs = (t) => Hub.esc(String(t || '').replace('T', ' ').slice(0, 19));
+
+      // ---- 可管场景单元格 ----
+      function sceneCell(scs) {
+        if (!scs || !scs.length) return '<span class="tr small">—</span>';
+        if (scs.includes('*')) return '<span class="chip-tag">全部场景</span>';
+        return '<div class="chips">' + scs.map(id => { const s = Hub.scenario(id); return `<span class="chip-tag">${Hub.esc(s ? (s.icon + ' ' + s.name) : id)}</span>`; }).join('') + '</div>';
+      }
+
+      // ---- 矩阵表 HTML（静态）----
+      const matrixHtml = `
+        <div class="tbl-wrap">
+          <table class="tbl mx">
+            <tr><th>角色</th>${CAP_COLS.map(c => `<th>${Hub.esc(c)}</th>`).join('')}<th>说明</th></tr>
+            ${ROLE_DEFS.map(r => `<tr>
+              <td><span class="b">${Hub.esc(ROLE_LABEL[r.role])}</span><div class="tr small mono">${r.role}</div></td>
+              ${r.caps.map(c => `<td>${c ? '<span class="mx-yes">✓</span>' : '<span class="mx-no">—</span>'}</td>`).join('')}
+              <td class="tr small">${Hub.esc(r.note)}</td>
+            </tr>`).join('')}
+          </table>
+        </div>
+        <div class="hint mt12">口径：权限由后端 <span class="mono">server/auth.js</span> 的 RBAC 模型强制校验；即便前端漏判，越权写操作也会被服务器 403 拒绝。</div>`;
+
+      // ---- 页面骨架 ----
+      V.innerHTML = `
+        <div class="wrap">
+          <div class="page-intro">
+            <b>账号与权限</b> —— 管理接入账号、角色与可管场景，查看操作审计。系统采用「角色 × 场景」双维 RBAC：
+            角色决定<b>能做什么</b>，可管场景决定<b>能管哪块</b>，两者叠加后由后端强制授权。
+            <span class="tr">当前登录：${Hub.esc(me.name)} · ${Hub.esc(me.roleLabel)}</span>
+          </div>
+
+          <div class="grid g4" id="kpiRow"></div>
+
+          <div class="section-t">角色权限矩阵</div>
+          <div class="panel">
+            <div class="panel-t"><h3>🛡 5 类角色 × 6 项能力</h3><span class="sub">✓ 具备 · — 不具备</span></div>
+            ${matrixHtml}
+          </div>
+
+          <div class="section-t">账号管理</div>
+          <div class="panel">
+            <div class="panel-t">
+              <h3>👥 接入账号</h3>
+              <span class="sub">姓名 · 账号 · 角色 · 可管场景</span>
+              <span class="sp"></span>
+              ${canManage
+          ? `<button class="btn btn-primary btn-sm" id="btn-new">＋ 新建账号</button>`
+          : `<span class="ro-note">👁 当前角色为只读，不可管理账号</span>`}
+            </div>
+            <div id="usersBox" class="tbl-wrap"><div class="empty">加载中…</div></div>
+          </div>
+
+          <div class="section-t">安全与运维</div>
+          <div class="grid g2">
+            <div class="panel">
+              <div class="panel-t"><h3>🔑 修改我的密码</h3><span class="sub">仅作用于当前账号</span></div>
+              <div class="form-narrow">
+                <div class="field"><label>当前密码</label><input type="password" id="pw-cur" placeholder="输入当前密码" autocomplete="current-password"></div>
+                <div class="field"><label>新密码（至少 6 位，且不能与初始密码相同）</label><input type="password" id="pw-new" placeholder="输入新密码" autocomplete="new-password"></div>
+                <div class="field"><label>确认新密码</label><input type="password" id="pw-new2" placeholder="再次输入新密码" autocomplete="new-password"></div>
+                <button class="btn btn-primary" id="pw-save">更新密码</button>
+              </div>
+            </div>
+            <div class="panel">
+              <div class="panel-t"><h3>♻️ 重置演示数据</h3><span class="sub">危险操作</span></div>
+              <p class="t2 small" style="margin-bottom:14px;line-height:1.6">将业务 / 配置数据与全部语音留痕恢复为初始种子（<b>账号与密码不受影响</b>）。常用于演示前清场，操作不可撤销。</p>
+              ${canReset
+          ? `<button class="btn" id="btn-reset" style="border-color:var(--bad);color:var(--bad)">重置演示数据</button>`
+          : `<span class="ro-note">仅平台管理员可执行重置</span>`}
+            </div>
+          </div>
+
+          <div class="section-t">操作审计</div>
+          <div class="panel">
+            <div class="panel-t">
+              <h3>📜 最近操作</h3>
+              <span class="sub">时间 · 操作人 · 动作 · 详情</span>
+              <span class="sp"></span>
+              <button class="btn btn-sm" id="btn-audit-refresh">刷新</button>
+            </div>
+            <div id="auditBox" class="tbl-wrap"><div class="empty">加载中…</div></div>
+          </div>
+
+          <div class="hint mt24">口径：账号 / 审计以真后端 SQLite 持久化；密码经 scrypt 加盐哈希存储，前端不接触明文密码哈希。新建账号初始密码为系统默认密码 <span class="mono">hub@2026</span>。</div>
+        </div>`;
+
+      const kpiRow = document.getElementById('kpiRow');
+      const usersBox = document.getElementById('usersBox');
+      const auditBox = document.getElementById('auditBox');
+
+      // ---- KPI ----
+      function renderKpis() {
+        const need = users.filter(u => u.mustChange).length;
+        kpiRow.innerHTML = [
+          { k: '接入账号', v: users.length, u: '个', d: '5 类角色 RBAC' },
+          { k: '待改初始密码', v: need, u: '个', d: need ? '建议尽快修改' : '均已自设' },
+          { k: '覆盖场景', v: data.scenarios.length, u: '个', d: '场景 × 角色授权' },
+          { k: '我的角色', v: me.roleLabel, d: me.name },
+        ].map(k => Hub.kpi(k)).join('');
+      }
+
+      // ---- 账号表 ----
+      function renderUsers() {
+        if (!users.length) { usersBox.innerHTML = '<div class="empty">暂无账号</div>'; return; }
+        const showActs = canManage;
+        const head = `<tr>
+          <th>姓名 / 显示名</th><th>登录账号</th><th>角色</th><th>可管场景</th><th>密码状态</th>
+          ${showActs ? '<th>操作</th>' : ''}
+        </tr>`;
+        const rows = users.map(u => {
+          const roleLabel = ROLE_LABEL[u.role] || u.role;
+          const pwCell = u.mustChange ? '<span class="pill warn">初始密码</span>' : '<span class="pill ok">已自设</span>';
+          let actCell = '';
+          if (showActs) {
+            const delBtn = u.username === 'admin'
+              ? '<span class="tr small">内置</span>'
+              : `<button class="btn btn-sm" data-act="del" data-u="${Hub.esc(u.username)}">删除</button>`;
+            actCell = `<td class="col-act"><div class="btn-row">
+              <button class="btn btn-sm" data-act="resetpw" data-u="${Hub.esc(u.username)}">重置密码</button>
+              <button class="btn btn-sm" data-act="edit" data-u="${Hub.esc(u.username)}">编辑</button>
+              ${delBtn}
+            </div></td>`;
+          }
+          return `<tr>
+            <td><div class="b">${Hub.esc(u.name || u.username)}</div></td>
+            <td class="mono small">${Hub.esc(u.username)}</td>
+            <td><span class="pill ${u.role === 'superadmin' ? 'acc' : u.role === 'viewer' ? '' : 'info'}">${Hub.esc(roleLabel)}</span></td>
+            <td>${sceneCell(u.scenarios)}</td>
+            <td>${pwCell}</td>
+            ${actCell}
+          </tr>`;
+        }).join('');
+        usersBox.innerHTML = `<table class="tbl">${head}${rows}</table>`;
+      }
+
+      async function refreshUsers() {
+        try { const r = await Hub.api('/api/users'); users = r.users || users; renderUsers(); renderKpis(); }
+        catch (e) { Hub.toast(e.message || '拉取账号失败', true); }
+      }
+
+      // ---- 新建 / 编辑 账号 表单 ----
+      function openUserForm(ex) {
+        if (!canManage) { Hub.toast('无权管理账号', true); return; }
+        const isEdit = !!ex;
+        const roleOpts = Object.keys(ROLE_LABEL).map(v => `<option value="${v}" ${ex && ex.role === v ? 'selected' : ''}>${Hub.esc(ROLE_LABEL[v])}（${v}）</option>`).join('');
+        const allChecked = isEdit && (ex.scenarios || []).includes('*');
+        const scBoxes = data.scenarios.map(s => `<label class="pick"><input type="checkbox" class="scx" value="${s.id}" ${isEdit && (ex.scenarios || []).includes(s.id) ? 'checked' : ''}> ${Hub.esc(s.icon + ' ' + s.name)}</label>`).join('');
+
+        const body = `
+          <div class="grid g2">
+            <div class="field"><label>登录账号${isEdit ? '（不可修改）' : ''}</label><input id="u-name" value="${isEdit ? Hub.esc(ex.username) : ''}" ${isEdit ? 'disabled' : ''} placeholder="如：media_op2"></div>
+            <div class="field"><label>姓名 / 显示名</label><input id="u-disp" value="${isEdit ? Hub.esc(ex.name || '') : ''}" placeholder="如：传媒运营·张三"></div>
+          </div>
+          <div class="field"><label>角色</label><select id="u-role">${roleOpts}</select></div>
+          <div class="field">
+            <label>可管场景</label>
+            <label class="pick" style="margin-bottom:8px"><input type="checkbox" id="u-all" ${allChecked ? 'checked' : ''}> 全部场景（跨场景 / *）</label>
+            <div class="pick-grid" id="u-scenes">${scBoxes}</div>
+          </div>
+          ${isEdit ? '<div class="hint">编辑不修改密码；如需重置请在账号列表使用「重置密码」。</div>' : '<div class="hint">初始密码为系统默认密码 <span class="mono">hub@2026</span>，用户首次登录后建议自行修改。</div>'}
+          <div class="btn-row" style="justify-content:flex-end;margin-top:12px">
+            <button class="btn" id="u-cancel">取消</button>
+            <button class="btn btn-primary" id="u-save">${isEdit ? '保存修改' : '创建账号'}</button>
+          </div>`;
+
+        Hub.modal(isEdit ? '编辑账号' : '新建账号', body, (root, close) => {
+          const allBox = root.querySelector('#u-all');
+          const scWrap = root.querySelector('#u-scenes');
+          const syncAll = () => {
+            scWrap.querySelectorAll('.scx').forEach(c => { c.disabled = allBox.checked; if (allBox.checked) c.checked = false; });
+            scWrap.style.opacity = allBox.checked ? '.4' : '1';
+          };
+          allBox.addEventListener('change', syncAll); syncAll();
+          root.querySelector('#u-cancel').onclick = close;
+          root.querySelector('#u-save').onclick = async () => {
+            const username = isEdit ? ex.username : root.querySelector('#u-name').value.trim();
+            const name = root.querySelector('#u-disp').value.trim();
+            const role = root.querySelector('#u-role').value;
+            const scenarios = allBox.checked ? ['*'] : [...scWrap.querySelectorAll('.scx:checked')].map(c => c.value);
+            if (!username) { Hub.toast('请填写登录账号', true); return; }
+            if (!/^[A-Za-z0-9_.-]{2,}$/.test(username)) { Hub.toast('登录账号仅限字母 / 数字 / _.-，至少 2 位', true); return; }
+            if (!isEdit && users.some(u => u.username === username)) { Hub.toast('该账号已存在', true); return; }
+            if (!scenarios.length) { Hub.toast('请至少选择一个可管场景，或勾选全部', true); return; }
+            try {
+              const r = await Hub.api('/api/users', { method: 'POST', body: { username, name, role, scenarios } });
+              users = r.users || users; renderUsers(); renderKpis(); close();
+              Hub.toast(isEdit ? '已保存账号「' + (name || username) + '」' : '已创建账号「' + username + '」，初始密码 hub@2026');
+            } catch (e) { Hub.toast(e.message || '操作失败', true); }
+          };
+        });
+      }
+      window.openUserForm = openUserForm;
+
+      // ---- 账号表事件委托 ----
+      usersBox.addEventListener('click', async (e) => {
+        const btn = e.target.closest('button[data-act]'); if (!btn) return;
+        const username = btn.dataset.u, act = btn.dataset.act;
+        const u = users.find(x => x.username === username); if (!u) return;
+        if (act === 'edit') { openUserForm(u); return; }
+        if (act === 'resetpw') {
+          Hub.confirm('确定将账号「' + username + '」的密码重置为系统初始密码？', async () => {
+            try {
+              const r = await Hub.api('/api/users/resetpw', { method: 'POST', body: { username } });
+              await refreshUsers();
+              Hub.toast('已重置「' + username + '」密码为 ' + (r.defaultPw || 'hub@2026'));
+              renderAudit();
+            } catch (e2) { Hub.toast(e2.message || '重置失败', true); }
+          });
+          return;
+        }
+        if (act === 'del') {
+          Hub.confirm('确定删除账号「' + (u.name || username) + '」？删除后该账号将无法登录，操作不可恢复。', async () => {
+            try {
+              const r = await Hub.api('/api/users/delete', { method: 'POST', body: { username } });
+              users = r.users || users; renderUsers(); renderKpis();
+              Hub.toast('已删除账号「' + username + '」');
+              renderAudit();
+            } catch (e2) { Hub.toast(e2.message || '删除失败', true); }
+          });
+        }
+      });
+
+      const btnNew = document.getElementById('btn-new');
+      if (btnNew) btnNew.onclick = () => openUserForm();
+
+      // ---- 修改我的密码 ----
+      const pwSave = document.getElementById('pw-save');
+      if (pwSave) pwSave.onclick = async () => {
+        const cur = document.getElementById('pw-cur').value;
+        const nx = document.getElementById('pw-new').value;
+        const nx2 = document.getElementById('pw-new2').value;
+        if (!cur || !nx) { Hub.toast('请填写当前密码与新密码', true); return; }
+        if (nx.length < 6) { Hub.toast('新密码至少 6 位', true); return; }
+        if (nx !== nx2) { Hub.toast('两次输入的新密码不一致', true); return; }
+        try {
+          await Hub.api('/api/password', { method: 'POST', body: { current: cur, next: nx } });
+          document.getElementById('pw-cur').value = '';
+          document.getElementById('pw-new').value = '';
+          document.getElementById('pw-new2').value = '';
+          Hub.toast('密码已更新，请牢记新密码');
+          renderAudit();
+        } catch (e) { Hub.toast(e.message || '修改失败', true); }
+      };
+
+      // ---- 重置演示数据 ----
+      const btnReset = document.getElementById('btn-reset');
+      if (btnReset) btnReset.onclick = () => {
+        Hub.confirm('确定重置演示数据？业务 / 配置数据与全部语音留痕将恢复为初始种子，操作不可撤销。', async () => {
+          try {
+            await Hub.api('/api/reset', { method: 'POST' });
+            Hub.toast('已重置演示数据，正在刷新…');
+            setTimeout(() => location.reload(), 1000);
+          } catch (e) { Hub.toast(e.message || '重置失败', true); }
+        });
+      };
+
+      // ---- 操作审计 ----
+      async function renderAudit() {
+        try {
+          const r = await Hub.api('/api/audit');
+          const list = r.audit || [];
+          if (!list.length) { auditBox.innerHTML = '<div class="empty">暂无审计记录</div>'; return; }
+          const head = '<tr><th>时间</th><th>操作人</th><th>动作</th><th>详情</th></tr>';
+          const rows = list.map(a => `<tr>
+            <td class="mono small nowrap">${fmtTs(a.ts)}</td>
+            <td class="mono small">${Hub.esc(a.actor)}</td>
+            <td>${Hub.esc(actLabel(a.action))}</td>
+            <td class="tr small">${a.detail ? Hub.esc(a.detail) : '—'}</td>
+          </tr>`).join('');
+          auditBox.innerHTML = `<table class="tbl">${head}${rows}</table>`;
+        } catch (e) { auditBox.innerHTML = `<div class="empty">${Hub.esc(e.message || '审计加载失败')}</div>`; }
+      }
+      const btnAuditRefresh = document.getElementById('btn-audit-refresh');
+      if (btnAuditRefresh) btnAuditRefresh.onclick = () => { renderAudit(); Hub.toast('审计已刷新'); };
+
+      // ---- 首屏渲染 ----
+      renderKpis();
+      renderUsers();
+      renderAudit();
+      if (!users.length) refreshUsers();
+    });
+  </script>
+</body>
+</html>

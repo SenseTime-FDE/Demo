@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>数字传媒工作台 · 灵犀统一 Agent 运营中台</title>
+  <link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+  <div id="view"></div>
+  <script src="assets/app.js"></script>
+  <script>
+    Hub.boot({ page: 'media', scenario: 'media' }).then(({ data, me, perms }) => {
+      const V = document.getElementById('view');
+      const esc = Hub.esc;
+      const canEdit = perms.editConfig && Hub.canScene('media');
+      const state = { tab: 'dist' };
+
+      const pad = (n) => String(n).padStart(2, '0');
+      const nowStr = () => { const d = new Date(); return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}`; };
+      const chName = (id) => (Hub.data.media.channels.find((c) => c.id === id) || {}).name || id;
+      const sentiSop = () => Hub.sopsOf('media').find((s) => /舆情/.test(s.title));
+      const trendBadge = (t) => t === 'up' ? '<span class="pill ok">↑ 上升</span>' : t === 'down' ? '<span class="pill bad">↓ 回落</span>' : '<span class="pill">→ 平稳</span>';
+      const polTag = (p) => { const c = p === '负' ? 'bad' : p === '正' ? 'ok' : ''; return `<span class="pill ${c}">${esc(p)}</span>`; };
+
+      // ---------- 头部：简介 + 入口卡 + KPI ----------
+      function header() {
+        const M = Hub.data.media;
+        const entries = [
+          { href: 'media_agent.html', ic: '🎙', t: 'Agent 原型', d: '采编 / 舆情坐席企微语音对话，命中 SOP 即推送', acc: '进入原型 ›' },
+          { href: 'media_miniapp.html', ic: '📱', t: '采编小程序', d: '一线记者移动端：语音写稿、送审、看舆情', acc: '打开小程序 ›' },
+          { href: 'media_board.html', ic: '📊', t: '数据看板', d: '发稿 / 阅读 / 分发结构 / 舆情，一屏问数', acc: '查看看板 ›' },
+        ];
+        return `
+          <div class="page-intro">
+            <b>数字传媒工作台</b> —— 采编写作、一键多渠道分发、7×24 舆情监测、热词选题与媒体知识库，
+            由采编助理 / 舆情监测 / 内容分发 / 合规审核 四个 Agent 协同，全过程语音留痕、按事件推送 SOP。
+            <span class="tr">强调色 · 传媒橙红</span>
+          </div>
+          <div class="grid g3">
+            ${entries.map((x) => `<a class="card" href="${x.href}" style="text-decoration:none">
+              <div style="font-size:26px">${x.ic}</div>
+              <h3 style="font-size:15px;margin:8px 0 4px">${x.t}</h3>
+              <div class="tr small">${esc(x.d)}</div>
+              <div class="tacc small mt12">${x.acc}</div>
+            </a>`).join('')}
+          </div>
+          <div class="section-t">经营概览</div>
+          ${Hub.kpis(M.board.kpis)}
+          ${canEdit ? '' : '<div class="ro-note mt8">· 当前角色为只读：可查看全部业务数据，分发 / 处置 / 状态切换等写操作已隐藏。</div>'}
+        `;
+      }
+
+      // ---------- Tab 1：一键分发 ----------
+      function paneDist() {
+        const M = Hub.data.media;
+        const chRows = M.channels.map((c) => `
+          <tr>
+            <td class="b">${esc(c.name)}</td>
+            <td class="tr">${esc(c.type)}</td>
+            <td class="num">${esc(c.followers)}</td>
+            <td>${Hub.statusPill(c.status)}</td>
+            <td class="right">${canEdit ? `<button class="btn btn-sm" data-act="ch-toggle" data-id="${esc(c.id)}">${c.status === 'on' ? '停用' : '启用'}</button>` : '<span class="tr small">—</span>'}</td>
+          </tr>`).join('');
+
+        const ctRows = M.contents.map((c) => {
+          const editable = canEdit && (c.status === '草稿' || c.status === '待审');
+          const chips = (c.channels || []).slice(0, 3).map((id) => `<span class="chip-tag">${esc(chName(id))}</span>`).join('');
+          const op = editable
+            ? `<button class="btn btn-primary btn-sm" data-act="dist" data-id="${esc(c.id)}">🚀 一键分发</button>`
+            : (c.status === '已发' ? '<span class="pill ok">已回收回执</span>' : '<span class="tr small">—</span>');
+          return `
+            <tr>
+              <td class="b">${esc(c.title)}</td>
+              <td>${Hub.statusPill(c.status)}</td>
+              <td><span class="num">${(c.channels || []).length}</span> 个 <div class="chips mt8">${chips || '<span class="tr small">未选</span>'}</div></td>
+              <td class="tr">${esc(c.author)}</td>
+              <td class="tr num">${esc((c.publishAt || '—'))}</td>
+              <td class="num">${esc(c.reads)}</td>
+              <td class="right">${op}</td>
+            </tr>`;
+        }).join('');
+
+        return `
+          <div class="panel">
+            <div class="panel-t"><h3>📡 分发渠道矩阵</h3><span class="sub">${M.channels.filter((c) => c.status === 'on').length}/${M.channels.length} 个渠道在线</span><span class="sp"></span>${canEdit ? '<span class="hint">点「停用/启用」切换渠道</span>' : ''}</div>
+            <div class="tbl-wrap"><table class="tbl">
+              <thead><tr><th>渠道</th><th>类型</th><th>粉丝</th><th>状态</th><th class="right">操作</th></tr></thead>
+              <tbody>${chRows}</tbody>
+            </table></div>
+          </div>
+          <div class="panel mt16">
+            <div class="panel-t"><h3>📝 稿件队列</h3><span class="sub">草稿 / 待审稿件可一键多渠道分发并回收回执</span></div>
+            <div class="tbl-wrap"><table class="tbl">
+              <thead><tr><th>标题</th><th>状态</th><th>已选渠道</th><th>作者</th><th>发布时间</th><th>阅读</th><th class="right">操作</th></tr></thead>
+              <tbody>${ctRows}</tbody>
+            </table></div>
+          </div>`;
+      }
+
+      // ---------- Tab 2：舆情 ----------
+      function paneSenti() {
+        const M = Hub.data.media, S = M.sentiment;
+        const reds = S.events.filter((e) => e.level === '红' && !e.handled);
+        const alertBar = reds.length ? reds.map((ev) => `
+          <div class="card" style="border-color:color-mix(in srgb,var(--bad) 45%,transparent);background:color-mix(in srgb,var(--bad) 10%,var(--panel));margin-bottom:14px">
+            <div class="flex ac gap12 wrapf">
+              <span class="lv lv-红" style="padding:3px 10px">🔴 红色预警</span>
+              <div><div class="b">${esc(ev.topic)}</div><div class="tr small">热度 ${ev.heat} · ${esc(ev.source)} · ${esc((ev.ts || '').slice(5, 16))} · 建议按《${esc((sentiSop() || {}).title || '突发舆情处置 SOP')}》处置</div></div>
+              <span class="sp" style="flex:1"></span>
+              ${canEdit ? `<button class="btn btn-primary" data-act="handle" data-id="${esc(ev.id)}">立即处置</button>` : '<span class="ro-note">当前角色只读</span>'}
+            </div>
+          </div>`).join('') : '';
+
+        const evRows = S.events.map((e) => {
+          const op = (!e.handled && canEdit) ? `<button class="btn btn-sm" data-act="handle" data-id="${esc(e.id)}">处置</button>` : (e.handled ? '<span class="tr small">—</span>' : '<span class="tr small">待处置</span>');
+          return `
+            <tr>
+              <td class="b">${esc(e.topic)}</td>
+              <td>${polTag(e.polarity)}</td>
+              <td class="num">${e.heat}</td>
+              <td class="tr">${esc(e.source)}</td>
+              <td>${Hub.levelTag(e.level)}</td>
+              <td class="tr num">${esc((e.ts || '').slice(5, 16))}</td>
+              <td>${e.handled ? Hub.statusPill('已闭环') : '<span class="pill warn">待处置</span>'}</td>
+              <td class="right">${op}</td>
+            </tr>`;
+        }).join('');
+
+        return `
+          ${alertBar}
+          <div class="grid g2">
+            <div class="panel">
+              <div class="panel-t"><h3>🧭 情绪分布</h3><span class="sub">正 / 中 / 负 · 待处置 ${S.summary.alerts} 起</span></div>
+              ${Hub.donut([{ n: '正', v: S.summary.pos }, { n: '中', v: S.summary.neu }, { n: '负', v: S.summary.neg }], '情绪')}
+              <div class="hint mt16">负面话题命中《${esc((sentiSop() || {}).title || '突发舆情处置 SOP')}》将自动向舆情值班组推送处置流程。</div>
+            </div>
+            <div class="panel">
+              <div class="panel-t"><h3>📻 舆情事件</h3><span class="sub">7×24 全网监测 · 分级预警</span></div>
+              <div class="tbl-wrap"><table class="tbl">
+                <thead><tr><th>话题</th><th>极性</th><th>热度</th><th>信源</th><th>分级</th><th>时间</th><th>处置</th><th class="right">操作</th></tr></thead>
+                <tbody>${evRows}</tbody>
+              </table></div>
+            </div>
+          </div>`;
+      }
+
+      // ---------- Tab 3：关键词 ----------
+      function paneKw() {
+        const M = Hub.data.media;
+        const rows = M.keywords.map((k) => ({ n: k.word, v: k.heat }));
+        const cards = M.keywords.map((k) => `
+          <div class="card kw-card" data-act="kw" data-word="${esc(k.word)}" style="cursor:pointer">
+            <div class="flex ac jb"><div class="b">${esc(k.word)}</div>${trendBadge(k.trend)}</div>
+            <div class="tr small mt8">热度 <span class="num">${k.heat}</span></div>
+            <div class="chips mt8">${k.related.map((r) => `<span class="chip-tag"># ${esc(r)}</span>`).join('')}</div>
+            <div class="tacc small mt12">＋ 推为采编选题 ›</div>
+          </div>`).join('');
+        return `
+          <div class="panel">
+            <div class="panel-t"><h3>🔥 热词雷达</h3><span class="sub">全网热度排行 · 近 1 小时</span></div>
+            ${Hub.bars(rows)}
+          </div>
+          <div class="section-t">选题建议 · 点选即推给采编助理 Agent</div>
+          <div class="grid g3">${cards}</div>`;
+      }
+
+      // ---------- Tab 4：知识库 ----------
+      function paneKb() {
+        const kbs = Hub.kbsOf('media');
+        const agents = Hub.agentsOf('media');
+        const cards = kbs.map((kb) => {
+          const refs = agents.filter((a) => (a.kbIds || []).includes(kb.id));
+          return `
+            <div class="card">
+              <div class="flex ac jb"><div class="b">📚 ${esc(kb.name)}</div><span class="pill acc">${esc(kb.docs)} 篇</span></div>
+              <div class="tr small mt8">${esc(kb.desc)}</div>
+              <div class="tr small mt8">更新 ${esc(kb.updated)} · 状态 ${kb.status === 'on' ? '启用' : '停用'}</div>
+              <div class="mt12"><div class="tr small">引用此库检索的 Agent</div>
+                <div class="chips mt8">${refs.length ? refs.map((a) => `<span class="chip-tag">${esc(a.name)}</span>`).join('') : '<span class="tr small">—</span>'}</div>
+              </div>
+            </div>`;
+        }).join('');
+        return `
+          <div class="hint" style="margin-bottom:12px">以下媒体知识库供 <b class="t2">采编 / 舆情 / 分发 / 审核</b> 各 Agent 实时检索，用于事实核查、口径核对与合规校验。</div>
+          <div class="grid g3">${cards}</div>`;
+      }
+
+      // ---------- 组装 ----------
+      function tabsBar() {
+        const tabs = [
+          { k: 'dist', label: '🚀 一键分发' },
+          { k: 'senti', label: '📈 舆情' },
+          { k: 'kw', label: '🔥 关键词' },
+          { k: 'kb', label: '📚 知识库' },
+        ];
+        return `<div class="tabs" id="biz-tabs">${tabs.map((t) => `<div class="tab${state.tab === t.k ? ' active' : ''}" data-tab="${t.k}">${t.label}</div>`).join('')}</div>`;
+      }
+      function pane() {
+        return state.tab === 'senti' ? paneSenti() : state.tab === 'kw' ? paneKw() : state.tab === 'kb' ? paneKb() : paneDist();
+      }
+      function render() {
+        V.innerHTML = `<div class="wrap">
+          ${Hub.sceneSubnav('media', '')}
+          ${header()}
+          <div style="margin-top:22px">${tabsBar()}</div>
+          <div id="biz-pane">${pane()}</div>
+        </div>`;
+      }
+
+      // ---------- 交互：分发弹窗 ----------
+      function openDist(id) {
+        const M = Hub.data.media;
+        const content = M.contents.find((c) => c.id === id);
+        if (!content) return;
+        const body = `
+          <div class="tr small" style="margin:-6px 0 14px">稿件：<b class="t2">${esc(content.title)}</b></div>
+          <div class="field"><label>选择分发渠道（已停用渠道不可选）</label>
+            <div style="display:flex;flex-direction:column;gap:9px">
+              ${M.channels.map((c) => `<label class="flex ac gap8" style="cursor:${c.status === 'on' ? 'pointer' : 'not-allowed'};font-size:13px">
+                <input type="checkbox" data-ch="${esc(c.id)}" ${c.status !== 'on' ? 'disabled' : ''} ${(content.channels || []).includes(c.id) ? 'checked' : ''} style="width:auto">
+                <span>${esc(c.name)} <span class="tr small">${esc(c.type)} · ${esc(c.followers)}</span></span>
+                ${c.status !== 'on' ? '<span class="pill">已停用</span>' : ''}
+              </label>`).join('')}
+            </div>
+          </div>
+          <div class="btn-row" style="justify-content:flex-end;margin-top:8px">
+            <button class="btn" data-x>取消</button>
+            <button class="btn btn-primary" id="do-dist">确认分发</button>
+          </div>`;
+        Hub.modal('🚀 一键多渠道分发', body, (bodyEl, close) => {
+          bodyEl.querySelector('[data-x]').onclick = close;
+          bodyEl.querySelector('#do-dist').onclick = async () => {
+            const sel = [...bodyEl.querySelectorAll('input[data-ch]:checked')].map((i) => i.dataset.ch);
+            if (!sel.length) { Hub.toast('请至少选择一个渠道', true); return; }
+            const M2 = Hub.data.media;
+            const value = M2.contents.map((c) => c.id === id ? { ...c, status: '已发', channels: sel, publishAt: nowStr() } : c);
+            try {
+              await Hub.change('scene.patch', { scenario: 'media', path: 'contents', value });
+              await Hub.refresh();
+              render();
+              Hub.toast(`已分发到 ${sel.length} 个渠道，回执已回收`);
+              bodyEl.innerHTML = `
+                <div class="panel-t"><h3>✅ 分发回执</h3><span class="sub">${sel.length} 个渠道 · 全部回收成功</span></div>
+                <div class="tbl-wrap"><table class="tbl">
+                  <thead><tr><th>渠道</th><th>回执</th><th class="right">耗时</th></tr></thead>
+                  <tbody>${sel.map((cid) => `<tr><td class="b">${esc(chName(cid))}</td><td>${Hub.statusPill('已发')}</td><td class="right num">${(Math.random() * 0.7 + 0.2).toFixed(1)}s</td></tr>`).join('')}</tbody>
+                </table></div>
+                <div class="btn-row" style="justify-content:flex-end;margin-top:14px"><button class="btn btn-primary" data-done>完成</button></div>`;
+              bodyEl.querySelector('[data-done]').onclick = close;
+            } catch (e) { /* Hub.change 已 toast */ }
+          };
+        });
+      }
+
+      // ---------- 交互：舆情处置弹窗 ----------
+      function openHandle(id) {
+        const M = Hub.data.media;
+        const ev = M.sentiment.events.find((e) => e.id === id);
+        if (!ev) return;
+        const sop = sentiSop();
+        const sopCard = sop ? `
+          <div class="card" style="margin:12px 0">
+            <div class="panel-t"><h3 style="font-size:14px">📋 建议按《${esc(sop.title)}》处置</h3><span class="sub">${esc(sop.priority)} · ${sop.mustAck ? '强制签收' : '提示'}</span></div>
+            <ul class="steps">${sop.steps.map((s) => `<li>${esc(s)}</li>`).join('')}</ul>
+          </div>` : '';
+        const body = `
+          <div class="kv"><span class="k">话题</span><b class="t2">${esc(ev.topic)}</b></div>
+          <div class="kv mt8"><span class="k">分级</span>${Hub.levelTag(ev.level)} <span class="tr small">热度 ${ev.heat} · ${esc(ev.source)}</span></div>
+          ${sopCard}
+          <div class="btn-row" style="justify-content:flex-end;margin-top:4px">
+            <button class="btn" data-x>取消</button>
+            <button class="btn btn-primary" id="do-handle">标记处置闭环</button>
+          </div>`;
+        Hub.modal('📻 舆情处置', body, (bodyEl, close) => {
+          bodyEl.querySelector('[data-x]').onclick = close;
+          bodyEl.querySelector('#do-handle').onclick = async () => {
+            const M2 = Hub.data.media;
+            const value = M2.sentiment.events.map((e) => e.id === id ? { ...e, handled: true } : e);
+            try {
+              await Hub.change('scene.patch', { scenario: 'media', path: 'sentiment.events', value });
+              await Hub.refresh();
+              render();
+              close();
+              Hub.toast('已标记处置 · 事件闭环');
+            } catch (e) { }
+          };
+        });
+      }
+
+      async function toggleChannel(id) {
+        const M = Hub.data.media;
+        const value = M.channels.map((c) => c.id === id ? { ...c, status: c.status === 'on' ? 'off' : 'on' } : c);
+        try {
+          await Hub.change('scene.patch', { scenario: 'media', path: 'channels', value });
+          await Hub.refresh();
+          render();
+          Hub.toast('渠道状态已更新');
+        } catch (e) { }
+      }
+
+      // ---------- 事件委托（挂一次，V 常驻）----------
+      V.addEventListener('click', (e) => {
+        const tab = e.target.closest('#biz-tabs .tab');
+        if (tab) { state.tab = tab.dataset.tab; render(); return; }
+        const act = e.target.closest('[data-act]');
+        if (!act) return;
+        const kind = act.dataset.act;
+        if (kind === 'ch-toggle') { if (canEdit) toggleChannel(act.dataset.id); }
+        else if (kind === 'dist') { openDist(act.dataset.id); }
+        else if (kind === 'handle') { openHandle(act.dataset.id); }
+        else if (kind === 'kw') { Hub.toast(`「${act.dataset.word}」已推给采编助理 Agent 作为选题`); }
+      });
+
+      render();
+    });
+  </script>
+</body>
+</html>

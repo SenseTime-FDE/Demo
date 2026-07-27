@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>商汤灵犀 · 多租户 AI SaaS 平台</title>
+  <link rel="stylesheet" href="assets/style.css">
+  <style>
+    .portal { min-height: 100vh; display: flex; flex-direction: column; align-items: center; padding: 48px 20px 60px; }
+    .portal .top { display: flex; align-items: center; gap: 12px; margin-bottom: 6px; }
+    .portal .top img { height: 30px; }
+    .portal h1 { font-size: 30px; font-weight: 800; letter-spacing: .5px; margin-top: 18px; text-align: center; }
+    .portal .sub { color: var(--txt-2); font-size: 14px; margin: 10px 0 4px; text-align: center; max-width: 720px; }
+    .portal .org { color: var(--txt-3); font-size: 12.5px; margin-bottom: 34px; }
+    .portal-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; width: min(1120px, 96vw); }
+    @media (max-width: 980px) { .portal-grid { grid-template-columns: repeat(2, 1fr); } }
+    .op-card { width: min(1120px, 96vw); margin-bottom: 16px; display: flex; align-items: center; gap: 16px; padding: 18px 22px; border-radius: var(--r); border: 1px solid var(--line-2); background: linear-gradient(100deg, color-mix(in srgb, var(--brand) 14%, var(--panel)), var(--panel-2)); cursor: pointer; transition: .16s; }
+    .op-card:hover { transform: translateY(-2px); border-color: var(--brand); }
+    .op-card .ic { font-size: 30px; } .op-card h3 { font-size: 17px; } .op-card .d { font-size: 12.5px; color: var(--txt-2); }
+    .op-card .go { margin-left: auto; color: var(--brand); font-weight: 700; }
+    .biz-card { cursor: pointer; border-radius: var(--r); padding: 22px; border: 1px solid var(--line); background: linear-gradient(180deg, var(--panel), var(--panel-2)); position: relative; overflow: hidden; transition: .18s; }
+    .biz-card:hover { transform: translateY(-4px); border-color: var(--bz); }
+    .biz-card::after { content: ""; position: absolute; right: -30px; top: -30px; width: 120px; height: 120px; border-radius: 50%; background: radial-gradient(circle, var(--bz), transparent 70%); opacity: .3; }
+    .biz-card .ic { font-size: 32px; } .biz-card h3 { font-size: 18px; margin: 12px 0 3px; }
+    .biz-card .tag { font-size: 11.5px; color: var(--bz); font-weight: 700; }
+    .biz-card .d { font-size: 12px; color: var(--txt-2); margin: 10px 0 14px; min-height: 40px; }
+    .biz-card .ent { font-size: 12px; color: var(--bz); font-weight: 700; }
+    .portal .foot { color: var(--txt-3); font-size: 12px; margin-top: 40px; text-align: center; }
+  </style>
+</head>
+<body>
+  <div class="portal">
+    <div class="top"><img src="assets/st_logo_white.png" alt="商汤"></div>
+    <h1>商汤灵犀 · 多租户 AI SaaS 平台</h1>
+    <div class="sub">一套灵犀 AI 产品，搭建 N 个行业 SaaS 业务；每个业务多租户独立运营、统一后台管理，声渡提供拟真人 AI 语音服务。</div>
+    <div class="org">商汤科技 · 大模型生态渠道部</div>
+
+    <div class="op-card" data-portal="operator">
+      <div class="ic">🛠️</div>
+      <div><h3>平台运营后台</h3><div class="d">商汤灵犀运营方 · 跨业务管理租户与 Agent、声渡总控、模型接入</div></div>
+      <div class="go">进入 ›</div>
+    </div>
+
+    <div class="portal-grid" id="grid"></div>
+    <div class="foot">四个业务各自独立登录、多租户隔离；演示账号见各业务登录页。© 商汤科技</div>
+  </div>
+  <script src="assets/saas.js"></script>
+  <script>
+    const grid = document.getElementById('grid');
+    grid.innerHTML = window.SAAS.businesses.map(b => `
+      <div class="biz-card" data-portal="${b.id}" style="--bz:${b.accent}">
+        <div class="ic">${b.icon}</div>
+        <div class="tag">${b.tagline}</div>
+        <h3>${b.name}</h3>
+        <div class="d">${b.product}</div>
+        <div class="ent">${b.tenantNoun}租户登录 ›</div>
+      </div>`).join('');
+    document.querySelectorAll('[data-portal]').forEach(c => c.onclick = () => location.href = 'login.html?portal=' + c.dataset.portal);
+    if (localStorage.getItem('hub_token')) { /* 已登录也允许回门户切换 */ }
+  </script>
+</body>
+</html>

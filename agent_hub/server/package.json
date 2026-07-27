@@ -1,0 +1,8 @@
+{
+  "name": "sense-agent-hub",
+  "version": "1.0.0",
+  "private": true,
+  "description": "灵犀 · 统一 Agent 运营中台（零依赖，Node 内置 http + sqlite）",
+  "main": "server.js",
+  "scripts": { "start": "node server.js" }
+}

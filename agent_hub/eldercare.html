@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>智慧养老 · 灵犀统一 Agent 运营中台</title>
+  <link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+  <div id="view"></div>
+  <script src="assets/app.js"></script>
+  <script>
+    Hub.boot({ page: 'eldercare', scenario: 'eldercare' }).then(({ data, me, perms }) => {
+      const V = document.getElementById('view');
+      const E = () => Hub.data.eldercare;                 // 每次重画都取最新
+      const canEdit = perms.editConfig && Hub.canScene('eldercare');
+      const nowTs = () => new Date().toISOString().slice(0, 16).replace('T', ' ');
+
+      const quick = [
+        { href: 'eldercare_agent.html', ic: '🎙', t: '照护助理 Agent', d: '护理员企微语音派工 · SOP 问答 · 应急处置' },
+        { href: 'eldercare_miniapp.html', ic: '📱', t: '照护助手小程序', d: '一线护理员端 · 今日任务 · 语音上报' },
+        { href: 'eldercare_board.html', ic: '📊', t: '经营数据看板', d: '照护完成率 · 结构分布 · chatBI 问数' },
+      ];
+
+      function riskPill(r) {
+        const cls = /高/.test(r) ? 'bad' : /中/.test(r) ? 'warn' : 'ok';
+        return `<span class="pill ${cls}">${Hub.esc(r)}</span>`;
+      }
+
+      let activeTab = 'residents';
+
+      V.innerHTML = `
+        <div class="wrap">
+          ${Hub.sceneSubnav('eldercare', '')}
+          <div class="page-intro">
+            <b>智慧养老 · 工作台</b> —— 面向养老机构的照护运营中枢：一线护理员以
+            <b class="tacc">照护助理 Agent</b> 语音派工与记录，健康/跌倒预警实时汇聚，命中即推送对应
+            SOP 与处置要求，全过程语音留痕。 <span class="tr">底座：${Hub.esc(data.platform.base)}</span>
+          </div>
+
+          <div class="grid g3">
+            ${quick.map(q => `<a class="card" href="${q.href}" style="text-decoration:none">
+              <div style="font-size:26px">${q.ic}</div>
+              <h3 style="font-size:15px;margin:8px 0 4px">${q.t}</h3>
+              <div class="tr small">${q.d}</div></a>`).join('')}
+          </div>
+
+          <div id="alert-banner"></div>
+
+          <div class="section-t">机构运营概览</div>
+          <div class="grid g4">${E().board.kpis.map(k => Hub.kpi(k)).join('')}</div>
+
+          <div class="section-t">照护业务</div>
+          <div class="tabs" id="wtabs" style="margin-bottom:16px">
+            <div class="tab${activeTab === 'residents' ? ' active' : ''}" data-t="residents">🛏 在护老人</div>
+            <div class="tab${activeTab === 'tasks' ? ' active' : ''}" data-t="tasks">📝 照护任务</div>
+            <div class="tab${activeTab === 'alerts' ? ' active' : ''}" data-t="alerts">🚨 健康预警</div>
+          </div>
+          <div class="card" id="tab-body"></div>
+
+          <div class="hint mt24">合规红线：不拍摄病患影像 · 家属授权后采集 · 遵循最小必要原则。全部数字为目标态示意，数据由真后端 SQLite 持久化，权限由服务器强制校验。</div>
+        </div>`;
+
+      // ---------- 顶部红色预警条 ----------
+      function paintBanner() {
+        const box = document.getElementById('alert-banner');
+        const reds = E().alerts.filter(a => a.level === '红' && a.status !== '已闭环');
+        if (!reds.length) { box.innerHTML = ''; return; }
+        box.innerHTML = reds.map(a => `
+          <div class="card" style="margin-top:16px;border-color:color-mix(in srgb,var(--bad) 55%,transparent);background:linear-gradient(180deg,color-mix(in srgb,var(--bad) 14%,var(--panel)),var(--panel-2))">
+            <div class="flex ac gap12 wrapf">
+              <div style="font-size:24px">🚨</div>
+              <div style="flex:1;min-width:200px">
+                <div class="b">红色预警 · ${Hub.esc(a.bed)} 床 · ${Hub.esc(a.type)}</div>
+                <div class="tr small mt8">${Hub.esc(a.detail)} · ${Hub.esc((a.ts || '').slice(5))}</div>
+              </div>
+              ${Hub.levelTag(a.level)}
+              ${Hub.statusPill(a.status)}
+              ${canEdit
+                ? `<button class="btn btn-primary btn-sm" data-quick-handle="${Hub.esc(a.id)}">立即处置</button>`
+                : `<span class="ro-note">当前角色只读</span>`}
+            </div>
+          </div>`).join('');
+        if (canEdit) box.querySelectorAll('[data-quick-handle]').forEach(b =>
+          b.addEventListener('click', () => { activeTab = 'alerts'; syncTabs(); alertAction(b.getAttribute('data-quick-handle'), '已闭环'); }));
+      }
+
+      // ---------- Tab 主体 ----------
+      const roNote = `<div class="ro-note mt12">当前角色为只读，如需处置请使用运营/场景管理员账号。</div>`;
+
+      function paintBody() {
+        const body = document.getElementById('tab-body');
+        const d = E();
+        if (activeTab === 'residents') {
+          body.innerHTML = `
+            <div class="panel-t"><h3>在护老人 · 床位与照护分级</h3><span class="sub">共 ${d.residents.length} 位在护</span></div>
+            <div class="tbl-wrap"><table class="tbl">
+              <thead><tr><th>姓名</th><th>床位</th><th>照护分级</th><th>风险评估</th><th>状态</th></tr></thead>
+              <tbody>${d.residents.map(r => `<tr>
+                <td class="b">${Hub.esc(r.name)}</td>
+                <td class="num">${Hub.esc(r.bed)}</td>
+                <td><span class="chip-tag">${Hub.esc(r.level)}</span></td>
+                <td>${riskPill(r.risk)}</td>
+                <td>${Hub.statusPill(r.status)}</td>
+              </tr>`).join('')}</tbody>
+            </table></div>`;
+          return;
+        }
+        if (activeTab === 'tasks') {
+          body.innerHTML = `
+            <div class="panel-t"><h3>照护任务 · 今日班次</h3><span class="sub">已完成 ${d.tasks.filter(t => t.status === '已完成').length}/${d.tasks.length}</span><span class="sp"></span>
+              ${canEdit ? `<button class="btn btn-sm" id="task-new">＋ 新建任务</button>` : ''}</div>
+            <div class="tbl-wrap"><table class="tbl">
+              <thead><tr><th>床位</th><th>照护项</th><th>负责人</th><th>时间</th><th>状态</th><th class="right">操作</th></tr></thead>
+              <tbody>${d.tasks.map(t => `<tr>
+                <td class="num">${Hub.esc(t.bed)}</td>
+                <td>${Hub.esc(t.item)}</td>
+                <td class="t2">${Hub.esc(t.owner)}</td>
+                <td class="tr small mono">${Hub.esc((t.ts || '').slice(5, 16))}</td>
+                <td>${Hub.statusPill(t.status)}</td>
+                <td class="right">${(canEdit && t.status !== '已完成')
+                  ? `<button class="btn btn-sm btn-primary" data-done="${Hub.esc(t.id)}">标记完成</button>`
+                  : (canEdit ? '<span class="tr small">—</span>' : '<span class="tr small">只读</span>')}</td>
+              </tr>`).join('')}</tbody>
+            </table></div>
+            ${canEdit ? '' : roNote}`;
+          if (canEdit) {
+            body.querySelectorAll('[data-done]').forEach(b => b.addEventListener('click', () => taskDone(b.getAttribute('data-done'))));
+            const nb = document.getElementById('task-new'); if (nb) nb.addEventListener('click', newTask);
+          }
+          return;
+        }
+        // alerts
+        body.innerHTML = `
+          <div class="panel-t"><h3>健康预警 · 分级处置</h3><span class="sub">待处置 ${d.alerts.filter(a => a.status !== '已闭环').length} 起</span></div>
+          <div class="tbl-wrap"><table class="tbl">
+            <thead><tr><th>床位</th><th>类型</th><th>详情</th><th>分级</th><th>时间</th><th>状态</th><th class="right">处置</th></tr></thead>
+            <tbody>${d.alerts.map(a => `<tr>
+              <td class="num">${Hub.esc(a.bed)}</td>
+              <td>${Hub.esc(a.type)}</td>
+              <td class="t2">${Hub.esc(a.detail)}</td>
+              <td>${Hub.levelTag(a.level)}</td>
+              <td class="tr small mono">${Hub.esc((a.ts || '').slice(5, 16))}</td>
+              <td>${Hub.statusPill(a.status)}</td>
+              <td class="right">${canEdit ? `<div class="btn-row" style="justify-content:flex-end">
+                  <button class="btn btn-sm" data-notify="${Hub.esc(a.id)}"${a.status === '已闭环' ? ' disabled' : ''}>通知医护</button>
+                  <button class="btn btn-sm btn-primary" data-handle="${Hub.esc(a.id)}"${a.status === '已闭环' ? ' disabled' : ''}>处置闭环</button>
+                </div>` : '<span class="tr small">只读</span>'}</td>
+            </tr>`).join('')}</tbody>
+          </table></div>
+          ${canEdit ? '' : roNote}`;
+        if (canEdit) {
+          body.querySelectorAll('[data-notify]').forEach(b => b.addEventListener('click', () => alertAction(b.getAttribute('data-notify'), '已通知医护')));
+          body.querySelectorAll('[data-handle]').forEach(b => b.addEventListener('click', () => alertAction(b.getAttribute('data-handle'), '已闭环')));
+        }
+      }
+
+      // ---------- 写操作 ----------
+      async function taskDone(id) {
+        const t = E().tasks.find(x => x.id === id); if (!t) return;
+        try {
+          await Hub.change('scene.listUpsert', { scenario: 'eldercare', list: 'tasks', record: { ...t, status: '已完成', ts: nowTs() } });
+          await Hub.refresh(); paintBody(); Hub.toast('任务已标记完成');
+        } catch (e) {}
+      }
+      async function alertAction(id, status) {
+        const a = E().alerts.find(x => x.id === id); if (!a) return;
+        try {
+          await Hub.change('scene.listUpsert', { scenario: 'eldercare', list: 'alerts', record: { ...a, status } });
+          await Hub.refresh(); paintBody(); paintBanner();
+          Hub.toast(status === '已闭环' ? `${a.bed} 床预警已处置闭环` : `已通知医护 · ${a.bed} 床`);
+        } catch (e) {}
+      }
+      function newTask() {
+        Hub.modal('新建照护任务', `
+          <div class="field"><label>床位</label><input id="f-bed" placeholder="如 3-08"></div>
+          <div class="field"><label>照护项</label><input id="f-item" placeholder="如 下午翻身+体征"></div>
+          <div class="field"><label>负责人</label><input id="f-owner" placeholder="如 护理员·刘敏" value="护理员·刘敏"></div>
+          <div class="btn-row" style="justify-content:flex-end;margin-top:6px">
+            <button class="btn" id="f-cancel">取消</button>
+            <button class="btn btn-primary" id="f-ok">创建</button>
+          </div>`, (b, close) => {
+          b.querySelector('#f-cancel').onclick = close;
+          b.querySelector('#f-ok').onclick = async () => {
+            const bed = b.querySelector('#f-bed').value.trim();
+            const item = b.querySelector('#f-item').value.trim();
+            const owner = b.querySelector('#f-owner').value.trim() || '护理员';
+            if (!bed || !item) { Hub.toast('请填写床位与照护项', true); return; }
+            const record = { id: 'x_' + Date.now(), bed, item, owner, status: '进行中', ts: nowTs() };
+            try {
+              await Hub.change('scene.listUpsert', { scenario: 'eldercare', list: 'tasks', record });
+              await Hub.refresh(); close(); paintBody(); Hub.toast('已新建照护任务');
+            } catch (e) {}
+          };
+        });
+      }
+
+      // ---------- Tab 切换 ----------
+      function syncTabs() {
+        document.querySelectorAll('#wtabs .tab').forEach(t => t.classList.toggle('active', t.getAttribute('data-t') === activeTab));
+        paintBody();
+      }
+      document.querySelectorAll('#wtabs .tab').forEach(t => t.addEventListener('click', () => { activeTab = t.getAttribute('data-t'); syncTabs(); }));
+
+      paintBanner();
+      paintBody();
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>数字校园 · 灵犀统一 Agent 运营中台</title>
+  <link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+  <div id="view"></div>
+  <script src="assets/app.js"></script>
+  <script>
+    Hub.boot({ page: 'campus', scenario: 'campus' }).then(({ data, me, perms }) => {
+      const V = document.getElementById('view');
+      const CA = () => Hub.data.campus;                 // 始终读最新数据
+      const canEdit = perms.editConfig && Hub.canScene('campus');
+      const kpis = CA().board.kpis;
+
+      const pad = n => String(n).padStart(2, '0');
+      const nowStr = () => { const d = new Date(); return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}`; };
+      const intentPill = i => { const m = { '高': 'acc', '中': 'info', '低': '' }; return `<span class="pill ${m[i] || ''}">${Hub.esc(i)} 意向</span>`; };
+
+      const quick = [
+        { href: 'campus_agent.html', ic: '🎙', tag: '企业微信 · 语音', t: '招生 / 家校 Agent', ds: '语音接待招生咨询与家长诉求，命中 SOP 自动推送处置要求，全程留痕。' },
+        { href: 'campus_miniapp.html', ic: '📱', tag: '家长端 · 小程序', t: '家校通小程序', ds: '面向家长：通知触达、成绩查询、在线请假、语音咨询一站直达。' },
+        { href: 'campus_board.html', ic: '📊', tag: '管理者 · 看板', t: '招生与家校看板', ds: '咨询趋势、招生漏斗、事件分级与 chatBI 问数，一屏掌握经营。' },
+      ];
+
+      V.innerHTML = `
+        <div class="wrap">
+          ${Hub.sceneSubnav('campus', '')}
+          <div class="page-intro">
+            <b>数字校园</b> —— 覆盖招生咨询、教务问答、家校沟通与校园安全处置。招生老师、班主任与家长以语音 Agent 交互，
+            线索自动沉淀、事件按规程处置，全过程数据留痕并汇入招生与家校看板。
+            <span class="tr">强调色 · 校园蓝 · 底座：${Hub.esc(data.platform.base)}</span>
+          </div>
+
+          <div class="grid g3">
+            ${quick.map(q => `<a class="scene-card" href="${q.href}" style="--sc-accent:#3E7BFA">
+              <div class="ic">${q.ic}</div>
+              <div class="tag">${Hub.esc(q.tag)}</div>
+              <h3>${Hub.esc(q.t)}</h3>
+              <div class="ds">${Hub.esc(q.ds)}</div>
+            </a>`).join('')}
+          </div>
+
+          <div class="section-t">本场景关键指标</div>
+          <div class="grid g4">${kpis.map(k => Hub.kpi(k)).join('')}</div>
+
+          <div class="tabs" id="biztabs" style="margin-top:26px">
+            <div class="tab active" data-k="leads">🎯 招生线索</div>
+            <div class="tab" data-k="notices">📢 家校通知</div>
+            <div class="tab" data-k="events">🚨 校园事件</div>
+          </div>
+          <div id="biz"></div>
+        </div>`;
+
+      const biztabs = document.getElementById('biztabs');
+      const biz = document.getElementById('biz');
+      let active = 'leads';
+
+      function leadActions(l) {
+        if (!canEdit) return '<span class="tr">—</span>';
+        if (l.status === '已转化') return '<span class="pill ok">已转化</span>';
+        return `<div class="btn-row"><button class="btn btn-sm" data-act="lead-follow" data-id="${l.id}">跟进</button><button class="btn btn-sm btn-primary" data-act="lead-convert" data-id="${l.id}">转化</button></div>`;
+      }
+      function eventActions(ev) {
+        if (!canEdit) return '<span class="tr">—</span>';
+        if (ev.status === '已闭环') return '<span class="pill ok">已闭环</span>';
+        return `<button class="btn btn-sm btn-primary" data-act="event-close" data-id="${ev.id}">处置闭环</button>`;
+      }
+
+      function paneLeads(c) {
+        return `
+          <div class="panel-t"><h3>🎯 招生线索</h3><span class="sub">语音进线自动沉淀 · 高意向优先跟进</span><span class="sp"></span>
+            ${canEdit ? '<button class="btn btn-sm" data-act="lead-new">＋ 新增线索</button>' : '<span class="ro-note">当前角色为只读</span>'}</div>
+          <div class="tbl-wrap"><table class="tbl">
+            <thead><tr><th>家长</th><th>意向年级</th><th>意向</th><th>来源</th><th>状态</th><th>时间</th><th>操作</th></tr></thead>
+            <tbody>${c.leads.map(l => `<tr>
+              <td class="b">${Hub.esc(l.name)}</td>
+              <td>${Hub.esc(l.grade)}</td>
+              <td>${intentPill(l.intent)}</td>
+              <td class="t2">${Hub.esc(l.channel)}</td>
+              <td>${Hub.statusPill(l.status)}</td>
+              <td class="tr small mono">${Hub.esc((l.ts || '').slice(5, 16))}</td>
+              <td>${leadActions(l)}</td></tr>`).join('')}</tbody>
+          </table></div>`;
+      }
+      function paneNotices(c) {
+        return `
+          <div class="panel-t"><h3>📢 家校通知</h3><span class="sub">口述成稿 · 一键推送企微与短信 · 回执追踪</span><span class="sp"></span>
+            ${canEdit ? '<button class="btn btn-sm" data-act="notice-new">＋ 新建通知</button>' : '<span class="ro-note">当前角色为只读</span>'}</div>
+          <div class="tbl-wrap"><table class="tbl">
+            <thead><tr><th>标题</th><th>触达对象</th><th>状态</th><th>阅读率</th><th>时间</th></tr></thead>
+            <tbody>${c.notices.map(n => `<tr>
+              <td class="b">${Hub.esc(n.title)}</td>
+              <td class="t2">${Hub.esc(n.to)}</td>
+              <td>${Hub.statusPill(n.status)}</td>
+              <td class="num">${Hub.esc(n.read)}</td>
+              <td class="tr small mono">${Hub.esc((n.ts || '').slice(5, 16))}</td></tr>`).join('')}</tbody>
+          </table></div>`;
+      }
+      function paneEvents(c) {
+        return `
+          <div class="panel-t"><h3>🚨 校园事件</h3><span class="sub">投诉 / 安全事件按 SOP 处置 · 闭环留档</span><span class="sp"></span>
+            ${canEdit ? '' : '<span class="ro-note">当前角色为只读</span>'}</div>
+          <div class="tbl-wrap"><table class="tbl">
+            <thead><tr><th>类型</th><th>事件</th><th>分级</th><th>状态</th><th>时间</th><th>操作</th></tr></thead>
+            <tbody>${c.events.map(ev => `<tr>
+              <td class="t2">${Hub.esc(ev.type)}</td>
+              <td class="b">${Hub.esc(ev.title)}</td>
+              <td>${Hub.levelTag(ev.level)}</td>
+              <td>${Hub.statusPill(ev.status)}</td>
+              <td class="tr small mono">${Hub.esc((ev.ts || '').slice(5, 16))}</td>
+              <td>${eventActions(ev)}</td></tr>`).join('')}</tbody>
+          </table></div>`;
+      }
+
+      function renderTabs(k) {
+        active = k;
+        [...biztabs.children].forEach(t => t.classList.toggle('active', t.dataset.k === k));
+        const c = CA();
+        const body = k === 'leads' ? paneLeads(c) : k === 'notices' ? paneNotices(c) : paneEvents(c);
+        biz.innerHTML = `<div class="card">${body}</div>`;
+      }
+
+      // ---- 写操作 ----
+      async function updLead(id, status) {
+        const l = CA().leads.find(x => x.id === id); if (!l) return;
+        try { await Hub.change('scene.listUpsert', { scenario: 'campus', list: 'leads', record: { ...l, status } }); await Hub.refresh(); Hub.toast('线索已更新为「' + status + '」'); renderTabs('leads'); } catch (e) {}
+      }
+      async function closeEvent(id) {
+        const ev = CA().events.find(x => x.id === id); if (!ev) return;
+        try { await Hub.change('scene.listUpsert', { scenario: 'campus', list: 'events', record: { ...ev, status: '已闭环' } }); await Hub.refresh(); Hub.toast('事件已处置闭环'); renderTabs('events'); } catch (e) {}
+      }
+      function newLead() {
+        Hub.modal('新增招生线索', `
+          <div class="field"><label>家长称呼</label><input id="f-name" placeholder="如：王同学家长"></div>
+          <div class="field"><label>意向年级</label><select id="f-grade"><option>小升初</option><option>初一</option><option>初二</option><option>高一</option><option>高二</option></select></div>
+          <div class="field"><label>意向等级</label><select id="f-intent"><option>高</option><option>中</option><option>低</option></select></div>
+          <div class="field"><label>来源渠道</label><select id="f-ch"><option>招生咨询 Agent</option><option>官网</option><option>转介绍</option><option>线下开放日</option></select></div>
+          <div class="btn-row" style="justify-content:flex-end"><button class="btn" id="f-cancel">取消</button><button class="btn btn-primary" id="f-save">保存并登记</button></div>`,
+          (b, close) => {
+            b.querySelector('#f-cancel').onclick = close;
+            b.querySelector('#f-save').onclick = async () => {
+              const rec = { id: 'cl_' + Date.now(), name: (b.querySelector('#f-name').value.trim() || '新登记家长'), grade: b.querySelector('#f-grade').value, intent: b.querySelector('#f-intent').value, channel: b.querySelector('#f-ch').value, status: '已登记', ts: nowStr() };
+              try { await Hub.change('scene.listUpsert', { scenario: 'campus', list: 'leads', record: rec }); await Hub.refresh(); close(); Hub.toast('线索已登记'); renderTabs('leads'); } catch (e) {}
+            };
+          });
+      }
+      function newNotice() {
+        Hub.modal('新建家校通知', `
+          <div class="field"><label>通知标题</label><input id="n-title" placeholder="如：期末家长会通知"></div>
+          <div class="field"><label>触达对象</label><select id="n-to"><option>全校家长</option><option>初一年级家长</option><option>高一年级家长</option><option>毕业班家长</option></select></div>
+          <div class="field"><label>正文摘要</label><textarea id="n-body" rows="3" placeholder="口述或输入通知要点，Agent 将成稿并推送"></textarea></div>
+          <div class="btn-row" style="justify-content:flex-end"><button class="btn" id="n-cancel">取消</button><button class="btn btn-primary" id="n-save">一键推送</button></div>`,
+          (b, close) => {
+            b.querySelector('#n-cancel').onclick = close;
+            b.querySelector('#n-save').onclick = async () => {
+              const title = b.querySelector('#n-title').value.trim() || '新通知';
+              const rec = { id: 'cn_' + Date.now(), title, to: b.querySelector('#n-to').value, status: '已推送', read: '0%', ts: nowStr() };
+              try { await Hub.change('scene.listUpsert', { scenario: 'campus', list: 'notices', record: rec }); await Hub.refresh(); close(); Hub.toast('通知已推送，正在回收阅读回执'); renderTabs('notices'); } catch (e) {}
+            };
+          });
+      }
+
+      // ---- 事件委托 ----
+      biztabs.addEventListener('click', e => { const t = e.target.closest('.tab'); if (t) renderTabs(t.dataset.k); });
+      biz.addEventListener('click', e => {
+        const b = e.target.closest('button[data-act]'); if (!b) return;
+        const act = b.dataset.act, id = b.dataset.id;
+        if (act === 'lead-follow') updLead(id, '待回访');
+        else if (act === 'lead-convert') updLead(id, '已转化');
+        else if (act === 'lead-new') newLead();
+        else if (act === 'notice-new') newNotice();
+        else if (act === 'event-close') closeEvent(id);
+      });
+
+      renderTabs('leads');
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>数字校园 · Agent 原型 · 灵犀统一 Agent 运营中台</title>
+  <link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+  <div id="view"></div>
+  <script src="assets/app.js"></script>
+  <script src="assets/chat.js"></script>
+  <script src="assets/voice.js"></script>
+  <script>
+    Hub.boot({ page: 'campus_agent', scenario: 'campus' }).then(({ data, me, perms }) => {
+      const V = document.getElementById('view');
+      const sop = id => (Hub.data.sops.find(s => s.id === id) || { steps: [], priority: '' });
+      const stripTags = h => String(h).replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
+
+      function infoCard(title, rows, footer) {
+        return '<div class="c-card"><div class="ch">' + title + '</div><div class="cb">'
+          + rows.map(r => '<div class="r"><span class="l">' + r[0] + '</span><span>' + r[1] + '</span></div>').join('')
+          + '</div>' + (footer ? '<div class="cf">' + footer + '</div>' : '') + '</div>';
+      }
+      function sopCard(sopId) {
+        const s = sop(sopId);
+        return '<div class="c-card"><div class="ch">📋 命中 SOP · ' + s.title + '</div><div class="cb">'
+          + '<div class="r"><span class="l">优先级</span><span>' + s.priority + (s.mustAck ? ' · 强制签收' : '') + '</span></div>'
+          + s.steps.map((x, i) => '<div class="r"><span class="l">步骤 ' + (i + 1) + '</span><span>' + x + '</span></div>').join('')
+          + '</div><div class="cf">已按角色推送 · 请签收并执行</div></div>';
+      }
+
+      // ---- 五个语音场景（自带 agentId/sopId 等留痕字段）----
+      const scenarios = [
+        {
+          id: 'enroll', title: '招生政策咨询', chip: '招生咨询', intent: '招生政策咨询',
+          intro: '家长通过企业微信语音咨询招生政策', agentId: 'ag_c_enroll', agentName: '招生咨询 Agent',
+          sopId: 'sop_c_enroll', sopTitle: '招生接待 SOP', duration: 78,
+          steps: [
+            { from: 'user', voice: '老师您好，孩子今年小升初，想问初一还有插班名额吗？学费怎么算？', dur: 8 },
+            { from: 'agent', text: '您好！初一年级目前尚有少量插班名额。我按最新《招生简章》为您播报关键信息：' },
+            { from: 'agent', html: infoCard('🎓 2026 招生政策速览', [['插班年级', '初一（余少量名额）'], ['学费标准', '¥1.28 万 / 学期'], ['住宿', '可申请 · ¥2400 / 学期'], ['报名方式', '登记后 24h 回访'], ['咨询依据', '招生政策库 · 74 篇']], '资料来源：招生政策库（实时检索）'), cardLabel: '招生政策速览卡' },
+            { from: 'agent', text: '识别到高意向咨询，已触发《招生接待 SOP》，为您登记意向并安排招生老师回访。' },
+            { from: 'agent', html: sopCard('sop_c_enroll'), cardLabel: '招生接待 SOP 推送卡' },
+            { from: 'user', voice: '好的，那帮我登记一下，我姓王，电话尾号 8866。', dur: 6 },
+            { from: 'agent', text: '已登记「王同学家长」意向为「高」，招生老师将于 24 小时内回访。祝您和孩子一切顺利！' },
+          ],
+        },
+        {
+          id: 'complain', title: '家长投诉处置', chip: '家长投诉', intent: '家长投诉处置',
+          intro: '识别到家长投诉与负面情绪，自动进入处置流程', agentId: 'ag_c_home', agentName: '家校沟通 Agent',
+          sopId: 'sop_c_complain', sopTitle: '家长投诉处置 SOP', duration: 92,
+          steps: [
+            { from: 'user', voice: '我要投诉！今天食堂的菜孩子说不新鲜，你们到底怎么管的？', dur: 7 },
+            { from: 'agent', text: '非常理解您的心情，孩子的饮食安全我们高度重视。我先完整记录您的诉求，马上转办后勤核查。' },
+            { from: 'agent', sys: '系统识别到投诉 / 负面情绪 · 自动触发《家长投诉处置 SOP》（P1 · 强制签收）' },
+            { from: 'agent', html: sopCard('sop_c_complain'), cardLabel: '家长投诉处置 SOP 推送卡' },
+            { from: 'agent', text: '已按 P1 流程受理：1 小时内响应，后勤科室核查今日食堂批次，结果将电话回访您。' },
+            { from: 'user', voice: '行，那我等你们消息。', dur: 4 },
+            { from: 'agent', html: infoCard('🧾 投诉工单已生成', [['工单号', '#CV-0716-03'], ['诉求', '食堂菜品新鲜度'], ['责任科室', '后勤保障科'], ['响应时限', '1 小时内'], ['状态', '受理中 → 回访闭环']], '处置进展将实时同步给您'), cardLabel: '投诉工单卡' },
+          ],
+        },
+        {
+          id: 'edu', title: '请假 / 成绩答疑', chip: '请假成绩', intent: '请假与成绩答疑',
+          intro: '家长语音办理请假并查询成绩', agentId: 'ag_c_edu', agentName: '教务助手 Agent',
+          duration: 70,
+          steps: [
+            { from: 'user', voice: '老师，孩子明天发烧要请假一天，另外期末成绩出来了吗？', dur: 8 },
+            { from: 'agent', text: '好的，我来帮您办理请假并查询成绩。请假需班主任审批，我先为您提交。' },
+            { from: 'agent', html: infoCard('📝 请假申请单', [['学生', '王小明 · 初一(3)班'], ['类型', '病假'], ['时长', '1 天（7-17）'], ['事由', '发烧需休息'], ['审批人', '班主任 · 李老师']], '提交后推送审批结果至企业微信'), cardLabel: '请假申请单卡' },
+            { from: 'agent', text: '期末成绩已发布，按绑定学生为您播报：语文 92 / 数学 88 / 英语 95，年级排名前 15%。' },
+            { from: 'user', voice: '太好了，谢谢老师！', dur: 3 },
+            { from: 'agent', text: '请假单已提交班主任审批，通过后会推送通知给您。孩子好好休息～' },
+          ],
+        },
+        {
+          id: 'safe', title: '校园安全事件上报', chip: '安全上报', intent: '校园安全事件上报',
+          intro: '值班老师语音上报校园突发安全事件', agentId: 'ag_c_safe', agentName: '校园安全 Agent',
+          sopId: 'sop_c_safe', sopTitle: '校园突发事件 SOP', duration: 84,
+          steps: [
+            { from: 'user', voice: '报告！刚才三楼楼梯有学生摔倒，膝盖擦伤，人清醒。', dur: 7 },
+            { from: 'agent', sys: '识别为校园安全事件 · 触发《校园突发事件 SOP》（P0 · 强制签收）' },
+            { from: 'agent', text: '已启动 P0 应急流程，请先做现场处置与保护，我同步上报校领导与相关部门。' },
+            { from: 'agent', html: sopCard('sop_c_safe'), cardLabel: '校园突发事件 SOP 推送卡' },
+            { from: 'agent', text: '已通知校医与德育处，并短信告知该生家长。请补充现场照片与处置记录。' },
+            { from: 'user', voice: '校医已经到了，正在处理。', dur: 4 },
+            { from: 'agent', text: '已登记事件 #SF-0716，将跟踪至闭环并自动生成复盘记录。' },
+          ],
+        },
+        {
+          id: 'notice', title: '家校通知群发', chip: '通知群发', intent: '家校通知群发',
+          intro: '班主任口述生成通知并一键群发', agentId: 'ag_c_home', agentName: '家校沟通 Agent',
+          duration: 66,
+          steps: [
+            { from: 'user', voice: '帮我给全班家长发一条家长会通知，本周五下午三点，学校报告厅。', dur: 9 },
+            { from: 'agent', text: '好的，已根据您的口述生成通知草稿，请确认：' },
+            { from: 'agent', html: infoCard('📣 期末家长会通知', [['时间', '本周五 15:00'], ['地点', '学校报告厅'], ['对象', '初一(3)班 全体家长'], ['应到', '42 人'], ['回执', '开启阅读追踪']], '确认后推送至企微 + 短信'), cardLabel: '家长会通知卡' },
+            { from: 'user', voice: '确认，发吧。', dur: 3 },
+            { from: 'agent', html: infoCard('✅ 发送结果', [['已送达', '42 / 42'], ['已读', '39'], ['阅读率', '93%'], ['未读提醒', '今晚 20:00 短信二次触达']], '回执实时回收 · 可下钻到未读家长'), cardLabel: '通知发送结果卡' },
+          ],
+        },
+      ];
+
+      let curScene = scenarios[0];
+
+      const agents = Hub.agentsOf('campus');
+      const sops = Hub.sopsOf('campus');
+      const kbs = Hub.kbsOf('campus');
+
+      V.innerHTML = `
+        <div class="wrap">
+          ${Hub.sceneSubnav('campus', '_agent')}
+          <div class="page-intro">
+            <b>招生 / 家校 语音 Agent</b> —— 家长与老师在企业微信里「按住说话」，ASR 实时转写、意图识别，
+            命中知识库即时作答；识别到投诉、安全事件等，自动推送对应 SOP 与处置要求，全程语音留痕。
+          </div>
+
+          <div class="flex gap12 wrapf" style="align-items:flex-start">
+            <div id="chat" class="phone-stage" style="flex:0 0 auto"></div>
+
+            <div class="panel" style="flex:1;min-width:300px">
+              <div class="panel-t"><h3>🎓 数字校园 · Agent 矩阵</h3><span class="sub">同一企微入口 · 多 Agent 协同</span></div>
+              <p class="t2 small">选择左侧任一语音场景播放。真实链路：语音 → ASR → 意图识别 → 检索知识库 / 命中 SOP → 推送要求 → 留痕。</p>
+
+              <div class="section-t" style="margin-top:16px">在架 Agent</div>
+              ${agents.map(a => `<div class="flex ac jb" style="padding:8px 0;border-bottom:1px solid var(--line)">
+                <div><div class="b small">${Hub.esc(a.name)}</div><div class="tr small">${Hub.esc(a.role)} · ${Hub.esc(a.version)}</div></div>
+                ${Hub.statusPill(a.status)}</div>`).join('')}
+
+              <div class="section-t">关联 SOP（命中即推送）</div>
+              ${sops.map(s => `<div class="flex ac jb" style="padding:7px 0;border-bottom:1px solid var(--line)">
+                <div class="small">${Hub.esc(s.title)}<div class="tr small">${Hub.esc(s.trigger)}</div></div>
+                <span class="pill ${s.priority === 'P0' ? 'bad' : 'warn'}">${Hub.esc(s.priority)}</span></div>`).join('')}
+
+              <div class="section-t">检索知识库</div>
+              <div class="chips">${kbs.map(k => `<span class="chip-tag">${Hub.esc(k.name)} · ${k.docs}篇</span>`).join('')}</div>
+
+              <div style="margin-top:18px" id="log-box"></div>
+            </div>
+          </div>
+        </div>`;
+
+      // ---- 挂载语音对话 ----
+      HubChat.mount(document.getElementById('chat'), {
+        live: true,
+        contact: { name: '数字校园 Agent', corp: '@启明示范学校', sub: '商汤 AI 技术底座 · 企业微信' },
+        agent: { name: '数字校园 Agent', avatar: '校' },
+        user: { name: '家长 / 教师', avatar: '我' },
+        scenarios,
+        onScenarioEnd: (sc) => { curScene = sc; },
+      });
+
+      // ---- 留痕按钮（按权限）----
+      const logBox = document.getElementById('log-box');
+      if (perms.useAgent) {
+        logBox.innerHTML = '<button class="btn btn-primary" id="log">▶ 记录本次语音留痕</button><div class="hint mt8">将当前语音场景整理为逐字转写，写入平台「语音留痕中心」。</div>';
+        document.getElementById('log').onclick = async () => {
+          const sc = curScene; if (!sc) { Hub.toast('请先播放一个语音场景', true); return; }
+          const transcript = [];
+          (sc.steps || []).forEach(s => {
+            if (s.sys) { transcript.push({ who: 'agent', text: '〔系统〕' + stripTags(s.sys) }); return; }
+            const t = s.voice != null ? s.voice : (s.text != null ? s.text : (s.html != null ? ('〔企微卡片〕' + (s.cardLabel || '')) : ''));
+            if (!t) return;
+            transcript.push({ who: s.from === 'user' ? 'user' : 'agent', text: stripTags(t) });
+          });
+          const r = await Hub.logTrace({
+            scenario: 'campus', agentId: sc.agentId, agentName: sc.agentName,
+            intent: sc.intent || sc.title, sopId: sc.sopId, sopTitle: sc.sopTitle,
+            duration: sc.duration || 80, transcript,
+          });
+          if (r) Hub.toast('已写入语音留痕中心'); else Hub.toast('留痕写入失败', true);
+        };
+      } else {
+        logBox.innerHTML = '<div class="ro-note">当前为观察员（只读）：可浏览语音原型，但不产生语音留痕。</div>';
+      }
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>个人 AI 助理 · 商汤灵犀</title>
+  <link rel="stylesheet" href="assets/style.css">
+  <style>
+    /* 局部微调：个人 AI 助理前台（沿用深色科技风，仅补齐聊天/信息细节）*/
+    .as-grid { display: grid; grid-template-columns: 1.4fr .6fr; gap: 16px; align-items: start; }
+    @media (max-width: 1080px) { .as-grid { grid-template-columns: 1fr; } }
+
+    /* 快捷话术 */
+    .as-quick { display: flex; flex-wrap: wrap; gap: 7px; margin-bottom: 12px; }
+    .as-qchip { font-size: 12px; padding: 6px 11px; border-radius: 16px; border: 1px solid var(--line-2);
+      background: rgba(255,255,255,.04); color: var(--txt-2); cursor: pointer; transition: .15s; }
+    .as-qchip:hover { border-color: var(--accent); color: var(--txt); background: color-mix(in srgb, var(--accent) 12%, transparent); }
+
+    /* 对话区（承接 models.html 的 mchat 观感）*/
+    .mchat-log { height: 420px; overflow-y: auto; padding: 6px 2px; display: flex; flex-direction: column; gap: 10px; }
+    .mrow { max-width: 88%; display: flex; flex-direction: column; }
+    .mrow.user { align-self: flex-end; align-items: flex-end; } .mrow.assistant { align-self: flex-start; }
+    .mbub { padding: 10px 13px; border-radius: 12px; font-size: 13.5px; line-height: 1.62; white-space: pre-wrap; word-break: break-word; }
+    .mrow.user .mbub { background: color-mix(in srgb, var(--accent) 24%, var(--panel-3)); }
+    .mrow.assistant .mbub { background: var(--panel-3); }
+    .mmeta { font-size: 10.5px; color: var(--txt-3); margin: 4px 2px 0; display: flex; align-items: center; gap: 8px; }
+    .rd-btn { font-size: 11px; padding: 2px 8px; border-radius: 12px; border: 1px solid var(--line-2);
+      background: rgba(255,255,255,.03); color: var(--txt-2); cursor: pointer; }
+    .rd-btn:hover { border-color: var(--accent); color: var(--accent); }
+    .as-typing i { display:inline-block; width:6px; height:6px; background:#8a97ad; border-radius:50%; margin:0 1px; animation: astp 1.2s infinite; }
+    .as-typing i:nth-child(2){animation-delay:.2s} .as-typing i:nth-child(3){animation-delay:.4s}
+    @keyframes astp { 0%,60%,100%{opacity:.3} 30%{opacity:1} }
+
+    /* 输入条 */
+    .as-bar { display: flex; gap: 8px; margin-top: 12px; align-items: stretch; }
+    .as-bar textarea { height: 48px; min-height: 44px; resize: vertical; }
+    .as-voice { flex: none; min-width: 94px; }
+    .as-voice.rec { background: color-mix(in srgb, var(--accent) 22%, transparent); border-color: var(--accent); color: #fff; animation: aspulse 1.1s infinite; }
+    @keyframes aspulse { 0%,100%{box-shadow:0 0 0 0 color-mix(in srgb, var(--accent) 40%, transparent)} 50%{box-shadow:0 0 0 6px transparent} }
+
+    /* 信息卡 */
+    .as-irow { display: flex; align-items: center; gap: 10px; padding: 9px 0; border-bottom: 1px dashed var(--line); font-size: 13px; }
+    .as-irow:last-child { border-bottom: none; }
+    .as-irow .il { color: var(--txt-3); min-width: 76px; font-size: 12px; }
+    .as-irow .iv { color: var(--txt); font-weight: 600; margin-left: auto; text-align: right; }
+    .as-voxcard { margin-top: 14px; padding: 13px 14px; border-radius: var(--r-sm);
+      background: color-mix(in srgb, var(--accent) 8%, var(--panel-2)); border: 1px solid color-mix(in srgb, var(--accent) 24%, transparent); }
+    .as-voxcard .vt { font-size: 12px; color: var(--txt-2); display: flex; align-items: center; gap: 7px; }
+    .as-voxcard .vv { font-size: 15px; font-weight: 700; margin: 6px 0 2px; }
+    .as-note { font-size: 11.5px; color: var(--txt-3); margin-top: 12px; line-height: 1.6; }
+  </style>
+</head>
+<body>
+  <div id="view"></div>
+  <script src="assets/app.js"></script>
+  <script src="assets/models.js"></script>
+  <script src="assets/voice.js"></script>
+  <script>
+    Hub.boot({ page: 'assistant' }).then(({ data, me, perms }) => {
+      const V = document.getElementById('view');
+      const esc = Hub.esc;
+
+      // ---- 业务上下文（一线用户归属的业务）----
+      const bizId = Hub.me.businessId || (Hub.visibleBusinesses()[0] || {}).id;
+      const B = bizId ? Hub.business(bizId) : null;
+      if (!B) {
+        V.innerHTML = `<div class="wrap"><div class="empty">当前账号未归属任何业务，无法使用个人 AI 助理。</div></div>`;
+        return;
+      }
+      const A = B.assistant || { name: 'AI 助理', persona: '面向一线用户的个人助理' };
+      const vox = B.voxone || { voice: '拟真人语音', platform: '商汤声渡 VoxOne', status: '待接入', latency: '—' };
+      const canUse = !!perms.useAgent;                          // 观察员为 false
+      const myTenant = Hub.me.tenantId ? Hub.tenant(Hub.me.tenantId) : null;
+
+      // ---- 运行模型：优先本业务旗舰租户在架且指定了模型的 Agent，否则回退默认 ----
+      const bizAgents = Hub.agentsOf(bizId) || [];
+      const flag = Hub.tenantsOf(bizId).find(t => t.flagship) || {};
+      const pick = bizAgents.find(a => a.tenantId === flag.id && a.model && a.status === 'on')
+        || bizAgents.find(a => a.model && a.status === 'on')
+        || bizAgents.find(a => a.model) || null;
+      const MODEL = (pick && pick.model) || 'deepseek-v4-flash';
+      const modelName = ((window.CHAT_MODELS || []).find(m => m.id === MODEL) || {}).name || MODEL;
+
+      // ---- 按业务定制的常用话术 & 语音（ASR）示意 ----
+      const QUICK = {
+        media:     ['帮我把这条线索写成短消息', '查一下这个选题的相关报道', '生成一段朋友圈文案', '给这条新闻起 3 个标题', '提炼采访录音的要点'],
+        eldercare: ['记录一次护理', '整理家属回访要点', '用药提醒话术', '生成今日交接班摘要', '老人情绪安抚话术'],
+        campus:    ['家长咨询答复', '请假审批话术', '拟一条班级通知', '学生评语初稿', '家长会发言要点'],
+        dining:    ['今日备餐清单', '客诉安抚话术', '拟一条门店促销文案', '交接班检查要点', '食安自查提醒'],
+      };
+      const VOICE_SAMPLE = {
+        media:     '刚才采访了社区养老食堂，负责人说日均供餐三百份，帮我整理成一条快讯。',
+        eldercare: '3 床张奶奶今天早饭吃了大半碗，血压正常，午后血糖偏高一点，帮我记一条护理记录。',
+        campus:    '明天下午三点开一年级家长会，主题是期中学习情况，帮我拟一条通知发家长群。',
+        dining:    '中午一桌客人反映汤上得太慢，帮我拟一段安抚话术，再提醒后厨出餐提速。',
+      };
+      const quicks = QUICK[bizId] || ['帮我起草一段话', '总结这段内容的要点', '把要点整理成清单'];
+      const asrSample = VOICE_SAMPLE[bizId] || '帮我把刚才这段整理一下。';
+
+      // ---- 系统提示（每轮携带）----
+      const sysPrompt = `你是「${A.name}」，商汤灵犀 · ${B.name} 平台面向一线用户的个人 AI 助理，`
+        + `正在服务一线用户 ${Hub.me.name}${myTenant ? '（' + myTenant.name + '）' : ''}。`
+        + `请用简体中文回答，简洁、条理清晰、可直接执行；涉及话术或文案时直接给出可复制的成稿，不要寒暄铺垫。`;
+
+      // ---- 预渲染片段 ----
+      const quicksHtml = quicks.map(q => `<button class="as-qchip" data-q="${esc(q)}">${esc(q)}</button>`).join('');
+      const infoRows = [
+        ['使用者', esc(Hub.me.name) + ` <span class="pill acc" style="font-size:10px">${esc(perms.label)}</span>`],
+        [esc(B.tenantNoun || '所属租户'), myTenant ? esc(myTenant.name) : '<span class="tr">平台 / 未指定</span>'],
+        ['语音音色', esc(vox.voice)],
+        ['运行模型', `<span class="mono small">${esc(modelName)}</span>`],
+        ['连接状态', `<span id="as-conn"><span class="dot"></span> 检测中…</span>`],
+      ].map(r => `<div class="as-irow"><span class="il">${r[0]}</span><span class="iv">${r[1]}</span></div>`).join('');
+
+      const voxStatusPill = vox.status === '已接入'
+        ? '<span class="pill ok">已接入</span>' : '<span class="pill warn">待接入</span>';
+
+      // ---- 页面骨架 ----
+      V.innerHTML = `
+        <div class="wrap">
+          <div class="page-intro">
+            <b>${esc(A.name)}</b> —— ${esc(A.persona)}。
+            底座：<b>商汤灵犀大模型</b> + <b>声渡拟真人语音</b>（${esc(vox.voice)}）。
+            说一句或点一句常用话术，即可获得可直接执行的成稿；全程<b>语音 / 文字留痕</b>可追溯。
+          </div>
+
+          <div class="as-grid">
+            <!-- 左：对话 -->
+            <div class="panel">
+              <div class="panel-t">
+                <h3>💬 与 ${esc(A.name)} 对话</h3>
+                <span class="sub">灵犀大模型直连 · 真实应答</span>
+                <span class="sp"></span>
+                <span class="pill acc">${esc(B.icon)} ${esc(B.name)}</span>
+              </div>
+
+              <div class="as-quick" id="as-quick">${quicksHtml}</div>
+
+              <div class="mchat-log" id="as-log"></div>
+
+              <div class="as-bar">
+                <button class="btn as-voice" id="as-voice" ${canUse ? '' : 'disabled'} title="点一下：按住说话→ASR 转写">🎙 语音</button>
+                <textarea id="as-in" placeholder="${canUse ? '输入消息，Enter 发送 / Shift+Enter 换行…' : '当前角色为只读，不能发起对话'}" ${canUse ? '' : 'disabled'}></textarea>
+                <button class="btn btn-primary" id="as-send" style="align-self:stretch" ${canUse ? '' : 'disabled'}>发送</button>
+              </div>
+              ${canUse
+                ? `<div class="hint mt8">运行模型 <span class="mono">${esc(modelName)}</span> · 语音由声渡「${esc(vox.voice)}」朗读 · 本轮对话自动写入语音留痕</div>`
+                : `<div class="ro-note mt8">👁 当前角色（观察员）不可发起真实对话，仅可查看助理界面与接入信息。</div>`}
+            </div>
+
+            <!-- 右：信息 -->
+            <div class="panel">
+              <div class="panel-t"><h3>ℹ️ 我的信息</h3><span class="sub">身份 · 音色 · 连接</span></div>
+              ${infoRows}
+
+              <div class="as-voxcard">
+                <div class="vt">🔊 ${esc(vox.platform || '商汤声渡 VoxOne')} · 拟真人语音 ${voxStatusPill}</div>
+                <div class="vv">${esc(vox.voice)}</div>
+                <div class="tr small">时延 ${esc(vox.latency || '—')} · 一套业务一套音色，回复可一键拟真人朗读</div>
+              </div>
+
+              <div class="as-note">
+                · 你与助理的每轮语音 / 文字对话都会自动<b>留痕</b>，可在语音留痕中心按业务、坐席、意图追溯。<br>
+                · 助理只在你所属${esc(B.tenantNoun || '租户')}的数据范围内工作，越权访问由服务器强制拦截。
+              </div>
+
+              <div class="btn-row" style="margin-top:16px">
+                <a class="btn btn-primary btn-sm" href="${esc(bizId)}_miniapp.html">📱 打开${esc(B.name)}小程序</a>
+              </div>
+            </div>
+          </div>
+
+          <div class="hint mt24">口径：模型应答为真实调用；语音识别 / 合成（声渡）为拟真人语音示意能力，真实计费以开放平台后台为准。</div>
+        </div>`;
+
+      // ---- 交互 ----
+      const log = document.getElementById('as-log');
+      const input = document.getElementById('as-in');
+      const send = document.getElementById('as-send');
+      const voiceBtn = document.getElementById('as-voice');
+      const quickBar = document.getElementById('as-quick');
+      const history = [];
+
+      function draw() {
+        if (!history.length) {
+          log.innerHTML = `<div class="empty">你好，我是「${esc(A.name)}」👋 点上方常用话术，或用 🎙 语音说一句，也可以直接输入。</div>`;
+          return;
+        }
+        log.innerHTML = history.map((m, i) => {
+          const bubble = m.pending
+            ? `<span class="as-typing"><i></i><i></i><i></i></span>`
+            : esc(m.content);
+          const readBtn = (m.role === 'assistant' && !m.pending && !m.err)
+            ? `<button class="rd-btn" data-read="${i}" title="用声渡拟真人音色朗读">🔊 朗读</button>` : '';
+          const metaTxt = m.meta ? esc(m.meta) : '';
+          const meta = (metaTxt || readBtn) ? `<div class="mmeta">${metaTxt ? `<span>${metaTxt}</span>` : ''}${readBtn}</div>` : '';
+          return `<div class="mrow ${m.role}"><div class="mbub">${bubble}</div>${meta}</div>`;
+        }).join('');
+        log.scrollTop = log.scrollHeight;
+      }
+      draw();
+
+      // 常用话术 → 填入输入框
+      quickBar.addEventListener('click', (e) => {
+        const b = e.target.closest('[data-q]'); if (!b) return;
+        if (!canUse) return;
+        input.value = b.getAttribute('data-q'); input.focus();
+      });
+
+      // 语音：点一下 → 真实听写（浏览器 SpeechRecognition，端到端），停顿后自动转写并发送
+      let asrRec = null;
+      voiceBtn.addEventListener('click', () => {
+        if (!canUse) return;
+        if (asrRec) { asrRec.stop(); asrRec = null; return; }
+        if (!window.HubVoice || !HubVoice.sttSupported()) {   // 无 STT 能力 → 填示意话术
+          input.value = (input.value ? input.value.trim() + ' ' : '') + asrSample; input.focus();
+          Hub.toast('此浏览器不支持语音听写，已填示意（建议用 Chrome）'); return;
+        }
+        const old = voiceBtn.innerHTML;
+        voiceBtn.classList.add('rec'); voiceBtn.innerHTML = '🎙 聆听中…';
+        Hub.toast('请说话…（停顿后自动转写发送）');
+        asrRec = HubVoice.listen(
+          (partial) => { input.value = partial; },
+          (finalText) => { asrRec = null; voiceBtn.classList.remove('rec'); voiceBtn.innerHTML = old; if (finalText) { input.value = finalText; doSend(); } }
+        );
+      });
+
+      // 回复气泡 → 拟真人朗读（声渡音色 → 浏览器 TTS，按音色描述挑男/女声、适老慢速）
+      log.addEventListener('click', (e) => {
+        const b = e.target.closest('[data-read]'); if (!b) return;
+        const m = history[+b.getAttribute('data-read')]; if (!m || !m.content) return;
+        if (window.HubVoice && HubVoice.speak(m.content, vox.voice)) Hub.toast('声渡音色「' + vox.voice + '」朗读中…');
+        else Hub.toast('此浏览器不支持朗读');
+      });
+
+      // 发送 → 真实模型调用（携带 system + 历史，写入留痕）
+      async function doSend() {
+        if (!canUse) return;
+        const text = input.value.trim(); if (!text) return;
+        history.push({ role: 'user', content: text }); input.value = '';
+        history.push({ role: 'assistant', content: '思考中…', pending: true }); draw();
+        send.disabled = true; voiceBtn.disabled = true;
+        try {
+          // 先走该业务真实声渡端点，失败回退灵犀模型；aiReply 内部已写留痕
+          const prior = history.filter(m => !m.pending && !m.err).slice(0, -1).map(m => ({ role: m.role, content: m.content }));
+          const r = await Hub.aiReply({ text, history: prior, scenario: bizId, model: MODEL, system: sysPrompt, intent: '个人AI助理', agentName: A.name });
+          history.pop();
+          history.push({
+            role: 'assistant', content: r.reply || '(空)',
+            meta: `${esc(r.via || modelName)}${r.ms ? ' · ' + r.ms + 'ms' : ''}${r.usage ? ' · ' + (r.usage.total_tokens || '?') + ' tok' : ''} · 已留痕`,
+          });
+          if (window.HubVoice) HubVoice.speak(r.reply, vox.voice);   // 拟真人自动朗读
+        } catch (e) {
+          history.pop();
+          history.push({ role: 'assistant', content: '⚠️ ' + (e.message || '调用失败，请稍后重试'), err: true, meta: '错误' });
+        } finally {
+          send.disabled = false; voiceBtn.disabled = false; draw(); input.focus();
+        }
+      }
+      send.addEventListener('click', doSend);
+      input.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); doSend(); }
+      });
+
+      // 连接状态（灵犀大模型接入健康度）
+      (async function health() {
+        const el = document.getElementById('as-conn'); if (!el) return;
+        if (!(perms.useAgent || perms.manageAgents)) { el.innerHTML = '<span class="dot"></span> 只读'; return; }
+        try {
+          const h = await Hub.llmHealth();
+          el.innerHTML = h.ok
+            ? `<span class="dot ok"></span> 已连通 <span class="tr small">${h.ms}ms</span>`
+            : `<span class="dot bad"></span> ${esc(h.msg || '不可用')}`;
+        } catch (e) { el.innerHTML = '<span class="dot bad"></span> 暂不可用'; }
+      })();
+    });
+  </script>
+</body>
+</html>

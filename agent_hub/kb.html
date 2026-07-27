@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>知识库 · 灵犀统一 Agent 运营中台</title>
+  <link rel="stylesheet" href="assets/style.css">
+  <style>
+    /* 局部微调：知识库卡片（沿用深色科技风，仅补齐卡片内排版细节）*/
+    #view .kb-card { display: flex; flex-direction: column; }
+    #view .kb-head { display: flex; align-items: flex-start; gap: 8px; justify-content: space-between; }
+    #view .kb-name { font-size: 15px; font-weight: 700; line-height: 1.35; }
+    #view .kb-pills { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; justify-content: flex-end; }
+    #view .kb-meta { display: flex; align-items: center; gap: 16px; margin: 12px 0 8px; font-size: 12px; color: var(--txt-3); flex-wrap: wrap; }
+    #view .kb-meta b { color: var(--txt); font-family: var(--mono); font-size: 15px; }
+    #view .kb-desc { font-size: 12.5px; color: var(--txt-2); min-height: 36px; }
+    #view .kb-ref { margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--line); }
+    #view .kb-ref .rl { font-size: 11px; color: var(--txt-3); margin-bottom: 7px; letter-spacing: .3px; }
+    #view .kb-acts { margin-top: 14px; }
+  </style>
+</head>
+<body>
+  <div id="view"></div>
+  <script src="assets/app.js"></script>
+  <script>
+    Hub.boot({ page: 'kb' }).then(({ data, me, perms }) => {
+      const V = document.getElementById('view');
+      const esc = Hub.esc;
+
+      // ---- 本页状态 ----
+      const state = { filter: 'all' };
+      const readOnly = !perms.editConfig;
+
+      // 可见场景（受 RBAC / viewAll 控制）
+      const scenes = Hub.visibleScenarios();
+      const sceneIds = scenes.map(s => s.id);
+
+      // 该知识库是否可编辑（editConfig 且场景在授权内）
+      const canEdit = (k) => perms.editConfig && Hub.canScene(k.scenario);
+      // 可新建 / 编辑的场景（用于表单下拉）
+      const editableScenes = () => scenes.filter(s => Hub.canScene(s.id));
+
+      const sceneName = (id) => (Hub.scenario(id) || {}).name || id;
+      const sceneIcon = (id) => (Hub.scenario(id) || {}).icon || '';
+      const fmtN = (n) => Number(n || 0).toLocaleString('en-US');
+
+      // 当前可见（并按筛选）的知识库
+      const baseKbs = () => (Hub.data.kbs || []).filter(k => sceneIds.includes(k.scenario));
+      const visibleKbs = () => baseKbs().filter(k => state.filter === 'all' || k.scenario === state.filter);
+
+      // 反查：引用该知识库的 Agent 名称
+      const refAgents = (kbId) => (Hub.data.agents || [])
+        .filter(a => (a.kbIds || []).includes(kbId))
+        .map(a => a.name);
+
+      // ---- KPI ----
+      function buildKpis() {
+        const base = baseKbs();
+        const docs = base.reduce((s, k) => s + (Number(k.docs) || 0), 0);
+        const covered = new Set(base.map(k => k.scenario)).size;
+        const on = base.filter(k => (k.status || 'on') === 'on').length;
+        const kpis = [
+          { k: '知识库总数', v: base.length, u: '个', d: perms.viewAll ? '全平台可见' : '本人可见场景' },
+          { k: '文档总数', v: fmtN(docs), u: '篇', d: '各库文档累计' },
+          { k: '覆盖场景', v: covered, u: '个', d: '平台共 ' + data.scenarios.length + ' 大场景' },
+          { k: '启用中', v: on, u: '个', d: base.length ? '停用 ' + (base.length - on) + ' 个' : '—' },
+        ];
+        return kpis.map(k => Hub.kpi(k)).join('');
+      }
+
+      // ---- 场景筛选条 ----
+      function buildFilter() {
+        const btn = (id, label) =>
+          `<button class="btn btn-sm filter-btn${state.filter === id ? ' btn-primary' : ''}" data-scene="${esc(id)}">${esc(label)}</button>`;
+        return btn('all', '全部场景') + scenes.map(s => btn(s.id, s.icon + ' ' + s.name)).join('');
+      }
+
+      // ---- 知识库卡片网格 ----
+      function buildList() {
+        const list = visibleKbs();
+        if (!list.length) return `<div class="empty">该场景暂无知识库</div>`;
+        return `<div class="grid g3">` + list.map(k => {
+          const refs = refAgents(k.id);
+          const refHtml = refs.length
+            ? `<div class="chips">${refs.map(n => `<span class="chip-tag">${esc(n)}</span>`).join('')}</div>`
+            : `<span class="tr small">暂无 Agent 引用</span>`;
+          const editable = canEdit(k);
+          const acts = editable
+            ? `<div class="btn-row kb-acts">
+                 <button class="btn btn-sm" data-act="edit" data-id="${esc(k.id)}">编辑</button>
+                 <button class="btn btn-sm btn-ghost" data-act="del" data-id="${esc(k.id)}">删除</button>
+               </div>`
+            : '';
+          return `
+            <div class="card kb-card">
+              <div class="kb-head">
+                <div class="kb-name">${esc(k.name)}</div>
+                <div class="kb-pills">
+                  <span class="pill acc">${esc(sceneIcon(k.scenario) + ' ' + sceneName(k.scenario))}</span>
+                  ${Hub.statusPill(k.status || 'on')}
+                </div>
+              </div>
+              <div class="kb-meta">
+                <span>文档 <b>${fmtN(k.docs)}</b> 篇</span>
+                <span>更新 <span class="mono t2">${esc(k.updated || '—')}</span></span>
+              </div>
+              <div class="kb-desc">${esc(k.desc || '')}</div>
+              <div class="kb-ref">
+                <div class="rl">被 ${refs.length} 个 Agent 引用检索</div>
+                ${refHtml}
+              </div>
+              ${acts}
+            </div>`;
+        }).join('') + `</div>`;
+      }
+
+      // ---- 页面骨架 ----
+      V.innerHTML = `
+        <div class="wrap">
+          <div class="page-intro">
+            <b>知识库管理</b> —— 知识库按场景绑定，供该场景 Agent 检索作答；数字传媒的媒体 / 政务 / 合规知识库也在此统一管理。
+            ${readOnly ? '' : '<span class="tr">编辑 / 新建权限由服务器按「角色 × 场景」强制校验。</span>'}
+          </div>
+
+          <div class="grid g4" id="kb-kpis">${buildKpis()}</div>
+
+          ${readOnly ? `<div class="ro-note mt16">· 当前角色为只读，仅可查看知识库与引用关系，编辑 / 新建 / 删除已隐藏。</div>` : ''}
+
+          <div class="flex ac jb wrapf gap8" style="margin:24px 0 14px">
+            <div class="flex ac gap8 wrapf" id="kb-filter">${buildFilter()}</div>
+            ${perms.editConfig ? `<button class="btn btn-primary btn-sm" id="new-kb">＋ 新建知识库</button>` : ''}
+          </div>
+
+          <div id="kb-list">${buildList()}</div>
+
+          <div class="hint mt24">口径：文档数等为目标态示意，非真实经营数据。配置以真后端 SQLite 持久化，权限由服务器强制校验。</div>
+        </div>`;
+
+      // ---- 重绘辅助 ----
+      const paintKpis = () => { document.getElementById('kb-kpis').innerHTML = buildKpis(); };
+      const paintFilter = () => { document.getElementById('kb-filter').innerHTML = buildFilter(); };
+      const paintList = () => { document.getElementById('kb-list').innerHTML = buildList(); };
+
+      // ---- 场景筛选交互 ----
+      document.getElementById('kb-filter').addEventListener('click', (e) => {
+        const b = e.target.closest('.filter-btn'); if (!b) return;
+        state.filter = b.getAttribute('data-scene');
+        paintFilter(); paintList();
+      });
+
+      // ---- 卡片内交互（事件委托）----
+      document.getElementById('kb-list').addEventListener('click', (e) => {
+        const btn = e.target.closest('button[data-act]'); if (!btn) return;
+        const id = btn.getAttribute('data-id');
+        const k = (Hub.data.kbs || []).find(x => x.id === id);
+        if (!k) return;
+        if (btn.getAttribute('data-act') === 'edit') openForm(k);
+        else if (btn.getAttribute('data-act') === 'del') delKb(k);
+      });
+
+      // ---- 新建 / 编辑 表单 ----
+      function openForm(kb) {
+        if (!perms.editConfig) { Hub.toast('无权维护知识库', true); return; }
+        const editing = !!kb;
+        const opts = editableScenes();
+        if (!opts.length) { Hub.toast('当前无可维护的场景', true); return; }
+        const cur = kb || { scenario: opts[0].id, docs: 0, status: 'on' };
+        // 编辑时校验场景归属
+        if (editing && !Hub.canScene(cur.scenario)) { Hub.toast('无权维护该场景知识库', true); return; }
+        const sceneSel = opts.map(s =>
+          `<option value="${esc(s.id)}"${cur.scenario === s.id ? ' selected' : ''}>${esc(s.icon + ' ' + s.name)}</option>`).join('');
+        const body = `
+          <div class="field"><label>知识库名称</label><input id="f-name" value="${esc(cur.name || '')}" placeholder="如：政务通稿库"></div>
+          <div class="grid g2">
+            <div class="field"><label>所属场景</label><select id="f-scene"${editing ? ' disabled' : ''}>${sceneSel}</select></div>
+            <div class="field"><label>状态</label>
+              <select id="f-status"><option value="on"${(cur.status || 'on') === 'on' ? ' selected' : ''}>启用</option><option value="off"${cur.status === 'off' ? ' selected' : ''}>停用</option></select>
+            </div>
+          </div>
+          <div class="field"><label>描述</label><textarea id="f-desc" rows="2" placeholder="一句话描述该知识库的内容与用途">${esc(cur.desc || '')}</textarea></div>
+          <div class="field"><label>文档数（篇）</label><input id="f-docs" type="number" min="0" value="${esc(cur.docs != null ? cur.docs : 0)}" placeholder="0"></div>
+          <div class="btn-row" style="justify-content:flex-end">
+            <button class="btn" id="f-no">取消</button>
+            <button class="btn btn-primary" id="f-yes">${editing ? '保存' : '创建'}</button>
+          </div>`;
+        Hub.modal(editing ? '编辑知识库' : '新建知识库', body, (b, close) => {
+          b.querySelector('#f-no').onclick = close;
+          b.querySelector('#f-yes').onclick = async () => {
+            const name = b.querySelector('#f-name').value.trim();
+            const scenario = editing ? cur.scenario : b.querySelector('#f-scene').value;
+            const status = b.querySelector('#f-status').value;
+            const desc = b.querySelector('#f-desc').value.trim();
+            const docs = Math.max(0, parseInt(b.querySelector('#f-docs').value, 10) || 0);
+            if (!name) { Hub.toast('请填写知识库名称', true); return; }
+            const today = new Date().toISOString().slice(0, 10);
+            const kbObj = editing
+              ? { ...cur, name, scenario, desc, docs, status, updated: today }
+              : { id: 'kb_' + Date.now(), scenario, name, desc, docs, status, updated: today };
+            try {
+              await Hub.change('kb.upsert', { scenario, kb: kbObj });
+              close();
+              await Hub.refresh();
+              paintKpis(); paintFilter(); paintList();
+              Hub.toast(editing ? '已保存《' + name + '》' : '已创建《' + name + '》');
+            } catch (err) { /* Hub.change 已 toast 403 */ }
+          };
+        });
+      }
+
+      // ---- 删除 ----
+      function delKb(k) {
+        Hub.confirm('确认删除知识库《' + k.name + '》？删除后引用它的 Agent 将失去该检索源，且不可恢复。', async () => {
+          try {
+            await Hub.change('kb.delete', { id: k.id });
+            await Hub.refresh();
+            paintKpis(); paintFilter(); paintList();
+            Hub.toast('已删除《' + k.name + '》');
+          } catch (err) { /* Hub.change 已 toast */ }
+        });
+      }
+
+      // ---- 新建按钮 ----
+      const nb = document.getElementById('new-kb');
+      if (nb) nb.addEventListener('click', () => openForm(null));
+    });
+  </script>
+</body>
+</html>

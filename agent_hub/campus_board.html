@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>数字校园 · 数据看板 · 灵犀统一 Agent 运营中台</title>
+  <link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+  <div id="view"></div>
+  <script src="assets/app.js"></script>
+  <script>
+    Hub.boot({ page: 'campus_board', scenario: 'campus' }).then(({ data, me, perms }) => {
+      const V = document.getElementById('view');
+      const C = Hub.data.campus;
+      const B = C.board;
+
+      // 线索意向分布（由 leads 实时统计）
+      const intents = ['高', '中', '低'].map(k => ({ n: k + '意向', v: C.leads.filter(l => l.intent === k).length })).filter(x => x.v > 0);
+      // 校园事件分级统计
+      const levels = ['红', '橙', '黄', '蓝'];
+      const lvCount = levels.map(l => ({ l, v: C.events.filter(e => e.level === l).length })).filter(x => x.v > 0);
+      const week = ['一', '二', '三', '四', '五', '六', '日'];
+
+      const biAns = [
+        { q: '本周咨询转化率多少？', a: '本周咨询 64 人次 → 登记 41 → 到校 28 → 报名 19，咨询→报名转化率 <b class="tacc">29.7%</b>，环比 +5pt；漏斗最大流失在「登记→到校」段（-32%），建议加密到校前的语音回访。' },
+        { q: '哪个渠道来的线索质量最高？', a: '「招生咨询 Agent」进线中高意向占比 <b class="tacc">67%</b>，显著高于官网渠道（约 33%）；建议加大企微 / 小程序语音入口投放，并对高意向 24h 内首访。' },
+        { q: '当前有哪些未闭环的校园事件？', a: '未闭环 <b class="tacc">1</b> 起：家长投诉「食堂菜品建议」(黄级 · 处置中)；已闭环 1 起（校门口交通疏导）。本周安全事件 0 新增，均已响应。' },
+        { q: '家校通知触达情况如何？', a: '本周 2 条通知平均阅读率 <b class="tacc">91%</b>，「期末家长会通知」94% 最高、「暑期安全告知书」88%；未读家长今晚 20:00 短信二次触达。' },
+      ];
+
+      const reach = [
+        { ic: '🖥', t: '桌面 BI', d: '管理者驾驶舱：咨询趋势、招生漏斗、事件分级一屏掌握。', href: 'campus_board.html' },
+        { ic: '📱', t: '一线小程序', d: '家校通家长端：成绩、请假、通知随身查，数据同源。', href: 'campus_miniapp.html' },
+        { ic: '🎙', t: 'Agent 早晚报', d: '招生咨询 Agent 早报播报新增线索与待回访，晚报汇总事件闭环。', href: 'campus_agent.html' },
+      ];
+
+      V.innerHTML = `
+        <div class="wrap">
+          ${Hub.sceneSubnav('campus', '_board')}
+          <div class="page-intro">
+            <b>招生与家校数据看板</b> —— 与工作台、小程序、Agent 同一套后端数据。招生咨询、意向漏斗、家校触达与校园事件
+            实时可视，并支持 chatBI 自然语言问数。
+            <span class="tr">口径：目标态示意数据，非真实经营数据。</span>
+          </div>
+
+          <div class="grid g4">${B.kpis.map(k => Hub.kpi(k)).join('')}</div>
+
+          <div class="grid g2 mt16">
+            <div class="panel">
+              <div class="panel-t"><h3>📈 咨询趋势</h3><span class="sub">近 7 日进线人次</span></div>
+              ${Hub.cols(B.series.consult)}
+              <div class="flex jb small tr" style="margin-top:6px">${week.map(d => `<span>周${d}</span>`).join('')}</div>
+            </div>
+            <div class="panel">
+              <div class="panel-t"><h3>🔻 招生漏斗</h3><span class="sub">咨询 → 登记 → 到校 → 报名</span></div>
+              ${Hub.bars(B.series.funnel)}
+              <div class="hint mt12">整体转化率 ${Math.round(B.series.funnel[B.series.funnel.length - 1].v / B.series.funnel[0].v * 100)}% · 数据随工作台线索实时更新</div>
+            </div>
+          </div>
+
+          <div class="grid g2 mt16">
+            <div class="panel">
+              <div class="panel-t"><h3>🎯 线索意向分布</h3><span class="sub">当前 ${C.leads.length} 条线索</span></div>
+              ${intents.length ? Hub.donut(intents, C.leads.length) : '<div class="empty">暂无线索</div>'}
+            </div>
+            <div class="panel">
+              <div class="panel-t"><h3>🚨 校园事件分级</h3><span class="sub">本周事件 ${C.events.length} 起</span></div>
+              ${lvCount.length ? lvCount.map(x => `<div class="flex ac jb" style="padding:10px 0;border-bottom:1px solid var(--line)">
+                <span>${Hub.levelTag(x.l)} <span class="t2 small" style="margin-left:6px">级事件</span></span>
+                <b class="mono">${x.v} 起</b></div>`).join('') : '<div class="empty">暂无事件</div>'}
+              <div class="hint mt12">已闭环 ${C.events.filter(e => e.status === '已闭环').length} · 处置中 ${C.events.filter(e => e.status !== '已闭环').length}</div>
+            </div>
+          </div>
+
+          <div class="panel mt16">
+            <div class="panel-t"><h3>💬 chatBI · 问数</h3><span class="sub">自然语言问经营数据（演示）</span></div>
+            <div class="btn-row" id="bi-qs">
+              ${biAns.map((x, i) => `<button class="btn btn-sm" data-a="${i}">${Hub.esc(x.q)}</button>`).join('')}
+            </div>
+            <div id="bi-ans" class="card" style="margin-top:12px;background:var(--panel-2)">
+              <div class="tr small">点击上方问题，查看 chatBI 应答。</div>
+            </div>
+          </div>
+
+          <div class="section-t">同一套数 · 三种触达</div>
+          <div class="grid g3">
+            ${reach.map(r => `<a class="card" href="${r.href}" style="text-decoration:none">
+              <div style="font-size:26px">${r.ic}</div>
+              <h3 style="font-size:15px;margin:8px 0 4px">${Hub.esc(r.t)}</h3>
+              <div class="tr small">${Hub.esc(r.d)}</div></a>`).join('')}
+          </div>
+
+          <div class="hint mt24">数据以真后端 SQLite 持久化；工作台对线索 / 事件的更新会实时反映到本看板与 chatBI 结论。</div>
+        </div>`;
+
+      const ansBox = document.getElementById('bi-ans');
+      document.getElementById('bi-qs').addEventListener('click', e => {
+        const b = e.target.closest('button[data-a]'); if (!b) return;
+        const x = biAns[+b.dataset.a];
+        ansBox.innerHTML = `<div class="b small" style="margin-bottom:6px">💬 ${Hub.esc(x.q)}</div><div class="t2" style="font-size:13px;line-height:1.6">${x.a}</div>`;
+      });
+    });
+  </script>
+</body>
+</html>

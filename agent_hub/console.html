@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Agent 控制台 · 灵犀统一 Agent 运营中台</title>
+  <link rel="stylesheet" href="assets/style.css">
+  <style>
+    /* 局部微调：Agent 控制台（沿用深色科技风，仅补齐表单/筛选细节）。
+       注意：Hub.modal 挂在 document.body（#view 之外），故表单样式不加 #view 作用域。*/
+    .pblock { margin-bottom: 14px; }
+    .plabel { font-size: 12px; color: var(--txt-3); margin-bottom: 6px; }
+    .pick-grid { display: flex; flex-wrap: wrap; gap: 8px; }
+    .pick { display: inline-flex; align-items: center; gap: 6px; font-size: 12.5px; color: var(--txt-2); background: var(--bg-2); border: 1px solid var(--line-2); border-radius: 8px; padding: 6px 10px; cursor: pointer; }
+    .pick input { width: auto; margin: 0; flex: none; }
+    .pick:hover { border-color: var(--accent); }
+    #view .ag-chips .chip-tag { cursor: default; }
+    #view .col-act { white-space: nowrap; }
+  </style>
+</head>
+<body>
+  <div id="view"></div>
+  <script src="assets/app.js"></script>
+  <script src="assets/models.js"></script>
+  <script>
+    Hub.boot({ page: 'console' }).then(({ data, me, perms }) => {
+      const V = document.getElementById('view');
+      let activeScene = 'all';
+
+      // ---- 取数辅助 ----
+      const visIds = () => Hub.visibleScenarios().map(s => s.id);
+      // 注意：Hub.refresh() 会把 Hub.data 整体换成新对象，故所有取数一律走 Hub.data（而非 boot 时捕获的 data 引用），否则写操作后表格读到旧数据。
+      const baseAgents = () => { const ids = visIds(); return Hub.data.agents.filter(a => ids.includes(a.scenario)); };
+      const manageScenes = () => Hub.visibleScenarios().filter(s => Hub.canScene(s.id));
+      const kbName = (id) => (Hub.data.kbs.find(k => k.id === id) || {}).name || id;
+      const sopTitle = (id) => (Hub.data.sops.find(s => s.id === id) || {}).title || id;
+      const canOp = (a) => perms.manageAgents && Hub.canScene(a.scenario);
+      const fmtN = (n) => Number(n || 0).toLocaleString('en-US');
+
+      // chip 展示：前 2 个 + 更多
+      function chipCell(ids, mapper) {
+        if (!ids || !ids.length) return '<span class="tr small">—</span>';
+        const names = ids.map(mapper);
+        const shown = names.slice(0, 2).map(n => `<span class="chip-tag">${Hub.esc(n)}</span>`).join('');
+        const more = names.length > 2
+          ? `<span class="chip-tag" title="${Hub.esc(names.join('、'))}">+${names.length - 2}</span>` : '';
+        return `<div class="chips ag-chips">${shown}${more}</div>`;
+      }
+
+      // ---- 页面骨架 ----
+      V.innerHTML = `
+        <div class="wrap">
+          <div class="page-intro">
+            <b>Agent 控制台</b> —— 统一纳管四大场景的 Agent：集中编排、上下架、绑定知识库与 SOP。
+            所有写操作由后端按「角色 × 场景」强制授权，越权将被拒绝。
+            <span class="tr">底座：${Hub.esc(Hub.data.platform.base)}</span>
+          </div>
+
+          <div id="kpiRow"></div>
+
+          <div class="section-t">Agent 注册表 · 编排与上下架</div>
+          <div class="panel">
+            <div class="panel-t">
+              <h3>🤖 Agent 列表</h3>
+              <span class="sub">按场景筛选 · 绑定知识库与 SOP</span>
+              <span class="sp"></span>
+              ${perms.manageAgents
+                ? `<button class="btn btn-primary btn-sm" id="btn-new">＋ 新建 Agent</button>`
+                : `<span class="ro-note">👁 当前角色为只读，可查看 Agent 配置但不可编辑</span>`}
+            </div>
+            <div id="filterBar" class="flex ac gap8 wrapf" style="margin-bottom:14px"></div>
+            <div id="tableBox" class="tbl-wrap"></div>
+          </div>
+
+          <div class="hint mt24">口径：调用数等为目标态示意，非真实经营数据。配置以真后端 SQLite 持久化，权限由服务器强制校验。</div>
+        </div>`;
+
+      const kpiRow = document.getElementById('kpiRow');
+      const filterBar = document.getElementById('filterBar');
+      const tableBox = document.getElementById('tableBox');
+
+      // ---- 渲染：KPI ----
+      function renderKpis() {
+        const base = baseAgents();
+        const on = base.filter(a => a.status === 'on').length;
+        const off = base.length - on;
+        const covered = new Set(base.map(a => a.scenario)).size;
+        const calls = base.reduce((s, a) => s + (a.calls || 0), 0);
+        kpiRow.innerHTML = Hub.kpis([
+          { k: 'Agent 总数', v: base.length, u: '个', d: perms.viewAll ? '全平台可见' : '本人可管场景' },
+          { k: '在架 Agent', v: on, u: '个', d: base.length ? '占比 ' + Math.round(on / base.length * 100) + '%' : '—' },
+          { k: '已停用', v: off, u: '个', d: off ? '待复核 / 已下线' : '全部在架' },
+          { k: '覆盖场景', v: covered, u: '个', d: '平台共 ' + Hub.data.scenarios.length + ' 大场景' },
+          { k: '累计调用', v: fmtN(calls), u: '次', d: '示意值' },
+        ]);
+      }
+
+      // ---- 渲染：场景筛选 ----
+      function renderFilter() {
+        const btns = [{ id: 'all', label: '▦ 全部' }]
+          .concat(Hub.visibleScenarios().map(s => ({ id: s.id, label: s.icon + ' ' + s.name })));
+        filterBar.innerHTML = btns.map(b =>
+          `<button class="scene-btn${activeScene === b.id ? ' active' : ''}" data-scene="${b.id}">${Hub.esc(b.label)}</button>`).join('');
+      }
+
+      // ---- 渲染：Agent 表格 ----
+      function renderTable() {
+        const ids = visIds();
+        let list = Hub.data.agents.filter(a => ids.includes(a.scenario));
+        if (activeScene !== 'all') list = list.filter(a => a.scenario === activeScene);
+
+        if (!list.length) { tableBox.innerHTML = '<div class="empty">该筛选下暂无 Agent</div>'; return; }
+
+        const showActs = perms.manageAgents;
+        const head = `
+          <tr>
+            <th>Agent 名称</th><th>场景</th><th>面向角色</th><th>状态</th><th>版本</th>
+            <th>运行模型</th><th>调用数</th><th>绑定知识库</th><th>绑定 SOP</th><th>负责人</th><th>更新时间</th>
+            ${showActs ? '<th>操作</th>' : ''}
+          </tr>`;
+
+        const rows = list.map(a => {
+          const scn = Hub.scenario(a.scenario) || {};
+          let actCell = '';
+          if (showActs) {
+            if (canOp(a)) {
+              actCell = `<td class="col-act"><div class="btn-row">
+                <button class="btn btn-sm" data-act="toggle" data-id="${a.id}">${a.status === 'on' ? '停用' : '启用'}</button>
+                <button class="btn btn-sm" data-act="edit" data-id="${a.id}">编辑</button>
+                <button class="btn btn-sm" data-act="del" data-id="${a.id}">删除</button>
+              </div></td>`;
+            } else {
+              actCell = '<td class="col-act"><span class="tr small">无权</span></td>';
+            }
+          }
+          return `<tr>
+            <td><div class="b">${Hub.esc(a.name)}</div><div class="tr small">${Hub.esc(a.desc || '')}</div></td>
+            <td><span class="nowrap">${Hub.esc((scn.icon || '') + ' ' + (scn.name || a.scenario))}</span></td>
+            <td>${Hub.esc(a.role || '—')}</td>
+            <td>${Hub.statusPill(a.status)}</td>
+            <td class="num">${Hub.esc(a.version || '—')}</td>
+            <td>${a.model ? `<span class="mono small">${Hub.esc(a.model)}</span>` : '<span class="tr small">默认</span>'}</td>
+            <td class="num">${fmtN(a.calls)}</td>
+            <td>${chipCell(a.kbIds, kbName)}</td>
+            <td>${chipCell(a.sopIds, sopTitle)}</td>
+            <td>${Hub.esc(a.owner || '—')}</td>
+            <td class="num tr small">${Hub.esc(a.updated || '—')}</td>
+            ${actCell}
+          </tr>`;
+        }).join('');
+
+        tableBox.innerHTML = `<table class="tbl">${head}${rows}</table>`;
+      }
+
+      async function reload() { await Hub.refresh(); renderKpis(); renderTable(); }
+
+      // ---- 新建 / 编辑 表单（可复用）----
+      function bindHtml(scId, checkedKb, checkedSop) {
+        const kbs = Hub.kbsOf(scId), sops = Hub.sopsOf(scId);
+        const kbBoxes = kbs.length
+          ? kbs.map(k => `<label class="pick"><input type="checkbox" class="kbx" value="${k.id}" ${checkedKb.includes(k.id) ? 'checked' : ''}> ${Hub.esc(k.name)}</label>`).join('')
+          : '<span class="tr small">该场景暂无知识库</span>';
+        const sopBoxes = sops.length
+          ? sops.map(s => `<label class="pick"><input type="checkbox" class="spx" value="${s.id}" ${checkedSop.includes(s.id) ? 'checked' : ''}> ${Hub.esc(s.title)}</label>`).join('')
+          : '<span class="tr small">该场景暂无 SOP</span>';
+        return `
+          <div class="pblock"><div class="plabel">绑定知识库</div><div class="pick-grid">${kbBoxes}</div></div>
+          <div class="pblock"><div class="plabel">绑定 SOP</div><div class="pick-grid">${sopBoxes}</div></div>`;
+      }
+
+      function openAgentForm(existing) {
+        if (!perms.manageAgents) { Hub.toast('无权管理 Agent', true); return; }
+        const scenes = manageScenes();
+        if (!scenes.length) { Hub.toast('无可管理的场景', true); return; }
+        const ex = existing || null;
+        const curSc = ex ? ex.scenario : scenes[0].id;
+
+        const body = `
+          <div class="grid g2">
+            <div class="field"><label>Agent 名称</label><input id="f-name" value="${ex ? Hub.esc(ex.name) : ''}" placeholder="如：舆情监测 Agent"></div>
+            <div class="field"><label>所属场景</label><select id="f-scene">${scenes.map(s => `<option value="${s.id}" ${s.id === curSc ? 'selected' : ''}>${Hub.esc(s.icon + ' ' + s.name)}</option>`).join('')}</select></div>
+          </div>
+          <div class="grid g2">
+            <div class="field"><label>面向角色</label><input id="f-role" value="${ex ? Hub.esc(ex.role || '') : ''}" placeholder="如：舆情分析师"></div>
+            <div class="field"><label>初始状态</label><select id="f-status">
+              <option value="on" ${(!ex || ex.status === 'on') ? 'selected' : ''}>启用（在架）</option>
+              <option value="off" ${ex && ex.status === 'off' ? 'selected' : ''}>停用</option>
+            </select></div>
+          </div>
+          <div class="field"><label>功能描述</label><textarea id="f-desc" rows="2" placeholder="一句话描述该 Agent 的能力">${ex ? Hub.esc(ex.desc || '') : ''}</textarea></div>
+          <div class="field"><label>技能（逗号分隔）</label><input id="f-skills" value="${ex ? Hub.esc((ex.skills || []).join('，')) : ''}" placeholder="选题建议，语音写稿，标题优化"></div>
+          <div class="field"><label>运行模型（大模型 · 留空则用平台默认聊天模型）</label><select id="f-model"><option value="">（平台默认聊天模型）</option>${(window.CHAT_MODELS || []).map(m => `<option value="${m.id}" ${ex && ex.model === m.id ? 'selected' : ''}>${Hub.esc(m.name)} · ${m.id}</option>`).join('')}</select></div>
+          <div id="f-bind">${bindHtml(curSc, ex ? (ex.kbIds || []) : [], ex ? (ex.sopIds || []) : [])}</div>
+          <div class="btn-row" style="justify-content:flex-end;margin-top:8px">
+            <button class="btn" id="f-cancel">取消</button>
+            <button class="btn btn-primary" id="f-save">${ex ? '保存修改' : '创建 Agent'}</button>
+          </div>`;
+
+        Hub.modal(ex ? '编辑 Agent' : '新建 Agent', body, (root, close) => {
+          const sceneSel = root.querySelector('#f-scene');
+          const bindBox = root.querySelector('#f-bind');
+          // 切换场景时，知识库/SOP 选项随之刷新（并清空原勾选）
+          sceneSel.addEventListener('change', () => { bindBox.innerHTML = bindHtml(sceneSel.value, [], []); });
+          root.querySelector('#f-cancel').onclick = close;
+          root.querySelector('#f-save').onclick = async () => {
+            const name = root.querySelector('#f-name').value.trim();
+            const scenario = sceneSel.value;
+            const role = root.querySelector('#f-role').value.trim();
+            const desc = root.querySelector('#f-desc').value.trim();
+            const status = root.querySelector('#f-status').value;
+            const skills = root.querySelector('#f-skills').value.split(/[,，、]/).map(s => s.trim()).filter(Boolean);
+            const kbIds = [...root.querySelectorAll('.kbx:checked')].map(c => c.value);
+            const sopIds = [...root.querySelectorAll('.spx:checked')].map(c => c.value);
+            const model = root.querySelector('#f-model').value;
+            if (!name) { Hub.toast('请填写 Agent 名称', true); return; }
+            const today = new Date().toISOString().slice(0, 10);
+            const obj = ex
+              ? { ...ex, name, scenario, role, desc, status, skills, kbIds, sopIds, model, updated: today }
+              : { id: 'ag_' + Date.now(), scenario, name, role, desc, status, skills, kbIds, sopIds, model, version: 'v1.0', owner: me.name, calls: 0, updated: today };
+            try {
+              await Hub.change('agent.upsert', { scenario: obj.scenario, agent: obj });
+              close();
+              Hub.toast(ex ? '已保存「' + obj.name + '」' : '已创建「' + obj.name + '」');
+              await reload();
+            } catch (_) { /* Hub.change 已 toast 403 */ }
+          };
+        });
+      }
+      window.openAgentForm = openAgentForm;
+
+      // ---- 事件绑定（委托，容器持久存在）----
+      filterBar.addEventListener('click', (e) => {
+        const b = e.target.closest('[data-scene]'); if (!b) return;
+        activeScene = b.dataset.scene; renderFilter(); renderTable();
+      });
+      tableBox.addEventListener('click', async (e) => {
+        const btn = e.target.closest('button[data-act]'); if (!btn) return;
+        const id = btn.dataset.id, act = btn.dataset.act;
+        const a = Hub.data.agents.find(x => x.id === id); if (!a) return;
+        if (act === 'edit') { openAgentForm(a); return; }
+        if (act === 'toggle') {
+          try { await Hub.change('agent.toggle', { id }); Hub.toast('已' + (a.status === 'on' ? '停用' : '启用') + '「' + a.name + '」'); await reload(); } catch (_) {}
+          return;
+        }
+        if (act === 'del') {
+          Hub.confirm('确定删除 Agent「' + a.name + '」？删除后不可恢复。', async () => {
+            try { await Hub.change('agent.delete', { id }); Hub.toast('已删除「' + a.name + '」'); await reload(); } catch (_) {}
+          });
+        }
+      });
+      const btnNew = document.getElementById('btn-new');
+      if (btnNew) btnNew.onclick = () => openAgentForm();
+
+      // ---- 首屏渲染 ----
+      renderKpis();
+      renderFilter();
+      renderTable();
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>数字餐饮 · 数据看板 · 灵犀统一 Agent 运营中台</title>
+  <link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+  <div id="view"></div>
+  <script src="assets/app.js"></script>
+  <script>
+    Hub.boot({ page: 'dining_board', scenario: 'dining' }).then(({ data, me, perms }) => {
+      const V = document.getElementById('view');
+      const D = Hub.data.dining;
+      const B = D.board;
+      const days = ['周一', '周二', '周三', '周四', '周五', '周六', '周日'];
+
+      // 门店营业额排行（解析「8.6万」→ 8.6）
+      const rank = [...D.stores].map(s => ({ n: s.name.replace(/^.*·/, ''), v: parseFloat(s.sales) || 0 }))
+        .sort((a, b) => b.v - a.v);
+      // 巡检态势：门店巡检状态占比
+      const okN = D.stores.filter(s => s.check === '已巡').length;
+      const badN = D.stores.length - okN;
+
+      // chatBI 预置问答
+      const bi = [
+        { q: '今天哪家店营业额最高？', a: '🏆 旗舰店·中心广场 <b>8.6 万</b>居首，其次 直营店·老城区 5.1 万；加盟店·科技园 4.2 万偏低，建议关注午市上座率与套餐连带。' },
+        { q: '本周营业额趋势怎样？', a: '📈 近 7 日 120 → 186 万稳步上升，周末（周六/周日）显著拉升，环比 <b>+6%</b>；建议周末提前备货并加派人手。' },
+        { q: '食安还有哪些待整改？', a: '🧪 1 项待闭环：科技园店「冷藏温度超标（橙）」整改中，要求 2 小时内复检上报；全网食安合格率 <b>96%</b>。' },
+        { q: '哪个品类卖得最好？', a: '🍽️ 套餐占比 <b>46%</b> 领先，单品 30%、饮品 14%、甜品 10%；建议把「招牌牛肉套餐」置顶推荐位以提升连带率。' },
+      ];
+
+      V.innerHTML = `
+        <div class="wrap">
+          ${Hub.sceneSubnav('dining', '_board')}
+          <div class="page-intro">
+            <b>数字餐饮 · 经营数据看板</b> —— 营业额与品类结构、门店排行、食安合格态势一屏统览；
+            同一套数据同时驱动桌面 BI、一线小程序与 Agent 早晚报推送。
+            <span class="tr">数据为目标态示意 · 落后端 SQLite</span>
+          </div>
+
+          <div class="grid g4">${B.kpis.map(k => Hub.kpi(k)).join('')}</div>
+
+          <div class="section-t">经营趋势</div>
+          <div class="grid g2">
+            <div class="panel">
+              <div class="panel-t"><h3>💰 营业额趋势</h3><span class="sub">近 7 日 · 单位：万元</span></div>
+              ${Hub.cols(B.series.sales)}
+              <div class="flex" style="justify-content:space-between;font-size:11px;color:var(--txt-3);margin-top:6px">
+                ${days.map(d => `<span>${d}</span>`).join('')}
+              </div>
+            </div>
+            <div class="panel">
+              <div class="panel-t"><h3>🥗 品类销售结构</h3><span class="sub">占比 %</span></div>
+              ${Hub.donut(B.series.cat, '品类')}
+            </div>
+          </div>
+
+          <div class="grid g2 mt16">
+            <div class="panel">
+              <div class="panel-t"><h3>🏬 门店营业额排行</h3><span class="sub">今日 · 万元</span></div>
+              ${Hub.bars(rank)}
+            </div>
+            <div class="panel">
+              <div class="panel-t"><h3>🧪 食安巡检态势</h3><span class="sub">合格率 96%</span></div>
+              <div class="flex ac gap12 wrapf">
+                ${Hub.donut([{ n: '已巡合格', v: okN }, { n: '待整改', v: badN }], okN + '/' + D.stores.length)}
+              </div>
+              <div class="section-t" style="margin:14px 0 8px">今日巡检记录</div>
+              <div class="tr-thread">
+                ${D.inspections.map(i => `<div class="flex ac jb" style="padding:8px 0;border-bottom:1px solid var(--line)">
+                  <div><div class="b small">${Hub.esc(i.store)} · ${Hub.esc(i.item)}</div><div class="tr small mono">${Hub.esc(i.ts)}</div></div>
+                  <div class="right flex ac gap8">${Hub.levelTag(i.level)}${Hub.statusPill(i.status)}</div>
+                </div>`).join('')}
+              </div>
+            </div>
+          </div>
+
+          <div class="section-t">chatBI · 问数</div>
+          <div class="panel">
+            <div class="panel-t"><h3>💬 用大白话问经营</h3><span class="sub">点击预置问题 · 商汤日日新驱动</span></div>
+            <div class="btn-row" id="bi-qs">
+              ${bi.map((x, i) => `<button class="btn btn-sm" data-i="${i}">${Hub.esc(x.q)}</button>`).join('')}
+            </div>
+            <div id="bi-ans" class="card" style="margin-top:14px;background:var(--panel-2)">
+              <div class="tr small">💡 选择上方任一问题，chatBI 基于同一套看板数据即时作答。</div>
+            </div>
+          </div>
+
+          <div class="section-t">同一套数 · 三种触达</div>
+          <div class="grid g3">
+            <div class="card"><div style="font-size:24px">🖥️</div>
+              <h3 style="font-size:14px;margin:8px 0 4px">桌面 BI（本页）</h3>
+              <div class="tr small">督导 / 加盟商在中台看经营大盘、门店排行与食安合格率，支持 chatBI 问数。</div></div>
+            <a class="card" href="dining_miniapp.html" style="text-decoration:none"><div style="font-size:24px">📱</div>
+              <h3 style="font-size:14px;margin:8px 0 4px">一线小程序</h3>
+              <div class="tr small">店员/顾客侧：点餐、忌口识别、临期折扣与会员，数据实时回流看板。</div></a>
+            <a class="card" href="dining_agent.html" style="text-decoration:none"><div style="font-size:24px">🎙</div>
+              <h3 style="font-size:14px;margin:8px 0 4px">Agent 早晚报推送</h3>
+              <div class="tr small">门店督导 Agent 每日早/晚报播报关键指标与待办，命中异常自动推 SOP。</div></a>
+          </div>
+
+          <div class="hint mt24">口径：数据为目标态示意，用于讲清「一套数据、三种触达」，非真实经营数据。</div>
+        </div>`;
+
+      // chatBI 交互
+      document.getElementById('bi-qs').addEventListener('click', (e) => {
+        const b = e.target.closest('button[data-i]'); if (!b) return;
+        const x = bi[+b.dataset.i];
+        document.querySelectorAll('#bi-qs button').forEach(btn => btn.classList.toggle('btn-primary', btn === b));
+        document.getElementById('bi-ans').innerHTML =
+          `<div class="tr small mb8" style="margin-bottom:8px">🙋 ${Hub.esc(x.q)}</div><div style="font-size:14px;line-height:1.7">${x.a}</div>`;
+      });
+    });
+  </script>
+</body>
+</html>

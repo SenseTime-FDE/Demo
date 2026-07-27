@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>照护助手小程序 · 灵犀统一 Agent 运营中台</title>
+  <link rel="stylesheet" href="assets/style.css">
+  <style>
+    /* 小程序内部（浅色）—— 仅限手机 .screen 内使用，不影响中台深色风格 */
+    .mini { height: 100%; display: flex; flex-direction: column; background: #f2f4f7; color: #1c2230; }
+    .mini-nav { background: #fff; text-align: center; padding: 6px 0 11px; font-size: 15px; font-weight: 700; color: #16324f; border-bottom: 1px solid #eaecef; }
+    .mini-body { flex: 1; overflow-y: auto; padding: 12px; }
+    .mini-tabbar { display: flex; background: #fff; border-top: 1px solid #eaecef; padding-bottom: 4px; }
+    .mini-tabbar .mt { flex: 1; text-align: center; padding: 6px 0 8px; font-size: 10.5px; color: #9aa4b2; cursor: pointer; }
+    .mini-tabbar .mt.active { color: #17B8A6; font-weight: 700; }
+    .mini-tabbar .mt .i { font-size: 20px; display: block; line-height: 1.3; }
+    .mscreen { display: none; } .mscreen.active { display: block; }
+    .mcard { background: #fff; border-radius: 13px; padding: 13px; margin-bottom: 10px; box-shadow: 0 1px 4px rgba(20,40,70,.05); }
+    .mhero { background: linear-gradient(135deg, #17B8A6, #0f8f81); color: #fff; border-radius: 15px; padding: 15px; margin-bottom: 12px; }
+    .mhero .hl { font-size: 12px; opacity: .9; } .mhero .hb { font-size: 20px; font-weight: 800; margin-top: 3px; }
+    .mhero .hr { display: flex; gap: 18px; margin-top: 12px; }
+    .mhero .hr b { font-size: 18px; display: block; } .mhero .hr span { font-size: 11px; opacity: .9; }
+    .mrow { display: flex; align-items: center; gap: 10px; padding: 11px 2px; border-bottom: 1px solid #f0f2f5; }
+    .mrow:last-child { border-bottom: none; }
+    .mrow .mi { width: 38px; height: 38px; border-radius: 10px; background: #eafaf7; color: #17B8A6; display: grid; place-items: center; font-size: 18px; flex: none; }
+    .mrow .mt2 { flex: 1; min-width: 0; } .mrow .mt2 .n { font-size: 13.5px; font-weight: 600; color: #1c2230; }
+    .mrow .mt2 .s { font-size: 11.5px; color: #98a2b3; margin-top: 2px; }
+    .mpill { font-size: 10.5px; padding: 2px 8px; border-radius: 20px; white-space: nowrap; }
+    .mpill.ok { background: #e4f8ef; color: #17a45f; } .mpill.warn { background: #fdf0d8; color: #c98a12; }
+    .mpill.info { background: #e7f0fe; color: #2f6fe0; } .mpill.bad { background: #fde5e5; color: #d64545; }
+    .msec { font-size: 12px; color: #7b8698; font-weight: 700; margin: 4px 2px 8px; }
+    .mbtn { display: block; width: 100%; text-align: center; border: none; background: #17B8A6; color: #fff; border-radius: 11px; padding: 11px; font-size: 14px; font-weight: 700; cursor: pointer; }
+    .mbtn.g { background: #eef1f4; color: #46536a; }
+    .mchip { display: inline-block; font-size: 12px; padding: 7px 13px; border-radius: 20px; background: #fff; border: 1px solid #e3e7ec; color: #46536a; margin: 0 7px 8px 0; cursor: pointer; }
+    .mchip.on { background: #17B8A6; color: #fff; border-color: #17B8A6; }
+    .mvoice { text-align: center; padding: 22px 0 6px; }
+    .mvoice .ring { width: 92px; height: 92px; border-radius: 50%; margin: 0 auto; background: radial-gradient(circle at 50% 40%, #22cbb8, #0f8f81); display: grid; place-items: center; font-size: 36px; color: #fff; box-shadow: 0 8px 22px rgba(23,184,166,.4); cursor: pointer; }
+    .mvoice .vt { font-size: 12px; color: #8a95a5; margin-top: 12px; }
+    .mprofile { text-align: center; padding: 6px 0 4px; }
+    .mprofile .av { width: 62px; height: 62px; border-radius: 50%; margin: 0 auto 8px; background: linear-gradient(135deg, #17B8A6, #7c3aed); color: #fff; display: grid; place-items: center; font-size: 24px; font-weight: 700; }
+    .mprofile .nm { font-size: 16px; font-weight: 800; color: #1c2230; } .mprofile .rl { font-size: 12px; color: #98a2b3; margin-top: 2px; }
+  </style>
+</head>
+<body>
+  <div id="view"></div>
+  <script src="assets/app.js"></script>
+  <script>
+    Hub.boot({ page: 'eldercare_miniapp', scenario: 'eldercare' }).then(({ data, me, perms }) => {
+      const V = document.getElementById('view');
+      const E = Hub.data.eldercare;
+      const NAV = { tasks: '今日任务', beds: '床位', report: '语音上报', me: '我的' };
+
+      const mpill = (s) => {
+        const m = { '已完成': 'ok', '进行中': 'info', '已推送': 'info', '处置中': 'warn', '已闭环': 'ok', '已通知医护': 'warn' }[s] || 'info';
+        return `<span class="mpill ${m}">${Hub.esc(s)}</span>`;
+      };
+      const riskClass = (r) => /高/.test(r) ? 'bad' : /中/.test(r) ? 'warn' : 'ok';
+
+      // ---------- 各屏 ----------
+      const screenTasks = () => {
+        const done = E.tasks.filter(t => t.status === '已完成').length;
+        return `
+          <div class="mhero">
+            <div class="hl">☀️ 早班 · ${new Date().getMonth() + 1}月${new Date().getDate()}日</div>
+            <div class="hb">刘敏，你好</div>
+            <div class="hr"><div><b>${done}/${E.tasks.length}</b><span>今日任务</span></div>
+              <div><b>${E.residents.length}</b><span>负责床位</span></div>
+              <div><b>${E.alerts.filter(a => a.status !== '已闭环').length}</b><span>待处置预警</span></div></div>
+          </div>
+          <div class="msec">今日照护任务</div>
+          <div class="mcard">${E.tasks.map(t => `
+            <div class="mrow"><div class="mi">📝</div>
+              <div class="mt2"><div class="n">${Hub.esc(t.bed)} · ${Hub.esc(t.item)}</div>
+                <div class="s">${Hub.esc(t.owner)} · ${Hub.esc((t.ts || '').slice(11, 16))}</div></div>
+              ${mpill(t.status)}</div>`).join('')}</div>
+          <button class="mbtn" data-voice="task">🎙 语音记录护理完成</button>`;
+      };
+
+      const screenBeds = () => `
+        <div class="msec">我负责的床位 · ${E.residents.length} 位</div>
+        ${E.residents.map(r => `<div class="mcard"><div class="mrow" style="border:none;padding:2px">
+          <div class="mi">🛏</div>
+          <div class="mt2"><div class="n">${Hub.esc(r.name)} · ${Hub.esc(r.bed)}</div>
+            <div class="s">${Hub.esc(r.level)}</div></div>
+          <span class="mpill ${riskClass(r.risk)}">${Hub.esc(r.risk)}</span></div></div>`).join('')}
+        <div class="mcard" style="text-align:center;color:#98a2b3;font-size:12px">点击床位可进入护理记录（示意）</div>`;
+
+      let reportType = '体征异常';
+      const screenReport = () => `
+        <div class="msec">选择上报类型</div>
+        <div class="mcard" id="rtype">
+          ${['体征异常', '跌倒预警', '用药异常', '其他'].map(t => `<span class="mchip${t === reportType ? ' on' : ''}" data-rt="${t}">${t}</span>`).join('')}
+        </div>
+        <div class="mcard mvoice">
+          <div class="ring" data-voice="report">🎙</div>
+          <div class="vt">按住说话上报「${Hub.esc(reportType)}」<br>示例：2-15 李国强血压 162/98，偏高</div>
+        </div>
+        <div class="msec">近期上报</div>
+        <div class="mcard">${E.alerts.map(a => `
+          <div class="mrow"><div class="mi">${a.level === '红' ? '🚨' : '🟠'}</div>
+            <div class="mt2"><div class="n">${Hub.esc(a.bed)} · ${Hub.esc(a.type)}</div>
+              <div class="s">${Hub.esc(a.detail)}</div></div>
+            ${mpill(a.status)}</div>`).join('')}</div>`;
+
+      const screenMe = () => `
+        <div class="mcard mprofile">
+          <div class="av">敏</div><div class="nm">护理员 · 刘敏</div>
+          <div class="rl">工号 NUR-0316 · 晚晴养老院 3 楼</div>
+        </div>
+        <div class="mcard"><div class="mrow"><div class="mi">📈</div>
+          <div class="mt2"><div class="n">本月照护</div><div class="s">已完成 428 项 · 完成率 98.2%</div></div></div>
+          <div class="mrow"><div class="mi">⭐</div>
+          <div class="mt2"><div class="n">家属满意度</div><div class="s">4.8 / 5 · 回收率 91%</div></div></div></div>
+        <div class="mcard">
+          <div class="mrow"><div class="mi">🗓</div><div class="mt2"><div class="n">我的排班</div></div><span style="color:#c3cad4">›</span></div>
+          <div class="mrow"><div class="mi">📋</div><div class="mt2"><div class="n">照护 SOP 与培训</div></div><span style="color:#c3cad4">›</span></div>
+          <div class="mrow"><div class="mi">⚙️</div><div class="mt2"><div class="n">设置</div></div><span style="color:#c3cad4">›</span></div>
+        </div>
+        <button class="mbtn g" data-voice="me">🎙 呼叫照护助理 Agent</button>`;
+
+      const SCREENS = { tasks: screenTasks, beds: screenBeds, report: screenReport, me: screenMe };
+      let cur = 'tasks';
+
+      V.innerHTML = `
+        <div class="wrap">
+          ${Hub.sceneSubnav('eldercare', '_miniapp')}
+          <div class="page-intro">
+            <b>照护助手小程序 · 护理员端</b> —— 一线护理员随身的微信小程序：查看今日任务、负责床位、
+            一键语音上报体征/跌倒异常。由第三方开发商开发，接入
+            <b class="tacc">商汤 AI 语音与问答能力</b>。 <span class="tr">底座：${Hub.esc(data.platform.base)}</span>
+          </div>
+          <div class="flex gap12 wrapf" style="align-items:flex-start;justify-content:center">
+            <div class="phone-stage">
+              <div class="phone"><div class="notch"></div><div class="screen">
+                <div class="statusbar" style="background:#fff"><span>9:41</span><span class="right">●●●●● 5G ▮▮▮</span></div>
+                <div class="mini">
+                  <div class="mini-nav" id="mnav">照护助手 · 今日任务</div>
+                  <div class="mini-body" id="mbody"></div>
+                  <div class="mini-tabbar" id="mtabs">
+                    <div class="mt active" data-s="tasks"><span class="i">📋</span>任务</div>
+                    <div class="mt" data-s="beds"><span class="i">🛏</span>床位</div>
+                    <div class="mt" data-s="report"><span class="i">🎙</span>上报</div>
+                    <div class="mt" data-s="me"><span class="i">👤</span>我的</div>
+                  </div>
+                </div>
+              </div></div>
+            </div>
+            <div class="panel" style="flex:1;min-width:280px;max-width:380px">
+              <div class="panel-t"><h3>📱 关于这个小程序</h3></div>
+              <p class="t2 small">面向一线护理员的轻应用，作为中台在 C 端/一线的触点：</p>
+              <div class="mt12"><span class="pill acc">第三方开发商开发</span> <span class="pill">商汤 AI 能力接入</span></div>
+              <div class="section-t">商汤能力赋能</div>
+              <ul class="steps">
+                <li>语音上报：ASR 转写体征/跌倒异常，自动生成预警工单</li>
+                <li>智能问答：照护 SOP、用药禁忌一问即答</li>
+                <li>任务提醒：早晚班待办与用药提醒智能推送</li>
+              </ul>
+              <div class="hint mt16">一线小程序、桌面 BI 与 Agent 早晚报共用同一套后台数据，任何上报都会实时汇入健康预警看板。</div>
+            </div>
+          </div>
+        </div>`;
+
+      function paint() {
+        document.getElementById('mbody').innerHTML = SCREENS[cur]();
+        document.getElementById('mnav').textContent = '照护助手 · ' + NAV[cur];
+        document.querySelectorAll('#mtabs .mt').forEach(t => t.classList.toggle('active', t.getAttribute('data-s') === cur));
+        // 屏内交互
+        document.querySelectorAll('#mbody [data-voice]').forEach(b => b.addEventListener('click', () => {
+          const k = b.getAttribute('data-voice');
+          if (k === 'task') Hub.toast('🎙 语音记录已保存：护理完成（示意）');
+          else if (k === 'report') Hub.toast('🎙 已上报「' + reportType + '」并生成预警工单（示意）');
+          else Hub.toast('🎙 正在为你接通照护助理 Agent（示意）');
+        }));
+        document.querySelectorAll('#mbody [data-rt]').forEach(c => c.addEventListener('click', () => { reportType = c.getAttribute('data-rt'); paint(); }));
+      }
+      document.querySelectorAll('#mtabs .mt').forEach(t => t.addEventListener('click', () => { cur = t.getAttribute('data-s'); paint(); }));
+      paint();
+    });
+  </script>
+</body>
+</html>

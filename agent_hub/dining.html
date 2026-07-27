@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>数字餐饮 · 灵犀统一 Agent 运营中台</title>
+  <link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+  <div id="view"></div>
+  <script src="assets/app.js"></script>
+  <script>
+    Hub.boot({ page: 'dining', scenario: 'dining' }).then(({ data, me, perms }) => {
+      const V = document.getElementById('view');
+      const sc = Hub.scenario('dining');
+      const canEdit = perms.editConfig && Hub.canScene('dining');
+
+      // ---- 小工具 ----
+      const checkPill = (s) => `<span class="pill ${s === '已巡' ? 'ok' : 'warn'}">${Hub.esc(s)}</span>`;
+      const stockPill = (s) => `<span class="pill ${s === '充足' ? 'ok' : 'warn'}">${Hub.esc(s)}</span>`;
+      const tagChip = (t) => `<span class="chip-tag" style="color:var(--accent);border-color:color-mix(in srgb,var(--accent) 40%,transparent)">${Hub.esc(t)}</span>`;
+
+      // ---- 三个 Tab 面板 HTML ----
+      function paneStores() {
+        const rows = Hub.data.dining.stores.map(s => `
+          <tr>
+            <td><b>${Hub.esc(s.name)}</b></td>
+            <td class="tr">${Hub.esc(s.area)}</td>
+            <td class="num">${Hub.esc(s.sales)}</td>
+            <td>${Hub.statusPill(s.status)}</td>
+            <td>${checkPill(s.check)}</td>
+            <td class="right">
+              <div class="btn-row" style="justify-content:flex-end">
+                <button class="btn btn-sm" data-act="store-view" data-id="${s.id}">查看</button>
+                ${canEdit ? `<button class="btn btn-sm btn-primary" data-act="store-inspect" data-id="${s.id}">巡店</button>` : ''}
+              </div>
+            </td>
+          </tr>`).join('');
+        return `
+          <div class="panel">
+            <div class="panel-t"><h3>🏬 门店台账</h3><span class="sub">在营 ${Hub.data.dining.stores.length} 家 · 巡检状态实时</span><span class="sp"></span>
+              ${canEdit ? '' : '<span class="ro-note">当前角色为只读</span>'}</div>
+            <div class="tbl-wrap"><table class="tbl">
+              <thead><tr><th>门店</th><th>区域</th><th>今日营业额</th><th>状态</th><th>巡检</th><th class="right">操作</th></tr></thead>
+              <tbody>${rows}</tbody>
+            </table></div>
+          </div>`;
+      }
+
+      function paneInsp() {
+        const rows = Hub.data.dining.inspections.map(i => `
+          <tr>
+            <td><b>${Hub.esc(i.store)}</b></td>
+            <td>${Hub.esc(i.item)}</td>
+            <td>${Hub.levelTag(i.level)}</td>
+            <td>${Hub.statusPill(i.status)}</td>
+            <td class="tr small mono">${Hub.esc(i.ts)}</td>
+            <td class="right">
+              <div class="btn-row" style="justify-content:flex-end">
+                ${canEdit ? `<button class="btn btn-sm btn-primary" data-act="insp-track" data-id="${i.id}">整改跟踪</button>
+                <button class="btn btn-sm" data-act="insp-del" data-id="${i.id}">删除</button>` : '<span class="tr small">只读</span>'}
+              </div>
+            </td>
+          </tr>`).join('');
+        return `
+          <div class="panel">
+            <div class="panel-t"><h3>🧪 食安巡检</h3><span class="sub">异常项闭环跟踪 · 分级处置</span><span class="sp"></span>
+              ${canEdit ? '<button class="btn btn-sm" data-act="insp-add">＋ 新增巡检</button>' : '<span class="ro-note">当前角色为只读</span>'}</div>
+            <div class="tbl-wrap"><table class="tbl">
+              <thead><tr><th>门店</th><th>检查项</th><th>分级</th><th>状态</th><th>时间</th><th class="right">操作</th></tr></thead>
+              <tbody>${rows || '<tr><td colspan="6"><div class="empty">暂无巡检记录</div></td></tr>'}</tbody>
+            </table></div>
+          </div>`;
+      }
+
+      function paneDishes() {
+        const cards = Hub.data.dining.dishes.map(d => `
+          <div class="card" style="padding:14px">
+            <div class="flex ac jb">
+              <div><b style="font-size:15px">${Hub.esc(d.name)}</b><div class="mt8 flex ac gap8">${tagChip(d.tag)}${stockPill(d.stock)}</div></div>
+              <div class="right"><div class="mono" style="font-size:22px;color:var(--accent)">¥${Hub.esc(d.price)}</div></div>
+            </div>
+            ${canEdit ? `<div class="btn-row mt12">
+              <button class="btn btn-sm btn-primary" data-act="dish-edit" data-id="${d.id}">编辑</button>
+              <button class="btn btn-sm" data-act="dish-del" data-id="${d.id}">删除</button>
+            </div>` : ''}
+          </div>`).join('');
+        return `
+          <div class="panel">
+            <div class="panel-t"><h3>🍽️ 菜品货架</h3><span class="sub">价格 · 标签 · 库存/临期</span><span class="sp"></span>
+              ${canEdit ? '<button class="btn btn-sm" data-act="dish-add">＋ 新品上架</button>' : '<span class="ro-note">当前角色为只读</span>'}</div>
+            <div class="grid g3">${cards}</div>
+          </div>`;
+      }
+
+      // ---- 渲染骨架 ----
+      const kpis = sc && Hub.data.dining.board ? Hub.data.dining.board.kpis : [];
+      V.innerHTML = `
+        <div class="wrap">
+          ${Hub.sceneSubnav('dining', '')}
+          <div class="page-intro">
+            <b>${Hub.esc(sc.name)}工作台</b> —— ${Hub.esc(sc.desc)}。
+            门店督导、点餐推荐、供应链与食安巡检统一在此运营，一线以 Agent 语音交互，异常按事件推送 SOP 并全过程留痕。
+            <span class="tr">强调色随场景 · 底座 ${Hub.esc(data.platform.base)}</span>
+          </div>
+
+          <div class="grid g3">
+            <a class="card" href="dining_agent.html" style="text-decoration:none">
+              <div style="font-size:26px">🎙</div><h3 style="font-size:15px;margin:8px 0 4px">门店督导 Agent 原型</h3>
+              <div class="tr small">企微语音：营业前检查 / 食安处置 / 语音点餐 / 客诉，命中 SOP 自动推送</div></a>
+            <a class="card" href="dining_miniapp.html" style="text-decoration:none">
+              <div style="font-size:26px">📱</div><h3 style="font-size:15px;margin:8px 0 4px">顾客点餐小程序</h3>
+              <div class="tr small">C 端点餐 / 套餐推荐 / 订单 / 会员，第三方开发 + 商汤 AI 能力</div></a>
+            <a class="card" href="dining_board.html" style="text-decoration:none">
+              <div style="font-size:26px">📊</div><h3 style="font-size:15px;margin:8px 0 4px">餐饮数据看板</h3>
+              <div class="tr small">营业额趋势 / 品类结构 / 门店排行 / 食安合格率 / chatBI 问数</div></a>
+          </div>
+
+          <div class="section-t">场景经营概览</div>
+          <div class="grid g4">${kpis.map(k => Hub.kpi(k)).join('')}</div>
+
+          <div class="section-t">业务运营</div>
+          <div class="tabs" id="biz-tabs">
+            <div class="tab active" data-k="stores">🏬 门店</div>
+            <div class="tab" data-k="insp">🧪 食安巡检</div>
+            <div class="tab" data-k="dishes">🍽️ 菜品</div>
+          </div>
+          <div id="biz-panes">
+            <div class="tabpane active" data-pane="stores">${paneStores()}</div>
+            <div class="tabpane" data-pane="insp">${paneInsp()}</div>
+            <div class="tabpane" data-pane="dishes">${paneDishes()}</div>
+          </div>
+
+          <div class="hint mt24">口径：数据为目标态示意，落后端 SQLite 持久化；写操作由服务器按角色×场景强制校验（越权 403）。</div>
+        </div>`;
+
+      // ---- 重绘 ----
+      function repaint() {
+        document.querySelector('[data-pane="stores"]').innerHTML = paneStores();
+        document.querySelector('[data-pane="insp"]').innerHTML = paneInsp();
+        document.querySelector('[data-pane="dishes"]').innerHTML = paneDishes();
+      }
+      async function commit(kind, payload, msg) {
+        try { await Hub.change(kind, payload); await Hub.refresh(); repaint(); Hub.toast(msg); }
+        catch (e) { /* Hub.change 已 toast */ }
+      }
+
+      // ---- Tab 切换 ----
+      document.getElementById('biz-tabs').addEventListener('click', (e) => {
+        const t = e.target.closest('.tab'); if (!t) return;
+        const k = t.dataset.k;
+        document.querySelectorAll('#biz-tabs .tab').forEach(x => x.classList.toggle('active', x === t));
+        document.querySelectorAll('#biz-panes .tabpane').forEach(p => p.classList.toggle('active', p.dataset.pane === k));
+      });
+
+      // ---- 行内操作（事件委托）----
+      document.getElementById('biz-panes').addEventListener('click', (e) => {
+        const b = e.target.closest('[data-act]'); if (!b) return;
+        const act = b.dataset.act, id = b.dataset.id;
+        const DN = Hub.data.dining;
+        if (act === 'store-view') {
+          const s = DN.stores.find(x => x.id === id); if (!s) return;
+          Hub.modal('门店详情 · ' + s.name,
+            `<div class="kv mt8"><span class="k">区域</span><span>${Hub.esc(s.area)}</span></div>
+             <div class="kv mt8"><span class="k">今日营业额</span><span class="mono tacc">${Hub.esc(s.sales)}</span></div>
+             <div class="kv mt8"><span class="k">营业状态</span><span>${Hub.statusPill(s.status)}</span></div>
+             <div class="kv mt8"><span class="k">巡检状态</span><span>${checkPill(s.check)}</span></div>
+             <div class="hint mt16">如需更新巡检结果，请点击门店行的「巡店」。</div>`);
+        }
+        else if (act === 'store-inspect') {
+          const s = DN.stores.find(x => x.id === id); if (!s) return;
+          Hub.modal('巡店 · ' + s.name, `
+            <div class="field"><label>巡检结果</label><select id="f-check">
+              <option value="已巡"${s.check === '已巡' ? ' selected' : ''}>已巡（合格）</option>
+              <option value="待整改"${s.check === '待整改' ? ' selected' : ''}>待整改</option>
+            </select></div>
+            <div class="field"><label>营业状态</label><select id="f-status">
+              <option value="营业"${s.status === '营业' ? ' selected' : ''}>营业</option>
+              <option value="停业"${s.status === '停业' ? ' selected' : ''}>停业</option>
+            </select></div>
+            <div class="field"><label>巡店备注（选填）</label><textarea id="f-note" rows="2" placeholder="如：冷藏温度、留样、仪容仪表等"></textarea></div>
+            <div class="btn-row" style="justify-content:flex-end"><button class="btn" id="m-cancel">取消</button><button class="btn btn-primary" id="m-save">保存巡店结果</button></div>
+          `, (body, close) => {
+            body.querySelector('#m-cancel').onclick = close;
+            body.querySelector('#m-save').onclick = () => {
+              const rec = { ...s, check: body.querySelector('#f-check').value, status: body.querySelector('#f-status').value };
+              close(); commit('scene.listUpsert', { scenario: 'dining', list: 'stores', record: rec }, '巡店结果已保存');
+            };
+          });
+        }
+        else if (act === 'insp-track') {
+          const i = DN.inspections.find(x => x.id === id); if (!i) return;
+          Hub.modal('整改跟踪 · ' + i.store, `
+            <div class="kv mt8"><span class="k">检查项</span><span>${Hub.esc(i.item)} ${Hub.levelTag(i.level)}</span></div>
+            <div class="field mt12"><label>处置状态</label><select id="f-st">
+              <option value="整改中"${i.status === '整改中' ? ' selected' : ''}>整改中</option>
+              <option value="合格"${i.status === '合格' ? ' selected' : ''}>合格（已闭环）</option>
+              <option value="待整改"${i.status === '待整改' ? ' selected' : ''}>待整改</option>
+            </select></div>
+            <div class="field"><label>处置说明（选填）</label><textarea id="f-note" rows="2" placeholder="如：已停售留样、复检温度已达标"></textarea></div>
+            <div class="btn-row" style="justify-content:flex-end"><button class="btn" id="m-cancel">取消</button><button class="btn btn-primary" id="m-save">更新</button></div>
+          `, (body, close) => {
+            body.querySelector('#m-cancel').onclick = close;
+            body.querySelector('#m-save').onclick = () => {
+              const rec = { ...i, status: body.querySelector('#f-st').value };
+              close(); commit('scene.listUpsert', { scenario: 'dining', list: 'inspections', record: rec }, '整改状态已更新');
+            };
+          });
+        }
+        else if (act === 'insp-del') {
+          const i = DN.inspections.find(x => x.id === id); if (!i) return;
+          Hub.confirm('确认删除巡检记录「' + i.item + '」？', () =>
+            commit('scene.listDelete', { scenario: 'dining', list: 'inspections', id }, '已删除巡检记录'));
+        }
+        else if (act === 'insp-add') {
+          const opts = DN.stores.map(s => `<option value="${Hub.esc(s.name)}">${Hub.esc(s.name)}</option>`).join('');
+          Hub.modal('新增食安巡检', `
+            <div class="field"><label>门店</label><select id="f-store">${opts}</select></div>
+            <div class="field"><label>检查项</label><input id="f-item" placeholder="如：冷藏温度超标 / 留样记录完整"></div>
+            <div class="field"><label>分级</label><select id="f-level">
+              <option value="蓝">蓝（提示）</option><option value="黄">黄（关注）</option>
+              <option value="橙" selected>橙（预警）</option><option value="红">红（严重）</option>
+            </select></div>
+            <div class="field"><label>初始状态</label><select id="f-st">
+              <option value="整改中" selected>整改中</option><option value="待整改">待整改</option><option value="合格">合格</option>
+            </select></div>
+            <div class="btn-row" style="justify-content:flex-end"><button class="btn" id="m-cancel">取消</button><button class="btn btn-primary" id="m-save">新增</button></div>
+          `, (body, close) => {
+            body.querySelector('#m-cancel').onclick = close;
+            body.querySelector('#m-save').onclick = () => {
+              const item = body.querySelector('#f-item').value.trim();
+              if (!item) { Hub.toast('请填写检查项', true); return; }
+              const now = new Date();
+              const ts = now.toISOString().slice(0, 10) + ' ' + now.toTimeString().slice(0, 5);
+              const rec = { id: 'x_' + Date.now(), store: body.querySelector('#f-store').value, item, level: body.querySelector('#f-level').value, status: body.querySelector('#f-st').value, ts };
+              close(); commit('scene.listUpsert', { scenario: 'dining', list: 'inspections', record: rec }, '巡检记录已新增');
+            };
+          });
+        }
+        else if (act === 'dish-edit' || act === 'dish-add') {
+          const d = act === 'dish-edit' ? DN.dishes.find(x => x.id === id) : { id: 'x_' + Date.now(), name: '', price: 0, tag: '推荐', stock: '充足' };
+          if (!d) return;
+          Hub.modal(act === 'dish-edit' ? ('编辑菜品 · ' + d.name) : '新品上架', `
+            <div class="field"><label>菜品名称</label><input id="f-name" value="${Hub.esc(d.name)}" placeholder="如：招牌牛肉套餐"></div>
+            <div class="field"><label>价格（元）</label><input id="f-price" type="number" value="${Hub.esc(d.price)}"></div>
+            <div class="field"><label>标签</label><select id="f-tag">
+              ${['热销', '新品', '推荐'].map(t => `<option value="${t}"${d.tag === t ? ' selected' : ''}>${t}</option>`).join('')}
+            </select></div>
+            <div class="field"><label>库存</label><select id="f-stock">
+              <option value="充足"${d.stock === '充足' ? ' selected' : ''}>充足</option>
+              <option value="临期提醒"${d.stock === '临期提醒' ? ' selected' : ''}>临期提醒</option>
+              <option value="缺货"${d.stock === '缺货' ? ' selected' : ''}>缺货</option>
+            </select></div>
+            <div class="btn-row" style="justify-content:flex-end"><button class="btn" id="m-cancel">取消</button><button class="btn btn-primary" id="m-save">保存</button></div>
+          `, (body, close) => {
+            body.querySelector('#m-cancel').onclick = close;
+            body.querySelector('#m-save').onclick = () => {
+              const name = body.querySelector('#f-name').value.trim();
+              if (!name) { Hub.toast('请填写菜品名称', true); return; }
+              const rec = { id: d.id, name, price: Number(body.querySelector('#f-price').value) || 0, tag: body.querySelector('#f-tag').value, stock: body.querySelector('#f-stock').value };
+              close(); commit('scene.listUpsert', { scenario: 'dining', list: 'dishes', record: rec }, act === 'dish-edit' ? '菜品已更新' : '新品已上架');
+            };
+          });
+        }
+        else if (act === 'dish-del') {
+          const d = DN.dishes.find(x => x.id === id); if (!d) return;
+          Hub.confirm('确认下架并删除「' + d.name + '」？', () =>
+            commit('scene.listDelete', { scenario: 'dining', list: 'dishes', id }, '菜品已下架'));
+        }
+      });
+    });
+  </script>
+</body>
+</html>

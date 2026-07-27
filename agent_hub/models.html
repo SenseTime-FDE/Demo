@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>模型接入 · 灵犀统一 Agent 运营中台</title>
+  <link rel="stylesheet" href="assets/style.css">
+  <style>
+    .mchat { display: grid; grid-template-columns: 1fr; gap: 0; }
+    .mchat-log { height: 360px; overflow-y: auto; padding: 6px 2px; display: flex; flex-direction: column; gap: 10px; }
+    .mchat-bar { display: flex; gap: 8px; margin-top: 12px; }
+    .mchat-bar textarea { height: 46px; resize: vertical; min-height: 42px; }
+    .mrow { max-width: 86%; }
+    .mrow.user { align-self: flex-end; } .mrow.assistant { align-self: flex-start; }
+    .mbub { padding: 9px 13px; border-radius: 12px; font-size: 13.5px; line-height: 1.6; white-space: pre-wrap; word-break: break-word; }
+    .mrow.user .mbub { background: color-mix(in srgb, var(--accent) 24%, var(--panel-3)); }
+    .mrow.assistant .mbub { background: var(--panel-3); }
+    .mmeta { font-size: 10.5px; color: var(--txt-3); margin: 3px 2px 0; }
+    .model-cell { font-family: var(--mono); font-size: 11.5px; color: var(--txt-2); }
+    .dot-live { width:8px;height:8px;border-radius:50%;display:inline-block;background:var(--txt-3) }
+    .dot-live.on{background:var(--ok)} .dot-live.bad{background:var(--bad)}
+  </style>
+</head>
+<body>
+  <div id="view"></div>
+  <script src="assets/app.js"></script>
+  <script src="assets/models.js"></script>
+  <script>
+    Hub.boot({ page: 'models' }).then(({ data, me, perms }) => {
+      const V = document.getElementById('view');
+      const canCfg = perms.manageAgents;     // 启停/设默认
+      const canChat = perms.useAgent;        // 试一试真实调用
+      let cfg = { config: {}, modelConfig: { enabled: {}, default: '' } };
+      const isEnabled = (id) => cfg.modelConfig.enabled[id] !== false;
+      const defModel = () => cfg.modelConfig.default || cfg.config.defaultModel || (window.CHAT_MODELS[0] || {}).id;
+
+      const groups = [...new Set(window.MODELS.map(m => m.group))];
+      const esc = Hub.esc;
+
+      function render() {
+        const c = cfg.config || {};
+        const chatCount = window.CHAT_MODELS.filter(m => isEnabled(m.id)).length;
+        V.innerHTML = `
+        <div class="wrap">
+          <div class="page-intro">
+            <b>模型接入</b> —— 统一配置 Agent 与场景所调用的大模型。接入 <span class="mono">${esc(c.baseURL || '未配置')}</span>（OpenAI 兼容），
+            密钥仅存服务端、界面只显示掩码。文本模型可绑定到 Agent、并在下方「试一试」发起<b>真实对话</b>。
+          </div>
+
+          <div class="grid g4">
+            <div class="kpi"><div class="k">接入状态</div><div class="v" id="mk-status" style="font-size:20px"><span class="dot-live"></span> 检测中…</div><div class="d">${esc(c.baseURL || '')}</div></div>
+            <div class="kpi"><div class="k">API Key</div><div class="v mono" style="font-size:20px">${esc(c.apiKeyMasked || '—')}</div><div class="d">仅服务端持有</div></div>
+            <div class="kpi"><div class="k">默认聊天模型</div><div class="v" style="font-size:18px" id="mk-def">${esc(defModel() || '—')}</div><div class="d">Agent 未指定时使用</div></div>
+            <div class="kpi"><div class="k">可用文本模型</div><div class="v">${chatCount}<small>/${window.CHAT_MODELS.length}</small></div><div class="d">共 ${window.MODELS.length} 款货架</div></div>
+          </div>
+
+          <div class="grid g2 mt16" style="grid-template-columns: 1.15fr .85fr; align-items:start">
+            <div class="panel">
+              <div class="panel-t"><h3>🧠 模型货架</h3><span class="sub">SenseAudio 开放平台</span><span class="sp"></span>
+                <button class="btn btn-sm" id="mbtn-health">🔌 检测连通</button></div>
+              <div id="mshelf"></div>
+              ${!canCfg ? '<div class="ro-note mt8">· 当前角色为只读，不能启停或设默认模型</div>' : ''}
+            </div>
+
+            <div class="panel">
+              <div class="panel-t"><h3>💬 试一试 · 真实对话</h3><span class="sub">直连模型，非脚本</span></div>
+              ${canChat ? `
+                <div class="field" style="margin-bottom:10px"><label>模型</label>
+                  <select id="mc-model">${window.CHAT_MODELS.filter(m=>isEnabled(m.id)).map(m=>`<option value="${m.id}">${esc(m.name)} · ${esc(m.id)}</option>`).join('')}</select></div>
+                <div class="mchat">
+                  <div class="mchat-log" id="mc-log"><div class="empty">选个模型，问点什么试试真实应答 👇</div></div>
+                  <div class="mchat-bar">
+                    <textarea id="mc-in" placeholder="输入消息，Enter 发送 / Shift+Enter 换行…"></textarea>
+                    <button class="btn btn-primary" id="mc-send" style="align-self:stretch">发送</button>
+                  </div>
+                  <div class="flex ac gap8 mt8" style="font-size:12px;color:var(--txt-3)">
+                    <label class="flex ac gap8" style="cursor:pointer"><input type="checkbox" id="mc-trace" style="width:auto"> 写入语音留痕</label>
+                    <select id="mc-scene" style="width:auto;padding:4px 8px;font-size:12px">${Hub.visibleScenarios().map(s=>`<option value="${s.id}">${esc(s.name)}</option>`).join('')}</select>
+                    <span class="sp" style="flex:1"></span><button class="btn btn-sm" id="mc-clear">清空</button>
+                  </div>
+                </div>` : '<div class="empty">当前角色（观察员）不可发起真实调用，仅可查看模型货架与接入状态。</div>'}
+            </div>
+          </div>
+
+          <div class="hint mt24">口径：模型价格为示意；真实计费以 SenseAudio 开放平台后台为准。密钥经服务端转发，前端与留痕中不含明文密钥。</div>
+        </div>`;
+
+        renderShelf();
+        wire();
+        health();
+      }
+
+      function renderShelf() {
+        const box = document.getElementById('mshelf');
+        box.innerHTML = groups.map(g => {
+          const rows = window.MODELS.filter(m => m.group === g);
+          return `<div class="section-t" style="margin:14px 0 8px">${esc(g)}</div>
+          <div class="tbl-wrap"><table class="tbl"><tbody>
+          ${rows.map(m => {
+            const chat = m.type === 'chat';
+            const en = isEnabled(m.id);
+            const isDef = chat && m.id === defModel();
+            const price = chat ? `<span class="tr">入 ${m.in} / 出 ${m.out} 元/M · ${m.ctx}</span>` : `<span class="tr">${esc(m.price || '')}</span>`;
+            return `<tr>
+              <td style="width:34%"><div class="b">${esc(m.name)} ${isDef ? '<span class="pill acc" style="font-size:10px">默认</span>' : ''}</div><div class="model-cell">${esc(m.id)}</div></td>
+              <td>${chat ? '<span class="pill info">对话</span>' : `<span class="pill">${esc(m.group)}</span>`}</td>
+              <td>${esc(m.note || '')}<div class="small tr">${price}</div></td>
+              <td class="right" style="width:180px">
+                ${chat ? (canCfg ? `
+                  <button class="btn btn-sm" data-en="${m.id}">${en ? '停用' : '启用'}</button>
+                  ${en && !isDef ? `<button class="btn btn-sm" data-def="${m.id}">设默认</button>` : ''}` :
+                  `<span class="pill ${en ? 'ok' : ''}">${en ? '启用' : '停用'}</span>`) :
+                  '<span class="tr small">独立端点</span>'}
+              </td></tr>`;
+          }).join('')}
+          </tbody></table></div>`;
+        }).join('');
+        // 启停 / 设默认
+        if (canCfg) {
+          box.querySelectorAll('[data-en]').forEach(b => b.onclick = async () => {
+            const id = b.getAttribute('data-en');
+            await Hub.change('model.config', { config: { enabled: { [id]: !isEnabled(id) } } });
+            await reload();
+          });
+          box.querySelectorAll('[data-def]').forEach(b => b.onclick = async () => {
+            const id = b.getAttribute('data-def');
+            await Hub.change('model.config', { config: { default: id } });
+            Hub.toast('已设为默认聊天模型：' + id);
+            await reload();
+          });
+        }
+      }
+
+      async function reload() { cfg = await Hub.models(); render(); }
+
+      async function health() {
+        const el = document.getElementById('mk-status'); if (!el) return;
+        try {
+          const h = await Hub.llmHealth();
+          el.innerHTML = h.ok
+            ? `<span class="dot-live on"></span> 已连通 <span class="small tr">${h.ms}ms</span>`
+            : `<span class="dot-live bad"></span> ${esc(h.msg || '不可用')}`;
+        } catch (e) { el.innerHTML = `<span class="dot-live bad"></span> ${esc(e.message || '检测失败')}`; }
+      }
+
+      function wire() {
+        const hb = document.getElementById('mbtn-health');
+        if (hb) hb.onclick = () => { document.getElementById('mk-status').innerHTML = '<span class="dot-live"></span> 检测中…'; health(); };
+        if (!canChat) return;
+        const log = document.getElementById('mc-log'), input = document.getElementById('mc-in'),
+          send = document.getElementById('mc-send'), clear = document.getElementById('mc-clear');
+        const history = [];
+        function draw() {
+          if (!history.length) { log.innerHTML = '<div class="empty">选个模型，问点什么试试真实应答 👇</div>'; return; }
+          log.innerHTML = history.map(m => `<div class="mrow ${m.role}"><div class="mbub">${esc(m.content)}</div>${m.meta ? `<div class="mmeta">${esc(m.meta)}</div>` : ''}</div>`).join('');
+          log.scrollTop = log.scrollHeight;
+        }
+        async function doSend() {
+          const text = input.value.trim(); if (!text) return;
+          const model = document.getElementById('mc-model').value;
+          history.push({ role: 'user', content: text }); input.value = '';
+          history.push({ role: 'assistant', content: '思考中…', pending: true }); draw();
+          send.disabled = true;
+          try {
+            const body = { model, messages: history.filter(m => !m.pending).map(m => ({ role: m.role, content: m.content })) };
+            if (document.getElementById('mc-trace').checked) { body.trace = true; body.scenario = document.getElementById('mc-scene').value; body.intent = '模型接入·试一试'; }
+            const r = await Hub.llmChat(body);
+            history.pop();
+            history.push({ role: 'assistant', content: r.content || '(空)', meta: `${r.model || model} · ${r.ms}ms${r.usage ? ' · ' + (r.usage.total_tokens || '?') + ' tok' : ''}${body.trace ? ' · 已留痕' : ''}` });
+          } catch (e) {
+            history.pop();
+            history.push({ role: 'assistant', content: '⚠️ ' + (e.message || '调用失败'), meta: '错误' });
+          } finally { send.disabled = false; draw(); }
+        }
+        send.onclick = doSend;
+        input.addEventListener('keydown', e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); doSend(); } });
+        clear.onclick = () => { history.length = 0; draw(); };
+        // 默认选中默认模型
+        const sel = document.getElementById('mc-model'); const d = defModel();
+        if (sel && [...sel.options].some(o => o.value === d)) sel.value = d;
+      }
+
+      reload();
+    });
+  </script>
+</body>
+</html>

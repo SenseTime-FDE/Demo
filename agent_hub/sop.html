@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SOP 与推送 · 灵犀统一 Agent 运营中台</title>
+  <link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+  <div id="view"></div>
+  <script src="assets/app.js"></script>
+  <script>
+    Hub.boot({ page: 'sop' }).then(({ data, me, perms }) => {
+      const V = document.getElementById('view');
+      const esc = Hub.esc;
+
+      // ---- 本页状态 ----
+      const state = { filter: 'all' };
+      const canEditAny = perms.editConfig;
+      const readOnly = !perms.pushSop && !perms.editConfig;
+
+      // 可见场景（受 RBAC / viewAll 控制）
+      const scenes = Hub.visibleScenarios();
+      const sceneIds = scenes.map(s => s.id);
+
+      // 该 SOP 是否可推送 / 可编辑（权限 + 场景在授权内）
+      const canPush = (s) => perms.pushSop && Hub.canScene(s.scenario);
+      const canEdit = (s) => perms.editConfig && Hub.canScene(s.scenario);
+      // 可新建/编辑的场景（用于表单下拉）
+      const editableScenes = () => scenes.filter(s => Hub.canScene(s.id));
+
+      // 优先级药丸
+      const prioPill = (p) => {
+        const cls = p === 'P0' ? 'bad' : p === 'P1' ? 'warn' : 'info';
+        return `<span class="pill ${cls}">${esc(p)}</span>`;
+      };
+      const fmtTs = (ts) => String(ts || '').replace('T', ' ').slice(0, 16);
+      const sceneName = (id) => (Hub.scenario(id) || {}).name || id;
+
+      // 当前筛选下可见的 SOP
+      const visibleSops = () => (Hub.data.sops || [])
+        .filter(s => sceneIds.includes(s.scenario))
+        .filter(s => state.filter === 'all' || s.scenario === state.filter);
+
+      // ---- KPI ----
+      function buildKpis() {
+        const all = (Hub.data.sops || []).filter(s => sceneIds.includes(s.scenario));
+        const p0 = all.filter(s => s.priority === 'P0').length;
+        const ack = all.filter(s => s.mustAck).length;
+        const pushes = all.reduce((a, s) => a + (s.pushCount || 0), 0);
+        const kpis = [
+          { k: 'SOP 总数', v: all.length, u: '条', d: '覆盖 ' + sceneIds.length + ' 个场景' },
+          { k: 'P0 最高优先级', v: p0, u: '条', d: '突发 / 应急处置' },
+          { k: '强制签收', v: ack, u: '条', d: 'mustAck · 需回执' },
+          { k: '累计推送', v: pushes, u: '次', d: '按事件 / 角色下发' },
+        ];
+        return kpis.map(k => Hub.kpi(k)).join('');
+      }
+
+      // ---- 场景筛选条 ----
+      function buildFilter() {
+        const btn = (id, label) =>
+          `<button class="btn btn-sm filter-btn${state.filter === id ? ' btn-primary' : ''}" data-scene="${esc(id)}">${esc(label)}</button>`;
+        return btn('all', '全部场景') + scenes.map(s => btn(s.id, s.icon + ' ' + s.name)).join('');
+      }
+
+      // ---- SOP 卡片列表 ----
+      function buildList() {
+        const list = visibleSops();
+        if (!list.length) return `<div class="empty">该场景暂无 SOP</div>`;
+        return `<div class="grid g2">` + list.map(s => {
+          const ack = s.mustAck
+            ? `<span class="pill warn">强制签收</span>`
+            : `<span class="pill">选读</span>`;
+          const steps = (s.steps || []).map(st => `<li>${esc(st)}</li>`).join('');
+          const actions = [];
+          if (canPush(s)) actions.push(`<button class="btn btn-sm btn-primary" data-act="push" data-id="${esc(s.id)}">推送</button>`);
+          if (canEdit(s)) actions.push(`<button class="btn btn-sm" data-act="edit" data-id="${esc(s.id)}">编辑</button>`);
+          if (canEdit(s)) actions.push(`<button class="btn btn-sm btn-ghost" data-act="del" data-id="${esc(s.id)}">删除</button>`);
+          return `
+            <div class="card">
+              <div class="flex ac jb wrapf gap8">
+                <div class="b" style="font-size:15px">${esc(s.title)}</div>
+                <div class="flex ac gap8 wrapf">
+                  <span class="pill acc">${esc(sceneName(s.scenario))}</span>
+                  ${prioPill(s.priority)}
+                  ${Hub.statusPill(s.status || 'on')}
+                </div>
+              </div>
+              <div class="flex ac gap12 wrapf mt8 small tr">
+                <span>触发：<span class="t2">${esc(s.trigger)}</span></span>
+                ${ack}
+                <span>累计推送 <b class="mono tacc">${s.pushCount || 0}</b> 次</span>
+                <span>${(s.steps || []).length} 步</span>
+              </div>
+              <div class="sop-steps" style="display:none">
+                <div class="section-t" style="margin:16px 0 10px">处置步骤</div>
+                <ol class="steps">${steps}</ol>
+              </div>
+              <div class="btn-row mt12">
+                <button class="btn btn-sm btn-ghost" data-act="toggle">展开步骤 ›</button>
+                <span class="sp" style="flex:1"></span>
+                ${actions.join('')}
+              </div>
+            </div>`;
+        }).join('') + `</div>`;
+      }
+
+      // ---- 推送记录 ----
+      function buildLog() {
+        const rows = (Hub.data.pushLog || []).filter(p => sceneIds.includes(p.scenario));
+        if (!rows.length) return `<div class="empty">暂无推送记录</div>`;
+        return `<div class="tbl-wrap"><table class="tbl">
+          <thead><tr><th>时间</th><th>SOP</th><th>场景</th><th>推送人</th><th>推送对象</th></tr></thead>
+          <tbody>${rows.slice(0, 40).map(p => `
+            <tr>
+              <td class="num tr nowrap">${esc(fmtTs(p.ts))}</td>
+              <td>${esc(p.title)}</td>
+              <td><span class="pill acc">${esc(sceneName(p.scenario))}</span></td>
+              <td class="tr">${esc(p.by)}</td>
+              <td>${esc(p.to)}</td>
+            </tr>`).join('')}</tbody>
+        </table></div>`;
+      }
+
+      // ---- 页面骨架 ----
+      V.innerHTML = `
+        <div class="wrap">
+          <div class="page-intro">
+            <b>SOP 与推送中心</b> —— 集中维护四大场景的标准作业规程（触发条件 · 优先级 · 是否强制签收），
+            并按事件或角色一键下发到坐席、值班组或门店。Agent 命中 SOP 后会随语音留痕存证。
+            ${readOnly ? '' : '<span class="tr">推送 / 编辑权限由服务器按角色强制校验。</span>'}
+          </div>
+
+          <div class="grid g4" id="sop-kpis">${buildKpis()}</div>
+
+          ${readOnly ? `<div class="ro-note mt16">· 当前角色为只读，仅可查看 SOP 与推送记录，推送 / 编辑 / 新建已隐藏。</div>` : ''}
+
+          <div class="flex ac jb wrapf gap8" style="margin:24px 0 14px">
+            <div class="flex ac gap8 wrapf" id="sop-filter">${buildFilter()}</div>
+            ${canEditAny ? `<button class="btn btn-primary btn-sm" id="new-sop">＋ 新建 SOP</button>` : ''}
+          </div>
+
+          <div id="sop-list">${buildList()}</div>
+
+          <div class="section-t">最新推送记录</div>
+          <div class="panel">
+            <div class="panel-t"><h3>📋 SOP 推送台账</h3><span class="sub">时间 · SOP · 场景 · 推送人 · 对象</span></div>
+            <div id="push-log">${buildLog()}</div>
+          </div>
+        </div>`;
+
+      // ---- 重绘辅助 ----
+      const paintKpis = () => { document.getElementById('sop-kpis').innerHTML = buildKpis(); };
+      const paintList = () => { document.getElementById('sop-list').innerHTML = buildList(); };
+      const paintLog = () => { document.getElementById('push-log').innerHTML = buildLog(); };
+      const paintFilter = () => { document.getElementById('sop-filter').innerHTML = buildFilter(); };
+
+      // ---- 场景筛选交互 ----
+      document.getElementById('sop-filter').addEventListener('click', (e) => {
+        const b = e.target.closest('.filter-btn'); if (!b) return;
+        state.filter = b.getAttribute('data-scene');
+        paintFilter(); paintList();
+      });
+
+      // ---- 列表内交互（事件委托）----
+      document.getElementById('sop-list').addEventListener('click', (e) => {
+        const btn = e.target.closest('button[data-act]'); if (!btn) return;
+        const act = btn.getAttribute('data-act');
+        if (act === 'toggle') {
+          const card = btn.closest('.card');
+          const box = card.querySelector('.sop-steps');
+          const open = box.style.display !== 'none';
+          box.style.display = open ? 'none' : 'block';
+          btn.textContent = open ? '展开步骤 ›' : '收起步骤 ⌄';
+          return;
+        }
+        const id = btn.getAttribute('data-id');
+        const s = (Hub.data.sops || []).find(x => x.id === id);
+        if (!s) return;
+        if (act === 'push') openPush(s);
+        else if (act === 'edit') openForm(s);
+        else if (act === 'del') delSop(s);
+      });
+
+      // ---- 推送弹窗 ----
+      function openPush(s) {
+        const presets = ['全体坐席', '值班组', '场景管理员', '指定门店', '责任护理员'];
+        const body = `
+          <p class="t2 small" style="margin-bottom:14px">将向指定对象推送
+            <b>${esc(s.title)}</b>（${esc(sceneName(s.scenario))} · ${esc(s.priority)}${s.mustAck ? ' · 需签收' : ''}）。</p>
+          <div class="field">
+            <label>推送对象</label>
+            <input id="push-to" value="全体坐席" placeholder="输入推送对象">
+          </div>
+          <div class="chips" style="margin-bottom:18px">
+            ${presets.map(p => `<span class="chip-tag push-preset" style="cursor:pointer" data-v="${esc(p)}">${esc(p)}</span>`).join('')}
+          </div>
+          <div class="btn-row" style="justify-content:flex-end">
+            <button class="btn" id="pk-no">取消</button>
+            <button class="btn btn-primary" id="pk-yes">确认推送</button>
+          </div>`;
+        Hub.modal('推送 SOP', body, (b, close) => {
+          const inp = b.querySelector('#push-to');
+          b.querySelectorAll('.push-preset').forEach(c =>
+            c.addEventListener('click', () => { inp.value = c.getAttribute('data-v'); }));
+          b.querySelector('#pk-no').onclick = close;
+          b.querySelector('#pk-yes').onclick = async () => {
+            const to = inp.value.trim() || '全体坐席';
+            try {
+              await Hub.change('sop.push', { id: s.id, scenario: s.scenario, to });
+              close();
+              await Hub.refresh();
+              paintKpis(); paintList(); paintLog();
+              Hub.toast('已推送《' + s.title + '》→ ' + to);
+            } catch (err) { /* Hub.change 已 toast */ }
+          };
+        });
+      }
+
+      // ---- 新建 / 编辑 表单 ----
+      function openForm(sop) {
+        const editing = !!sop;
+        const opts = editableScenes();
+        if (!opts.length) { Hub.toast('当前无可编辑的场景', true); return; }
+        const cur = sop || { scenario: opts[0].id, priority: 'P2', mustAck: false, status: 'on', steps: [] };
+        const sceneSel = opts.map(s =>
+          `<option value="${esc(s.id)}"${cur.scenario === s.id ? ' selected' : ''}>${esc(s.icon + ' ' + s.name)}</option>`).join('');
+        const prioSel = ['P0', 'P1', 'P2'].map(p =>
+          `<option value="${p}"${cur.priority === p ? ' selected' : ''}>${p}</option>`).join('');
+        const body = `
+          <div class="field"><label>SOP 标题</label><input id="f-title" value="${esc(cur.title || '')}" placeholder="如：突发舆情处置 SOP"></div>
+          <div class="grid g2">
+            <div class="field"><label>所属场景</label><select id="f-scene"${editing ? ' disabled' : ''}>${sceneSel}</select></div>
+            <div class="field"><label>优先级</label><select id="f-prio">${prioSel}</select></div>
+          </div>
+          <div class="grid g2">
+            <div class="field"><label>触发条件</label><input id="f-trigger" value="${esc(cur.trigger || '')}" placeholder="如：舆情热度≥红色"></div>
+            <div class="field"><label>是否强制签收</label>
+              <select id="f-ack"><option value="1"${cur.mustAck ? ' selected' : ''}>是（需回执）</option><option value="0"${!cur.mustAck ? ' selected' : ''}>否</option></select>
+            </div>
+          </div>
+          <div class="field"><label>处置步骤（每行一步）</label>
+            <textarea id="f-steps" rows="6" placeholder="每行填写一步">${esc((cur.steps || []).join('\n'))}</textarea>
+          </div>
+          <div class="btn-row" style="justify-content:flex-end">
+            <button class="btn" id="f-no">取消</button>
+            <button class="btn btn-primary" id="f-yes">${editing ? '保存' : '创建'}</button>
+          </div>`;
+        Hub.modal(editing ? '编辑 SOP' : '新建 SOP', body, (b, close) => {
+          b.querySelector('#f-no').onclick = close;
+          b.querySelector('#f-yes').onclick = async () => {
+            const title = b.querySelector('#f-title').value.trim();
+            const scenario = editing ? cur.scenario : b.querySelector('#f-scene').value;
+            const trigger = b.querySelector('#f-trigger').value.trim();
+            const priority = b.querySelector('#f-prio').value;
+            const mustAck = b.querySelector('#f-ack').value === '1';
+            const steps = b.querySelector('#f-steps').value.split('\n').map(x => x.trim()).filter(Boolean);
+            if (!title) { Hub.toast('请填写 SOP 标题', true); return; }
+            if (!trigger) { Hub.toast('请填写触发条件', true); return; }
+            const sopObj = editing
+              ? { id: cur.id, scenario, title, trigger, priority, mustAck, steps, status: cur.status || 'on' }
+              : { id: 'sop_' + Date.now(), scenario, title, trigger, priority, mustAck, steps, status: 'on' };
+            try {
+              await Hub.change('sop.upsert', { scenario, sop: sopObj });
+              close();
+              await Hub.refresh();
+              paintKpis(); paintList();
+              Hub.toast(editing ? '已保存《' + title + '》' : '已创建《' + title + '》');
+            } catch (err) { /* Hub.change 已 toast */ }
+          };
+        });
+      }
+
+      // ---- 删除 ----
+      function delSop(s) {
+        Hub.confirm('确认删除 SOP《' + s.title + '》？此操作不可撤销。', async () => {
+          try {
+            await Hub.change('sop.delete', { id: s.id });
+            await Hub.refresh();
+            paintKpis(); paintList();
+            Hub.toast('已删除《' + s.title + '》');
+          } catch (err) { /* Hub.change 已 toast */ }
+        });
+      }
+
+      // ---- 新建按钮 ----
+      const nb = document.getElementById('new-sop');
+      if (nb) nb.addEventListener('click', () => openForm(null));
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>智慧养老数据看板 · 灵犀统一 Agent 运营中台</title>
+  <link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+  <div id="view"></div>
+  <script src="assets/app.js"></script>
+  <script>
+    Hub.boot({ page: 'eldercare_board', scenario: 'eldercare' }).then(({ data, me, perms }) => {
+      const V = document.getElementById('view');
+      const E = Hub.data.eldercare;
+      const series = E.board.series;
+      const days = ['周一', '周二', '周三', '周四', '周五', '周六', '周日'];
+
+      // 预警分级统计
+      const byLevel = {};
+      E.alerts.forEach(a => { byLevel[a.level] = (byLevel[a.level] || 0) + 1; });
+      const order = ['红', '橙', '黄', '蓝'];
+      const levelParts = order.filter(k => byLevel[k]).map(k => ({ n: k + '级预警', v: byLevel[k] }));
+
+      // chatBI 预置问答
+      const doneAvg = Math.round(series.done.reduce((s, v) => s + v, 0) / series.done.length);
+      const topCare = series.care.slice().sort((a, b) => b.v - a.v)[0];
+      const BI = [
+        { q: '今天有几起健康预警？分别是什么？',
+          a: `今日共 <b>${E.alerts.length}</b> 起健康预警：` + E.alerts.map(a => `${a.bed} 床「${a.type}·${a.detail}」（${a.level}级，${a.status}）`).join('；') + '。其中红色预警需优先闭环。' },
+        { q: '本周照护完成率趋势如何？',
+          a: `本周照护完成率在 <b>${Math.min(...series.done)}%–${Math.max(...series.done)}%</b> 区间波动，周均约 <b>${doneAvg}%</b>，周末（周六）达峰值 ${Math.max(...series.done)}%，整体稳中有升。` },
+        { q: '哪类照护占比最高？',
+          a: `照护结构中 <b>${topCare.n}</b> 占比最高（${topCare.v}%），其次为医疗护理与康复。建议按结构配置人力与耗材。` },
+        { q: '2-15 床李国强今天的照护情况？',
+          a: `2-15 床李国强（失能 · 压疮高风险）：上午<b>压疮护理进行中</b>；07:20 体征异常（血压 162/98，橙级）已通知医护。建议每 1.5 小时翻身一次并记录皮肤情况。` },
+      ];
+
+      const touch = [
+        { ic: '🖥', t: '桌面 BI 看板', d: '院长/主管在中台看经营与合规全景，支持 chatBI 问数下钻' },
+        { ic: '📱', t: '一线小程序', d: '护理员端今日任务与语音上报，数据实时回流看板' },
+        { ic: '🔔', t: 'Agent 早晚报推送', d: '机构管理 Agent 按班次推送预警摘要与照护完成早晚报' },
+      ];
+
+      V.innerHTML = `
+        <div class="wrap">
+          ${Hub.sceneSubnav('eldercare', '_board')}
+          <div class="page-intro">
+            <b>智慧养老 · 数据看板</b> —— 一线小程序、企微 Agent 与桌面 BI
+            共用同一套后台数据，把照护完成、健康预警、家属满意汇聚成经营与合规全景，可用
+            <b class="tacc">chatBI</b> 直接问数。 <span class="tr">底座：${Hub.esc(data.platform.base)}</span>
+          </div>
+
+          <div class="grid g4">${E.board.kpis.map(k => Hub.kpi(k)).join('')}</div>
+
+          <div class="grid g2 mt16">
+            <div class="panel">
+              <div class="panel-t"><h3>📈 照护完成率趋势</h3><span class="sub">近 7 日 · %</span><span class="sp"></span><span class="pill ok">周均 ${doneAvg}%</span></div>
+              ${Hub.cols(series.done)}
+              <div class="flex" style="justify-content:space-between;margin-top:8px">${days.map(d => `<span class="tr small" style="flex:1;text-align:center">${d}</span>`).join('')}</div>
+            </div>
+            <div class="panel">
+              <div class="panel-t"><h3>🍩 照护结构分布</h3><span class="sub">占比 %</span></div>
+              ${Hub.donut(series.care, '照护')}
+            </div>
+          </div>
+
+          <div class="grid g2 mt16">
+            <div class="panel">
+              <div class="panel-t"><h3>🚨 健康预警 · 分级处置</h3><span class="sub">待处置 ${E.alerts.filter(a => a.status !== '已闭环').length} 起</span></div>
+              <div class="flex gap12 wrapf" style="align-items:center">
+                <div>${Hub.donut(levelParts, E.alerts.length)}</div>
+                <div style="flex:1;min-width:200px" class="tbl-wrap"><table class="tbl">
+                  <thead><tr><th>床位</th><th>类型</th><th>分级</th><th>状态</th></tr></thead>
+                  <tbody>${E.alerts.map(a => `<tr>
+                    <td class="num">${Hub.esc(a.bed)}</td><td>${Hub.esc(a.type)}</td>
+                    <td>${Hub.levelTag(a.level)}</td><td>${Hub.statusPill(a.status)}</td></tr>`).join('')}</tbody>
+                </table></div>
+              </div>
+            </div>
+            <div class="panel">
+              <div class="panel-t"><h3>💬 chatBI 问数</h3><span class="sub">点击问题查看解读</span></div>
+              <div class="btn-row" id="bi-qs">${BI.map((b, i) => `<button class="btn btn-sm" data-q="${i}">${Hub.esc(b.q)}</button>`).join('')}</div>
+              <div id="bi-ans" class="card mt16" style="background:var(--bg-2)">
+                <div class="tr small">选择上方任一问题，chatBI 将基于同一套后台数据实时作答。</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="section-t">同一套数 · 三种触达</div>
+          <div class="grid g3">
+            ${touch.map(t => `<div class="card"><div style="font-size:24px">${t.ic}</div>
+              <h3 style="font-size:15px;margin:8px 0 4px">${t.t}</h3>
+              <div class="tr small">${t.d}</div></div>`).join('')}
+          </div>
+
+          <div class="card mt16" style="border-color:color-mix(in srgb,var(--warn) 40%,transparent)">
+            <div class="flex ac gap8"><span style="font-size:18px">🛡</span>
+              <b>合规红线</b>
+              <span class="t2 small">不拍摄病患影像 · 家属授权后采集 · 遵循最小必要采集原则；健康数据仅在授权范围内用于照护与预警。</span></div>
+          </div>
+
+          <div class="hint mt16">口径：全部数字为目标态示意，数据由真后端 SQLite 持久化，权限由服务器强制校验。</div>
+        </div>`;
+
+      // chatBI 交互
+      const ansBox = document.getElementById('bi-ans');
+      document.querySelectorAll('#bi-qs [data-q]').forEach(b => b.addEventListener('click', () => {
+        const item = BI[+b.getAttribute('data-q')];
+        ansBox.innerHTML = `<div class="tr small">💬 ${Hub.esc(item.q)}</div><div class="mt8" style="line-height:1.6">${item.a}</div>`;
+      }));
+    });
+  </script>
+</body>
+</html>

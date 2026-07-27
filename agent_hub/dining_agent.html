@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>数字餐饮 · Agent 原型 · 灵犀统一 Agent 运营中台</title>
+  <link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+  <div id="view"></div>
+  <script src="assets/app.js"></script>
+  <script src="assets/chat.js"></script>
+  <script src="assets/voice.js"></script>
+  <script>
+    Hub.boot({ page: 'dining_agent', scenario: 'dining' }).then(({ data, me, perms }) => {
+      const V = document.getElementById('view');
+      const canUse = perms.useAgent && Hub.canScene('dining');
+      const sopOpen = Hub.sopsOf('dining').find(s => s.id === 'sop_d_open');
+      const sopFood = Hub.sopsOf('dining').find(s => s.id === 'sop_d_food');
+
+      // ---- 企微「命中 SOP」卡片 ----
+      function sopCard(sop, to) {
+        if (!sop) return '';
+        return `<div class="c-card">
+          <div class="ch">📋 命中 SOP · ${Hub.esc(sop.title)}</div>
+          <div class="cb">
+            <div class="r"><span class="l">触发</span><span>${Hub.esc(sop.trigger)}</span></div>
+            <div class="r"><span class="l">优先级 / 签收</span><span>${Hub.esc(sop.priority)} · ${sop.mustAck ? '需签收' : '免签'}</span></div>
+            ${sop.steps.map((st, i) => `<div class="r"><span class="l">步骤 ${i + 1}</span><span>${Hub.esc(st)}</span></div>`).join('')}
+          </div>
+          <div class="cf">已推送至 ${Hub.esc(to)} · 累计推送 ${Hub.esc(sop.pushCount)} 次</div>
+        </div>`;
+      }
+      function bizCard(title, rows, foot) {
+        return `<div class="c-card">
+          <div class="ch">${Hub.esc(title)}</div>
+          <div class="cb">${rows.map(r => `<div class="r"><span class="l">${Hub.esc(r[0])}</span><span>${Hub.esc(r[1])}</span></div>`).join('')}</div>
+          ${foot ? `<div class="cf">${Hub.esc(foot)}</div>` : ''}
+        </div>`;
+      }
+
+      // ---- 5 个语音场景 ----
+      const scenarios = [
+        {
+          id: 'open', title: '营业前检查', chip: '营业前检查',
+          agentId: 'ag_d_super', agentName: '门店督导 Agent', intent: '营业前检查',
+          sopId: 'sop_d_open', sopTitle: '营业前检查 SOP', duration: 78,
+          intro: '门店督导 Agent · 每日 07:30 自动发起',
+          steps: [
+            { from: 'agent', text: '早，科技园店。今天由我陪你做营业前检查，共 5 项，我逐条核对，你口头确认即可。' },
+            { from: 'user', voice: '好的，开始吧。', dur: 3 },
+            { from: 'agent', text: '已触发《营业前检查 SOP》，检查清单推送给你：' },
+            { from: 'agent', html: sopCard(sopOpen, '科技园店店长') },
+            { from: 'user', voice: '设备和环境正常，食材效期、留样都核对过了，员工健康证齐全。', dur: 7 },
+            { from: 'agent', text: '收到，前三项通过。系统与收银我已远程核验就绪，第 4 项完成。最后一步：拍照打卡上报，请上传后厨与冷藏照片。' },
+            { from: 'user', voice: '照片传好了。', dur: 3 },
+            { from: 'agent', text: '5 项全部完成，今日营业前检查合格 ✅，已归档并同步区域督导。祝开门红。' },
+          ],
+        },
+        {
+          id: 'food', title: '食安突发处置', chip: '食安突发',
+          agentId: 'ag_d_super', agentName: '门店督导 Agent', intent: '食安突发处置',
+          sopId: 'sop_d_food', sopTitle: '食安突发处置 SOP', duration: 96,
+          intro: '巡检发现异常 · 自动升级处置',
+          steps: [
+            { from: 'agent', voice: '科技园店冷藏温度实测 12℃，超过 8℃ 阈值，触发食安预警，请立即确认。', dur: 6 },
+            { from: 'user', voice: '收到，涉及哪些菜品？', dur: 4 },
+            { from: 'agent', text: '涉及 3 个冷藏批次。命中《食安突发处置 SOP》，已推送给你和食安负责人，请按步骤处置：' },
+            { from: 'agent', html: sopCard(sopFood, '科技园店店长 + 食安负责人') },
+            { from: 'user', voice: '明白，先全部停售留样，我马上排查批次和追溯。', dur: 6 },
+            { from: 'agent', text: '已记录「停售留样」。整改要求：2 小时内复检温度并上报，我会跟踪闭环；超时将自动升级区域督导。需要我通知设备维保吗？' },
+            { from: 'user', voice: '通知维保来修冷柜。', dur: 3 },
+            { from: 'agent', text: '维保工单已派发，预计 40 分钟到店。本次事件已登记，处置进展我会实时同步。' },
+          ],
+        },
+        {
+          id: 'order', title: '语音点餐·忌口识别', chip: '语音点餐',
+          agentId: 'ag_d_order', agentName: '点餐推荐 Agent', intent: '语音点餐+忌口识别', duration: 64,
+          intro: '顾客桌边扫码 · 语音点餐',
+          steps: [
+            { from: 'user', voice: '来一份招牌牛肉套餐，我对花生过敏，牛肉别放辣。', dur: 6 },
+            { from: 'agent', text: '好的，为你点【招牌牛肉套餐 ¥38】。已识别忌口 → 全单避开花生及花生油，牛肉去辣。' },
+            { from: 'agent', html: bizCard('🧾 订单确认', [['菜品', '招牌牛肉套餐 ×1'], ['价格', '¥38'], ['忌口', '花生过敏（红标）· 去辣']], '忌口已透传后厨，红色高亮') },
+            { from: 'user', voice: '再加一份儿童营养餐。', dur: 3 },
+            { from: 'agent', text: '已加【儿童营养餐 ¥28】。该菜品临期食材已自动规避，为你使用当日新批次。合计 ¥66，是否下单？' },
+            { from: 'user', voice: '下单。', dur: 2 },
+            { from: 'agent', text: '已下单 ✅ 后厨已收到忌口标记（无花生）。预计 12 分钟出餐，进度会实时推送到你手机。' },
+          ],
+        },
+        {
+          id: 'supply', title: '订货·临期提醒', chip: '订货提醒',
+          agentId: 'ag_d_supply', agentName: '供应链 Agent', intent: '订货与临期提醒', duration: 58,
+          intro: '每日 21:00 · 供应链 Agent 复盘',
+          steps: [
+            { from: 'agent', voice: '老城区店，今日复盘：儿童营养餐主料明日临期，剩 6 份，建议今晚做限时折扣清库。', dur: 6 },
+            { from: 'user', voice: '好，顺便帮我订下周的货。', dur: 4 },
+            { from: 'agent', text: '根据近 7 日消耗与安全库存，为你生成订货建议：' },
+            { from: 'agent', html: bizCard('📦 下周订货建议', [['牛肉', '48 kg'], ['时蔬', '60 kg'], ['餐盒/包材', '1200 套']], '中央厨房 · 预计次日 09:00 到店') },
+            { from: 'user', voice: '按这个下单。', dur: 2 },
+            { from: 'agent', text: '订单已提交至中央厨房。临期折扣海报也已生成到店端小程序，我明早 08:00 再提醒你一次。' },
+          ],
+        },
+        {
+          id: 'complain', title: '客诉处置', chip: '客诉处置',
+          agentId: 'ag_d_super', agentName: '门店督导 Agent', intent: '线上客诉处置', duration: 72,
+          intro: '线上差评 · 自动派单到店',
+          steps: [
+            { from: 'agent', voice: '中心广场店收到一条 1 星差评：出餐慢、汤偏咸。情绪偏负，已为你起草致歉与补偿话术。', dur: 6 },
+            { from: 'user', voice: '补偿方案给我看看。', dur: 3 },
+            { from: 'agent', html: bizCard('🛎 客诉处置建议', [['致歉', '标准话术已生成'], ['补偿', '20 元无门槛券'], ['复盘', '出餐时长 / 汤品盐度']], '一键发送 · 结果自动回访') },
+            { from: 'user', voice: '同意，发给顾客。', dur: 2 },
+            { from: 'agent', text: '已发送致歉与补偿券，顾客已读。出餐时长异常已转后厨复盘，闭环后我会通知你并回收顾客二次评价。' },
+          ],
+        },
+      ];
+
+      // ---- 布局 ----
+      V.innerHTML = `
+        <div class="wrap">
+          ${Hub.sceneSubnav('dining', '_agent')}
+          <div class="page-intro">
+            <b>门店智能助手 · 企业微信语音 Agent</b> —— 一线员工用「按住说话」发起，Agent 完成营业前检查、食安处置、语音点餐、订货与客诉；
+            命中 SOP 自动推送要求并要求签收，全过程可一键写入语音留痕中心。
+            <span class="tr">底座 ${Hub.esc(data.platform.base)}</span>
+          </div>
+          <div class="grid g2">
+            <div id="phone-mount" class="phone-stage"></div>
+            <div>
+              <div class="panel">
+                <div class="panel-t"><h3>🎙 门店智能助手</h3><span class="sub">企微 · 语音优先</span></div>
+                <p class="t2 small">点上方任一场景气泡即可播放语音对话演示。ASR 实时转写、意图识别、命中知识库/SOP 后自动作答与推送，贴近一线真实使用。</p>
+                <div class="section-t" style="margin-top:18px">已绑定能力</div>
+                <div class="chips">
+                  ${Hub.kbsOf('dining').map(k => `<span class="chip-tag">📚 ${Hub.esc(k.name)}</span>`).join('')}
+                  ${Hub.sopsOf('dining').map(s => `<span class="chip-tag" style="color:var(--accent)">📋 ${Hub.esc(s.title)}</span>`).join('')}
+                </div>
+                <div class="section-t" style="margin-top:18px">当前会话</div>
+                <div id="cur-info" class="kv"><span class="k">场景</span><span id="cur-name">—</span></div>
+                <div class="btn-row mt16">
+                  ${canUse
+          ? '<button class="btn btn-primary" id="btn-trace">▶ 记录本次语音留痕</button>'
+          : '<span class="ro-note">当前角色为观察员/只读，不产生语音留痕。</span>'}
+                </div>
+                <div class="hint mt12">留痕将写入「语音留痕中心」真表，可在平台侧检索、回放与 SOP 命中分析。</div>
+              </div>
+            </div>
+          </div>
+        </div>`;
+
+      // ---- 挂载 HubChat ----
+      const mountRoot = document.getElementById('phone-mount');
+      let currentScene = scenarios[0];
+      const curNameEl = document.getElementById('cur-name');
+      const setCur = (sc) => { currentScene = sc; if (curNameEl) curNameEl.textContent = sc.title; };
+      HubChat.mount(mountRoot, {
+        live: true,
+        contact: { name: '门店智能助手', corp: '@连锁餐饮', sub: '商汤 AI 技术底座 · 企业微信' },
+        agent: { name: '门店智能助手', avatar: 'S' },
+        user: { name: me.name, avatar: '我' },
+        scenarios,
+        onScenarioEnd: (sc) => setCur(sc),
+      });
+      setCur(scenarios[0]);
+      const bar = mountRoot.querySelector('.scene-bar');
+      if (bar) bar.addEventListener('click', (e) => { const b = e.target.closest('.scene-btn'); if (!b) return; const s = scenarios.find(x => x.id === b.dataset.id); if (s) setCur(s); });
+
+      // ---- 记录语音留痕 ----
+      const btn = document.getElementById('btn-trace');
+      if (btn) btn.onclick = async () => {
+        const s = currentScene; if (!s) { Hub.toast('请先播放一个场景', true); return; }
+        const transcript = (s.steps || []).filter(x => !x.sys)
+          .map(x => ({ who: x.from || 'agent', text: x.voice || x.text || (x.html ? '［企微卡片］' : '') }))
+          .filter(x => x.text);
+        const payload = { scenario: 'dining', agentId: s.agentId || 'ag_d_super', agentName: s.agentName || '门店督导 Agent', intent: s.intent || s.title, duration: s.duration || 60, transcript };
+        if (s.sopId) { payload.sopId = s.sopId; payload.sopTitle = s.sopTitle; }
+        btn.disabled = true;
+        const r = await Hub.logTrace(payload);
+        btn.disabled = false;
+        if (r) Hub.toast('已写入语音留痕中心'); else Hub.toast('留痕失败，请重试', true);
+      };
+    });
+  </script>
+</body>
+</html>

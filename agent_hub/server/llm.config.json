@@ -1,0 +1,6 @@
+{
+  "baseURL": "https://api.senseaudio.cn/v1",
+  "apiKey": "sk-trFSHWzsVyN0tjP9iR6kOszihwqxtMky3bF9FeEd4257491aB60051Db0dAcC46a",
+  "defaultModel": "deepseek-v4-flash",
+  "timeoutMs": 60000
+}

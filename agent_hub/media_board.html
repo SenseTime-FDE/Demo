@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>数字传媒数据看板 · 灵犀统一 Agent 运营中台</title>
+  <link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+  <div id="view"></div>
+  <script src="assets/app.js"></script>
+  <script>
+    Hub.boot({ page: 'media_board', scenario: 'media' }).then(({ data, me, perms }) => {
+      const V = document.getElementById('view');
+      const esc = Hub.esc;
+      const M = Hub.data.media;
+      const B = M.board;
+
+      // ---- chatBI 预置问答（部分由真实数据派生）----
+      const parseReads = (s) => { const m = String(s || '').match(/([\d.]+)/); return m ? parseFloat(m[1]) : 0; };
+      const topContent = M.contents.filter((c) => c.status === '已发').sort((a, b) => parseReads(b.reads) - parseReads(a.reads))[0] || M.contents[0];
+      const topDist = [...B.series.dist].sort((a, b) => b.v - a.v)[0];
+      const negEvents = M.sentiment.events.filter((e) => e.polarity === '负' && !e.handled);
+      const redEvent = M.sentiment.events.find((e) => e.level === '红');
+      const kpiLine = B.kpis.map((k) => `${k.k} ${k.v}${k.u || ''}（${k.d}）`).join('，');
+
+      const biQA = [
+        { q: '本周哪个渠道涨粉最快', a: `按本周分发结构，「${esc(topDist.n)}」占比 ${topDist.v}% 居首；结合粉丝体量，抖音（128 万粉丝）短视频拉新最快，建议短视频选题持续加码。` },
+        { q: '负面舆情集中在哪', a: `当前 ${negEvents.length} 起待处置负面预警，集中在民生服务：${negEvents.map((e) => '「' + esc(e.topic) + '」').join('、') || '暂无'}。${redEvent ? '其中「' + esc(redEvent.topic) + '」为红色预警，建议优先按《突发舆情处置 SOP》处理。' : ''}` },
+        { q: '阅读量最高的稿件', a: `《${esc(topContent.title)}》全网阅读 ${esc(topContent.reads)}，已分发 ${(topContent.channels || []).length} 个渠道，位居本周第一。` },
+        { q: '本周整体表现如何', a: `本周经营概览：${esc(kpiLine)}。` },
+      ];
+
+      const days = ['一', '二', '三', '四', '五', '六', '日'];
+
+      const chRows = M.channels.map((c) => `
+        <tr>
+          <td class="b">${esc(c.name)}</td>
+          <td class="tr">${esc(c.type)}</td>
+          <td class="num">${esc(c.followers)}</td>
+          <td>${Hub.statusPill(c.status)}</td>
+        </tr>`).join('');
+
+      const reach = [
+        { ic: '🖥', t: '桌面 BI 大屏', d: '决策层实时看发稿 / 阅读 / 舆情 / 正面率，异动自动标红。' },
+        { ic: '📱', t: '采编小程序', d: '一线记者移动端随手问数、看热词、领选题，同一套口径。' },
+        { ic: '🎙', t: 'Agent 早晚报', d: '舆情监测 Agent 每日 8:00 / 20:00 推送简报到企业微信。' },
+      ];
+
+      V.innerHTML = `
+        <div class="wrap">
+          ${Hub.sceneSubnav('media', '_board')}
+          <div class="page-intro">
+            <b>数字传媒数据看板</b> —— 发稿、全网阅读、分发结构、舆情情绪与热词，一屏可视；
+            下方 chatBI 支持自然语言问数。<span class="tr">同一套数据同时供桌面 BI、采编小程序与 Agent 早晚报推送。</span>
+          </div>
+
+          <div class="section-t">核心指标</div>
+          ${Hub.kpis(B.kpis)}
+
+          <div class="grid g2 mt16">
+            <div class="panel">
+              <div class="panel-t"><h3>📈 近 7 日全网阅读趋势</h3><span class="sub">单位：万</span></div>
+              ${Hub.cols(B.series.reads)}
+              <div class="flex" style="justify-content:space-between;margin-top:6px">${days.map((d) => `<span class="tr small">周${d}</span>`).join('')}</div>
+            </div>
+            <div class="panel">
+              <div class="panel-t"><h3>📮 分发渠道结构</h3><span class="sub">本周分发占比 %</span></div>
+              ${Hub.bars(B.series.dist)}
+            </div>
+          </div>
+
+          <div class="grid g2 mt16">
+            <div class="panel">
+              <div class="panel-t"><h3>🧭 舆情情绪分布</h3><span class="sub">待处置 ${M.sentiment.summary.alerts} 起</span></div>
+              ${Hub.donut([{ n: '正', v: M.sentiment.summary.pos }, { n: '中', v: M.sentiment.summary.neu }, { n: '负', v: M.sentiment.summary.neg }], '情绪')}
+            </div>
+            <div class="panel">
+              <div class="panel-t"><h3>🔥 Top 热词</h3><span class="sub">全网热度</span></div>
+              ${Hub.bars(M.keywords.map((k) => ({ n: k.word, v: k.heat })))}
+            </div>
+          </div>
+
+          <div class="panel mt16">
+            <div class="panel-t"><h3>📡 渠道覆盖一览</h3><span class="sub">${M.channels.filter((c) => c.status === 'on').length}/${M.channels.length} 个渠道在线</span></div>
+            <div class="tbl-wrap"><table class="tbl">
+              <thead><tr><th>渠道</th><th>类型</th><th>粉丝</th><th>状态</th></tr></thead>
+              <tbody>${chRows}</tbody>
+            </table></div>
+          </div>
+
+          <div class="panel mt16">
+            <div class="panel-t"><h3>💬 chatBI · 问数</h3><span class="sub">点击问题，看数据口径统一的回答</span></div>
+            <div class="chips">${biQA.map((x, i) => `<button class="btn btn-sm" data-q="${i}">${esc(x.q)}</button>`).join('')}</div>
+            <div id="bi-thread" class="tr-thread mt16"><div class="empty">选择上方问题，chatBI 基于同一套后台数据作答。</div></div>
+          </div>
+
+          <div class="section-t">同一套数 · 三种触达</div>
+          <div class="grid g3">
+            ${reach.map((x) => `<div class="card"><div style="font-size:26px">${x.ic}</div><h3 style="font-size:15px;margin:8px 0 4px">${esc(x.t)}</h3><div class="tr small">${esc(x.d)}</div></div>`).join('')}
+          </div>
+
+          <div class="hint mt24">口径：全部数字为目标态示意，用于讲清场景与闭环，非真实经营数据。看板数据来自本场景后台业务数据（渠道 / 稿件 / 舆情 / 热词）。</div>
+        </div>`;
+
+      // chatBI 交互
+      const thread = V.querySelector('#bi-thread');
+      let asked = false;
+      V.addEventListener('click', (e) => {
+        const btn = e.target.closest('[data-q]');
+        if (!btn) return;
+        const x = biQA[+btn.dataset.q];
+        if (!asked) { thread.innerHTML = ''; asked = true; }
+        thread.insertAdjacentHTML('beforeend',
+          `<div class="tr-line user"><div class="tr-who">你</div><div class="tr-bub">${esc(x.q)}</div></div>
+           <div class="tr-line agent"><div class="tr-bub"><span class="tr-who" style="display:block;margin-bottom:2px">chatBI</span>${x.a}</div></div>`);
+        thread.lastElementChild.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+      });
+    });
+  </script>
+</body>
+</html>

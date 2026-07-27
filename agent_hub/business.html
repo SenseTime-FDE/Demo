@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>业务后台 · 商汤灵犀</title>
+  <link rel="stylesheet" href="assets/style.css">
+  <style>
+    /* 局部微调：业务后台（沿用深色科技风）。表单挂在 Hub.modal（#view 之外），故不加 #view 作用域。*/
+    .entry-cards .scene-card { padding: 16px 18px; }
+    .entry-cards .scene-card .ds { min-height: 40px; margin: 6px 0 10px; }
+    .entry-cards .scene-card .go { font-size: 12px; color: var(--txt-3); border-top: 1px solid var(--line); padding-top: 10px; }
+    .entry-cards .scene-card .go b { color: var(--txt); }
+    #view .col-act { white-space: nowrap; }
+    #view .assign-sel { width: auto; min-width: 128px; padding: 5px 10px; font-size: 12.5px; }
+    .vox-kv { display: flex; flex-direction: column; gap: 10px; }
+    .vox-kv .row { display: flex; gap: 10px; align-items: baseline; font-size: 13px; }
+    .vox-kv .row .l { color: var(--txt-3); min-width: 78px; flex: none; }
+    .vox-kv .row .v { color: var(--txt); word-break: break-all; }
+    .vox-kv .row .v.mono { font-family: var(--mono); font-size: 12px; }
+    #vox-test-out { margin-top: 12px; font-size: 12.5px; color: var(--txt-2); line-height: 1.5; min-height: 18px; }
+  </style>
+</head>
+<body>
+  <div id="view"></div>
+  <script src="assets/app.js"></script>
+  <script>
+    let bizId = new URLSearchParams(location.search).get("biz");   // 平台运营下钻用 ?biz=
+    Hub.boot({ page: "business", business: bizId || undefined }).then(({ data, me, perms }) => {
+      bizId = bizId || me.businessId;   // 业务管理员：登录后落到自己的业务（此时 me 已就绪）
+      const V = document.getElementById("view");
+      const esc = Hub.esc;
+      const fmtN = (n) => Number(n || 0).toLocaleString("en-US");
+      const ym = () => new Date().toISOString().slice(0, 7);
+      const today = () => new Date().toISOString().slice(0, 10);
+      const planOpts = (sel) => ["基础版", "专业版", "旗舰版"].map((p) => `<option ${p === sel ? "selected" : ""}>${p}</option>`).join("");
+      const tenantName = (id) => { const t = Hub.tenant(id); return t ? t.name : "未分配"; };
+      let activeTab = "tenants";
+
+      // ============ 主渲染 ============
+      function render() {
+        const B = Hub.business(bizId);
+        if (!B) { V.innerHTML = '<div class="wrap"><div class="empty">未找到该业务，或无权访问。</div></div>'; return; }
+        const noun = B.tenantNoun || "租户";
+        const tenants = Hub.tenantsOf(bizId);
+        const agents = Hub.agentsOf(bizId);
+        const inUse = tenants.filter((t) => t.status === "在用").length;
+        const trial = tenants.filter((t) => t.status === "试用").length;
+        const vx = B.voxone || {};
+        const bd = (Hub.data[bizId] && Hub.data[bizId].board) || null;
+
+        // ---- KPI ----
+        const kpis = Hub.kpis([
+          { k: "租户总数", v: tenants.length, u: "家", d: "本业务企业客户" },
+          { k: "在用", v: inUse, u: "家", d: tenants.length ? "占比 " + Math.round(inUse / tenants.length * 100) + "%" : "—" },
+          { k: "试用", v: trial, u: "家", d: trial ? "待转化" : "暂无" },
+          { k: "Agent 数", v: agents.length, u: "个", d: agents.filter((a) => a.status === "on").length + " 个在架" },
+          { k: "声渡状态", v: vx.status || "待接入", u: "", d: esc(vx.voice || "拟真人语音") },
+        ]);
+
+        // ---- 业务经营指标（示意，来自场景看板数据）----
+        const bizBoard = bd && bd.kpis && bd.kpis.length
+          ? `<div class="section-t">业务经营指标 · 示意</div>${Hub.kpis(bd.kpis)}` : "";
+
+        // ---- 入口卡 ----
+        const cards = [
+          { href: `${bizId}_agent.html`, ic: "🎙", tag: "一线使用场景", t: "Agent 语音原型", d: "面向一线员工，声渡拟真人语音接入的 Agent 交互原型。" },
+          { href: `${bizId}_miniapp.html`, ic: "📱", tag: "移动端", t: "业务小程序", d: `${esc(noun)}一线随手用：问数、办事、看提醒，同一套后台口径。` },
+          { href: "assistant.html", ic: "💬", tag: "个人助理", t: "AI 助理", d: esc((B.assistant && B.assistant.persona) || "面向个人的 AI 助理") + "。" },
+        ].map((c) => `
+          <a class="scene-card" href="${c.href}" style="--sc-accent:${B.accent}">
+            <div class="ic">${c.ic}</div>
+            <div class="tag">${esc(c.tag)}</div>
+            <h3>${esc(c.t)}</h3>
+            <div class="ds">${c.d}</div>
+            <div class="go">进入 <b>→</b></div>
+          </a>`).join("");
+
+        // ---- 租户表 ----
+        const tHead = `<tr><th>名称</th><th>类型</th><th>套餐</th><th>状态</th><th>Agent</th><th>地区</th><th>联系人</th><th>开通</th>${perms.manageTenants ? "<th>操作</th>" : ""}</tr>`;
+        const tRows = tenants.map((t) => {
+          const agN = Hub.agentsOfTenant(t.id).length;
+          const act = perms.manageTenants ? `<td class="col-act"><div class="btn-row">
+              <button class="btn btn-sm" data-act="t-edit" data-id="${t.id}">编辑</button>
+              <button class="btn btn-sm" data-act="t-toggle" data-id="${t.id}">${t.status === "停用" ? "启用" : "停用"}</button>
+              <button class="btn btn-sm" data-act="t-del" data-id="${t.id}">删除</button>
+            </div></td>` : "";
+          return `<tr>
+            <td><div class="b">${esc(t.name)}</div>${t.flagship ? '<span class="pill acc" style="font-size:10px">旗舰租户</span>' : ""}</td>
+            <td class="tr">${esc(t.type || "—")}</td>
+            <td>${esc(t.plan || "—")}</td>
+            <td>${Hub.statusPill(t.status)}</td>
+            <td class="num">${agN}</td>
+            <td class="tr">${esc(t.region || "—")}</td>
+            <td class="tr small">${esc(t.contact || "—")}</td>
+            <td class="num tr small">${esc(t.since || "—")}</td>
+            ${act}
+          </tr>`;
+        }).join("");
+        const tenantTable = tenants.length
+          ? `<div class="tbl-wrap"><table class="tbl"><thead>${tHead}</thead><tbody>${tRows}</tbody></table></div>`
+          : '<div class="empty">该业务下暂无租户，点击右上角新建。</div>';
+
+        // ---- Agent 表 ----
+        const aHead = `<tr><th>Agent 名称</th><th>所属租户</th><th>面向角色</th><th>状态</th><th>运行模型</th><th>调用数</th>${perms.manageTenants ? "<th>分配租户</th>" : ""}${perms.manageAgents ? "<th>操作</th>" : ""}</tr>`;
+        const aRows = agents.map((a) => {
+          const assignCell = perms.manageTenants
+            ? `<td><select class="assign-sel" data-assign="${a.id}">${a.tenantId ? "" : '<option value="" selected disabled>（未分配）</option>'}${tenants.map((t) => `<option value="${t.id}" ${t.id === a.tenantId ? "selected" : ""}>${esc(t.name)}</option>`).join("")}</select></td>`
+            : "";
+          const act = perms.manageAgents ? `<td class="col-act"><div class="btn-row">
+              <button class="btn btn-sm" data-act="ag-toggle" data-id="${a.id}">${a.status === "on" ? "下架" : "上架"}</button>
+              <button class="btn btn-sm" data-act="ag-edit" data-id="${a.id}">编辑</button>
+              <button class="btn btn-sm" data-act="ag-del" data-id="${a.id}">删除</button>
+            </div></td>` : "";
+          return `<tr>
+            <td><div class="b">${esc(a.name)}</div><div class="tr small">${esc(a.desc || "")}</div></td>
+            <td><span class="nowrap">${esc(tenantName(a.tenantId))}</span></td>
+            <td class="tr">${esc(a.role || "—")}</td>
+            <td>${Hub.statusPill(a.status)}</td>
+            <td>${a.model ? `<span class="mono small">${esc(a.model)}</span>` : '<span class="tr small">平台默认</span>'}</td>
+            <td class="num">${fmtN(a.calls)}</td>
+            ${assignCell}
+            ${act}
+          </tr>`;
+        }).join("");
+        const agentTable = agents.length
+          ? `<div class="tbl-wrap"><table class="tbl"><thead>${aHead}</thead><tbody>${aRows}</tbody></table></div>`
+          : '<div class="empty">该业务下暂无 Agent，点击右上角新建。</div>';
+
+        // ---- 声渡接入 ----
+        const voxCurrent = `
+          <div class="panel-t"><h3>🔊 声渡接入 · 当前配置</h3><span class="sub">${esc(vx.platform || "商汤声渡 VoxOne")}</span></div>
+          <div class="vox-kv">
+            <div class="row"><span class="l">状态</span><span class="v">${Hub.statusPill(vx.status === "已接入" ? "在护" : "待回访")}<span class="tr small" style="margin-left:6px">${esc(vx.status || "待接入")}</span></span></div>
+            <div class="row"><span class="l">音色</span><span class="v">${esc(vx.voice || "—")}</span></div>
+            <div class="row"><span class="l">端点</span><span class="v mono">${esc(vx.endpoint || "—")}</span></div>
+            <div class="row"><span class="l">网关令牌</span><span class="v mono">${esc(vx.gwToken || "—")}</span></div>
+            <div class="row"><span class="l">时延</span><span class="v">${esc(vx.latency || "—")}</span></div>
+          </div>
+          <div class="hint mt12">本业务共一套声渡，为 <b class="t2">${tenants.length}</b> 个${esc(noun)}提供拟真人 AI 语音。</div>
+          <div class="btn-row mt12"><button class="btn btn-sm" data-act="vox-test">📞 测试呼叫</button></div>
+          <div id="vox-test-out"></div>`;
+
+        const voxEdit = perms.manageVoxone ? `
+          <div class="panel-t"><h3>⚙ 编辑声渡配置</h3><span class="sub">保存后对本业务全部租户生效</span></div>
+          <div class="field"><label>接入端点 endpoint</label><input id="vox-endpoint" value="${esc(vx.endpoint || "")}" placeholder="https://voxone.local/${esc(bizId)}"></div>
+          <div class="field"><label>网关令牌 gwToken</label><input id="vox-token" value="${esc(vx.gwToken || "")}" placeholder="vox_${esc(bizId)}_****"></div>
+          <div class="field"><label>音色 voice</label><input id="vox-voice" value="${esc(vx.voice || "")}" placeholder="如：温柔女声 · 客服（拟真人）"></div>
+          <div class="field"><label>状态 status</label><select id="vox-status">
+            <option value="已接入" ${vx.status === "已接入" ? "selected" : ""}>已接入</option>
+            <option value="待接入" ${vx.status !== "已接入" ? "selected" : ""}>待接入</option>
+          </select></div>
+          <div class="btn-row" style="justify-content:flex-end"><button class="btn btn-primary" data-act="vox-save">保存配置</button></div>`
+          : `<div class="panel-t"><h3>⚙ 声渡配置</h3></div><div class="ro-note">👁 当前角色只读，不可编辑声渡接入配置。配置由平台运营或业务管理员维护。</div>`;
+
+        // ---- 组装 ----
+        V.innerHTML = `
+          <div class="wrap">
+            <div class="page-intro">
+              <b>${esc(B.name)} 业务后台</b> —— 多租户运营 · Agent 分配 · 声渡配置。
+              一个 AI 产品承载 <b class="t2">${tenants.length}</b> 个${esc(noun)}，统一后台管理，声渡提供拟真人 AI 语音。
+              <span class="tr">${esc(B.tagline || "")}</span>
+            </div>
+
+            <div class="grid g3 entry-cards">${cards}</div>
+
+            <div class="section-t">业务概览</div>
+            ${kpis}
+            ${bizBoard}
+
+            <div class="section-t">运营管理</div>
+            <div class="tabs">
+              <div class="tab" data-tab="tenants">🏢 租户管理</div>
+              <div class="tab" data-tab="agents">🤖 Agent 管理与分配</div>
+              <div class="tab" data-tab="voxone">🔊 声渡接入</div>
+            </div>
+
+            <div class="tabpane" data-pane="tenants">
+              <div class="panel">
+                <div class="panel-t"><h3>🏢 ${esc(noun)}管理</h3><span class="sub">共 ${tenants.length} 家 · 在用 ${inUse} · 试用 ${trial}</span><span class="sp"></span>
+                  ${perms.manageTenants ? `<button class="btn btn-primary btn-sm" data-act="t-new">＋ 新建${esc(noun)}</button>` : '<span class="ro-note">👁 当前角色只读，不可增删改租户</span>'}
+                </div>
+                ${tenantTable}
+              </div>
+            </div>
+
+            <div class="tabpane" data-pane="agents">
+              <div class="panel">
+                <div class="panel-t"><h3>🤖 Agent 管理与分配</h3><span class="sub">编排 · 上下架 · 分配到${esc(noun)}</span><span class="sp"></span>
+                  ${perms.manageAgents ? `<button class="btn btn-primary btn-sm" data-act="ag-new">＋ 新建 Agent</button>` : '<span class="ro-note">👁 当前角色只读，不可编排 Agent</span>'}
+                </div>
+                ${!perms.manageTenants && perms.manageAgents ? '<div class="ro-note" style="margin-bottom:10px">👁 可编排 Agent，但「分配到租户」需业务管理员权限（manageTenants）。</div>' : ""}
+                ${agentTable}
+              </div>
+            </div>
+
+            <div class="tabpane" data-pane="voxone">
+              <div class="grid g2" style="align-items:start">
+                <div class="panel">${voxCurrent}</div>
+                <div class="panel">${voxEdit}</div>
+              </div>
+            </div>
+
+            <div class="hint mt24">口径：租户 / Agent 配置由真后端 SQLite 持久化，写操作按「角色 × 业务 × 租户」强制授权，越权返回 403。调用数等为目标态示意，非真实经营数据。</div>
+          </div>`;
+
+        setTab(activeTab);
+      }
+
+      // ============ Tab 切换 ============
+      function setTab(t) {
+        activeTab = t;
+        V.querySelectorAll(".tab").forEach((x) => x.classList.toggle("active", x.dataset.tab === t));
+        V.querySelectorAll(".tabpane").forEach((x) => x.classList.toggle("active", x.dataset.pane === t));
+      }
+
+      async function reload() { await Hub.refresh(); render(); }
+
+      // ============ 租户表单 ============
+      function openTenantForm(ex) {
+        if (!perms.manageTenants) { Hub.toast("无权管理租户", true); return; }
+        const noun = (Hub.business(bizId) || {}).tenantNoun || "租户";
+        const body = `
+          <div class="grid g2">
+            <div class="field"><label>${esc(noun)}名称</label><input id="t-name" value="${ex ? esc(ex.name) : ""}" placeholder="如：北京市第一中学"></div>
+            <div class="field"><label>类型</label><input id="t-type" value="${ex ? esc(ex.type || "") : ""}" placeholder="如：K12 中学"></div>
+          </div>
+          <div class="grid g2">
+            <div class="field"><label>套餐</label><select id="t-plan">${planOpts(ex ? ex.plan : "基础版")}</select></div>
+            <div class="field"><label>地区</label><input id="t-region" value="${ex ? esc(ex.region || "") : ""}" placeholder="如：北京"></div>
+          </div>
+          <div class="field"><label>联系人</label><input id="t-contact" value="${ex ? esc(ex.contact || "") : ""}" placeholder="如：德育处 · 王主任"></div>
+          <div class="btn-row" style="justify-content:flex-end;margin-top:8px">
+            <button class="btn" id="t-cancel">取消</button>
+            <button class="btn btn-primary" id="t-ok">${ex ? "保存修改" : "创建" + esc(noun)}</button>
+          </div>`;
+        Hub.modal(ex ? "编辑" + noun : "新建" + noun, body, (root, close) => {
+          root.querySelector("#t-cancel").onclick = close;
+          root.querySelector("#t-ok").onclick = async () => {
+            const name = root.querySelector("#t-name").value.trim();
+            if (!name) { Hub.toast("请填写名称", true); return; }
+            const type = root.querySelector("#t-type").value.trim();
+            const plan = root.querySelector("#t-plan").value;
+            const region = root.querySelector("#t-region").value.trim();
+            const contact = root.querySelector("#t-contact").value.trim();
+            const obj = ex
+              ? { ...ex, name, type, plan, region, contact }
+              : { id: "t_" + bizId + "_" + Date.now(), businessId: bizId, name, type, plan, region, contact, status: "试用", since: ym() };
+            try {
+              await Hub.change("tenant.upsert", { scenario: bizId, tenant: obj });
+              close(); Hub.toast(ex ? "已保存「" + name + "」" : "已创建「" + name + "」"); await reload();
+            } catch (_) { /* Hub.change 已 toast 403 */ }
+          };
+        });
+      }
+
+      // ============ Agent 表单 ============
+      function openAgentForm(ex) {
+        if (!perms.manageAgents) { Hub.toast("无权管理 Agent", true); return; }
+        const tenants = Hub.tenantsOf(bizId);
+        const curT = ex ? ex.tenantId : (tenants[0] && tenants[0].id) || "";
+        const body = `
+          <div class="grid g2">
+            <div class="field"><label>Agent 名称</label><input id="a-name" value="${ex ? esc(ex.name) : ""}" placeholder="如：招生咨询 Agent"></div>
+            <div class="field"><label>面向角色</label><input id="a-role" value="${ex ? esc(ex.role || "") : ""}" placeholder="如：招生老师"></div>
+          </div>
+          <div class="grid g2">
+            <div class="field"><label>所属租户</label><select id="a-tenant">${tenants.length ? tenants.map((t) => `<option value="${t.id}" ${t.id === curT ? "selected" : ""}>${esc(t.name)}</option>`).join("") : '<option value="">（该业务暂无租户）</option>'}</select></div>
+            <div class="field"><label>状态</label><select id="a-status">
+              <option value="on" ${(!ex || ex.status === "on") ? "selected" : ""}>上架（在用）</option>
+              <option value="off" ${ex && ex.status === "off" ? "selected" : ""}>下架</option>
+            </select></div>
+          </div>
+          <div class="field"><label>功能描述</label><textarea id="a-desc" rows="2" placeholder="一句话描述该 Agent 的能力">${ex ? esc(ex.desc || "") : ""}</textarea></div>
+          <div class="field"><label>运行模型（大模型 id · 留空则用平台默认聊天模型）</label><input id="a-model" value="${ex ? esc(ex.model || "") : ""}" placeholder="如 SenseChat-5，留空用平台默认"></div>
+          <div class="btn-row" style="justify-content:flex-end;margin-top:8px">
+            <button class="btn" id="a-cancel">取消</button>
+            <button class="btn btn-primary" id="a-ok">${ex ? "保存修改" : "创建 Agent"}</button>
+          </div>`;
+        Hub.modal(ex ? "编辑 Agent" : "新建 Agent", body, (root, close) => {
+          root.querySelector("#a-cancel").onclick = close;
+          root.querySelector("#a-ok").onclick = async () => {
+            const name = root.querySelector("#a-name").value.trim();
+            if (!name) { Hub.toast("请填写 Agent 名称", true); return; }
+            const role = root.querySelector("#a-role").value.trim();
+            const tenantId = root.querySelector("#a-tenant").value || null;
+            const status = root.querySelector("#a-status").value;
+            const desc = root.querySelector("#a-desc").value.trim();
+            const model = root.querySelector("#a-model").value.trim();
+            const obj = ex
+              ? { ...ex, name, role, tenantId, status, desc, model, updated: today() }
+              : { id: "ag_" + Date.now(), scenario: bizId, businessId: bizId, tenantId, name, role, status, desc, model, version: "v1.0", owner: me.name, calls: 0, skills: [], kbIds: [], sopIds: [], updated: today() };
+            try {
+              await Hub.change("agent.upsert", { scenario: bizId, agent: obj });
+              close(); Hub.toast(ex ? "已保存「" + name + "」" : "已创建「" + name + "」"); await reload();
+            } catch (_) { /* Hub.change 已 toast 403 */ }
+          };
+        });
+      }
+
+      // ============ 事件委托 ============
+      V.addEventListener("click", async (e) => {
+        const tab = e.target.closest("[data-tab]");
+        if (tab) { setTab(tab.dataset.tab); return; }
+        const btn = e.target.closest("button[data-act]");
+        if (!btn) return;
+        const act = btn.dataset.act, id = btn.dataset.id;
+
+        if (act === "t-new") return openTenantForm();
+        if (act === "ag-new") return openAgentForm();
+        if (act === "t-edit") return openTenantForm(Hub.tenant(id));
+        if (act === "ag-edit") return openAgentForm(Hub.data.agents.find((a) => a.id === id));
+
+        if (act === "t-toggle") {
+          const t = Hub.tenant(id); if (!t) return;
+          const ns = t.status === "停用" ? "在用" : "停用";
+          try { await Hub.change("tenant.upsert", { scenario: bizId, tenant: { ...t, status: ns } }); Hub.toast("「" + t.name + "」已" + (ns === "停用" ? "停用" : "启用")); await reload(); } catch (_) {}
+          return;
+        }
+        if (act === "t-del") {
+          const t = Hub.tenant(id); if (!t) return;
+          Hub.confirm("确定删除「" + t.name + "」？其名下 Agent 将一并移除，且不可恢复。", async () => {
+            try { await Hub.change("tenant.delete", { id }); Hub.toast("已删除「" + t.name + "」"); await reload(); } catch (_) {}
+          });
+          return;
+        }
+        if (act === "ag-toggle") {
+          const a = Hub.data.agents.find((x) => x.id === id); if (!a) return;
+          try { await Hub.change("agent.toggle", { id }); Hub.toast("已" + (a.status === "on" ? "下架" : "上架") + "「" + a.name + "」"); await reload(); } catch (_) {}
+          return;
+        }
+        if (act === "ag-del") {
+          const a = Hub.data.agents.find((x) => x.id === id); if (!a) return;
+          Hub.confirm("确定删除 Agent「" + a.name + "」？删除后不可恢复。", async () => {
+            try { await Hub.change("agent.delete", { id }); Hub.toast("已删除「" + a.name + "」"); await reload(); } catch (_) {}
+          });
+          return;
+        }
+        if (act === "vox-save") {
+          const voxone = {
+            endpoint: V.querySelector("#vox-endpoint").value.trim(),
+            gwToken: V.querySelector("#vox-token").value.trim(),
+            voice: V.querySelector("#vox-voice").value.trim(),
+            status: V.querySelector("#vox-status").value,
+          };
+          try { await Hub.change("voxone.config", { scenario: bizId, businessId: bizId, voxone }); Hub.toast("已保存声渡配置"); await reload(); } catch (_) {}
+          return;
+        }
+        if (act === "vox-test") {
+          const out = V.querySelector("#vox-test-out");
+          out.textContent = "正在测试呼叫声渡拟真人语音…";
+          try {
+            const r = await Hub.voxoneInvoke({ source: "voxone", scenario: bizId, mode: "chat", text: "你好，测试拟真人语音", history: [] });
+            const reply = r.reply || r.text || r.content || (typeof r === "string" ? r : JSON.stringify(r));
+            out.textContent = "✓ 声渡应答：" + reply;
+            Hub.toast("测试呼叫成功");
+          } catch (err) {
+            out.textContent = "✗ 测试失败：" + (err.message || "调用失败") + "（该业务声渡端点尚未真实接入，属预期，可在「外部平台对接」注册后联调）";
+            Hub.toast("测试呼叫失败：该业务声渡端点未真实接入", true);
+          }
+          return;
+        }
+      });
+
+      // 分配 Agent 到租户
+      V.addEventListener("change", async (e) => {
+        const sel = e.target.closest("select[data-assign]");
+        if (!sel) return;
+        const id = sel.dataset.assign, tenantId = sel.value;
+        if (!tenantId) return;
+        const t = Hub.tenant(tenantId);
+        try { await Hub.change("agent.assign", { id, tenantId }); Hub.toast("已分配到「" + (t ? t.name : tenantId) + "」"); await reload(); } catch (_) { render(); }
+      });
+
+      // ============ 首屏 ============
+      render();
+    });
+  </script>
+</body>
+</html>

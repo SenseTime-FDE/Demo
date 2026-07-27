@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>运营总览 · 商汤灵犀</title>
+  <link rel="stylesheet" href="assets/style.css">
+  <style>
+    /* 局部微调：平台运营总览（沿用深色科技风，仅补齐 6 列 KPI 与声渡表细节）*/
+    .kpi6 { display: grid; gap: 16px; grid-template-columns: repeat(6, 1fr); }
+    @media (max-width: 1080px) { .kpi6 { grid-template-columns: repeat(3, 1fr); } }
+    @media (max-width: 680px)  { .kpi6 { grid-template-columns: repeat(2, 1fr); } }
+    #view .scene-card .st .vx { color: var(--txt-2); font-family: inherit; }
+    #view .scene-card .st .vx.warn { color: var(--warn); }
+    #view .scene-card .st .vx.ok { color: var(--ok); }
+    #view .tnt-row { cursor: pointer; }
+    #view .ep { font-family: var(--mono); font-size: 11.5px; color: var(--txt-2); word-break: break-all; }
+  </style>
+</head>
+<body>
+  <div id="view"></div>
+  <script src="assets/app.js"></script>
+  <script>
+    Hub.boot({ page: 'operator' }).then(({ data, me, perms }) => {
+      const V = document.getElementById('view');
+      const esc = Hub.esc;
+      let activeBiz = 'all';
+
+      // ---- 取数一律走 Hub.data（与 console.html 一致，避免刷新后读旧引用）----
+      const businesses = () => Hub.businesses();
+      const allTenants = () => Hub.data.tenants || [];
+      const cnt = (arr) => arr.length;
+
+      // ---- 页面骨架 ----
+      V.innerHTML = `
+        <div class="wrap">
+          <div class="page-intro">
+            <b>商汤灵犀 · 多租户 SaaS 运营总览</b> —— 一套 AI 产品，搭建 ${businesses().length} 个 SaaS 业务；
+            每个业务多租户运营、统一后台管理，<b>声渡</b>为其下所有租户提供拟真人 AI 语音。
+            这里是灵犀运营方（大模型生态渠道部）的统一后台首页，点任一业务卡片即可下钻其业务后台。
+          </div>
+
+          <div id="kpiRow" class="grid kpi6"></div>
+
+          <div class="section-t">业务矩阵 · ${businesses().length} 个 SaaS 业务</div>
+          <div id="matrix" class="grid g4"></div>
+
+          <div class="section-t">全量租户 · 跨业务</div>
+          <div class="panel">
+            <div class="panel-t">
+              <h3>🏢 企业租户总览</h3>
+              <span class="sub">按业务筛选 · 点击行下钻对应业务后台</span>
+              <span class="sp"></span>
+              <span class="tr small" id="tntCount"></span>
+            </div>
+            <div id="bizFilter" class="flex ac gap8 wrapf" style="margin-bottom:14px"></div>
+            <div id="tenantBox" class="tbl-wrap"></div>
+          </div>
+
+          <div class="section-t">声渡总控 · 拟真人 AI 语音</div>
+          <div class="panel">
+            <div class="panel-t">
+              <h3>🔊 声渡 VoxOne 网关</h3>
+              <span class="sub">一个业务配一套声渡，为其下所有租户提供拟真人 AI 语音</span>
+              <span class="sp"></span>
+              <div class="btn-row">
+                <a class="btn btn-sm" href="integration.html">🔗 外部平台对接</a>
+                <a class="btn btn-sm" href="models.html">🧠 模型接入</a>
+              </div>
+            </div>
+            <div id="voxBox" class="tbl-wrap"></div>
+          </div>
+
+          <div class="section-t">最新语音留痕</div>
+          <div class="panel">
+            <div class="panel-t">
+              <h3>🎙 最近对话留痕</h3>
+              <span class="sub">跨业务 · 最新 6 条</span>
+              <span class="sp"></span>
+              <a class="btn btn-sm" href="trace.html">查看全部 →</a>
+            </div>
+            <div id="traceBox" class="tbl-wrap"><div class="empty">加载中…</div></div>
+          </div>
+
+          <div class="hint mt24">口径：租户数 / Agent 数 / 语音留痕为真后端 SQLite 持久化数据；各业务示意经营指标见对应业务看板。</div>
+        </div>`;
+
+      // ---- KPI 一排 ----
+      function renderKpis() {
+        const ts = allTenants();
+        const total = (Hub.stats && Hub.stats.total) || 0;
+        document.getElementById('kpiRow').innerHTML = [
+          { k: '业务数', v: businesses().length, u: '个', d: 'SaaS 业务线' },
+          { k: '租户总数', v: ts.length, u: '个', d: '跨全部业务' },
+          { k: '在用租户', v: ts.filter(t => t.status === '在用').length, u: '个', d: '正式付费在用' },
+          { k: '试用租户', v: ts.filter(t => t.status === '试用').length, u: '个', d: '转化中' },
+          { k: 'Agent 总数', v: (Hub.data.agents || []).length, u: '个', d: '全平台在册' },
+          { k: '语音留痕', v: total, u: '条', d: '声渡对话记录' },
+        ].map(Hub.kpi).join('');
+      }
+
+      // ---- 业务矩阵卡片 ----
+      function renderMatrix() {
+        document.getElementById('matrix').innerHTML = businesses().map(b => {
+          const tCount = Hub.tenantsOf(b.id).length;
+          const aCount = Hub.agentsOf(b.id).length;
+          const vx = (b.voxone && b.voxone.status) || '待接入';
+          const vxCls = vx === '已接入' ? 'ok' : 'warn';
+          return `
+            <a class="scene-card" style="--sc-accent:${esc(b.accent)}" href="business.html?biz=${esc(b.id)}">
+              <div class="ic">${esc(b.icon)}</div>
+              <div class="tag">${esc(b.product)}</div>
+              <h3>${esc(b.name)}</h3>
+              <div class="ds">${esc(b.tagline)}</div>
+              <div class="st">
+                <span>租户 <b>${tCount}</b></span>
+                <span>Agent <b>${aCount}</b></span>
+                <span>声渡 <span class="dot ${vxCls}"></span><span class="vx ${vxCls}">${esc(vx)}</span></span>
+              </div>
+            </a>`;
+        }).join('');
+      }
+
+      // ---- 业务筛选按钮 ----
+      function renderFilter() {
+        const btns = [{ id: 'all', label: '▦ 全部业务' }]
+          .concat(businesses().map(b => ({ id: b.id, label: b.icon + ' ' + b.name })));
+        document.getElementById('bizFilter').innerHTML = btns.map(b =>
+          `<button class="scene-btn${activeBiz === b.id ? ' active' : ''}" data-biz="${esc(b.id)}">${esc(b.label)}</button>`).join('');
+      }
+
+      // ---- 全量租户表 ----
+      function renderTenants() {
+        let list = allTenants();
+        if (activeBiz !== 'all') list = list.filter(t => t.businessId === activeBiz);
+        document.getElementById('tntCount').textContent = `共 ${list.length} 家`;
+        if (!list.length) { document.getElementById('tenantBox').innerHTML = '<div class="empty">该业务下暂无租户</div>'; return; }
+
+        const rows = list.map(t => {
+          const b = Hub.business(t.businessId) || {};
+          const aCount = Hub.agentsOfTenant(t.id).length;
+          return `<tr class="tnt-row" data-biz="${esc(t.businessId)}">
+            <td><div class="b">${esc(t.name)}</div><div class="tr small">${esc(t.contact || '')}</div></td>
+            <td><span class="nowrap">${esc((b.icon || '') + ' ' + (b.name || t.businessId))}</span></td>
+            <td>${esc(t.type || '—')}</td>
+            <td><span class="chip-tag">${esc(t.plan || '—')}</span></td>
+            <td>${Hub.statusPill(t.status)}</td>
+            <td class="num">${aCount}</td>
+            <td>${esc(t.region || '—')}</td>
+            <td class="num tr small">${esc(t.since || '—')}</td>
+          </tr>`;
+        }).join('');
+
+        document.getElementById('tenantBox').innerHTML = `
+          <table class="tbl">
+            <tr><th>租户名</th><th>所属业务</th><th>类型</th><th>套餐</th><th>状态</th><th>Agent 数</th><th>地区</th><th>开通</th></tr>
+            ${rows}
+          </table>`;
+      }
+
+      // ---- 声渡总控表 ----
+      function renderVox() {
+        const rows = businesses().map(b => {
+          const v = b.voxone || {};
+          const on = v.status === '已接入';
+          return `<tr>
+            <td><span class="nowrap b">${esc(b.icon + ' ' + b.name)}</span></td>
+            <td>${esc(v.platform || '—')}</td>
+            <td>${esc(v.voice || '—')}</td>
+            <td class="ep">${esc(v.endpoint || '—')}</td>
+            <td class="num">${esc(v.latency || '—')}</td>
+            <td><span class="pill ${on ? 'ok' : 'warn'}">${esc(v.status || '待接入')}</span></td>
+          </tr>`;
+        }).join('');
+        document.getElementById('voxBox').innerHTML = `
+          <table class="tbl">
+            <tr><th>业务</th><th>声渡平台</th><th>音色</th><th>网关端点</th><th>时延</th><th>状态</th></tr>
+            ${rows}
+          </table>`;
+      }
+
+      // ---- 最新语音留痕 ----
+      async function renderTraces() {
+        const box = document.getElementById('traceBox');
+        try {
+          const r = await Hub.traces({});
+          const list = (r.traces || []).slice(0, 6);
+          if (!list.length) { box.innerHTML = '<div class="empty">暂无语音留痕</div>'; return; }
+          const rows = list.map(t => {
+            const b = Hub.business(t.scenario);
+            const biz = b ? `<span class="pill acc">${esc(b.icon + ' ' + b.name)}</span>` : esc(t.scenario || '—');
+            return `<tr>
+              <td class="num tr small nowrap">${esc((t.ts || '').replace('T', ' ').slice(0, 16))}</td>
+              <td>${biz}</td>
+              <td class="nowrap">${esc(t.agentName || '—')}</td>
+              <td class="nowrap">${esc(t.actorName || '—')}</td>
+              <td>${esc(t.intent || '—')}</td>
+            </tr>`;
+          }).join('');
+          box.innerHTML = `
+            <table class="tbl">
+              <tr><th>时间</th><th>业务</th><th>Agent</th><th>坐席</th><th>意图</th></tr>
+              ${rows}
+            </table>`;
+        } catch (e) {
+          box.innerHTML = `<div class="empty">留痕加载失败：${esc(e.message || '未知错误')}</div>`;
+        }
+      }
+
+      // ---- 事件绑定（委托）----
+      document.getElementById('bizFilter').addEventListener('click', (e) => {
+        const btn = e.target.closest('[data-biz]'); if (!btn) return;
+        activeBiz = btn.dataset.biz; renderFilter(); renderTenants();
+      });
+      document.getElementById('tenantBox').addEventListener('click', (e) => {
+        const tr = e.target.closest('tr.tnt-row'); if (!tr) return;
+        location.href = 'business.html?biz=' + encodeURIComponent(tr.dataset.biz);
+      });
+
+      // ---- 首屏渲染 ----
+      renderKpis();
+      renderMatrix();
+      renderFilter();
+      renderTenants();
+      renderVox();
+      renderTraces();
+    });
+  </script>
+</body>
+</html>
