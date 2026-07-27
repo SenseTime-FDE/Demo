@@ -1,0 +1,820 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>智能需求管理平台</title>
+<style>
+:root{
+  --navy:#0f2a4a; --navy2:#173e6d; --teal:#0e7f78; --gold:#c9a227;
+  --bg:#f2f4f8; --card:#ffffff; --line:#dfe4ec; --txt:#22314a; --sub:#65748c;
+  --hi:#c62828; --mid:#e08a00; --lo:#5a7d2a; --ai:#7b5cd6;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:"Microsoft YaHei","PingFang SC","Segoe UI",sans-serif;background:var(--bg);color:var(--txt);min-height:100vh;font-size:14px}
+.app{display:flex;min-height:calc(100vh - 52px)}
+/* ---------- topbar ---------- */
+.topbar{height:52px;background:#fff;border-bottom:1px solid var(--line);display:flex;align-items:center;padding:0 20px;gap:14px;position:sticky;top:0;z-index:20}
+.topbar .brand{font-weight:bold;color:var(--navy);font-size:15px}
+.topbar .env{font-size:11px;background:#fdf3e7;color:#8a5a00;border:1px solid #f0d9b5;border-radius:9px;padding:1px 8px}
+.topbar .sp{flex:1}
+.roleswitch{display:flex;align-items:center;gap:8px;font-size:12.5px;color:var(--sub)}
+.roleswitch select{padding:5px 8px;border:1px solid var(--line);border-radius:6px;font-size:12.5px;color:var(--navy);background:#fff}
+.avatar{width:30px;height:30px;border-radius:50%;background:var(--navy2);color:#fff;display:flex;align-items:center;justify-content:center;font-size:13px}
+/* ---------- sidebar ---------- */
+aside{width:230px;background:var(--navy);color:#dbe4f0;flex-shrink:0;display:flex;flex-direction:column;position:sticky;top:52px;height:calc(100vh - 52px)}
+.logo{padding:16px 18px 12px;border-bottom:1px solid rgba(255,255,255,.12)}
+.logo b{font-size:16px;color:#fff;display:block}
+.logo span{font-size:11px;color:#8fa5c4}
+nav{padding:10px 0;flex:1;overflow:auto}
+.navsec{font-size:11px;color:#7d92b3;padding:10px 18px 4px;letter-spacing:1px}
+.navitem{display:block;padding:8px 18px;cursor:pointer;color:#cfdaeb;border-left:3px solid transparent;font-size:13.5px}
+.navitem:hover{background:rgba(255,255,255,.07)}
+.navitem.on{background:rgba(255,255,255,.12);border-left-color:var(--gold);color:#fff}
+.navitem small{display:block;font-size:11px;color:#8fa5c4}
+.navitem .bdg{float:right;background:var(--hi);color:#fff;font-size:10.5px;border-radius:8px;padding:0 6px}
+.sidefoot{padding:10px 18px;font-size:10.5px;color:#7d92b3;border-top:1px solid rgba(255,255,255,.12);line-height:1.6}
+/* ---------- main ---------- */
+main{flex:1;padding:22px 28px 60px;max-width:1180px}
+h1.page{font-size:21px;color:var(--navy);margin-bottom:4px}
+.crumb{color:var(--sub);font-size:12px;margin-bottom:16px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:18px 20px;margin-bottom:16px}
+.card h3{font-size:15px;color:var(--navy);margin-bottom:10px}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.tabs{display:flex;gap:6px;margin-bottom:14px;flex-wrap:wrap}
+.tab{padding:8px 16px;border:1px solid var(--line);border-radius:20px;background:#fff;cursor:pointer;font-size:13px;color:var(--sub)}
+.tab.on{background:var(--navy);color:#fff;border-color:var(--navy)}
+.pill{display:inline-block;padding:1px 9px;border-radius:10px;font-size:11.5px;color:#fff;white-space:nowrap}
+.p-hi{background:var(--hi)}.p-mid{background:var(--mid)}.p-lo{background:var(--lo)}
+.p-type{background:#eef1f7;color:var(--navy);border:1px solid var(--line)}
+.p-ai{background:#f1ecfd;color:var(--ai);border:1px solid #d9cdf5}
+.p-gap{background:#fdecec;color:var(--hi);border:1px solid #f3c1c1}
+.p-add{background:#e8f4ee;color:#1e6b46;border:1px solid #bfe0cd}
+.p-wait{background:#fdf3e7;color:#8a5a00;border:1px solid #f0d9b5}
+.p-ok{background:#e8f4ee;color:#1e6b46;border:1px solid #bfe0cd}
+.scorewrap{display:flex;gap:22px;align-items:center;flex-wrap:wrap}
+.scorebig{width:108px;height:108px;border-radius:50%;display:flex;flex-direction:column;align-items:center;justify-content:center;color:#fff;flex-shrink:0}
+.scorebig b{font-size:32px}.scorebig span{font-size:11px;opacity:.85}
+.dims{flex:1;min-width:260px}
+.dim{display:flex;align-items:center;gap:10px;margin-bottom:7px}
+.dim label{width:70px;font-size:12.5px;color:var(--sub);text-align:right}
+.bar{flex:1;height:12px;background:#e9edf4;border-radius:6px;overflow:hidden}
+.bar i{display:block;height:100%;border-radius:6px}
+.dim b{width:34px;font-size:12.5px}
+.verdict{border-radius:8px;padding:11px 14px;font-size:13px;margin-top:14px;line-height:1.7}
+.v-warn{background:#fdf3e7;border:1px solid #f0d9b5;color:#8a5a00}
+.v-info{background:#eef4fe;border:1px solid #cfdef5;color:#1c4d8f}
+table.iss{width:100%;border-collapse:collapse;font-size:12.8px}
+table.iss th{background:#eef1f7;color:var(--navy);text-align:left;padding:8px 10px;border:1px solid var(--line);white-space:nowrap}
+table.iss td{border:1px solid var(--line);padding:9px 10px;vertical-align:top;line-height:1.65}
+table.iss tr:nth-child(even) td{background:#fafbfd}
+.quote{background:#f6f7fa;border-left:3px solid #b9c4d6;padding:4px 8px;margin-top:5px;font-size:12px;color:#4a5a75;border-radius:0 4px 4px 0}
+.fix{color:#1e6b46;margin-top:5px}
+.ask{color:#8a5a00;margin-top:4px}
+details.tr{margin:3px 0 3px 14px;border-left:1px dashed #ccd5e2;padding-left:10px}
+details.tr>summary{cursor:pointer;padding:4px 6px;border-radius:6px;list-style:none;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+details.tr>summary::before{content:"▸";color:var(--sub);font-size:11px;transition:.15s}
+details[open].tr>summary::before{transform:rotate(90deg)}
+details.tr>summary:hover{background:#f0f3f8}
+.leaf{margin:3px 0 3px 14px;border-left:1px dashed #ccd5e2;padding:4px 6px 4px 10px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.leaf::before{content:"·";color:var(--sub)}
+.fp{font-size:11px;color:var(--sub);background:#eef1f7;border-radius:8px;padding:0 7px}
+.nodenote{font-size:11.5px;color:var(--sub)}
+.dcard{background:#fbfcfe;border:1px solid var(--line);border-radius:8px;padding:14px 16px;margin:8px 0 10px 24px;font-size:13px}
+.dcard h4{font-size:13.5px;color:var(--navy);margin-bottom:8px}
+.dcard dt{font-weight:bold;color:var(--navy2);margin-top:8px;font-size:12.5px}
+.dcard dd{margin:3px 0 0 0;line-height:1.7;color:#33415e}
+.dcard ol,.dcard ul{margin:4px 0 0 20px;line-height:1.75}
+.gwt{background:#eef7f1;border:1px solid #cfe5d8;border-radius:6px;padding:8px 10px;margin-top:5px;font-size:12.5px;line-height:1.7}
+.trace{font-size:11.5px;color:var(--sub);margin-top:8px}
+.aibanner{background:linear-gradient(90deg,#f3eefe,#eef4fe);border:1px solid #ddd3f5;border-radius:8px;padding:10px 14px;font-size:12.5px;color:#5b4a9e;margin-bottom:14px;display:flex;gap:8px;align-items:center}
+.robanner{background:#f4f6fa;border:1px solid var(--line);border-radius:8px;padding:9px 14px;font-size:12.5px;color:var(--sub);margin-bottom:14px}
+.lanes{display:grid;gap:0;border:1px solid var(--line);border-radius:8px;overflow:hidden;margin-top:8px}
+.lanehead{background:var(--navy2);color:#fff;padding:8px 6px;text-align:center;font-size:13px}
+.lanecell{border-top:1px solid var(--line);border-left:1px solid var(--line);min-height:54px;display:flex;align-items:center;justify-content:center;padding:7px 6px;position:relative}
+.lanecell:nth-child(3n+1){border-left:none}
+.fnode{background:#fff;border:1.5px solid var(--navy2);border-radius:8px;padding:7px 10px;font-size:12.3px;text-align:center;max-width:200px;line-height:1.5;box-shadow:0 1px 3px rgba(15,42,74,.12)}
+.fnode.start{border-radius:20px;border-color:var(--teal);background:#eef7f5}
+.fnode.gap{border-style:dashed;border-color:var(--hi);color:var(--hi);background:#fff8f8}
+.fnode.aiadd{border-style:dashed;border-color:var(--ai);color:var(--ai);background:#faf8ff}
+.fnode.dec{border-color:var(--gold);background:#fdf9ec}
+.stepno{position:absolute;top:4px;left:8px;font-size:10px;color:#9aa8bf}
+.arrowrow{grid-column:1/-1;text-align:center;color:var(--navy2);font-size:14px;line-height:1;padding:1px 0;background:#fbfcfe}
+.flowlegend{font-size:11.5px;color:var(--sub);margin-top:8px;line-height:1.8}
+.proto{border:1px solid #c9d2e0;border-radius:10px;overflow:hidden;background:#fff;margin-top:10px}
+.pbar{background:#e8ecf3;padding:7px 12px;display:flex;gap:6px;align-items:center;border-bottom:1px solid #c9d2e0}
+.pbar i{width:10px;height:10px;border-radius:50%;background:#c3cddd;display:inline-block}
+.pbar span{font-size:11.5px;color:var(--sub);margin-left:8px}
+.pnav{background:var(--navy);color:#fff;display:flex;gap:2px;padding:0 12px;align-items:center;flex-wrap:wrap}
+.pnav b{padding:10px 8px;margin-right:10px;font-size:14px}
+.pnav a{padding:10px 12px;font-size:13px;color:#cfdaeb;cursor:pointer}
+.pnav a.on,.pnav a:hover{background:rgba(255,255,255,.15);color:#fff}
+.pbody{padding:16px;background:#f6f8fb;min-height:300px}
+.wire{background:repeating-linear-gradient(45deg,#e8ecf3,#e8ecf3 6px,#e2e7f0 6px,#e2e7f0 12px);border:1px dashed #b7c2d4;border-radius:6px;display:flex;align-items:center;justify-content:center;color:#7d8aa3;font-size:12.5px}
+.pgrid{display:grid;gap:12px}
+.pcardx{background:#fff;border:1px solid #d7deea;border-radius:8px;padding:12px}
+.pcardx h5{font-size:13px;color:var(--navy);margin-bottom:8px;display:flex;justify-content:space-between;align-items:center}
+.plist li{list-style:none;padding:6px 2px;border-bottom:1px dashed #e3e8f0;font-size:12.5px;display:flex;justify-content:space-between;color:#33415e}
+.plist li span{color:#9aa8bf;font-size:11.5px}
+.pbtn{display:inline-block;background:var(--navy2);color:#fff;border-radius:5px;padding:6px 14px;font-size:12.5px;cursor:pointer;border:none}
+.pbtn.ghost{background:#fff;color:var(--navy2);border:1px solid var(--navy2)}
+.pbtn.warn{background:var(--hi)}
+.pbtn.teal{background:var(--teal)}
+.pbtn.gold{background:var(--gold)}
+.pbtn:disabled{opacity:.45;cursor:not-allowed}
+.pinput{border:1px solid #c9d2e0;border-radius:5px;padding:6px 9px;font-size:12.5px;background:#fff;color:#33415e}
+.ptable{width:100%;border-collapse:collapse;font-size:12.3px;margin-top:6px}
+.ptable th{background:#eef1f7;padding:6px 8px;border:1px solid #dde3ed;text-align:left;font-weight:600;color:var(--navy)}
+.ptable td{padding:6px 8px;border:1px solid #e6ebf3;color:#33415e}
+.ptabs{display:flex;gap:0;border-bottom:2px solid #dde3ed;margin-bottom:10px}
+.ptabs a{padding:8px 14px;font-size:12.8px;cursor:pointer;color:var(--sub);border-bottom:2px solid transparent;margin-bottom:-2px}
+.ptabs a.on{color:var(--navy2);border-bottom-color:var(--navy2);font-weight:600}
+.statuspill{padding:1px 8px;border-radius:9px;font-size:11px}
+.st-on{background:#e8f4ee;color:#1e6b46}.st-off{background:#fdecec;color:var(--hi)}.st-wait{background:#fdf3e7;color:#8a5a00}
+.toast{position:fixed;bottom:26px;left:50%;transform:translateX(-50%);background:var(--navy);color:#fff;padding:10px 22px;border-radius:22px;font-size:13px;opacity:0;transition:.3s;pointer-events:none;z-index:99;max-width:80%;text-align:center}
+.toast.show{opacity:1}
+.ovcard{cursor:pointer;transition:.15s;position:relative}
+.ovcard:hover{transform:translateY(-2px);box-shadow:0 4px 14px rgba(15,42,74,.12)}
+.ovscore{font-size:30px;font-weight:bold}
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px}
+.kpi{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:14px 16px}
+.kpi b{font-size:24px;color:var(--navy);display:block}
+.kpi span{font-size:12px;color:var(--sub)}
+.pipeline{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-top:6px}
+.pstep{background:#eef1f7;border:1px solid var(--line);border-radius:8px;padding:8px 13px;font-size:12.5px;color:var(--navy)}
+.pstep b{display:block;font-size:12.5px}
+.pstep small{color:var(--sub);font-size:11px}
+.parrow{color:var(--sub)}
+.mini{font-size:12px;color:var(--sub);line-height:1.8}
+.footnote{font-size:11.5px;color:var(--sub);margin-top:10px;line-height:1.8}
+/* upload */
+.drop{border:2px dashed #b7c2d4;border-radius:12px;background:#fbfcfe;padding:34px 20px;text-align:center;color:var(--sub);cursor:pointer;transition:.15s}
+.drop:hover,.drop.over{border-color:var(--navy2);background:#f0f5fc;color:var(--navy2)}
+.drop b{display:block;font-size:15px;color:var(--navy);margin-bottom:6px}
+/* clar */
+.clarcard{border:1px solid var(--line);border-radius:8px;padding:13px 15px;margin-bottom:10px;background:#fff}
+.clarcard .q{font-size:13.5px;color:var(--navy);line-height:1.6}
+.clarcard .meta{font-size:11.5px;color:var(--sub);margin:5px 0}
+.clarcard textarea{width:100%;border:1px solid #c9d2e0;border-radius:6px;padding:8px;font-size:12.5px;font-family:inherit;margin-top:6px;min-height:54px}
+.answer{background:#eef7f1;border:1px solid #cfe5d8;border-radius:6px;padding:8px 10px;font-size:12.5px;margin-top:7px;line-height:1.6}
+/* switch */
+.sw{position:relative;width:36px;height:20px;display:inline-block;vertical-align:middle}
+.sw input{display:none}
+.sw i{position:absolute;inset:0;background:#c9d2e0;border-radius:10px;cursor:pointer;transition:.2s}
+.sw i::after{content:"";position:absolute;width:16px;height:16px;border-radius:50%;background:#fff;top:2px;left:2px;transition:.2s}
+.sw input:checked+i{background:var(--teal)}
+.sw input:checked+i::after{left:18px}
+.rolechip{font-size:11px;border-radius:8px;padding:1px 8px;background:#eef1f7;color:var(--navy);border:1px solid var(--line);margin-left:4px}
+@media(max-width:900px){aside{display:none}.grid3,.grid2,.kpis{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="topbar">
+  <span class="brand">🏛 智能需求管理平台</span><span class="env">演示环境 · 数据为真实文档实跑结果</span>
+  <span class="sp"></span>
+  <div class="roleswitch">当前身份：
+    <select id="rolesel" onchange="setRole(this.value)">
+      <option value="analyst">需求分析师 · 王工（科技开发部）</option>
+      <option value="business">业务提交人 · 杨丽（业务部门）</option>
+      <option value="pm">项目负责人 · 李处（评审人）</option>
+      <option value="admin">系统管理员</option>
+    </select>
+  </div>
+  <div class="avatar" id="avat">王</div>
+</div>
+<div class="app">
+<aside>
+  <div class="logo"><b id="sideRole">需求分析师工作台</b><span id="sideDept">科技开发部</span></div>
+  <nav id="nav"></nav>
+  <div class="sidefoot">流程：质检 → 澄清 → 分解 → 原型 → 评审 → 基线<br>AI 产物均为草稿态，人工确认后基线化</div>
+</aside>
+<main id="main"></main>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+/*__DATA__*/
+
+/* ================= 角色与状态 ================= */
+const ROLES = {
+  analyst:{name:"王工",dept:"科技开发部",label:"需求分析师",home:"ov"},
+  business:{name:"杨丽",dept:"业务部门（综合部）",label:"业务提交人",home:"bov"},
+  pm:{name:"李处",dept:"科技部（评审人）",label:"项目负责人",home:"ov"},
+  admin:{name:"管理员",dept:"科技部",label:"系统管理员",home:"users"}
+};
+let ROLE = "analyst";
+let CURPAGE = "ov";
+
+/* 澄清单：由质检问题自动生成，部分已有业务答复 */
+const ANSWERS = {
+ "A-04":"首页固定展示 5 条公告，支持 1 条置顶。",
+ "A-05":"官网日均访问约 2000 PV，峰值并发 100 以内。",
+ "B-07":"部署在集团本地机房，有信创要求，禁止使用境外公有云。文档中 AWS 描述作废。",
+ "C-01":"用户类型共四类：运营管理员、网点收费员、财务人员、维修主管。"
+};
+const CLARS = [];
+DOCS.forEach(d=>{ d.issues.forEach((i,n)=>{ if(i.ask){
+  const id = d.id+"-"+String(n+1).padStart(2,"0");
+  CLARS.push({id, doc:d.id, sys:d.sys, q:i.ask, loc:i.loc, sev:i.sev,
+    status: ANSWERS[id]?"已答复":"待答复", answer: ANSWERS[id]||"", replied: ANSWERS[id]?"07-09 14:20 杨丽":""});
+}});});
+
+/* 评审与确认任务 */
+const REVIEWS = [
+ {doc:"A",item:"功能分解结果评审",type:"pm",status:"待评审",note:"13 个功能点 · 3 个AI补充项需重点看"},
+ {doc:"A",item:"原型与流程图业务确认",type:"biz",status:"已确认",note:"杨丽 07-09 15:02 确认"},
+ {doc:"B",item:"功能分解结果评审",type:"pm",status:"待评审",note:"存在 5 个范围缺口模块，建议澄清后再评审"},
+ {doc:"B",item:"原型与流程图业务确认",type:"biz",status:"待确认",note:""},
+ {doc:"C",item:"功能分解结果评审",type:"pm",status:"待评审",note:"计费公式未澄清，评审存在风险"},
+ {doc:"C",item:"原型与流程图业务确认",type:"biz",status:"待确认",note:""}
+];
+
+/* 审计日志 */
+const AUDIT = [
+ {t:"07-09 15:02",u:"杨丽（业务）",a:"业务确认",o:"官网 · 原型与流程图",r:"已确认"},
+ {t:"07-09 14:20",u:"杨丽（业务）",a:"答复澄清问题",o:"A-04 / A-05",r:"成功"},
+ {t:"07-09 11:47",u:"王工（分析师）",a:"发送澄清单",o:"3 份文档 · 23 个澄清问题",r:"成功"},
+ {t:"07-09 11:32",u:"王工（分析师）",a:"生成页面原型",o:"官网 / 水务 / 供热",r:"成功 · AI草稿"},
+ {t:"07-09 11:15",u:"王工（分析师）",a:"生成业务流程图",o:"官网 / 水务 / 供热",r:"成功 · AI草稿"},
+ {t:"07-09 10:58",u:"王工（分析师）",a:"执行功能分解（强制继续）",o:"供热 · 质量分46 低于阈值70",r:"已留痕 ⚠️",hl:1},
+ {t:"07-09 10:55",u:"王工（分析师）",a:"执行功能分解（强制继续）",o:"水务 · 质量分52 低于阈值70",r:"已留痕 ⚠️",hl:1},
+ {t:"07-09 10:52",u:"王工（分析师）",a:"执行功能分解（强制继续）",o:"官网 · 质量分58 低于阈值70",r:"已留痕 ⚠️",hl:1},
+ {t:"07-09 10:31",u:"王工（分析师）",a:"执行质量检查",o:"3 份文档",r:"成功 · 43 个问题"},
+ {t:"07-09 10:02",u:"杨丽（业务）",a:"上传需求文档",o:"官网用户需求说明书V1.0.doc",r:"解析成功"},
+ {t:"07-09 10:01",u:"王工（分析师）",a:"上传需求文档",o:"水务/供热 2 份文档",r:"解析成功"}
+];
+
+/* 系统管理数据 */
+const USERS = [
+ {n:"王工",dept:"科技开发部",role:"需求分析师",st:"启用"},
+ {n:"杨丽",dept:"业务部门（综合部）",role:"业务提交人",st:"启用"},
+ {n:"李处",dept:"科技部",role:"项目负责人/评审人",st:"启用"},
+ {n:"admin",dept:"科技部",role:"系统管理员",st:"启用"}
+];
+const PERMS = [
+ ["上传与解析文档","✓","✓","—","—"],
+ ["发起质量检查 / 功能分解 / 生成原型","✓","—","—","—"],
+ ["查看质检报告","✓","✓（本部门文档）","✓","—"],
+ ["答复澄清问题","—","✓","—","—"],
+ ["编辑功能分解结果","✓","—","—","—"],
+ ["业务确认（分解/原型）","—","✓","—","—"],
+ ["评审与基线审批","—","—","✓","—"],
+ ["度量看板","✓","—","✓","—"],
+ ["用户/角色/检查清单/LLM配置","—","—","—","✓"],
+ ["审计日志查询","—","—","—","✓"],
+ ["查看业务数据明细","✓","✓（本部门）","✓","✗（最小权限）"]
+];
+const RULES = [
+ {id:"R-01",type:"模糊",rule:"检测无量化的程度副词/形容词：快速、大量、及时、友好、稳定、尽量、原则上等（词表可配置）",sev:"中",on:1},
+ {id:"R-02",type:"歧义",rule:"代词指代检查：“该”“其”“它”等指代对象不唯一时标记",sev:"中",on:1},
+ {id:"R-03",type:"不完整",rule:"功能描述缺少异常分支：无“失败/超时/为空/权限不足”等处理说明",sev:"高",on:1},
+ {id:"R-04",type:"不完整",rule:"涉及金额计算但未说明精度、舍入规则、币种",sev:"高",on:1},
+ {id:"R-05",type:"不一致",rule:"同一术语/字段在文中多处定义冲突（对照行内术语表）",sev:"高",on:1},
+ {id:"R-06",type:"不可测试",rule:"需求条目无法推导出验收标准",sev:"中",on:1},
+ {id:"R-07",type:"合规",rule:"涉及客户敏感信息展示/导出，未说明脱敏与权限要求",sev:"高",on:1},
+ {id:"R-08",type:"合规",rule:"资金变动类操作未说明复核（双人）与审计留痕要求",sev:"高",on:1},
+ {id:"R-09",type:"不一致",rule:"模板残留检测：出现与本系统业务域无关的术语（跨行业词表比对）",sev:"高",on:1},
+ {id:"R-10",type:"不一致",rule:"功能模块总表与正文章节覆盖度比对，宣称模块无详细描述时告警",sev:"高",on:1}
+];
+
+/* ================= 工具 ================= */
+const $=s=>document.querySelector(s);
+function scoreColor(s){return s>=70?"var(--teal)":s>=55?"var(--mid)":"var(--hi)";}
+function sevPill(s){return `<span class="pill p-${s=='高'?'hi':s=='中'?'mid':'lo'}">${s}</span>`;}
+function counts(d){const c={高:0,中:0,低:0};d.issues.forEach(i=>c[i.sev]++);return c;}
+function toast(t){const e=$("#toast");e.textContent=t;e.classList.add("show");clearTimeout(e._t);e._t=setTimeout(()=>e.classList.remove("show"),2600);}
+function can(p){ // 页面级权限
+  const map={
+   analyst:["ov","upload","doc","clar","review","dash"],
+   business:["bov","upload","doc","clar","confirm"],
+   pm:["ov","doc","review","dash"],
+   admin:["users","rolescfg","rules","llm","audit"]
+  };
+  return map[ROLE].includes(p);
+}
+
+/* ================= 导航 ================= */
+function renderNav(){
+  const pendClar = CLARS.filter(c=>c.status=="待答复").length;
+  const pendBiz = REVIEWS.filter(r=>r.type=="biz"&&r.status=="待确认").length;
+  const pendPm = REVIEWS.filter(r=>r.type=="pm"&&r.status=="待评审").length;
+  let h="";
+  const item=(pg,icon,t,sub,bdg)=>`<span class="navitem ${CURPAGE==pg?'on':''}" onclick="go('${pg}')">${icon} ${t}${bdg?`<span class="bdg">${bdg}</span>`:""}${sub?`<small>${sub}</small>`:""}</span>`;
+  const docitems=(ro)=>DOCS.map(d=>`<span class="navitem ${CURPAGE=='doc'+d.id?'on':''}" onclick="go('doc${d.id}')">📄 ${d.short} · ${d.sys.length>9?d.sys.slice(0,9)+'…':d.sys}<small>质量分 ${d.score} · ${ro}</small></span>`).join("");
+  if(ROLE=="analyst"){
+    h+=`<div class="navsec">工作台</div>`+item("ov","📊","项目总览","3 文档 · 流水线状态");
+    h+=`<div class="navsec">需求接入</div>`+item("upload","📤","上传与解析","docx / pdf / doc");
+    h+=`<div class="navsec">需求文档（3）</div>`+docitems("全功能");
+    h+=`<div class="navsec">协作闭环</div>`
+      +item("clar","💬","澄清管理","",pendClar)
+      +item("review","🧾","评审与基线","分解评审 · 业务确认",pendPm)
+      +item("dash","📈","度量看板","对接项目度量数据表");
+  }
+  if(ROLE=="business"){
+    h+=`<div class="navsec">工作台</div>`+item("bov","🏠","我的工作台","待办与进度");
+    h+=`<div class="navsec">需求提交</div>`+item("upload","📤","上传需求文档","提交给科技部");
+    h+=`<div class="navsec">我提交的文档</div>`+docitems("只读+确认");
+    h+=`<div class="navsec">待我处理</div>`
+      +item("clar","💬","待我答复的澄清","",pendClar)
+      +item("confirm","✅","待我确认","分解结果 · 原型",pendBiz);
+  }
+  if(ROLE=="pm"){
+    h+=`<div class="navsec">总览</div>`+item("ov","📊","项目总览","");
+    h+=`<div class="navsec">需求文档（只读）</div>`+docitems("评审视角");
+    h+=`<div class="navsec">审批</div>`
+      +item("review","🧾","评审任务与基线","",pendPm)
+      +item("dash","📈","度量看板","");
+  }
+  if(ROLE=="admin"){
+    h+=`<div class="navsec">系统管理</div>`
+      +item("users","👥","用户管理","")
+      +item("rolescfg","🔐","角色与权限","最小权限矩阵")
+      +item("rules","📋","质检清单配置","10 条规则")
+      +item("llm","🤖","LLM 与提示词","行内私有化模型");
+    h+=`<div class="navsec">合规</div>`+item("audit","🧾","审计日志","全量留痕");
+  }
+  $("#nav").innerHTML=h;
+  $("#sideRole").textContent = ROLES[ROLE].label + (ROLE=="admin"?"控制台":"工作台");
+  $("#sideDept").textContent = ROLES[ROLE].dept;
+  $("#avat").textContent = ROLES[ROLE].name[0];
+}
+
+function setRole(r){
+  ROLE=r; $("#rolesel").value=r;
+  go(ROLES[r].home);
+  toast("已切换身份："+ROLES[r].label+"（"+ROLES[r].dept+"）——菜单与操作权限已同步变化");
+}
+function go(pg){
+  CURPAGE = pg.startsWith("doc")?pg:pg;
+  const base = pg.startsWith("doc")?"doc":pg;
+  if(!can(base)){ $("#main").innerHTML=`<div class="card"><h3>⛔ 无权限</h3><div class="mini">当前身份「${ROLES[ROLE].label}」无权访问该页面（PRD 第3章最小权限原则）。</div></div>`; renderNav(); return; }
+  renderNav();
+  if(pg=="ov") renderOverview();
+  else if(pg=="bov") renderBov();
+  else if(pg=="upload") renderUpload();
+  else if(pg=="clar") renderClar();
+  else if(pg=="confirm") renderConfirm();
+  else if(pg=="review") renderReview();
+  else if(pg=="dash") renderDash();
+  else if(pg=="users") renderUsers();
+  else if(pg=="rolescfg") renderPerms();
+  else if(pg=="rules") renderRules();
+  else if(pg=="llm") renderLlm();
+  else if(pg=="audit") renderAudit();
+  else if(pg.startsWith("doc")) renderDoc(pg.slice(3));
+  window.scrollTo(0,0);
+}
+
+/* ================= 总览（分析师/负责人） ================= */
+function renderOverview(){
+  let totalIss=0,hi=0;DOCS.forEach(d=>{totalIss+=d.issues.length;hi+=counts(d).高;});
+  const pendClar=CLARS.filter(c=>c.status=="待答复").length, ansClar=CLARS.length-pendClar;
+  let h=`<h1 class="page">项目总览 <span class="rolechip">${ROLES[ROLE].label}视角</span></h1>
+  <div class="crumb">演示项目「2026 年业务需求接入」 · 3 份需求文档已完成「解析 → 质检 → 分解 → 原型」</div>
+  <div class="kpis">
+   <div class="kpi"><b>3</b><span>需求文档（V1.0 均在澄清中）</span></div>
+   <div class="kpi"><b>${totalIss}</b><span>质检问题（高严重 ${hi}）</span></div>
+   <div class="kpi"><b>${ansClar} / ${CLARS.length}</b><span>澄清问题已答复</span></div>
+   <div class="kpi"><b style="color:var(--hi)">0 / 3</b><span>形成需求基线</span></div>
+  </div>
+  <div class="card"><h3>端到端流水线（PRD 第4章）</h3>
+   <div class="pipeline">
+    <div class="pstep"><b>① 上传解析</b><small>3/3 完成</small></div><span class="parrow">→</span>
+    <div class="pstep"><b>② 质量检查</b><small>3/3 完成 · 43 问题</small></div><span class="parrow">→</span>
+    <div class="pstep"><b>③ 业务澄清</b><small>${ansClar} 答复 / ${pendClar} 待答复</small></div><span class="parrow">→</span>
+    <div class="pstep"><b>④ 功能分解</b><small>草稿 · 待评审</small></div><span class="parrow">→</span>
+    <div class="pstep"><b>⑤ 流程图/原型</b><small>1/3 业务已确认</small></div><span class="parrow">→</span>
+    <div class="pstep" style="opacity:.45"><b>⑥ 基线</b><small>未开始</small></div>
+   </div>
+   <div class="footnote">三份文档质量分均低于阈值 70：按 PRD 决策 1 应先澄清修订。分析师选择「强制继续」生成了分解与原型草稿（审计日志已留痕），缺口在产物中以红色标注回指质检问题。</div>
+  </div>
+  <div class="grid3">`;
+  DOCS.forEach(d=>{const c=counts(d);
+   h+=`<div class="card ovcard" onclick="go('doc${d.id}')">
+    <div style="display:flex;justify-content:space-between;align-items:flex-start">
+     <div><b style="font-size:15px;color:var(--navy)">${d.sys}</b><div class="mini">${d.name} · ${d.pages}页 · V1.0</div></div>
+     <div class="ovscore" style="color:${scoreColor(d.score)}">${d.score}</div>
+    </div>
+    <div style="margin:10px 0 8px">${sevPill('高')} ${c.高} &nbsp; ${sevPill('中')} ${c.中} &nbsp; ${sevPill('低')} ${c.低}</div>
+    <div class="dims">`;
+   DIMS.forEach((n,i)=>{h+=`<div class="dim"><label>${n}</label><div class="bar"><i style="width:${d.dims[i]}%;background:${scoreColor(d.dims[i])}"></i></div><b>${d.dims[i]}</b></div>`;});
+   h+=`</div><div class="mini" style="margin-top:8px">FP ≈ ${d.fp} · 澄清 ${CLARS.filter(x=>x.doc==d.id&&x.status=='已答复').length}/${CLARS.filter(x=>x.doc==d.id).length} 已答复</div></div>`;
+  });
+  h+=`</div>
+  <div class="card"><h3>三份文档共性病灶对比</h3>
+   <table class="iss"><tr><th>共性问题</th><th>官网</th><th>水务</th><th>供热</th></tr>
+   <tr><td>其他项目模板残留（需求可信度）</td><td>—</td><td>“微ME”“医疗/患者信息”“号码池”等 5 处</td><td>“电子阅览室”“图书馆软件”等 3 处</td></tr>
+   <tr><td>模块总表与正文不一致（范围口径）</td><td>文章管理有表无文</td><td>11 模块宣称 vs 7 模块描述</td><td>总表 3 模块 vs 正文 13 模块</td></tr>
+   <tr><td>资金类核心规则缺失</td><td>不涉及</td><td>幂等/冲正/部分缴费未定义</td><td>计费公式、退款、发票作废缺失</td></tr>
+   <tr><td>不可测试的性能描述</td><td>“界面友好”</td><td>五处性能指标互相矛盾</td><td>“客户端监控实时速度1S”</td></tr>
+   <tr><td>财务数据可物理删除（合规）</td><td>不涉及</td><td>未定义</td><td>账单/对账单可删且不可恢复</td></tr>
+   </table></div>`;
+  $("#main").innerHTML=h;
+}
+
+/* ================= 业务工作台 ================= */
+function renderBov(){
+  const pend=CLARS.filter(c=>c.status=="待答复");
+  const conf=REVIEWS.filter(r=>r.type=="biz"&&r.status=="待确认");
+  let h=`<h1 class="page">我的工作台 <span class="rolechip">业务提交人</span></h1>
+  <div class="crumb">杨丽 · 业务部门（综合部） · 您看到的是业务视角：无质检引擎与分解编辑权限</div>
+  <div class="kpis">
+   <div class="kpi"><b>3</b><span>我部门提交的需求文档</span></div>
+   <div class="kpi"><b style="color:${pend.length?'var(--hi)':'var(--teal)'}">${pend.length}</b><span>待我答复的澄清问题</span></div>
+   <div class="kpi"><b style="color:${conf.length?'var(--mid)':'var(--teal)'}">${conf.length}</b><span>待我确认的分解/原型</span></div>
+   <div class="kpi"><b>1</b><span>我已完成的确认</span></div>
+  </div>
+  <div class="card"><h3>❗ 需要您优先处理</h3>`;
+  if(pend.length){
+    h+=`<div class="mini" style="margin-bottom:8px">科技部对需求文档提出了以下澄清问题，您的答复将直接决定开发理解是否正确（高严重问题不澄清将阻塞排期）：</div>`;
+    pend.slice(0,5).forEach(c=>{h+=`<div class="clarcard"><div class="q">❓ ${c.q}</div><div class="meta">${c.sys} · 关联质检问题 ${c.id}（${c.sev}严重） · 位置：${c.loc}</div><button class="pbtn teal" onclick="go('clar')">去答复</button></div>`;});
+    if(pend.length>5) h+=`<div class="mini">…还有 ${pend.length-5} 个，<a style="color:var(--navy2);cursor:pointer" onclick="go('clar')">进入澄清列表</a></div>`;
+  } else h+=`<div class="mini">全部澄清已答复 ✅</div>`;
+  h+=`</div>
+  <div class="card"><h3>我的文档进度</h3><table class="iss"><tr><th>文档</th><th>版本</th><th>质量评分</th><th>当前状态</th><th>操作</th></tr>`;
+  DOCS.forEach(d=>{
+    const myPend=CLARS.filter(x=>x.doc==d.id&&x.status=='待答复').length;
+    h+=`<tr><td><b>${d.sys}</b><div class="mini">${d.name}</div></td><td>V1.0</td>
+    <td><span style="color:${scoreColor(d.score)};font-weight:bold">${d.score}</span> / 100</td>
+    <td>${myPend?`<span class="pill p-wait">待答复澄清 ×${myPend}</span>`:`<span class="pill p-ok">澄清已闭环</span>`}</td>
+    <td><a style="color:var(--navy2);cursor:pointer" onclick="go('doc${d.id}')">查看质检报告与原型</a></td></tr>`;
+  });
+  h+=`</table><div class="footnote">说明：演示环境将 3 份文档都归属于您名下；正式环境按“提交人+部门”隔离，只能看到本部门文档。</div></div>`;
+  $("#main").innerHTML=h;
+}
+
+/* ================= 上传与解析 ================= */
+let UPLOADED=[];
+function renderUpload(){
+  let h=`<h1 class="page">上传与解析 <span class="rolechip">${ROLES[ROLE].label}</span></h1>
+  <div class="crumb">支持 docx / doc / pdf / xlsx · 解析为章节结构并建立原文锚点（PRD F1-1）</div>
+  <div class="card">
+   <div class="drop" id="drop" onclick="document.getElementById('fpick').click()">
+    <b>📤 点击选择 或 拖拽需求文档到此处</b>
+    上传后自动执行：格式转换 → 章节解析 → 原文锚点 → 进入质检队列
+   </div>
+   <input type="file" id="fpick" multiple accept=".doc,.docx,.pdf,.xlsx" style="display:none" onchange="onPick(this.files)">
+   <div id="uplist"></div>
+   <div class="footnote">演示说明：本 Demo 为离线静态环境，新上传文档会完成入队模拟；真实质检/分解需连接 LLM 引擎（正式环境为行内私有化大模型）。本页下方 3 份文档为已完成全流程的真实处理结果。</div>
+  </div>
+  <div class="card"><h3>文档库（本项目）</h3>
+  <table class="iss"><tr><th>文档</th><th>提交人</th><th>版本</th><th>解析</th><th>质检</th><th>分解</th><th>原型</th><th>基线</th><th>操作</th></tr>`;
+  DOCS.forEach(d=>{
+   h+=`<tr><td><b>${d.sys}</b><div class="mini">${d.name} · ${d.pages}页</div></td>
+   <td>${d.id=='A'?'杨丽（业务）':'王工（代传）'}</td><td>V1.0</td>
+   <td><span class="pill p-ok">完成</span></td>
+   <td><span class="pill" style="background:${scoreColor(d.score)}">${d.score}分</span></td>
+   <td><span class="pill p-ai">草稿</span></td><td><span class="pill p-ai">草稿</span></td>
+   <td><span class="pill p-wait">未基线</span></td>
+   <td><a style="color:var(--navy2);cursor:pointer" onclick="go('doc${d.id}')">进入</a></td></tr>`;
+  });
+  UPLOADED.forEach(f=>{
+   h+=`<tr><td><b>${f.name}</b><div class="mini">新上传</div></td><td>${ROLES[ROLE].name}</td><td>V1.0</td>
+   <td>${f.st>=1?'<span class="pill p-ok">完成</span>':'<span class="pill p-wait">解析中…</span>'}</td>
+   <td>${f.st>=1?'<span class="pill p-wait">排队中</span>':'—'}</td><td>—</td><td>—</td><td>—</td>
+   <td><span class="mini">待引擎处理</span></td></tr>`;
+  });
+  h+=`</table></div>`;
+  $("#main").innerHTML=h;
+  const dz=$("#drop");
+  if(dz){
+    dz.addEventListener("dragover",e=>{e.preventDefault();dz.classList.add("over")});
+    dz.addEventListener("dragleave",()=>dz.classList.remove("over"));
+    dz.addEventListener("drop",e=>{e.preventDefault();dz.classList.remove("over");onPick(e.dataTransfer.files);});
+  }
+}
+function onPick(files){
+  if(!files||!files.length) return;
+  Array.from(files).forEach(f=>{
+    const rec={name:f.name,st:0};
+    UPLOADED.push(rec);
+    toast("「"+f.name+"」上传成功，开始解析（格式转换→章节结构→原文锚点）…");
+    setTimeout(()=>{rec.st=1; if(CURPAGE=="upload")renderUpload(); toast("「"+f.name+"」解析完成，已进入质检队列（演示模式：请将文档交给分析引擎执行质检）");},1500);
+  });
+  renderUpload();
+}
+
+/* ================= 澄清管理 ================= */
+function renderClar(){
+  const mine = ROLE=="business";
+  let list = mine? CLARS : CLARS;
+  const pend=list.filter(c=>c.status=="待答复").length;
+  let h=`<h1 class="page">${mine?"待我答复的澄清":"澄清管理"} <span class="rolechip">${ROLES[ROLE].label}</span></h1>
+  <div class="crumb">${mine?"科技部提出的问题需要您逐条答复；答复后自动通知分析师并关联到需求修订":"跨 3 份文档共 "+list.length+" 个澄清问题 · "+pend+" 个待业务答复（PRD F2-3 澄清工作流）"}</div>`;
+  if(!mine) h+=`<div class="card"><div style="display:flex;gap:10px;flex-wrap:wrap">
+   <button class="pbtn" onclick="toast('已向业务提交人发送催办提醒（示意）')">催办待答复问题</button>
+   <button class="pbtn ghost" onclick="toast('已导出澄清单 Excel（示意）')">导出澄清单</button>
+  </div></div>`;
+  ["A","B","C"].forEach(did=>{
+    const d=DOCS.find(x=>x.id==did);
+    const sub=list.filter(c=>c.doc==did);
+    if(!sub.length) return;
+    h+=`<div class="card"><h3>${d.sys}（${sub.filter(c=>c.status=='已答复').length}/${sub.length} 已答复）</h3>`;
+    sub.forEach(c=>{
+      h+=`<div class="clarcard">
+      <div class="q">❓ ${c.q}</div>
+      <div class="meta">编号 ${c.id} · ${sevPill(c.sev)} · 位置：${c.loc} · 状态：${c.status=='已答复'?'<span class="pill p-ok">已答复</span>':'<span class="pill p-wait">待答复</span>'}</div>`;
+      if(c.status=="已答复"){
+        h+=`<div class="answer">💬 业务答复（${c.replied}）：${c.answer}</div>`;
+        if(!mine) h+=`<div class="mini" style="margin-top:6px"><a style="color:var(--navy2);cursor:pointer" onclick="toast('已登记为需求修订输入，将纳入文档 V1.1（示意）')">采纳并纳入 V1.1 修订 →</a></div>`;
+      } else if(mine){
+        h+=`<textarea id="ta_${c.id}" placeholder="请输入答复，例如给出明确数值、规则或流程……"></textarea>
+        <div style="margin-top:6px"><button class="pbtn teal" onclick="answerClar('${c.id}')">提交答复</button></div>`;
+      } else {
+        h+=`<div class="mini">等待业务答复中…</div>`;
+      }
+      h+=`</div>`;
+    });
+    h+=`</div>`;
+  });
+  $("#main").innerHTML=h;
+}
+function answerClar(id){
+  const c=CLARS.find(x=>x.id==id);
+  const ta=document.getElementById("ta_"+id);
+  const v=ta&&ta.value.trim();
+  if(!v){toast("请先填写答复内容");return;}
+  c.status="已答复";c.answer=v;c.replied="07-09 "+new Date().toTimeString().slice(0,5)+" "+ROLES[ROLE].name;
+  AUDIT.unshift({t:"07-09 "+new Date().toTimeString().slice(0,5),u:ROLES[ROLE].name+"（业务）",a:"答复澄清问题",o:id,r:"成功"});
+  toast("答复已提交，已通知分析师（"+id+"）");
+  renderClar();renderNav();
+}
+
+/* ================= 业务确认 ================= */
+function renderConfirm(){
+  let h=`<h1 class="page">待我确认 <span class="rolechip">业务提交人</span></h1>
+  <div class="crumb">确认=您认可分解结果/原型与业务意图一致；确认记录将作为需求基线的前置条件留痕（PRD F5-2）</div>`;
+  ["A","B","C"].forEach(did=>{
+    const d=DOCS.find(x=>x.id==did);
+    const items=REVIEWS.filter(r=>r.doc==did&&r.type=="biz");
+    h+=`<div class="card"><h3>${d.sys}</h3>`;
+    items.forEach((r)=>{
+      const i=REVIEWS.indexOf(r);
+      h+=`<div class="clarcard"><div class="q">✅ ${r.item}</div>
+      <div class="meta">${r.note||"请先查看产物再确认"} · 状态：${r.status=='已确认'?'<span class="pill p-ok">已确认</span>':'<span class="pill p-wait">待确认</span>'}</div>
+      <div style="display:flex;gap:8px;margin-top:6px">
+       <button class="pbtn ghost" onclick="go('doc${did}')">查看产物</button>
+       ${r.status=='待确认'?`<button class="pbtn teal" onclick="bizConfirm(${i})">确认无误</button>
+       <button class="pbtn warn" onclick="toast('已退回并要求修改（示意）——将通知分析师')">有问题，退回</button>`:""}
+      </div></div>`;
+    });
+    h+=`</div>`;
+  });
+  $("#main").innerHTML=h;
+}
+function bizConfirm(i){
+  REVIEWS[i].status="已确认";REVIEWS[i].note=ROLES[ROLE].name+" 刚刚确认";
+  AUDIT.unshift({t:"07-09 "+new Date().toTimeString().slice(0,5),u:ROLES[ROLE].name+"（业务）",a:"业务确认",o:REVIEWS[i].doc+" · "+REVIEWS[i].item,r:"已确认"});
+  toast("确认成功，已留痕；该文档基线前置条件 +1");
+  renderConfirm();renderNav();
+}
+
+/* ================= 评审与基线 ================= */
+function renderReview(){
+  const isPm = ROLE=="pm";
+  let h=`<h1 class="page">评审与基线 <span class="rolechip">${ROLES[ROLE].label}</span></h1>
+  <div class="crumb">分解结果评审（负责人）+ 业务确认（提交人）双通过后方可冻结基线（PRD F5-1/2/3）</div>`;
+  ["A","B","C"].forEach(did=>{
+    const d=DOCS.find(x=>x.id==did);
+    const items=REVIEWS.filter(r=>r.doc==did);
+    const allok=items.every(r=>r.status=="已确认"||r.status=="已通过");
+    h+=`<div class="card"><h3>${d.sys} ${allok?'<span class="pill p-ok">具备基线条件</span>':'<span class="pill p-wait">未达基线条件</span>'}</h3>
+    <table class="iss"><tr><th>事项</th><th>责任角色</th><th>状态</th><th>备注</th><th>操作</th></tr>`;
+    items.forEach(r=>{
+      const i=REVIEWS.indexOf(r);
+      h+=`<tr><td>${r.item}</td><td>${r.type=='pm'?'项目负责人':'业务提交人'}</td>
+      <td>${r.status=='待评审'||r.status=='待确认'?`<span class="pill p-wait">${r.status}</span>`:`<span class="pill p-ok">${r.status}</span>`}</td>
+      <td class="mini">${r.note||"—"}</td>
+      <td>${isPm&&r.type=='pm'&&r.status=='待评审'?`<button class="pbtn teal" onclick="pmPass(${i})">通过</button> <button class="pbtn warn" onclick="pmReject(${i})">驳回</button>`:`<a style="color:var(--navy2);cursor:pointer" onclick="go('doc${did}')">查看</a>`}</td></tr>`;
+    });
+    h+=`</table>
+    <div class="footnote">基线前置条件：① 分解评审通过 ② 业务确认 ③ 高严重澄清全部闭环（当前 ${CLARS.filter(x=>x.doc==did&&x.sev=='高'&&x.status=='待答复').length} 个高严重待答复）。基线后变更须走“修订→增量质检→重新确认”。</div>
+    <div style="margin-top:8px"><button class="pbtn gold" ${allok?"":"disabled"} onclick="toast('基线 V1.0 已冻结（示意）：功能点快照+确认记录归档')">冻结为需求基线 V1.0</button></div></div>`;
+  });
+  $("#main").innerHTML=h;
+}
+function pmPass(i){
+  if(REVIEWS[i].doc=='C'&&CLARS.some(x=>x.doc=='C'&&x.id=='C-04'&&x.status=='待答复')){
+    toast("⚠️ 供热计费公式（C-04）尚未澄清——评审通过存在资金规则风险，请确认是否继续");
+  }
+  REVIEWS[i].status="已通过";REVIEWS[i].note="李处 刚刚通过";
+  AUDIT.unshift({t:"07-09 "+new Date().toTimeString().slice(0,5),u:"李处（负责人）",a:"评审通过",o:REVIEWS[i].doc+" · "+REVIEWS[i].item,r:"已通过"});
+  renderReview();renderNav();
+}
+function pmReject(i){
+  REVIEWS[i].status="待评审";REVIEWS[i].note="李处 驳回：请先完成高严重澄清";
+  AUDIT.unshift({t:"07-09 "+new Date().toTimeString().slice(0,5),u:"李处（负责人）",a:"评审驳回",o:REVIEWS[i].doc+" · "+REVIEWS[i].item,r:"已驳回"});
+  toast("已驳回并通知分析师");
+  renderReview();
+}
+
+/* ================= 度量看板 ================= */
+function renderDash(){
+  const types={};let tot=0;
+  DOCS.forEach(d=>d.issues.forEach(i=>{types[i.type]=(types[i.type]||0)+1;tot++;}));
+  const ans=CLARS.filter(c=>c.status=='已答复').length;
+  let h=`<h1 class="page">度量看板 <span class="rolechip">${ROLES[ROLE].label}</span></h1>
+  <div class="crumb">数据可导出至《项目度量数据表》（KSSH-1102）作为“评审缺陷度量”数据源（PRD F5-4）</div>
+  <div class="kpis">
+   <div class="kpi"><b>43</b><span>平台预检出问题（≈人工评审缺陷前置发现）</span></div>
+   <div class="kpi"><b>${(43/3.5).toFixed(1)}</b><span>等效评审效率 个/人时（引擎3.5人时估） · 行内目标 ≥0.75</span></div>
+   <div class="kpi"><b>${Math.round(ans/CLARS.length*100)}%</b><span>澄清闭环率（${ans}/${CLARS.length}）</span></div>
+   <div class="kpi"><b>0</b><span>基线后需求变更次数</span></div>
+  </div>
+  <div class="grid2">
+  <div class="card"><h3>问题类型分布（3 份文档合计 ${tot} 项）</h3><div class="dims">`;
+  Object.entries(types).sort((a,b)=>b[1]-a[1]).forEach(([k,v])=>{
+    h+=`<div class="dim"><label style="width:84px">${k}</label><div class="bar"><i style="width:${v/tot*100}%;background:var(--navy2)"></i></div><b>${v}</b></div>`;
+  });
+  h+=`</div><div class="footnote">“不完整”与“不一致”占比最高——与三份文档共性病灶（模板残留、总表与正文脱节）一致。</div></div>
+  <div class="card"><h3>文档质量对比</h3><div class="dims">`;
+  DOCS.forEach(d=>{h+=`<div class="dim"><label style="width:84px">${d.short}（${d.score}）</label><div class="bar"><i style="width:${d.score}%;background:${scoreColor(d.score)}"></i></div><b>${d.score}</b></div>`;});
+  h+=`</div><div class="footnote">阈值 70 分（可配置，PRD F2-2）。低于阈值文档进入分解需“强制继续”并留痕。</div></div>
+  </div>
+  <div class="card"><h3>与行内度量体系对接（数据来源：02项目度量数据表.xlsx）</h3>
+  <table class="iss"><tr><th>指标</th><th>行内基线/目标【事实】</th><th>本项目当前值</th><th>说明</th></tr>
+  <tr><td>评审效率（个/人时）</td><td>≥0.75（样本实际 0.76）</td><td>平台预检出 43 个问题，供评审会直接使用</td><td>平台报告作为评审输入，减少人工通读时间</td></tr>
+  <tr><td>需求开发阶段工期</td><td>样本 19 天（计划17，偏差+6.9%）</td><td>解析+质检+分解+原型 < 1 天</td><td>机器时间；澄清与确认仍取决于业务响应</td></tr>
+  <tr><td>需求评审缺陷数</td><td>样本 25 个/项目</td><td>43 个（3 文档，其中高严重 15）</td><td>建议按文档口径入表，标注“AI预检”来源</td></tr>
+  <tr><td>缺陷探测率</td><td>≥75%</td><td>待测试阶段回填</td><td>上线后统计“需求根因缺陷”占比验证平台价值</td></tr>
+  </table>
+  <div style="margin-top:10px"><button class="pbtn" onclick="toast('已生成度量数据导出文件（示意）：可直接粘贴至项目度量数据表-缺陷页签')">导出至项目度量数据表</button></div></div>`;
+  $("#main").innerHTML=h;
+}
+
+/* ================= 系统管理（admin） ================= */
+function renderUsers(){
+  let h=`<h1 class="page">用户管理 <span class="rolechip">系统管理员</span></h1>
+  <div class="crumb">管理员遵循最小权限：可管理账户与配置，不可见业务数据明细（PRD 第3章）</div>
+  <div class="card"><h3>用户列表 <button class="pbtn teal" style="float:right" onclick="toast('新增用户（示意）：正式环境对接行内统一认证同步')">+ 新增用户</button></h3>
+  <table class="iss"><tr><th>姓名</th><th>部门</th><th>角色</th><th>状态</th><th>操作</th></tr>`;
+  USERS.forEach(u=>{h+=`<tr><td>${u.n}</td><td>${u.dept}</td><td>${u.role}</td><td><span class="pill p-ok">${u.st}</span></td>
+  <td><a style="color:var(--navy2);cursor:pointer" onclick="toast('编辑（示意）')">编辑</a> · <a style="color:var(--navy2);cursor:pointer" onclick="toast('重置密码（示意）')">重置密码</a> · <a style="color:var(--hi);cursor:pointer" onclick="toast('冻结（示意）')">冻结</a></td></tr>`;});
+  h+=`</table></div>`;
+  $("#main").innerHTML=h;
+}
+function renderPerms(){
+  let h=`<h1 class="page">角色与权限 <span class="rolechip">系统管理员</span></h1>
+  <div class="crumb">权限矩阵与左侧菜单联动——切换右上角身份即可体验不同视角</div>
+  <div class="card"><table class="iss"><tr><th>能力</th><th>需求分析师</th><th>业务提交人</th><th>项目负责人</th><th>系统管理员</th></tr>`;
+  PERMS.forEach(p=>{h+=`<tr><td>${p[0]}</td><td>${p[1]}</td><td>${p[2]}</td><td>${p[3]}</td><td>${p[4]}</td></tr>`;});
+  h+=`</table><div class="footnote">数据隔离：按项目授权；业务提交人仅见本部门文档。审计要求：权限变更本身也写入审计日志。</div></div>`;
+  $("#main").innerHTML=h;
+}
+function renderRules(){
+  let h=`<h1 class="page">质检清单配置 <span class="rolechip">系统管理员</span></h1>
+  <div class="crumb">规则清单注入 LLM 提示词执行（PRD F2-4）；R-09/R-10 为本次实跑后新增的“模板残留/总表覆盖度”规则</div>
+  <div class="card"><table class="iss"><tr><th>编号</th><th>类型</th><th>规则</th><th>严重级</th><th>启用</th></tr>`;
+  RULES.forEach((r,i)=>{h+=`<tr ${i>=8?'style="background:#f4fbf6"':''}><td>${r.id}${i>=8?' <span class="pill p-add">新增</span>':''}</td><td><span class="pill p-type">${r.type}</span></td><td>${r.rule}</td><td>${sevPill(r.sev)}</td>
+  <td><label class="sw"><input type="checkbox" ${r.on?"checked":""} onchange="toast('规则 ${r.id} 已${r.on?'停用':'启用'}（示意）——下次质检生效，变更已留痕')"><i></i></label></td></tr>`;});
+  h+=`</table><div class="footnote">配套词表：模糊词表（32词）· 行内术语表（对接数据字典）· 跨行业残留词表（医疗/电信/图书馆…）。词表维护入口略。</div></div>`;
+  $("#main").innerHTML=h;
+}
+function renderLlm(){
+  let h=`<h1 class="page">LLM 与提示词管理 <span class="rolechip">系统管理员</span></h1>
+  <div class="crumb">可追溯性要求：基线内容记录生成时的模型版本+提示词版本（PRD 第6章）</div>
+  <div class="grid2">
+  <div class="card"><h3>模型配置</h3><ul class="plist">
+   <li>推理服务<span>行内私有化大模型（示意：LLM-Bank-72B）</span></li>
+   <li>部署位置<span>行内机房 GPU 集群 · 数据不出行</span></li>
+   <li>上下文长度<span>128K tokens（超长文档自动分片 8K/段）</span></li>
+   <li>温度参数<span>质检 0.1 / 分解 0.2 / 原型 0.4</span></li>
+   <li>输出校验<span>JSON Schema 强校验 + 失败重试 ×2</span></li>
+   <li>降级策略<span>LLM 不可用时保留文档管理与人工编辑</span></li>
+  </ul></div>
+  <div class="card"><h3>提示词版本</h3><ul class="plist">
+   <li>质检提示词<span>v3.1 · 注入 10 条规则+3 词表</span></li>
+   <li>分解提示词<span>v2.4 · 输出用户故事+GWT验收标准</span></li>
+   <li>流程图提示词<span>v1.2 · 泳道图 · 缺失环节标红</span></li>
+   <li>原型提示词<span>v1.0 · 低保真线框</span></li>
+  </ul><div style="margin-top:10px"><button class="pbtn ghost" onclick="toast('提示词版本历史（示意）：每次修改留存 diff 与生效时间')">查看版本历史</button></div></div>
+  </div>
+  <div class="card"><h3>本次实跑消耗（3 份文档）</h3>
+  <table class="iss"><tr><th>环节</th><th>调用次数</th><th>耗时</th><th>输出</th></tr>
+  <tr><td>解析与结构化</td><td>3</td><td>约 2 分钟</td><td>66 页 → 章节树+锚点</td></tr>
+  <tr><td>质量检查</td><td>9（分片×3文档）</td><td>约 8 分钟</td><td>43 个问题 + 23 个澄清问题</td></tr>
+  <tr><td>功能分解</td><td>6</td><td>约 10 分钟</td><td>3 棵功能树 + 7 个详细描述样例</td></tr>
+  <tr><td>流程图/原型</td><td>6</td><td>约 6 分钟</td><td>3 泳道图 + 3 套可点击原型</td></tr>
+  </table></div>`;
+  $("#main").innerHTML=h;
+}
+function renderAudit(){
+  let h=`<h1 class="page">审计日志 <span class="rolechip">系统管理员</span></h1>
+  <div class="crumb">全量操作留痕：谁、何时、对什么、做了什么（PRD F6-3）· 黄色行=“强制继续”例外操作</div>
+  <div class="card"><table class="iss"><tr><th>时间</th><th>操作人</th><th>动作</th><th>对象</th><th>结果</th></tr>`;
+  AUDIT.forEach(a=>{h+=`<tr ${a.hl?'style="background:#fdf9ec"':''}><td>${a.t}</td><td>${a.u}</td><td>${a.a}</td><td>${a.o}</td><td>${a.r}</td></tr>`;});
+  h+=`</table></div>`;
+  $("#main").innerHTML=h;
+}
+
+/* ================= 文档视图（角色差异化） ================= */
+function renderTree(nodes){
+  let h="";
+  nodes.forEach(n=>{
+    const badge = n.badge=='gap'?`<span class="pill p-gap">缺口</span>`:n.badge=='add'?`<span class="pill p-add">AI补充</span>`:n.badge=='ask'?`<span class="pill p-wait">待澄清</span>`:"";
+    const fp = n.fp?`<span class="fp">≈${n.fp} FP</span>`:"";
+    const note = n.note?`<span class="nodenote">${n.note}</span>`:"";
+    if(n.kids){h+=`<details class="tr" open><summary><b>${n.t}</b> ${fp} ${badge} ${note}</summary>${renderTree(n.kids)}</details>`;}
+    else{
+      let det="";
+      if(n.detail!==undefined) det=` <a style="font-size:11.5px;color:var(--navy2);cursor:pointer" onclick="document.getElementById('det'+CURDOC+n.detail).scrollIntoView({behavior:'smooth'});event.stopPropagation()">查看详细描述 ↓</a>`;
+      h+=`<div class="leaf">${n.t} ${fp} ${badge} ${note}${det}</div>`;
+    }
+  });
+  return h;
+}
+function renderDetail(d,i,idx){
+  return `<div class="dcard" id="det${d.id}${idx}">
+   <h4>📋 ${i.title} <span class="pill p-ai">AI 生成 · 待人工确认</span></h4>
+   <dt>用户故事</dt><dd>${i.story}</dd>
+   <dt>前置条件</dt><dd>${i.pre}</dd>
+   <dt>主流程</dt><dd><ol>${i.main.map(s=>`<li>${s}</li>`).join("")}</ol></dd>
+   <dt>异常流</dt><dd><ul>${i.exc.map(s=>`<li>${s}</li>`).join("")}</ul></dd>
+   <dt>业务规则</dt><dd><ul>${i.rules.map(s=>`<li>${s}</li>`).join("")}</ul></dd>
+   <dt>验收标准</dt><dd><div class="gwt">${i.accept}</div></dd>
+   <div class="trace">🔗 ${i.trace}</div></div>`;
+}
+let CURDOC="";
+function renderDoc(idtab){
+  const id=idtab[0]; const d=DOCS.find(x=>x.id==id); CURDOC=id;
+  let tab=idtab.slice(1)||"qa";
+  const c=counts(d);
+  const roleNote = ROLE=="business"?`<div class="robanner">👤 业务视角：您可查看质检报告、答复澄清、确认原型与分解结果；无法编辑分解内容或重跑引擎。</div>`
+    : ROLE=="pm"?`<div class="robanner">👤 评审视角：只读查看全部产物；请在「评审与基线」中给出评审结论。</div>`:"";
+  let h=`<h1 class="page">${d.sys} <span class="rolechip">${ROLES[ROLE].label}视角</span></h1>
+  <div class="crumb">${d.name} · ${d.pages} 页 · V1.0 · 提交人：${d.id=='A'?'杨丽':'（代传）'} · 状态：澄清中（${CLARS.filter(x=>x.doc==id&&x.status=='已答复').length}/${CLARS.filter(x=>x.doc==id).length} 已答复）</div>
+  ${roleNote}
+  <div class="tabs">
+   <span class="tab ${tab=='qa'?'on':''}" onclick="renderDoc('${id}qa')">① 质检报告</span>
+   <span class="tab ${tab=='tree'?'on':''}" onclick="renderDoc('${id}tree')">② 功能分解</span>
+   <span class="tab ${tab=='flow'?'on':''}" onclick="renderDoc('${id}flow')">③ 业务流程图</span>
+   <span class="tab ${tab=='proto'?'on':''}" onclick="renderDoc('${id}proto')">④ 页面原型</span>
+  </div>`;
+  if(tab=='qa'){
+    h+=`<div class="card"><div class="scorewrap">
+     <div class="scorebig" style="background:${scoreColor(d.score)}"><b>${d.score}</b><span>质量评分</span></div>
+     <div class="dims">`;
+    DIMS.forEach((n,i)=>{h+=`<div class="dim"><label>${n}</label><div class="bar"><i style="width:${d.dims[i]}%;background:${scoreColor(d.dims[i])}"></i></div><b>${d.dims[i]}</b></div>`;});
+    h+=`</div></div>
+    <div class="verdict v-warn">⚠️ 低于分解阈值 70 分（PRD F2-2）。${ROLE=='business'?'科技部已针对下列问题发出澄清请求，请在「待我答复的澄清」中回复。':'建议先将高严重问题澄清修订后再分解；本项目为「强制继续」模式，已留痕。'}</div></div>
+    <div class="card"><h3>问题清单（${d.issues.length} 项：高 ${c.高} / 中 ${c.中} / 低 ${c.低}）</h3>
+    <table class="iss"><tr><th>#</th><th style="width:15%">位置与原文</th><th>类型</th><th>严重</th><th style="width:44%">问题说明与改写建议</th><th style="width:22%">澄清状态</th></tr>`;
+    d.issues.forEach((i,n)=>{
+      const cid=d.id+"-"+String(n+1).padStart(2,"0");
+      const clar=CLARS.find(x=>x.id==cid);
+      h+=`<tr><td>${cid}</td>
+      <td><b>${i.loc}</b><div class="quote">“${i.quote}”</div></td>
+      <td><span class="pill p-type">${i.type}</span></td><td>${sevPill(i.sev)}</td>
+      <td>${i.desc}<div class="fix">✎ 建议：${i.fix}</div>${i.ask?`<div class="ask">❓ ${i.ask}</div>`:""}</td>
+      <td>${clar?(clar.status=='已答复'?`<span class="pill p-ok">已答复</span><div class="mini" style="margin-top:4px">${clar.answer}</div>`:`<span class="pill p-wait">待业务答复</span>`):'<span style="color:#aab6c8">无需澄清</span>'}</td></tr>`;
+    });
+    h+=`</table>`;
+    if(ROLE=='analyst') h+=`<div class="footnote"><button class="pbtn" onclick="toast('已生成澄清单并发送业务提交人（示意）')">重新发送澄清单</button> <button class="pbtn ghost" onclick="toast('已导出质检报告 Word（示意）')">导出报告</button></div>`;
+    if(ROLE=='business') h+=`<div class="footnote"><button class="pbtn teal" onclick="go('clar')">去答复澄清问题</button></div>`;
+    h+=`</div>`;
+  }
+  if(tab=='tree'){
+    h+=`<div class="aibanner">🤖 功能树与详细描述为 AI 草稿——${ROLE=='analyst'?'可编辑（增删改/合并拆分），确认后进入评审':'只读展示'}。<span class="pill p-gap">缺口</span>=原文宣称但无描述；<span class="pill p-add">AI补充</span>=依据业务常识建议新增。</div>
+    <div class="card"><h3>功能树 · FP 估算合计 ≈ ${d.fp}（${d.fpNote}）</h3>${renderTree(d.tree)}
+    <div class="footnote">FP 为 AI 粗估，对接《项目估算表》（行内目标：功能点耗时率 ≤7.15 人时/FP），正式估算需人工复核。</div></div>
+    <div class="card"><h3>结构化详细描述（样例 ${d.details.length} 个 · 其余确认功能树后批量生成）</h3>
+    ${d.details.map((i,idx)=>renderDetail(d,i,idx)).join("")}`;
+    if(ROLE=='analyst') h+=`<div style="display:flex;gap:8px"><button class="pbtn" onclick="toast('进入编辑模式（示意）：节点增删改、合并拆分、逐字段修改并留痕')">编辑分解结果</button><button class="pbtn teal" onclick="toast('已提交评审：负责人评审+业务确认双通过后可基线（示意）')">确认并提交评审</button></div>`;
+    if(ROLE=='business') h+=`<button class="pbtn teal" onclick="go('confirm')">去确认分解结果</button>`;
+    if(ROLE=='pm') h+=`<button class="pbtn gold" onclick="go('review')">去评审</button>`;
+    h+=`</div>`;
+  }
+  if(tab=='flow'){
+    const f=FLOWS[d.id];
+    h+=`<div class="aibanner">🤖 AI 依据需求原文生成（草稿态）；红色虚线=原文缺失环节，对齐会上需与业务逐一确认。</div>
+    <div class="card"><h3>${f.title}</h3>${f.html}<div class="flowlegend">${f.legend}</div>
+    ${ROLE=='business'?`<div style="margin-top:10px"><button class="pbtn teal" onclick="go('confirm')">流程无误，去确认</button> <button class="pbtn warn" onclick="toast('已标记异议并通知分析师（示意）')">流程有误，提出异议</button></div>`:""}</div>`;
+  }
+  if(tab=='proto'){
+    const p=PROTOS[d.id];
+    h+=`<div class="aibanner">🤖 低保真可点击原型（草稿态）——用于对齐布局、字段与流程，非 UI 定稿。</div>
+    <div class="card"><h3>${p.title}</h3><div class="mini">${p.note}</div>${p.html}
+    ${ROLE=='business'?`<div style="margin-top:12px"><button class="pbtn teal" onclick="go('confirm')">原型符合预期，去确认</button> <button class="pbtn warn" onclick="toast('已在原型上留下异议标注（示意）')">提出修改意见</button></div>`:""}</div>`;
+  }
+  $("#main").innerHTML=h;
+  window.scrollTo(0,0);
+}
+
+/* 原型交互 */
+function pswitch(a,pg){a.parentElement.querySelectorAll("a").forEach(x=>x.classList.remove("on"));a.classList.add("on");
+ document.querySelectorAll(".pg").forEach(x=>x.style.display="none");document.getElementById(pg).style.display="block";}
+function ctab(a,id){a.parentElement.querySelectorAll("a").forEach(x=>x.classList.remove("on"));a.classList.add("on");
+ document.querySelectorAll(".ct").forEach(x=>x.style.display="none");document.getElementById(id).style.display="block";}
+function bcharge(){
+ let sum=0;document.querySelectorAll(".bsel:checked").forEach(x=>sum+=parseFloat(x.dataset.v));
+ const real=parseFloat($("#breal").value||0);
+ if(real<sum){toast("实收("+real.toFixed(2)+") < 应收("+sum.toFixed(2)+")：部分销账是否允许待澄清（B-11）");return;}
+ toast("销账成功：2笔账单已缴，流水已生成，发票打印中…找零 ¥"+(real-sum).toFixed(2));
+}
+document.addEventListener("change",e=>{if(e.target.classList&&e.target.classList.contains("bsel")){let s=0;document.querySelectorAll(".bsel:checked").forEach(x=>s+=parseFloat(x.dataset.v));$("#bsum").textContent=s.toFixed(2);}});
+
+go("ov");
+</script>
+</body>
+</html>
